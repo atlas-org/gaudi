@@ -1,0 +1,58 @@
+Package : ParticleProp
+Package manager : Charles Leggett
+
+================ PartPropSvc v2r6 =========================================
+! 20070605 Paolo Calafiura
+ Patch #1186.
+ - added missing charged geantino.
+
+================ PartPropSvc v2r5 =========================================
+! 20070216 Charles Leggett
+ Patch #1076
+ - fix for default PDGTABLE.
+
+================ PartPropSvc v2r4 =========================================
+! 20070216 Charles Leggett
+ Patch #1019
+ - changed into a component lib
+ - moved IPartPropSvc to GaudiKernel
+ - moved PartPropSvc.h to src/
+
+! 20070202 Hubert Degaudenzi
+ - added missing library (CLHEP-HepPDT) in the CLHEP_linkopts macro 
+   (in the private section for the moment).
+ - commented out the "apply_pattern install_runtime".
+ 
+================ PartPropSvc v2r3p1 =========================================
+! 20040910 Charles Leggett
+ - src/PartPropSvc.cpp: uses PathResolver to locate PDT files
+                        return FAILURE if can't find any files to open.
+
+================ PartPropSvc v2r3 ==========================================
+! 20040716 Charles Leggett
+ - changed IID to InterfaceID
+
+================ PartPropSvc v2r2 ==========================================
+! 20040507 Charles Leggett
+ - use standard macros in PartPropSvc_entries.cpp, PartPropSvc_load.cpp
+ - removed PartPropSvc_dll.cpp
+
+================ PartPropSvc v2r1 ==========================================
+! 20040129 Paolo Calafiura
+ - return an error if no PDT file was read
+! 20040126 Charles Leggett
+ - changed default data file to PDGTable.MeV. Obviously non-backward compatible
+
+================ PartPropSvc v2r0 ==========================================
+! 20040115 Paolo Calafiura
+ - importing package to cvs repository"
+
+! 20030624 Charles Leggett
+ - removed built in version of HepPDT, uses CLHEP version instead
+ - PartPropSvc.cpp: reads in Herwig and IsaJet as well
+                  : removed QQ input mode
+                  : added share directory, jobOptions and PDGTABLE file
+
+! 20020703 Paolo Calafiura
+ - TableBuilderT.icc: addQQParticles added return value (false) to
+                      dummy implementation
