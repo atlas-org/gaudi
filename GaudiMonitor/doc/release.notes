@@ -1,0 +1,28 @@
+Package: GaudiMonitor
+Package manager : Hubert Degaudenzi
+
+================ GaudiMonitor v1r4 ====================================
+! 2008-01-15 - Marco Clemencic
+ - Fixed bug #31950. Missing call to Service::finalize.
+   Added the call to:
+     - DataListenerSvc
+
+! 2007-11-20 - Marco Clemencic
+ - Fixed few compilation warnings on win32.
+
+================ GaudiMonitor v1r3 ==========================================
+! 2007-08-16 - Hubert Degaudenzi
+ - Added guards to delete statement
+
+================ GaudiMonitor v1r2 ==========================================
+! 2007-02-28 - Hubert Degaudenzi
+ - Fixed compilation on Windows.
+
+================ GaudiMonitor v1r1 ==========================================
+! 2007-02-22 - Hubert Degaudenzi
+ - Compilation fixes
+
+================ GaudiMonitor v1r0 ==========================================
+! 2007-01-15 - Hubert Degaudenzi
+ New package.
+!============================================================================
