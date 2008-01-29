@@ -1,0 +1,30 @@
+package RootHistCnv
+version v9r16
+
+branches doc cmt src
+
+use GaudiKernel   v*
+use AIDA          v* LCG_Interfaces -no_auto_imports
+use ROOT          v* LCG_Interfaces -no_auto_imports
+use PCRE          v* LCG_Interfaces -no_auto_imports
+
+# component library
+library RootHistCnv -import=ROOT -import=AIDA ../src/*.cpp
+apply_pattern component_library library=RootHistCnv
+#apply_pattern library_Clinkopts library=RootHistCnv import=ROOT
+#apply_pattern packageShr
+
+#==============================================================
+private
+macro_append ROOT_linkopts " -lHist -lTree -lMatrix" \
+             WIN32         " libHist.lib libTree.lib libMatrix.lib" \
+             osx104        " -lHist -lTree -lMatrix"
+macro_append ROOT_linkopts "" \
+       ROOT_GE_5_15&osx104 " -lNet"
+
+#apply_pattern package_Cshlibflags
+
+
+
+
+
