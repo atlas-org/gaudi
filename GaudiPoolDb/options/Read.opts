@@ -1,0 +1,58 @@
+//--------------------------------------------------------------
+// Private Application Configuration options
+//--------------------------------------------------------------
+ApplicationMgr.Dlls        = { "GaudiExamples" };
+ApplicationMgr.EvtMax      = 2000000;
+ApplicationMgr.HistogramPersistency = "NONE";
+ApplicationMgr.SvcOptMapping += { "Gaudi::MultiFileCatalog/FileCatalog", "Gaudi::IODataManager/IODataManager" };
+// Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
+MessageSvc.OutputLevel     = 2;
+//
+EventSelector.PrintFreq    = 1;
+EventSelector.FirstEvent   = 1;
+//--------------------------------------------------------------
+//
+//  Setup for ROOT I/O System
+//
+#include "$GAUDIPOOLDBROOT/options/GaudiPoolDbRoot.opts"
+MessageSvc.OutputLevel     = 3;
+PoolDbCacheSvc.OutputLevel = 3;
+//--------------------------------------------------------------
+// Input File
+//--------------------------------------------------------------
+EventSelector.Input  = {"DATAFILE='FID:FCBAD21C-5CA0-D811-908C-8CB0FB2011D1'  TYP='POOL_ROOT' OPT='READ'" };
+EventSelector.Input += {"DATAFILE='FID:C6550E1D-5CA0-D811-908C-8CB0FB2011D1' TYP='POOL_ROOT' OPT='READ'" };
+EventSelector.Input  = {"DATAFILE='LFN:RootDst'  TYP='POOL_ROOT' OPT='READ'" };
+EventSelector.Input += {"DATAFILE='LFN:RootMini' TYP='POOL_ROOT' OPT='READ'" };
+EventSelector.Input  = {"DATAFILE='PFN:RootDst0.root'  TYP='POOL_ROOT' OPT='READ'" };
+EventSelector.Input += {"DATAFILE='PFN:RootMini0.root' TYP='POOL_ROOT' OPT='READ'" };
+EventSelector.Input  = {"DATAFILE='PFN:RootMini0.root' TYP='POOL_ROOT' OPT='READ'" };
+EventSelector.Input += {"DATAFILE='PFN:RootMini1.root' TYP='POOL_ROOT' OPT='READ'" };
+
+ApplicationMgr.TopAlg         = { "ReadAlg" };
+ApplicationMgr.TopAlg        += { "StoreExplorerAlg" };
+StoreExplorerAlg.Load         = 1;
+StoreExplorerAlg.PrintFreq    = 1.0;
+ApplicationMgr.EvtMax         = 100;
+ReadAlg.OutputLevel           = 1;
+PoolDbCacheSvc.OutputLevel    = 3;
+//PoolDbCacheSvc.UseBadFileMap  = false;
+//PoolDbCacheSvc.UseGFAL        = false;
+PoolRootTreeEvtCnvSvc.CheckFIDs = false;
+
+/*
+ApplicationMgr.DLLs          += {"GaudiAlg" };
+ApplicationMgr.ExtSvc        += { "MultiStoreSvc/EventDataSvc" };
+EventDataSvc.Partitions       = {"NAME='Buffer1' TYPE='EvtDataSvc/EvtBuff1'",
+                                 "NAME='Buffer2' TYPE='EvtDataSvc/EvtBuff2'"
+                                };
+EventDataSvc.DefaultPartition = "Buffer1";
+ApplicationMgr.TopAlg         = { "Sequencer/ReadSeq" };
+ReadSeq.Members              += { "ReadAlg/Alg1", "PartitionSwitchAlg/Switcher", "ReadAlg/Alg2" };
+Switcher.Partition            = "Buffer2";
+Switcher.Tool                 = "PartitionSwitchTool";
+Switcher.PartitionSwitchTool.Actor = "EventDataSvc";
+
+*/
+//EventSelector.Input  = {"DATAFILE='gfal:lfn:/bla/bla/RootDst0.root'  TYP='POOL_ROOT' OPT='READ'" };
+//EventSelector.Input  = {"DATAFILE='gfal:lfn:/bla/bla/RootMini0.root'  TYP='POOL_ROOT' OPT='READ'" };

@@ -1,0 +1,45 @@
+//--------------------------------------------------------------
+// Private Application Configuration options
+//--------------------------------------------------------------
+ApplicationMgr.Dlls        = { "GaudiExamples" };
+ApplicationMgr.OutStream  += { "RootDst"};
+ApplicationMgr.OutStream  += { "RootMini" };
+ApplicationMgr.TopAlg      = { "WriteAlg", "ReadAlg" };
+// Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
+MessageSvc.OutputLevel     =  3;
+//--------------------------------------------------------------
+// Event related parameters
+//--------------------------------------------------------------
+ApplicationMgr.EvtMax    = 100000;
+ApplicationMgr.EvtMax    = 100;
+ApplicationMgr.EvtSel   = "NONE"; // do not use any event input
+ApplicationMgr.HistogramPersistency = "NONE";
+//--------------------------------------------------------------
+// Output Stream Options
+//--------------------------------------------------------------
+//
+//  Setup for ROOT I/O System
+//
+#include "$GAUDIPOOLDBROOT/options/GaudiPoolDbRoot.opts"
+//
+RootDst.ItemList              = { "/Event#1"
+                                 ,"/Event/Collision_0#999"
+                                 ,"/Event/Collision_2#1"
+                                 ,"/Event/MyTracks#1"
+                                };
+RootDst.ItemList              = { "/Event#999" };
+RootDst.ItemList              = { "/Event/MyTracks#1"
+                                 ,"/Event/Collision_0#999"
+                                 ,"/Event/Collision_2#1"
+                                };
+RootMini.ItemList             = { "/Event#1" };
+RootDst.Output                = "DATAFILE='PFN:RootDst0.root' TYP='POOL_ROOTTREE' OPT='NEW'";
+RootMini.Output               = "DATAFILE='PFN:RootMini0.root' TYP='POOL_ROOTTREE' OPT='NEW'";
+RootDst.Output                = "DATAFILE='PFN:RootDst0.root' TYP='POOL_ROOTTREE' OPT='UPDATE'";
+RootMini.Output               = "DATAFILE='PFN:RootMini0.root' TYP='POOL_ROOTTREE' OPT='UPDATE'";
+RootDst.Output                = "DATAFILE='PFN:RootDst0.root' TYP='POOL_ROOTTREE' OPT='RECREATE'";
+RootMini.Output               = "DATAFILE='PFN:RootMini0.root' TYP='POOL_ROOTTREE' OPT='RECREATE'";
+
+ReadAlg.OutputLevel           = 3;
+ApplicationMgr.EvtMax         = 10;
+PoolDbCacheSvc.OutputLevel    = 1;

@@ -1,0 +1,29 @@
+//--------------------------------------------------------------
+// Private Application Configuration options
+//--------------------------------------------------------------
+ApplicationMgr.Dlls        = { "GaudiExamples" };
+ApplicationMgr.TopAlg      = { "ReadAlg" };
+// Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
+MessageSvc.OutputLevel     = 3;
+EventSelector.PrintFreq    = 100;
+//--------------------------------------------------------------
+// Input File. For example, the output of the RootIOWrite Example
+//--------------------------------------------------------------
+ApplicationMgr.EvtMax               = 100000;
+ApplicationMgr.Histogrampersistency = "NONE";
+//--------------------------------------------------------------
+//  Setup for ROOT I/O System
+//--------------------------------------------------------------
+#include "$GAUDIPOOLDBROOT/options/GaudiPoolDbRoot.opts"
+//--------------------------------------------------------------
+// EventCollection Output Stream parameters 
+//--------------------------------------------------------------
+ApplicationMgr.ExtSvc += {"TagCollectionSvc/EvtTupleSvc"};
+EventSelector.Input  = {"DATAFILE='PFN:RootDst0.root'   TYP='POOL_ROOT' OPT='READ'" };
+EventSelector.Input += {"DATAFILE='PFN:RootMini0.root'  TYP='POOL_ROOT' OPT='READ'" };
+
+ApplicationMgr.OutStream  = { "TagCollectionStream/WR" };
+ApplicationMgr.OutStream += { "EvtCollectionWrite/Writer" };
+WR.ItemList = {"/Event#1" };
+WR.Output   = "COLLECTION='EvtColl/Dir1/Dir2/Dir3/Collection' ADDRESS='/Event' DATAFILE='PFN:MyEvtCollection.root' TYP='POOL_ROOTTREE' OPT='RECREATE'";
+ReadAlg.OutputLevel     = 4;
