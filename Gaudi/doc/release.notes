@@ -1,0 +1,89 @@
+Package : Gaudi
+Package manager : Hubert Degaudenzi
+
+================ Gaudi v19r9 ====================================
+! 2008-04-04 - Marco Clemencic
+ - Bug #35201. Python options parser '//' interpreted as comment in strings.
+   Added a test for the bug.
+ 
+! 2008-03-07 - Marco Clemencic
+ - Fixed Bug #34046. False warning when mixing Python options and old options.
+   Improved the test on case sensitivity to expose the bug (if present).
+
+! 2008-03-06 - Marco Clemencic
+ - Modified Gaudi.Main.gaudimain to use the environment variables GAUDIAPPNAME
+   and GAUDIAPPVERSION to set the default values for the ApplicationMgr
+   properties AppName and AppVersion.
+
+================ Gaudi v19r8 ====================================
+! 2008-02-11 - Marco Clemencic
+ - Added aliases for the configurables FileCatalog (Gaudi::MultiFileCatalog) and
+   IODataManager (Gaudi::IODataManager).
+
+! 2008-02-08 - Marco Clemencic
+ - Modified python/Gaudi/CommonGaudiConfigurables.py to ignore missing packages,
+   essentially to allow the import of Gaudi.Configuration when GaudiPoolDb is
+   missing.
+
+================ Gaudi v19r7 ====================================
+! 2008-01-11 - Marco Clemencic
+ - Added a test to check the late-bound references in old options
+   (e.g. "MyAlg.MyProp = @AnotherAlg.AProp;").
+ - Added a simple test for properties with wrong cases in (old) job options.  
+ 
+! 2008-01-09 - Marco Clemencic
+ - Added a test to check the conversion between configurables and strings.
+
+================ Gaudi v19r6 ====================================
+! 2007-11-16 - Marco Clemencic
+ - Added a couple of tests for the correct overriding of mixed options (exposing
+   a bug fixed in GaudiKernel).
+
+! 2007-11-14 - Marco Clemencic
+ - Added a test for the function GaudiKernel.Configurable.purge.
+
+! 2007-11-12 - Marco Clemencic
+ - Moved the *.qmt files to the implicit suite (directory) "gaudi.qms".
+
+! 2007-11-01 - Marco Clemencic
+ - Added the function Gaudi.Configuration.configurationDict to produce the
+   dictionary of configurations.
+ - Minor changes in the command line options for gaudirun.py:
+   - short option for "--dry-run" in now "-n"
+   - the configuration is printed as dictionary by default and the old format is
+     activated with the option "--old-opts" (removed "--opts-dict")
+ - Added tests for the job option parser.
+ - Moved "importOptions" from Gaudi.Configuration to
+   GaudiKernel.ProcessJobOptions. The function is still accessible from
+   Gaudi.Configuration (from Gaudi.Configuration import importOptions).
+
+! 2007-10-29 - Marco Clemencic
+ - Moved the command line logic from the class Gaudi.Main.gaudimain to the
+   script gaudirun.py, using optparse instead of getopt.
+ - Added an option to format the dump of the computed properties as a Python
+   dictionary (formatted such that it can be evaluated in Python).
+ - Renamed some command line options.
+ - The different behaviors depending on the file name extension, are delegated
+   to Configuration.importOptions(). 
+
+! 2007-10-29 - Pere Mato
+ - Adapted to new GaudiPython structure
+
+==================== Gaudi v19r5 ======================================
+! 2007-10-10 - Pere Mato
+ - Added GaudiRun alias to "gaudirun.py"
+
+! 2007-10-02 - Pere Mato
+ Patch #1400:  Support for configuration in Python pickle files
+
+! 2007-09-28 - Pere Mato
+ - Renamed the meta module containing common configurables from ConfDb to
+   Configurables. 
+
+! 2007-09-24 - Hubert Degaudenzi
+ - changed back Configurables.py into Configurable.py (it was
+   a mistake)
+   
+! 2007-09-21 - Hubert Degaudenzi 
+ - New package to contain the main part of the Gaudi application.
+   Moved the necessary parts from GaudiKernel.

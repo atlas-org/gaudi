@@ -1,0 +1,32 @@
+package Gaudi
+
+version v19r9
+branches doc cmt 
+
+use GaudiSys v*
+
+apply_pattern install_scripts
+apply_pattern install_python_modules
+
+set GAUDIEXE $(GAUDIROOT)/$(tag)/Gaudi.exe \
+    GAUDI_with_installarea  $(Gaudi_cmtpath)/$(GAUDI_installarea_prefix)/$(tag)/bin/Gaudi.exe
+
+# don't need to put the full path for the executable
+# they are on the path
+
+alias Gaudi "Gaudi.exe"
+alias GaudiRun "gaudirun.py"
+
+
+private 
+
+
+application Gaudi main.cpp
+
+path_remove  JOBOPTSEARCHPATH "/Gaudi/" WIN32 "\Gaudi\"
+path_prepend JOBOPTSEARCHPATH "$(GAUDIROOT)/options" WIN32 "$(GAUDIROOT)\options"
+
+apply_pattern QMTest
+path_prepend JOBOPTSEARCHPATH "" \
+                 QMTest&WIN32 "$(GAUDIROOT)\tests\pyjobopts" \
+                       QMTest "$(GAUDIROOT)/tests/pyjobopts" 
