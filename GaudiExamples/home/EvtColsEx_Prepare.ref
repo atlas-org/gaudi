@@ -1,0 +1,50 @@
+JobOptionsSvc        INFO 
+//GP:================================================================================
+//GP: include ../options/EvtColsEx_Prepare.opts                               (0,0)
+//GP: include /afs/cern.ch/user/h/hmd/scratch0/WorkSpace2/Gaudi/GaudiPoolDb/options/GaudiPoolDbRoot.opts (16,10)
+ApplicationMgr.ExtSvc +=  [ "PoolDbCacheSvc" , "PoolDbCnvSvc/PoolRootEvtCnvSvc" , "PoolDbCnvSvc/PoolRootKeyEvtCnvSvc" , "PoolDbCnvSvc/PoolRootTreeEvtCnvSvc" ] ;//GP: (5,1)
+EventPersistencySvc.CnvServices +=  [ "PoolRootEvtCnvSvc" ] ;           //GP: (10,1)
+EventPersistencySvc.CnvServices +=  [ "PoolRootTreeEvtCnvSvc" ] ;       //GP: (11,1)
+EventPersistencySvc.CnvServices +=  [ "PoolRootKeyEvtCnvSvc" ] ;        //GP: (12,1)
+PoolRootEvtCnvSvc.DbType = "POOL_ROOT";                                 //GP: (13,1)
+PoolRootKeyEvtCnvSvc.DbType = "POOL_ROOTKEY";                           //GP: (14,1)
+PoolRootTreeEvtCnvSvc.DbType = "POOL_ROOTTREE";                         //GP: (15,1)
+PoolDbCacheSvc.Dlls =  [ "lcg_RootStorageSvc" , "lcg_XMLCatalog" , "GaudiKernelDict" ] ;//GP: (16,1)
+PoolDbCacheSvc.OutputLevel = 4;                                         //GP: (17,1)
+PoolDbCacheSvc.UseGFAL = 1;                                             //GP: (18,1)
+PoolDbCacheSvc.DomainOpts =  [ "Domain[ROOT_All].TREE_MAX_SIZE=500000000000 TYP=longlong" ] ;//GP: (19,1)
+//GP: end  /afs/cern.ch/user/h/hmd/scratch0/WorkSpace2/Gaudi/GaudiPoolDb/options/GaudiPoolDbRoot.opts (20,1)
+PoolDbCacheSvc.DLLs +=  [ "GaudiExamplesDict" ] ;                       //GP: (17,1)
+PoolDbCacheSvc.Catalog =  [ "xmlcatalog_file:EvtColsEx.xml" ] ;         //GP: (18,1)
+ApplicationMgr.EvtSel = "NONE";                                         //GP: (22,1)
+ApplicationMgr.OutStream +=  [ "PoolDst" ] ;                            //GP: (24,1)
+ApplicationMgr.EvtMax = 50000;                                          //GP: (27,1)
+PoolDst.ItemList =  [ "/Event#1" ] ;                                    //GP: (30,1)
+PoolDst.Output = "DATAFILE='PFN:EvtColsEx.dst' TYP='POOL_ROOTTREE' OPT='RECREATE'";//GP: (33,1)
+//GP: end  ../options/EvtColsEx_Prepare.opts                                  (38,1)
+//GP:================================================================================
+
+JobOptionsSvc        INFO Job options successfully read in from ../options/EvtColsEx_Prepare.opts
+ApplicationMgr    SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr $Revision: 1.25 $
+                                          running on pclhcb114.cern.ch on Fri Sep 21 19:20:46 2007
+====================================================================================================================================
+ApplicationMgr       INFO Application Manager Configured successfully
+EventPersistenc...   INFO  'CnvServices':[ 'PoolRootEvtCnvSvc' , 'PoolRootTreeEvtCnvSvc' , 'PoolRootKeyEvtCnvSvc' ]
+EventPersistenc...   INFO Added successfully Conversion service:PoolRootEvtCnvSvc
+EventPersistenc...   INFO Added successfully Conversion service:PoolRootTreeEvtCnvSvc
+PoolDst              INFO Data source: EventDataSvc output: DATAFILE='PFN:EvtColsEx.dst' TYP='POOL_ROOTTREE' OPT='RECREATE'
+EventLoopMgr      WARNING Unable to locate service "EventSelector" 
+EventLoopMgr      WARNING No events will be processed from external input.
+HistogramPersis...   INFO  'CnvServices':[ 'HbookHistSvc' , 'RootHistSvc' ]
+HistogramPersis...WARNING Histograms saving not required.
+ApplicationMgr       INFO Application Manager Initialized successfully
+EvtColsEx.dst   Always Root file version:51709
+PoolDst              INFO Events output: 50000
+EventLoopMgr         INFO Histograms converted successfully according to request.
+PoolRootTreeEvt...   INFO Disconnected data IO:FID:B29889D9-63C4-DC11-A3AB-0030488365F2
+ApplicationMgr       INFO Application Manager Finalized successfully
+ApplicationMgr       INFO Application Manager Terminated successfully
+Number of MyTrack instances:0
+Number of MyVertex instances:0

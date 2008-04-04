@@ -1,0 +1,103 @@
+JobOptionsSvc        INFO 
+//GP:================================================================================
+//GP: include ../options/AlgErrAud.opts                                       (0,0)
+//GP: include ../options/Common.opts                                          (4,10)
+//GP: include ../options/Services.opts                                        (7,10)
+AuditorSvc.Auditors =  [ "ChronoAuditor" ] ;                            //GP: (12,1)
+//GP: end  ../options/Services.opts                                           (24,1)
+ApplicationMgr.StatusCodeCheck = 1;                                     //GP: (9,1)
+//GP: end  ../options/Common.opts                                             (16,1)
+AuditorSvc.Auditors =  [ "AlgErrorAuditor" ] ;                          //GP: (6,1)
+ApplicationMgr.AuditAlgorithms = 1;                                     //GP: (8,1)
+ApplicationMgr.TopAlg =  [ "MyAudAlgorithm" ] ;                         //GP: (13,1)
+MessageSvc.OutputLevel = 3;                                             //GP: (16,1)
+MessageSvc.enableSuppression = 1;                                       //GP: (18,1)
+MessageSvc.defaultLimit = 5;                                            //GP: (19,1)
+MessageSvc.infoLimit = 7;                                               //GP: (20,1)
+MessageSvc.alwaysLimit = 4;                                             //GP: (21,1)
+ApplicationMgr.EvtMax = 10;                                             //GP: (26,1)
+ApplicationMgr.EvtSel = "NONE";                                         //GP: (27,1)
+ToolSvc.MyAudTool.OutputLevel = 3;                                      //GP: (35,1)
+MyAudAlgorithm.OutputLevel = 2;                                         //GP: (36,1)
+//GP: end  ../options/AlgErrAud.opts                                          (39,1)
+//GP:================================================================================
+
+JobOptionsSvc        INFO Job options successfully read in from ../options/AlgErrAud.opts
+MessageSvc ERROR: cannot suppress ALWAYS messages
+MessageSvc ERROR: cannot suppress ALWAYS messages
+ApplicationMgr    SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr $Revision: 1.1 $
+                                          running on pclhcb114.cern.ch on Fri Sep 21 19:21:13 2007
+====================================================================================================================================
+ApplicationMgr       INFO Application Manager Configured successfully
+StatusCodeSvc        INFO initialize
+MyAudAlgorithm       INFO initializing....
+ToolSvc.MyAudTool    INFO intialize() has been called
+MyAudAlgorithm       INFO ....initialization done
+MyAudAlgorithm       INFO test 0010
+EventLoopMgr      WARNING Unable to locate service "EventSelector" 
+EventLoopMgr      WARNING No events will be processed from external input.
+HistogramPersis...   INFO  'CnvServices':[ 'HbookHistSvc' , 'RootHistSvc' ]
+HistogramPersis...WARNING Histograms saving not required.
+ApplicationMgr       INFO Application Manager Initialized successfully
+MyAudAlgorithm       INFO executing....
+MyAudAlgorithm      ERROR testing AlgErrorAud
+MyAudAlgorithm    SUCCESS This message should never be suppressed
+AlgErrorAuditor     ERROR Illegal Return Code: Algorithm MyAudAlgorithm reported an ERROR, but returned a StatusCode "SUCCESS"
+MyAudAlgorithm       INFO executing....
+ToolSvc.MyAudTool   ERROR doErr() has been called
+MyAudAlgorithm    SUCCESS This message should never be suppressed
+AlgErrorAuditor     ERROR Illegal Return Code: Algorithm MyAudAlgorithm reported an ERROR, but returned a StatusCode "SUCCESS"
+MyAudAlgorithm       INFO executing....
+ToolSvc.MyAudTool   FATAL doFatal() has been called
+MyAudAlgorithm    SUCCESS This message should never be suppressed
+AlgErrorAuditor     ERROR Illegal Return Code: Algorithm MyAudAlgorithm reported a FATAL, but returned a StatusCode "SUCCESS"
+MyAudAlgorithm    WARNING INFO message limit (7) reached for MyAudAlgorithm. Suppressing further output.
+MyAudAlgorithm    SUCCESS This message should never be suppressed
+MyAudAlgorithm    SUCCESS This message should never be suppressed
+ToolSvc.MyAudTool   ERROR doErr() has been called
+MyAudAlgorithm      ERROR testing AlgErrorAud
+MyAudAlgorithm    SUCCESS This message should never be suppressed
+AlgErrorAuditor     ERROR Illegal Return Code: Algorithm MyAudAlgorithm reported an ERROR, but returned a StatusCode "SUCCESS"
+ToolSvc.MyAudTool   FATAL doFatal() has been called
+MyAudAlgorithm    SUCCESS This message should never be suppressed
+AlgErrorAuditor   WARNING ERROR message limit (5) reached for AlgErrorAuditor. Suppressing further output.
+MyAudAlgorithm    SUCCESS This message should never be suppressed
+MyAudAlgorithm    SUCCESS This message should never be suppressed
+ToolSvc.MyAudTool   ERROR doErr() has been called
+MyAudAlgorithm    SUCCESS This message should never be suppressed
+Listing sources of suppressed message: 
+=====================================================
+ Message Source              |   Level |    Count
+-----------------------------+---------+-------------
+ AlgErrorAuditor             |   ERROR |        6
+ MyAudAlgorithm              |    INFO |       13
+=====================================================
+MyAudAlgorithm       INFO finalizing....
+MyAudAlgorithm    SUCCESS none of the following 10 messages should be suppressed
+ToolSvc.MyAudTool   ERROR doErr() has been called
+ToolSvc.MyAudTool   ERROR doErr() has been called
+ToolSvc.MyAudTool   ERROR doErr() has been called
+ToolSvc.MyAudTool   ERROR doErr() has been called
+ToolSvc.MyAudTool   ERROR doErr() has been called
+ToolSvc.MyAudTool   ERROR doErr() has been called
+ToolSvc.MyAudTool   ERROR doErr() has been called
+ToolSvc.MyAudTool   ERROR doErr() has been called
+ToolSvc.MyAudTool   ERROR doErr() has been called
+ToolSvc.MyAudTool   ERROR doErr() has been called
+EventLoopMgr         INFO Histograms converted successfully according to request.
+ToolSvc.finalize()   INFO Removing all tools created by ToolSvc
+ToolSvc.MyAudTool    INFO finalize() has been called
+ToolSvc.MyAudTool    INFO destructor has been called
+AlgErrorAuditor      INFO Found 1 instances where an Algorithm::execute() produced an ERROR but returned a SUCCESS:
+MyAudAlgorithm: 4
+
+AlgErrorAuditor      INFO Found 1 instances where an Algorithm::execute() produced a FATAL but returned a SUCCESS:
+MyAudAlgorithm: 2
+
+StatusCodeSvc        INFO initialize
+ApplicationMgr       INFO Application Manager Finalized successfully
+ApplicationMgr       INFO Application Manager Terminated successfully
+Number of MyVertex instances:0
+Number of MyTrack instances:0

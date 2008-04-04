@@ -1,0 +1,33 @@
+// $Id: POOLIORead.opts,v 1.7 2008/01/30 17:06:50 marcocle Exp $ 
+// ============================================================================
+// CVS tag $Name:  $, verison $Revision: 1.7 $
+// ============================================================================
+////////////////////////////////////////////////////////////////
+// Example options file.
+////////////////////////////////////////////////////////////////
+//
+ApplicationMgr.TopAlg      = { "ReadAlg" };
+ApplicationMgr.HistogramPersistency = "NONE";
+// Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
+ApplicationMgr.EvtMax      = 2000;
+EventSelector.OutputLevel  = 2;
+EventSelector.PrintFreq    = 50;
+EventSelector.FirstEvent   = 1;
+//--------------------------------------------------------------
+//
+//  Setup for ROOT I/O System
+//
+#include "GaudiPoolDbRoot.opts"
+PoolDbCacheSvc.OutputLevel = 4;
+//--------------------------------------------------------------
+// Input File
+//--------------------------------------------------------------
+EventSelector.Input  = { "DATAFILE='PFN:POOLIO.dst'  TYP='POOL_ROOT' OPT='READ'" };
+EventSelector.Input += { "DATAFILE='PFN:POOLIO.mdst' TYP='POOL_ROOT' OPT='READ'" };
+ReadAlg.OutputLevel  = 1;
+
+FileCatalog.Catalogs += { "xmlcatalog_file:POOLIO.xml" } ;
+
+// ============================================================================
+// The END 
+// ============================================================================

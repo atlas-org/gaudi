@@ -1,0 +1,482 @@
+JobOptionsSvc        INFO 
+//GP:================================================================================
+//GP: include ../options/TupleEx.opts                                         (0,0)
+ApplicationMgr.StatusCodeCheck = 0;                                     //GP: (14,1)
+ApplicationMgr.ExtSvc +=  [ "RndmGenSvc" ] ;                            //GP: (20,1)
+ApplicationMgr.TopAlg =  [ "TupleAlg/Tuple" ] ;                         //GP: (21,1)
+ApplicationMgr.TopAlg +=  [ "TupleAlg2/Tuple2" ] ;                      //GP: (22,1)
+ApplicationMgr.TopAlg +=  [ "TupleAlg3/Tuple3" ] ;                      //GP: (23,1)
+Tuple.NTupleLUN = "MYLUN";                                              //GP: (25,1)
+Tuple2.NTupleLUN = "MYLUN";                                             //GP: (26,1)
+Tuple3.NTupleLUN = "MYLUN";                                             //GP: (27,1)
+MessageSvc.OutputLevel = 3;                                             //GP: (30,1)
+ApplicationMgr.EvtMax = 10000;                                          //GP: (35,1)
+ApplicationMgr.EvtSel = "NONE";                                         //GP: (36,1)
+ApplicationMgr.HistogramPersistency = "ROOT";                           //GP: (46,1)
+NTupleSvc.Output =  [ "MYLUN DATAFILE='TupleEx.root'  OPT='NEW' TYP='ROOT'" ] ;//GP: (47,1)
+//GP: end  ../options/TupleEx.opts                                            (52,1)
+//GP:================================================================================
+
+JobOptionsSvc        INFO Job options successfully read in from ../options/TupleEx.opts
+ApplicationMgr    SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr $Revision: 1.25 $
+                                          running on pclhcb114.cern.ch on Fri Sep 21 19:19:21 2007
+====================================================================================================================================
+ApplicationMgr       INFO Application Manager Configured successfully
+RndmGenSvc.Engine    INFO Generator engine type:CLHEP::RanluxEngine
+RndmGenSvc.Engine    INFO Current Seed:1234567 Luxury:3
+RndmGenSvc           INFO Using Random engine:HepRndm::Engine<CLHEP::RanluxEngine>
+HistogramPersis...   INFO  'CnvServices':[ 'HbookHistSvc' , 'RootHistSvc' ]
+RootHistSvc          INFO Writing ROOT histograms to: UndefinedROOTOutputFileName
+HistogramPersis...   INFO Added successfully Conversion service:RootHistSvc
+NTupleSvc            INFO Added stream file:TupleEx.root as MYLUN
+Tuple                INFO TupleAlg:: The N-Tuple   path is set to be 'MYLUN/Tuple'
+Tuple2               INFO TupleAlg2:: The N-Tuple   path is set to be 'MYLUN/Tuple2'
+Tuple3               INFO TupleAlg3:: The N-Tuple   path is set to be 'MYLUN/Tuple3'
+EventLoopMgr      WARNING Unable to locate service "EventSelector" 
+EventLoopMgr      WARNING No events will be processed from external input.
+ApplicationMgr       INFO Application Manager Initialized successfully
+RFileCnv             INFO opening Root file "TupleEx.root" for writing
+RRWNTupleCnv         INFO ID 1: added branch: gauss / gauss/F
+RRWNTupleCnv         INFO ID 1: added branch: flat / flat/F
+RRWNTupleCnv         INFO ID 1: added branch: expo / expo/F
+RRWNTupleCnv         INFO ID 1: added branch: breit / breit/F
+RRWNTupleCnv         INFO ID 1: added branch: poiss / poiss/I
+RRWNTupleCnv         INFO ID 1: added branch: binom / binom/I
+RRWNTupleCnv         INFO ID 1: added branch: pois2 / pois2/I
+RRWNTupleCnv         INFO ID 1: added branch: bino2 / bino2/I
+RRWNTupleCnv         INFO ID 1: added branch: poisb / poisb/I
+RRWNTupleCnv         INFO Booked TTree with ID:1 "Trivial Row-Wise Tuple"
+RCWNTupleCnv         INFO Booked TTree with ID: two "Column-Wise Tuple" in directory TupleEx.root:/Tuple
+RCWNTupleCnv         INFO Booked TTree with ID: 3 "Fixed-size arrays/vectors" in directory TupleEx.root:/Tuple
+RCWNTupleCnv         INFO Booked TTree with ID: four "Fixed-size matrices" in directory TupleEx.root:/Tuple/subdir
+RCWNTupleCnv         INFO Booked TTree with ID: 5 "Variable-size arrays/vectors" in directory TupleEx.root:/Tuple
+RCWNTupleCnv         INFO Booked TTree with ID: six "Variable-size matrices" in directory TupleEx.root:/Tuple
+RCWNTupleCnv         INFO Booked TTree with ID: dublets "Tuple with dublets" in directory TupleEx.root:/Tuple2
+RCWNTupleCnv         INFO Booked TTree with ID: triplets "Tuple with triplets" in directory TupleEx.root:/Tuple2
+RCWNTupleCnv         INFO Booked TTree with ID: LorentzVectors "Tuple with Lorentz Vectors " in directory TupleEx.root:/Tuple3
+RCWNTupleCnv         INFO Booked TTree with ID: Vectors-3D "Tuple with Vectors in 3D " in directory TupleEx.root:/Tuple3
+RCWNTupleCnv         INFO Booked TTree with ID: Math-vectors "Tuple with Math Vectors" in directory TupleEx.root:/Tuple3
+RCWNTupleCnv         INFO Booked TTree with ID: S-matrices "Tuple with S-matrices" in directory TupleEx.root:/Tuple3
+RCWNTupleCnv         INFO Booked TTree with ID: VectorMaps "Tuple with VectorMaps/'ExtraInfo'" in directory TupleEx.root:/Tuple3
+Tuple             SUCCESS Booked 6 N-Tuples and 0 Event Tag Collections
+Tuple             SUCCESS List of booked N-Tuples in directory "MYLUN/Tuple"
+Tuple             SUCCESS  ID=1             Title="Trivial Row-Wise Tuple"                  #items=9  {gauss,flat,expo,breit,poiss,binom,pois2,bino2,poisb}
+Tuple             SUCCESS  ID=3             Title="Fixed-size arrays/vectors"               #items=4  {arflat[1],arexpo[1],argau[1],argau2[1]}
+Tuple             SUCCESS  ID=5             Title="Variable-size arrays/vectors"            #items=6  {Len1,arr[1]/V,Len2,sinar[1]/V,cosar[1]/V,tanar[1]/V}
+Tuple             SUCCESS  ID=subdir/four   Title="Fixed-size matrices"                     #items=3  {mgau[2],mflat[2],mexpo[2]}
+Tuple             SUCCESS  ID=two           Title="Column-Wise Tuple"                       #items=9  {gauss,flat,expo,breit,poiss,binom,pois2,bino2,poisb}
+Tuple             SUCCESS  ID=six           Title="Variable-size matrices"                  #items=8  {Len1,mgau[2]/V,Len2,mexpo[2]/V,Len3,m3flat[2]/V,Len4,m2expo[2]/V}
+Tuple             SUCCESS No histograms are booked
+Tuple2            SUCCESS Booked 2 N-Tuples and 0 Event Tag Collections
+Tuple2            SUCCESS List of booked N-Tuples in directory "MYLUN/Tuple2"
+Tuple2            SUCCESS  ID=triplets      Title="Tuple with triplets"                     #items=6  {tr1F,tr1S,tr1T,tr2F,tr2S,tr2T}
+Tuple2            SUCCESS  ID=dublets       Title="Tuple with dublets"                      #items=8  {d1F,d1S,d2F,d2S,d3F,d3S,d4F,d4S}
+Tuple2            SUCCESS No histograms are booked
+Tuple3            SUCCESS Booked 5 N-Tuples and 0 Event Tag Collections
+Tuple3            SUCCESS List of booked N-Tuples in directory "MYLUN/Tuple3"
+Tuple3            SUCCESS  ID=Math-vectors  Title="Tuple with Math Vectors"                 #items=3  {g[1],b[1],f[1]}
+Tuple3            SUCCESS  ID=VectorMaps    Title="Tuple with VectorMaps/'ExtraInfo'"       #items=8  {n1,map1[2]/V,n2,map2[2]/V,n3,map3[2]/V,n4,map4[2]/V}
+Tuple3            SUCCESS  ID=LorentzVectorsTitle="Tuple with Lorentz Vectors "             #items=8  {lv1E,lv1X,lv1Y,lv1Z,lv2E,lv2X,lv2Y,lv2Z}
+Tuple3            SUCCESS  ID=Vectors-3D    Title="Tuple with Vectors in 3D "               #items=6  {p3X,p3Y,p3Z,v3X,v3Y,v3Z}
+Tuple3            SUCCESS  ID=S-matrices    Title="Tuple with S-matrices"                   #items=3  {g[2],b[2],f[2]}
+Tuple3            SUCCESS No histograms are booked
+RootHistSvc       WARNING no ROOT output file name, Histograms cannot be persistified
+EventLoopMgr         INFO Histograms converted successfully according to request.
+RFileCnv             INFO dumping contents of /NTUPLES/MYLUN
+TFile: name=TupleEx.root, title=Gaudi Trees, option=CREATE
+******************************************************************************
+*Tree    :1         : Trivial Row-Wise Tuple                                 *
+*Entries :    10000 : Total =          366536 bytes  File  Size =     182287 *
+*        :          : Tree compression factor =   2.00                       *
+******************************************************************************
+*Br    0 :gauss     : gauss/F                                                *
+*Entries :    10000 : Total  Size=      40693 bytes  File Size  =      29717 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    1 :flat      : flat/F                                                 *
+*Entries :    10000 : Total  Size=      40686 bytes  File Size  =      29579 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    2 :expo      : expo/F                                                 *
+*Entries :    10000 : Total  Size=      40686 bytes  File Size  =      29202 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.10     *
+*............................................................................*
+*Br    3 :breit     : breit/F                                                *
+*Entries :    10000 : Total  Size=      40693 bytes  File Size  =      30216 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.06     *
+*............................................................................*
+*Br    4 :poiss     : poiss/I                                                *
+*Entries :    10000 : Total  Size=      40693 bytes  File Size  =       5762 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   5.55     *
+*............................................................................*
+*Br    5 :binom     : binom/I                                                *
+*Entries :    10000 : Total  Size=      40693 bytes  File Size  =       5541 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   5.77     *
+*............................................................................*
+*Br    6 :pois2     : pois2/I                                                *
+*Entries :    10000 : Total  Size=      40693 bytes  File Size  =       5755 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   5.56     *
+*............................................................................*
+*Br    7 :bino2     : bino2/I                                                *
+*Entries :    10000 : Total  Size=      40693 bytes  File Size  =       5537 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   5.78     *
+*............................................................................*
+*Br    8 :poisb     : poisb/I                                                *
+*Entries :    10000 : Total  Size=      40693 bytes  File Size  =       2492 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=  12.84     *
+*............................................................................*
+******************************************************************************
+*Tree    :two       : Column-Wise Tuple                                      *
+*Entries :    10000 : Total =          366584 bytes  File  Size =     182297 *
+*        :          : Tree compression factor =   2.00                       *
+******************************************************************************
+*Br    0 :gauss     : gauss/F                                                *
+*Entries :    10000 : Total  Size=      40699 bytes  File Size  =      29704 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    1 :flat      : flat/F                                                 *
+*Entries :    10000 : Total  Size=      40692 bytes  File Size  =      29588 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    2 :expo      : expo/F                                                 *
+*Entries :    10000 : Total  Size=      40692 bytes  File Size  =      29182 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.10     *
+*............................................................................*
+*Br    3 :breit     : breit/F                                                *
+*Entries :    10000 : Total  Size=      40699 bytes  File Size  =      30224 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.06     *
+*............................................................................*
+*Br    4 :poiss     : poiss/I                                                *
+*Entries :    10000 : Total  Size=      40699 bytes  File Size  =       5777 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   5.54     *
+*............................................................................*
+*Br    5 :binom     : binom/I                                                *
+*Entries :    10000 : Total  Size=      40699 bytes  File Size  =       5489 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   5.83     *
+*............................................................................*
+*Br    6 :pois2     : pois2/I                                                *
+*Entries :    10000 : Total  Size=      40699 bytes  File Size  =       5780 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   5.54     *
+*............................................................................*
+*Br    7 :bino2     : bino2/I                                                *
+*Entries :    10000 : Total  Size=      40699 bytes  File Size  =       5510 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   5.81     *
+*............................................................................*
+*Br    8 :poisb     : poisb/I                                                *
+*Entries :    10000 : Total  Size=      40699 bytes  File Size  =       2509 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=  12.75     *
+*............................................................................*
+******************************************************************************
+*Tree    :3         : Fixed-size arrays/vectors                              *
+*Entries :    10000 : Total =         7865021 bytes  File  Size =    7249494 *
+*        :          : Tree compression factor =   1.08                       *
+******************************************************************************
+*Br    0 :arflat    : arflat[50]/F                                           *
+*Entries :    10000 : Total  Size=    2006482 bytes  File Size  =    1825974 *
+*Baskets :       62 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    1 :arexpo    : arexpo[62]/F                                           *
+*Entries :    10000 : Total  Size=    2488386 bytes  File Size  =    2263182 *
+*Baskets :       78 : Basket Size=      32000 bytes  Compression=   1.10     *
+*............................................................................*
+*Br    2 :argau     : argau[42]/F                                            *
+*Entries :    10000 : Total  Size=    1685684 bytes  File Size  =    1544465 *
+*Baskets :       52 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    3 :argau2    : argau2[42]/F                                           *
+*Entries :    10000 : Total  Size=    1685742 bytes  File Size  =    1544613 *
+*Baskets :       52 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+******************************************************************************
+*Tree    :four      : Fixed-size matrices                                    *
+*Entries :    10000 : Total =         8747908 bytes  File  Size =    8075230 *
+*        :          : Tree compression factor =   1.08                       *
+******************************************************************************
+*Br    0 :mgau      : mgau[15][5]/F                                          *
+*Entries :    10000 : Total  Size=    3009664 bytes  File Size  =    2781697 *
+*Baskets :       94 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    1 :mflat     : mflat[26][4]/F                                         *
+*Entries :    10000 : Total  Size=    4173656 bytes  File Size  =    3836527 *
+*Baskets :      131 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    2 :mexpo     : mexpo[13][3]/F                                         *
+*Entries :    10000 : Total  Size=    1565624 bytes  File Size  =    1425507 *
+*Baskets :       49 : Basket Size=      32000 bytes  Compression=   1.10     *
+*............................................................................*
+******************************************************************************
+*Tree    :5         : Variable-size arrays/vectors                           *
+*Entries :    10000 : Total =          566033 bytes  File  Size =     379705 *
+*        :          : Tree compression factor =   1.47                       *
+******************************************************************************
+*Br    0 :Len1      : Len1/I                                                 *
+*Entries :    10000 : Total  Size=      40686 bytes  File Size  =       5747 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   5.57     *
+*............................................................................*
+*Br    1 :arr       : arr[Len1]/F                                            *
+*Entries :    10000 : Total  Size=     120643 bytes  File Size  =      72323 *
+*Baskets :        4 : Basket Size=      32000 bytes  Compression=   1.33     *
+*............................................................................*
+*Br    2 :Len2      : Len2/I                                                 *
+*Entries :    10000 : Total  Size=      40686 bytes  File Size  =       5777 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   5.54     *
+*............................................................................*
+*Br    3 :sinar     : sinar[Len2]/F                                          *
+*Entries :    10000 : Total  Size=     121328 bytes  File Size  =      90205 *
+*Baskets :        5 : Basket Size=      32000 bytes  Compression=   1.33     *
+*............................................................................*
+*Br    4 :cosar     : cosar[Len2]/F                                          *
+*Entries :    10000 : Total  Size=     121328 bytes  File Size  =      88867 *
+*Baskets :        5 : Basket Size=      32000 bytes  Compression=   1.35     *
+*............................................................................*
+*Br    5 :tanar     : tanar[Len2]/F                                          *
+*Entries :    10000 : Total  Size=     121328 bytes  File Size  =      91542 *
+*Baskets :        5 : Basket Size=      32000 bytes  Compression=   1.31     *
+*............................................................................*
+******************************************************************************
+*Tree    :six       : Variable-size matrices                                 *
+*Entries :    10000 : Total =         4416072 bytes  File  Size =    3888351 *
+*        :          : Tree compression factor =   1.13                       *
+******************************************************************************
+*Br    0 :Len1      : Len1/I                                                 *
+*Entries :    10000 : Total  Size=      40692 bytes  File Size  =       5785 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   5.53     *
+*............................................................................*
+*Br    1 :mgau      : mgau[Len1][15]/F                                       *
+*Entries :    10000 : Total  Size=    1246337 bytes  File Size  =    1140164 *
+*Baskets :       40 : Basket Size=      32000 bytes  Compression=   1.09     *
+*............................................................................*
+*Br    2 :Len2      : Len2/I                                                 *
+*Entries :    10000 : Total  Size=      40692 bytes  File Size  =       5762 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   5.55     *
+*............................................................................*
+*Br    3 :mexpo     : mexpo[Len2][15]/F                                      *
+*Entries :    10000 : Total  Size=    1252263 bytes  File Size  =    1121640 *
+*Baskets :       40 : Basket Size=      32000 bytes  Compression=   1.10     *
+*............................................................................*
+*Br    4 :Len3      : Len3/I                                                 *
+*Entries :    10000 : Total  Size=      40692 bytes  File Size  =       5746 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   5.57     *
+*............................................................................*
+*Br    5 :m3flat    : m3flat[Len3][6]/F                                      *
+*Entries :    10000 : Total  Size=     518459 bytes  File Size  =     445201 *
+*Baskets :       17 : Basket Size=      32000 bytes  Compression=   1.13     *
+*............................................................................*
+*Br    6 :Len4      : Len4/I                                                 *
+*Entries :    10000 : Total  Size=      40692 bytes  File Size  =       5734 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   5.58     *
+*............................................................................*
+*Br    7 :m2expo    : m2expo[Len4][15]/F                                     *
+*Entries :    10000 : Total  Size=    1236805 bytes  File Size  =    1092391 *
+*Baskets :       39 : Basket Size=      32000 bytes  Compression=   1.11     *
+*............................................................................*
+******************************************************************************
+*Tree    :dublets   : Tuple with dublets                                     *
+*Entries :    10000 : Total =          325889 bytes  File  Size =     298418 *
+*        :          : Tree compression factor =   1.08                       *
+******************************************************************************
+*Br    0 :d1F       : d1F/F                                                  *
+*Entries :    10000 : Total  Size=      40697 bytes  File Size  =      29694 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    1 :d1S       : d1S/F                                                  *
+*Entries :    10000 : Total  Size=      40697 bytes  File Size  =      29715 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    2 :d2F       : d2F/F                                                  *
+*Entries :    10000 : Total  Size=      40697 bytes  File Size  =      29554 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    3 :d2S       : d2S/F                                                  *
+*Entries :    10000 : Total  Size=      40697 bytes  File Size  =      29570 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    4 :d3F       : d3F/F                                                  *
+*Entries :    10000 : Total  Size=      40697 bytes  File Size  =      30223 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.06     *
+*............................................................................*
+*Br    5 :d3S       : d3S/F                                                  *
+*Entries :    10000 : Total  Size=      40697 bytes  File Size  =      30203 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.06     *
+*............................................................................*
+*Br    6 :d4F       : d4F/F                                                  *
+*Entries :    10000 : Total  Size=      40697 bytes  File Size  =      29166 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.10     *
+*............................................................................*
+*Br    7 :d4S       : d4S/F                                                  *
+*Entries :    10000 : Total  Size=      40697 bytes  File Size  =      29208 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.10     *
+*............................................................................*
+******************************************************************************
+*Tree    :triplets  : Tuple with triplets                                    *
+*Entries :    10000 : Total =          244565 bytes  File  Size =     224014 *
+*        :          : Tree compression factor =   1.08                       *
+******************************************************************************
+*Br    0 :tr1F      : tr1F/F                                                 *
+*Entries :    10000 : Total  Size=      40707 bytes  File Size  =      29723 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    1 :tr1S      : tr1S/F                                                 *
+*Entries :    10000 : Total  Size=      40707 bytes  File Size  =      29703 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    2 :tr1T      : tr1T/F                                                 *
+*Entries :    10000 : Total  Size=      40707 bytes  File Size  =      29714 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    3 :tr2F      : tr2F/F                                                 *
+*Entries :    10000 : Total  Size=      40707 bytes  File Size  =      29578 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    4 :tr2S      : tr2S/F                                                 *
+*Entries :    10000 : Total  Size=      40707 bytes  File Size  =      29586 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    5 :tr2T      : tr2T/F                                                 *
+*Entries :    10000 : Total  Size=      40707 bytes  File Size  =      29597 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+******************************************************************************
+*Tree    :LorentzVectors: Tuple with Lorentz Vectors                             *
+*Entries :    10000 : Total =          326145 bytes  File  Size =     261217 *
+*        :          : Tree compression factor =   1.24                       *
+******************************************************************************
+*Br    0 :lv1E      : lv1E/F                                                 *
+*Entries :    10000 : Total  Size=      40725 bytes  File Size  =      15927 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   2.01     *
+*............................................................................*
+*Br    1 :lv1X      : lv1X/F                                                 *
+*Entries :    10000 : Total  Size=      40725 bytes  File Size  =      29704 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    2 :lv1Y      : lv1Y/F                                                 *
+*Entries :    10000 : Total  Size=      40725 bytes  File Size  =      29714 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    3 :lv1Z      : lv1Z/F                                                 *
+*Entries :    10000 : Total  Size=      40725 bytes  File Size  =      29559 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    4 :lv2E      : lv2E/F                                                 *
+*Entries :    10000 : Total  Size=      40725 bytes  File Size  =      12247 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   2.61     *
+*............................................................................*
+*Br    5 :lv2X      : lv2X/F                                                 *
+*Entries :    10000 : Total  Size=      40725 bytes  File Size  =      29704 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    6 :lv2Y      : lv2Y/F                                                 *
+*Entries :    10000 : Total  Size=      40725 bytes  File Size  =      29714 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    7 :lv2Z      : lv2Z/F                                                 *
+*Entries :    10000 : Total  Size=      40725 bytes  File Size  =      29559 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+******************************************************************************
+*Tree    :Vectors-3D: Tuple with Vectors in 3D                               *
+*Entries :    10000 : Total =          244575 bytes  File  Size =     224001 *
+*        :          : Tree compression factor =   1.08                       *
+******************************************************************************
+*Br    0 :p3X       : p3X/F                                                  *
+*Entries :    10000 : Total  Size=      40706 bytes  File Size  =      29562 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    1 :p3Y       : p3Y/F                                                  *
+*Entries :    10000 : Total  Size=      40706 bytes  File Size  =      29581 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    2 :p3Z       : p3Z/F                                                  *
+*Entries :    10000 : Total  Size=      40706 bytes  File Size  =      29583 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    3 :v3X       : v3X/F                                                  *
+*Entries :    10000 : Total  Size=      40706 bytes  File Size  =      29686 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    4 :v3Y       : v3Y/F                                                  *
+*Entries :    10000 : Total  Size=      40706 bytes  File Size  =      29717 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    5 :v3Z       : v3Z/F                                                  *
+*Entries :    10000 : Total  Size=      40706 bytes  File Size  =      29716 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+******************************************************************************
+*Tree    :Math-vectors: Tuple with Math Vectors                                *
+*Entries :    10000 : Total =         3171564 bytes  File  Size =    2949473 *
+*        :          : Tree compression factor =   1.07                       *
+******************************************************************************
+*Br    0 :g         : g[4]/F                                                 *
+*Entries :    10000 : Total  Size=     161024 bytes  File Size  =     148543 *
+*Baskets :        5 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    1 :b         : b[25]/F                                                *
+*Entries :    10000 : Total  Size=    1003566 bytes  File Size  =     935585 *
+*Baskets :       31 : Basket Size=      32000 bytes  Compression=   1.06     *
+*............................................................................*
+*Br    2 :f         : f[50]/F                                                *
+*Entries :    10000 : Total  Size=    2006846 bytes  File Size  =    1826200 *
+*Baskets :       62 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+******************************************************************************
+*Tree    :S-matrices: Tuple with S-matrices                                  *
+*Entries :    10000 : Total =         3452166 bytes  File  Size =    2985939 *
+*        :          : Tree compression factor =   1.16                       *
+******************************************************************************
+*Br    0 :g         : g[4][4]/F                                              *
+*Entries :    10000 : Total  Size=     642426 bytes  File Size  =     593224 *
+*Baskets :       20 : Basket Size=      32000 bytes  Compression=   1.08     *
+*............................................................................*
+*Br    1 :b         : b[3][15]/F                                             *
+*Entries :    10000 : Total  Size=    1806256 bytes  File Size  =    1687994 *
+*Baskets :       56 : Basket Size=      32000 bytes  Compression=   1.06     *
+*............................................................................*
+*Br    2 :f         : f[5][5]/F                                              *
+*Entries :    10000 : Total  Size=    1003504 bytes  File Size  =     677639 *
+*Baskets :       31 : Basket Size=      32000 bytes  Compression=   1.46     *
+*............................................................................*
+******************************************************************************
+*Tree    :VectorMaps: Tuple with VectorMaps/'ExtraInfo'                      *
+*Entries :    10000 : Total =        64554368 bytes  File  Size =    3661293 *
+*        :          : Tree compression factor =  17.68                       *
+******************************************************************************
+*Br    0 :n1        : n1/I                                                   *
+*Entries :    10000 : Total  Size=      40699 bytes  File Size  =        267 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression= 119.85     *
+*............................................................................*
+*Br    1 :map1      : map1[n1][2]/F                                          *
+*Entries :    10000 : Total  Size=   16098315 bytes  File Size  =    1089346 *
+*Baskets :      526 : Basket Size=      32000 bytes  Compression=  14.76     *
+*............................................................................*
+*Br    2 :n2        : n2/I                                                   *
+*Entries :    10000 : Total  Size=      40699 bytes  File Size  =        267 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression= 119.85     *
+*............................................................................*
+*Br    3 :map2      : map2[n2][2]/F                                          *
+*Entries :    10000 : Total  Size=   16098315 bytes  File Size  =     835814 *
+*Baskets :      526 : Basket Size=      32000 bytes  Compression=  19.23     *
+*............................................................................*
+*Br    4 :n3        : n3/I                                                   *
+*Entries :    10000 : Total  Size=      40699 bytes  File Size  =        267 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression= 119.85     *
+*............................................................................*
+*Br    5 :map3      : map3[n3][2]/F                                          *
+*Entries :    10000 : Total  Size=   16098315 bytes  File Size  =     771642 *
+*Baskets :      526 : Basket Size=      32000 bytes  Compression=  20.83     *
+*............................................................................*
+*Br    6 :n4        : n4/I                                                   *
+*Entries :    10000 : Total  Size=      40699 bytes  File Size  =        267 *
+*Baskets :        1 : Basket Size=      32000 bytes  Compression= 119.85     *
+*............................................................................*
+*Br    7 :map4      : map4[n4][2]/F                                          *
+*Entries :    10000 : Total  Size=   16098315 bytes  File Size  =     945748 *
+*Baskets :      526 : Basket Size=      32000 bytes  Compression=  17.00     *
+*............................................................................*
+NTupleSvc            INFO NTuples saved successfully
+ApplicationMgr       INFO Application Manager Finalized successfully
+ApplicationMgr       INFO Application Manager Terminated successfully
+Number of MyTrack instances:0
+Number of MyVertex instances:0
