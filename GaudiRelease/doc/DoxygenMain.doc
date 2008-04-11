@@ -1,0 +1,75 @@
+/** \mainpage notitle
+ *  \anchor gaudidoxygenmain
+ *
+ * This is the code reference manual for the GAUDI framework. These pages have
+ * been generated directly from the code and reflect the exact state of the software.
+ * For a more comprehensive and guiding manual for the user of the framework there
+ * exists the User Guide accessible from the 
+ * <a href="http://cern.ch/gaudi"> GAUDI Project Web page</a>.
+ *
+ * Use the links in the menu at the top of the page to navigate. In particular,
+ * the list of classes can be found <a href="annotated.html">here</a> or via
+ * the <a href="hierarchy.html">Class Hierarchy</a> link.
+ *
+\htmlonly
+<h3>Version details</h3>
+<table border="1" cellspacing="0" width="100%">
+  <tr>
+    <td><b>Version</b></td>
+    <td>$(GAUDIVERS)</td>
+  </tr>
+  <tr>
+    <td><b>Description</b></td>
+    <td> Details of the constituent package versions are available
+    <a href="../../requirements">here</a>.<br>
+      The release notes (<a href="../release.notes.html">$(GAUDIVERS)</a>) 
+      contain the details of changes since the previous release. </td>
+  </tr>
+  <tr>
+        <td><b>Supported platforms</b></td>
+        <td>Windows with VC++
+          7.1, Linux RedHat 7.3 with gcc-3.2.3 (released with debug and non debug versions)</td>
+  </tr>
+  <tr>
+        <td><b>Download</b></td>
+        <td>Download
+        <a href="http://lhcbproject.web.cern.ch/lhcbproject/dist/GAUDI/GAUDI_GAUDI_$(GAUDIVERS).tar.gz">GAUDI $(GAUDIVERS) </a></td>
+  </tr>
+  <tr>
+        <td><b>Documentation</b></td>
+        <td>Gaudi Developers Guide <a href="http://cern.ch/lhcb-comp/Frameworks/Gaudi/Gaudi_v9/GUG/Output/GUG.htm">v9</a> ( <a href="http://cern.ch/lhcb-comp/Frameworks/Gaudi/Gaudi_v9/GUG/GUG.pdf">.pdf</a>, <a href="http://cern.ch/lhcb-comp/Frameworks/Gaudi/Gaudi_v9/GUG/GUG-2up.pdf">.pdf
+          2up (for printing)</a>)</td>
+  </tr>
+</table>
+
+\endhtmlonly
+
+
+ * See also: \ref externaldocs (from LCGCMT version $(LCGCMTVERS))
+ */
+
+/** \page externaldocs Related external libraries
+ * \htmlonly <h3><center>(from LCGCMT version $(LCGCMTVERS))</h3></center>
+ <UL>
+  <LI> <a href="http://lcgapp.cern.ch/doxygen/SEAL/$(SEALVERS)/doxygen/html/" target="_blank">$(SEALVERS)</A> (foundation)
+  <UL>
+    <LI> <a href="http://www.boost.org/libs/libraries.htm" target="_blank">Boost $(BoostVERS)</A> 
+    <LI> <a href="http://spi.cern.ch/extsoft/packages.php?pkg=uuid" target="_blank">uuid $(uuidVERS)</A>
+    <LI> <a href="http://spi.cern.ch/extsoft/packages.php?pkg=pcre" target="_blank">pcre $(PCREVERS)</A>
+    <LI> <a href="http://spi.cern.ch/extsoft/packages.php?pkg=gccxml" target="_blank">GCC-XML $(GCCXMLVERS)</A>
+  </UL>
+  <UL>
+    <LI> <a href="http://aida.freehep.org/doc/v$(AIDAVERS)/api/index.html" target="_blank">AIDA $(AIDAVERS)</A> (histogramming)
+  </UL>
+  <LI> <a href="http://lcgapp.cern.ch/doxygen/POOL/$(POOLVERS)/doxygen/html/" target="_blank">$(POOLVERS)</A> (persistency)
+  <UL>
+    <LI> <a href="http://lcgapp.cern.ch/doxygen/ROOT/$(ROOTVERS)/doxygen/html/" target="_blank">ROOT $(ROOTVERS)</A> (persistency)
+    <LI> <a href="http://xml.apache.org/xerces-c/apiDocs/index.html" target="_blank">Xerces-C $(XercesCVERS)</A> 
+  </UL>
+  <LI> <a href="http://www.gnu.org/software/gsl/manual/gsl-ref_toc.html" target="_blank">GNU Scientific Library (GSL) $(GSLVERS)</A> 
+  <LI> <a href="http://www.python.org/doc/$(PythonVERS)/" target="_blank">Python $(PythonVERS)</A> (scripting and interactivity)
+</UL>
+See also:
+  <a href="http://gcc.gnu.org/onlinedocs/libstdc++/libstdc++-html-USERS-3.4/index.html" target="_blank">Standard Template Library</A> 
+\endhtmlonly
+ */

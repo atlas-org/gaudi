@@ -1,0 +1,81 @@
+# Package used to manage the Gaudi project packages
+# No wildcards allowed
+
+package GaudiRelease
+
+version v19r9
+branches doc cmt 
+
+# CMT and Gaudi policy
+use GaudiPolicy	   v8r2
+
+# Note for conditional use statements: only the tags which are defined
+# at the level of CMT (and CMTSITE) can be used. This means that
+# "Linux", "CERN" , "Darwin" etc are valid tags but not "slc3",
+# "slc4_amd64" etc.  If one needs to use those, this should be done at
+# the level of the package itself with a "macro_remove constituents"
+
+# Gaudi executable
+use Gaudi          v19r9
+
+# Gaudi libraries - generic
+use GaudiKernel    v24r0
+use GaudiSvc       v16r5
+use GaudiAud       v8r5
+use GaudiAlg       v10r5
+use GaudiGSL       v6r9
+use GaudiUtils     v1r6
+
+# Technology-specific Persistency packages
+use HbookCnv       v14r13
+use RootHistCnv    v9r16
+use GaudiPoolDb    v3r1
+use GaudiPython    v8r19
+
+# Container package specifying the minimum set of core packages
+use GaudiSys       v19r9
+
+# Grid utilities for prestaging files
+use GaudiGridSvc   v1r5
+
+# Monitoring utility. Can use also MonaLisa
+use GaudiMonitor   v1r4
+
+
+# Examples packages
+use GaudiExamples   v19r9
+
+
+# Atlas packages
+use PartPropSvc      v2r6
+
+#LHCb external packages
+macro COOL_use "" LHCb "COOL v* LCG_Interfaces"
+use ${COOL_use}
+macro CORAL_use "" LHCb "CORAL v* LCG_Interfaces"
+use ${CORAL_use}
+macro RELAX_use "" LHCb "RELAX v* LCG_Interfaces"
+use ${RELAX_use}
+macro sqlite_use "" LHCb "sqlite v* LCG_Interfaces"
+use $(sqlite_use)
+macro HepMC_use "" LHCb "HepMC v* LCG_Interfaces"
+use $(HepMC_use)
+macro oracle_use "" LHCb "oracle v* LCG_Interfaces"
+use $(oracle_use)
+macro pyqt_use "" LHCb "pyqt v* LCG_Interfaces"
+use $(pyqt_use)
+macro QMtest_use "" LHCb "QMtest v* LCG_Interfaces"
+use $(QMtest_use)
+macro CppUnit_use "" LHCb "CppUnit v* LCG_Interfaces"
+use $(CppUnit_use)
+
+#LHCbGrid external packages
+macro gfal_use "" LHCbGrid "gfal v* LCG_Interfaces"
+use $(gfal_use)
+macro CASTOR_use "" LHCbGrid "CASTOR v* LCG_Interfaces"
+use $(CASTOR_use)
+macro dcache_client_use "" LHCbGrid "dcache_client v* LCG_Interfaces"
+use $(dcache_client_use)
+
+# Allow the generation of QMTest summary 
+apply_pattern QMTestSummarize
