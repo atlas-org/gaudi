@@ -1,0 +1,59 @@
+Configuring the Exception Service
+=================================
+
+The Algorithm base class has a try/catch loop around the execute()
+phase of every Algorithm. If an algorithm throws an exception during
+the execute phase, the Algorithm base class catches it, and forwards
+it on to the Exception Service.
+
+The Exception Service allows one to change the return codes of
+Algorithms on a per-algorithm basis, when an exception is thrown
+by that algorithm.
+
+There are five alternatives:
+   - DEFAULT
+   - SUCCESS
+   - FAILURE
+   - RECOVERABLE
+   - RETHROW
+
+
+DEFAULT: If the thrown exception is a GaudiException, then the
+  Exception Service will change the return code to whatever is given
+  in the GaudiException  (GaudiException.code()). If it is not a
+  GaudiException, then the return code is set to StatusCode::FAILURE
+
+SUCCESS: Return code set to StatusCode::SUCCESS. Normal processing of
+  the event will continue.
+
+FAILURE: Return code set to StatusCode::FAILURE. Processing of the
+  event will halt, and the job will terminate.
+
+RECOVERABLE: Return code set to StatusCode::RECOVERABLE. Processing of
+  the event will halt, and the EvenLoopManager will jump to the next
+  event. Processing of the job will continue.
+
+RETHROW: The exception will be rethrown. This will most likely cause
+  the termination of the job, and a seg fault to occur.
+
+
+jobOptions
+-----------
+
+string ExceptionSvc.Catch:
+  can be one of "ALL", "NONE", "LIST"
+
+  ALL: catch all exceptions, and rethrow them
+  NONE: do not process any exceptions, return StatusCode::FAILURE
+  LIST: process algorithms on a per algorithm basis, according to
+        jobOption "Algorithms". See Below
+
+vector<string> ExceptionSvc.Algorithms:
+  vector of algorithm in format AlgName=Action, where the Action is
+  one of the five alternatives listed above. eg:
+
+  { "MyAlg=SUCCESS", "MyOtherAlg=DEFAULT", "Alg3=RETHROW", "Alg4=RECOVERABLE" }
+ 
+
+
+
