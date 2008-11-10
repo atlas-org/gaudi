@@ -1,0 +1,60 @@
+#============================================================================
+# Created    : 2006-11-17
+# Maintainer : Andres Felipe OSORIO OLIVEROS
+#============================================================================
+package           GaudiGridSvc
+version           v1r7
+
+#============================================================================
+# Structure, i.e. directories to process. 
+#============================================================================
+branches          cmt doc src 
+
+
+#============================================================================
+# Used packages. Specify the version, * at the end specifies 'any revision'
+#    Put as many lines as needed, with all packages, without the '#'
+#============================================================================
+use GaudiKernel v*
+
+#-------------------------------------------------------
+#GFAL libraries and dependencies (needed by GFALDataStreamSvc)
+use gfal        v* LCG_Interfaces -no_auto_imports
+
+include_dirs ${gfal_home}/include
+
+macro_append GaudiGridSvc_use_linkopts " ${gfal_linkopts} "
+
+#-------------------------------------------------------
+
+
+#============================================================================
+# Component library building rule
+
+library GaudiGridSvc \
+                 GFALDataStreamTool/*.cpp \
+                 Dll/GaudiGridSvc*.cpp
+
+#============================================================================
+# define component library link options
+#============================================================================
+apply_pattern component_library library=GaudiGridSvc
+######################################################################
+
+
+private
+
+macro_append cppflags "" \
+   Linux " -pedantic -Wwrite-strings -Wpointer-arith -Woverloaded-virtual -Wno-long-long " \
+   Darwin "" \
+   WIN32 ""
+
+# FIXME: It should use tags derived from CMTCONFIG only
+apply_pattern disable_package_on platform=WIN32
+apply_pattern disable_package_on platform=osx104
+apply_pattern disable_package_on platform=osx105
+
+apply_pattern disable_package_on platform=gcc43
+
+# Explicitly requested by ATLAS (patch #1611)
+apply_pattern disable_package_on platform=ATLAS
