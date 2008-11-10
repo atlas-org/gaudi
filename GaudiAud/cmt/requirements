@@ -1,0 +1,12 @@
+package GaudiAud
+version v8r7
+
+branches doc src cmt
+
+use GaudiKernel v*
+
+# component library
+library GaudiAud ../src/*.cpp 
+apply_pattern component_library library=GaudiAud
+
+apply_pattern QMTest
