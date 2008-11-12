@@ -1,0 +1,34 @@
+// $Id: ITestTool.h,v 1.1 2004/03/09 09:25:32 mato Exp $
+#ifndef ITESTTOOL_H 
+#define ITESTTOOL_H 1
+
+// Include files
+// from STL
+#include <string>
+
+// from Gaudi
+#include "GaudiKernel/IAlgTool.h"
+
+
+/** @class ITestTool ITestTool.h
+ *  
+ *
+ *  @author Chris Jones
+ *  @date   2004-03-08
+ */
+
+static const InterfaceID IID_ITestTool( "ITestTool", 1, 0 );
+
+class ITestTool : public virtual IAlgTool {
+
+public:
+
+  /// static interface identification
+  static const InterfaceID& interfaceID() { return IID_ITestTool; }
+
+protected:
+
+private:
+
+};
+#endif // ITESTTOOL_H
