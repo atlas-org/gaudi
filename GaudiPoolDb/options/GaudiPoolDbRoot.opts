@@ -1,0 +1,21 @@
+// ===================================================================
+// Standard Gaudi options for POOL I/O using ROOT
+// ===================================================================
+// $ID $
+ApplicationMgr.ExtSvc    += { "Gaudi::MultiFileCatalog/FileCatalog", 
+                              "Gaudi::IODataManager/IODataManager",
+                              "PoolDbCacheSvc/PoolDbCacheSvc",
+                              "PoolDbCnvSvc/PoolRootEvtCnvSvc",
+                              "PoolDbCnvSvc/PoolRootKeyEvtCnvSvc",
+                              "PoolDbCnvSvc/PoolRootTreeEvtCnvSvc"
+                            };
+EventPersistencySvc.CnvServices += { "PoolRootEvtCnvSvc" }; 
+EventPersistencySvc.CnvServices += { "PoolRootTreeEvtCnvSvc" }; 
+EventPersistencySvc.CnvServices += { "PoolRootKeyEvtCnvSvc" };
+PoolRootEvtCnvSvc.DbType         = "POOL_ROOT";
+PoolRootKeyEvtCnvSvc.DbType      = "POOL_ROOTKEY";
+PoolRootTreeEvtCnvSvc.DbType     = "POOL_ROOTTREE";
+PoolDbCacheSvc.Dlls              = {"lcg_RootStorageSvc", "GaudiKernelDict" };
+PoolDbCacheSvc.OutputLevel       = 4;
+//PoolDbCacheSvc.UseGFAL         = true;
+PoolDbCacheSvc.DomainOpts        = { "Domain[ROOT_All].TREE_MAX_SIZE=500000000000 TYP=longlong" };
