@@ -1,0 +1,21 @@
+
+${CONSTITUENT}LIB :: $(${CONSTITUENT}lib) $(${CONSTITUENT}shstamp)
+	@/bin/echo "------> ${CONSTITUENT} : library ok"
+
+$(${CONSTITUENT}lib) :: ${OBJS}
+	$(lib_echo) library
+	$(lib_silent) cd $(bin); $(ar) $(${CONSTITUENT}lib) $?;\
+           /bin/rm -f $?;touch $?
+	$(lib_silent) $(ranlib) $(${CONSTITUENT}lib)
+	$(lib_silent) cat /dev/null >$(${CONSTITUENT}stamp)
+
+$(${CONSTITUENT}shstamp) :: $(${CONSTITUENT}lib)
+	$(lib_silent) cd $(bin); $(make_shlib) $(tag) ${CONSTITUENT} $(${CONSTITUENT}_shlibflags)
+	@if test -f $(bin)/lib${CONSTITUENT}.$(shlibsuffix) ; then cat /dev/null >$(${CONSTITUENT}shstamp) ; fi
+
+${CONSTITUENT}clean ::
+	$(cleanup_echo) objects
+	$(cleanup_silent) cd $(bin); /bin/rm -f ${OBJS}
+
+
+
