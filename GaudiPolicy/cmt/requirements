@@ -280,14 +280,14 @@ make_fragment install_scripts -header=install_scripts_header
 #
 # Some data files are specified using a directory.
 #
-macro install_command 'python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x*~ -x*.stamp --log=./install.history '
+macro install_command 'python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x.svn -x*~ -x*.stamp --log=./install.history '
 macro uninstall_command 'python $(GaudiPolicy_root)/cmt/fragments/install.py -u --log=./install.history '
 
 macro remove_command "$(cmt_uninstallarea_command)"
 
-macro library_install_command "python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x*~ -x*.stamp -s --log=./install.history " \
+macro library_install_command "python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x.svn -x*~ -x*.stamp -s --log=./install.history " \
       VisualC                 "copy "
-macro cmt_installarea_command "python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x*~ -x*.stamp -s --log=./install.history " \
+macro cmt_installarea_command "python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x.svn -x*~ -x*.stamp -s --log=./install.history " \
       WIN32                   "xcopy /S /E /Y "
 
 pattern declare_runtime \
@@ -1093,13 +1093,15 @@ cmtpath_pattern \
 # Create a confDb.py file for ConfigurableUser specializations
 # 
 #-------------------------------------------------------------------
+macro GenConfUser_script "genconfuser.py" \
+                   WIN32 "genconfuser.bat"
 pattern real_genconfuser \
 	private ; \
 	macro <package>GenConfUser_output "$(<package>_root)$(genconfDir)<package>/<package>_user_confDb.py" \
 	                            WIN32 "$(<package>_root)$(genconfDir)<package>\<package>_user_confDb.py" ; \
 	macro <package>GenConfUser_python "$(<package>_root)/python" \
                                     WIN32 "$(<package>_root)\python" ; \
-	macro <package>GenConfUser_command "genconfuser.py -r $(<package>GenConfUser_python) -o $(<package>GenConfUser_output) <package> $(<package>ConfUserModules)" ; \
+	macro <package>GenConfUser_command "$(GenConfUser_script) -r $(<package>GenConfUser_python) -o $(<package>GenConfUser_output) <package> $(<package>ConfUserModules)" ; \
 	apply_pattern CallCommand target=<package>GenConfUser ; \
 	document merge_genconfDb <package>ConfUserDbMerge -group=<group> \
 		inDir=$(<package>_root)$(genconfDir)<package> \
