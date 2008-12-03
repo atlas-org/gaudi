@@ -4,6 +4,7 @@ __all__ = [
            "PublicToolHandle", "PrivateToolHandle",
            "ServiceHandle",
            "GaudiHandleArray",
+           "ServiceHandleArray",
            "PublicToolHandleArray", "PrivateToolHandleArray",
            ]
 __version__ = "$Revision: 1.6 $"
@@ -204,6 +205,13 @@ class GaudiHandleArray(list):
     def __setstate__ ( self, dict ):
         self.typesAndNames = dict[ 'typesAndNames' ]
 
+
+class ServiceHandleArray(GaudiHandleArray):
+    __slots__ = ()
+    handleType = ServiceHandle
+    
+    def __init__(self, serviceTypesAndNames=None):
+        GaudiHandleArray.__init__( self, serviceTypesAndNames )
 
 class PublicToolHandleArray(GaudiHandleArray):
     __slots__ = ()

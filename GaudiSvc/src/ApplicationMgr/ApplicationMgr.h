@@ -220,6 +220,7 @@ protected:
 
   /// For ServiceMgr initialization loop checking
   BooleanProperty      m_loopCheck;
+  StringArrayProperty  m_loopIgnore;  
 
   // Flag to activate the printout of properties
   bool                 m_propertiesPrint ; ///< flag to actiavte the printout of properties

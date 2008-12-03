@@ -64,6 +64,17 @@ static ISvcLocator* s_svclocInstance = 0;
 static IAppMgrUI*   s_appmgrInstance = 0;
 
 //------------------------------------------------------------------------------
+bool Gaudi::hasApplicationMgr()
+//------------------------------------------------------------------------------
+{
+  //Return true if the applicationmgr has already been created
+  if ( 0 == s_appmgrInstance ) {
+    return false;
+  }
+  return true;
+}
+
+//------------------------------------------------------------------------------
 IAppMgrUI* Gaudi::createApplicationMgr(const std::string& dllname,
                                        const std::string& factname)
 //------------------------------------------------------------------------------

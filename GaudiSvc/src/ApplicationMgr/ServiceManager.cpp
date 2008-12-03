@@ -15,13 +15,10 @@
 using ROOT::Reflex::PluginService;
 // constructor
 ServiceManager::ServiceManager(IInterface* iface):
-  m_statemgr(iface),
-  m_loopCheck(true)
-{
-  m_refcount   = 1;
-  m_pOuter = iface;
+  m_refcount(1), m_pOuter(iface), m_msgsvc(0),  m_statemgr(iface),
+  m_loopCheck(true) {
   m_svclocator = (ISvcLocator*)this;
-  m_msgsvc     = 0;
+
 }
 
 // destructor
@@ -159,12 +156,43 @@ StatusCode ServiceManager::getService( const std::string& nam, IService*& svc,
     if (m_loopCheck &&
         (createIf && (*it)->FSMState() == Gaudi::StateMachine::CONFIGURED)) {
       MsgStream log(msgSvc(), "ServiceManager");
-      log << MSG::ERROR
-	  << "Initialization loop detected when creating service \"" << name
-	  << "\""
-          << endreq;
-      sc = StatusCode::FAILURE;
-    } else {
+      std::ostringstream ost;
+      ost << "Initialization loop detected when creating service \"" << name
+	  << "\"" << std::endl;
+
+      const size_t depth(99);
+      void* addresses[depth];
+      std::string lib,rlib,fnc;
+      void* addr(0);
+      
+      ost << "Printing stack trace:" << std::endl;
+      if ( addresses && System::backTrace(addresses, depth)) {      
+	int i=1;
+	while (System::getStackLevel(addresses[i], addr, fnc, lib)) {
+	  if ( (lib.find("libGaudiSvc.so") == std::string::npos &&
+		lib.find("libGaudiKernel.so") == std::string::npos &&
+		fnc.find("::service<IService>(") == std::string::npos &&
+		fnc.find("__") != 0) || log.level() <= MSG::DEBUG )
+	    {
+	      int i1 = lib.rfind("/",lib.length());
+	      rlib = lib.substr(i1+1,lib.length()-i1-1);
+	      ost << "  " << fnc << "  [" << rlib << "]" << std::endl;	    
+	    }
+	  ++i;
+	}
+      }
+
+
+      if ( find(m_loopIgnore.begin(), m_loopIgnore.end(), name) == m_loopIgnore.end() ) {
+	log << MSG::ERROR << ost.str() << endreq;
+
+	sc = StatusCode::FAILURE;
+      } else {
+	log << MSG::DEBUG << ost.str() << endreq;
+
+	sc = StatusCode::SUCCESS;
+      }
+    } else {      
       sc = StatusCode::SUCCESS;
     }
   } else {
@@ -550,7 +578,7 @@ StatusCode ServiceManager::finalizeServices()
     }
 
     // this may destroy the service
-    (*its).first->release();
+    while ((*its).first->release()) {}
   }
 
   // clear the list of active services
@@ -662,4 +690,10 @@ bool ServiceManager::loopCheckEnabled() const {
 //------------------------------------------------------------------------------
 void ServiceManager::setLoopCheckEnabled(bool en) {
   m_loopCheck = en;
+}
+//------------------------------------------------------------------------------
+// Set the value of the initialization loop ignore list.
+//------------------------------------------------------------------------------
+void ServiceManager::setLoopCheckIgnore(const std::vector<std::string>& vec) {
+  m_loopIgnore = vec;
 }

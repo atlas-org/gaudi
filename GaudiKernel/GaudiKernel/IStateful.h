@@ -26,7 +26,7 @@ class IStateful : virtual public IInterface {
   
   /** Configuration (from OFFLINE to CONFIGURED).
   */
-  virtual StatusCode configure() = 0;
+  //  virtual StatusCode configure() = 0;
 
   /** Initialization (from CONFIGURED to INITIALIZED). 
    */

@@ -1,6 +1,6 @@
 // $Id: PropertyMgr.h,v 1.22 2008/04/03 17:27:01 marcocle Exp $
 // ============================================================================
-// CVS tag $Name:  $, version $Revision: 1.22 $
+// CVS tag $Name: HEAD $, version $Revision: 1.22 $
 // ============================================================================
 #ifndef GAUDIKERNEL_PROPERTYMGR_H
 #define GAUDIKERNEL_PROPERTYMGR_H
@@ -24,6 +24,7 @@
 template< class T> class ToolHandle;
 template< class T> class ServiceHandle;
 template< class T> class ToolHandleArray;
+template< class T> class ServiceHandleArray;
 
 /** @class PropertyMgr PropertyMgr.h GaudiKernel/PropertyMgr.h
  *
@@ -82,6 +83,12 @@ public:
   Property* declareProperty
   ( const std::string& name, 
     ToolHandleArray<TYPE>& ref, 
+    const std::string& doc = "none" ) ;  
+  /// Declare a property (specialization)
+  template<class TYPE>
+  Property* declareProperty
+  ( const std::string& name, 
+    ServiceHandleArray<TYPE>& ref, 
     const std::string& doc = "none" ) ;  
   /// Declare a remote property
   Property* declareRemoteProperty
@@ -259,6 +266,22 @@ inline Property*
 PropertyMgr::declareProperty
 ( const std::string& name, 
   ToolHandleArray<TYPE>& ref, 
+  const std::string& doc ) 
+{
+  Property* p = new GaudiHandleArrayProperty( name, ref );
+  //
+  p -> setDocumentation    ( doc ) ;
+  m_properties . push_back ( p   ) ;
+  m_todelete   . push_back ( p   ) ;
+  //
+  return p ;
+}
+// ============================================================================
+template<class TYPE>
+inline Property* 
+PropertyMgr::declareProperty
+( const std::string& name, 
+  ServiceHandleArray<TYPE>& ref, 
   const std::string& doc ) 
 {
   Property* p = new GaudiHandleArrayProperty( name, ref );

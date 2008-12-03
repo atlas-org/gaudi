@@ -100,6 +100,7 @@ class ServiceManager : virtual public ISvcManager,
   virtual bool loopCheckEnabled() const;
   /// Set the value of the initialization loop check flag.
   virtual void setLoopCheckEnabled(bool en);
+  virtual void setLoopCheckIgnore(const std::vector<std::string>&);
 
 private:
   /// access the message service
@@ -120,6 +121,7 @@ private:
   IMessageSvc*  m_msgsvc;      ///< Pointer to the message service if it exists
   SmartIF<IStateful> m_statemgr; ///< Pointer to the state machine
   bool          m_loopCheck;   ///< Check for service initialization loops
+  std::vector<std::string> m_loopIgnore;  ///< list of services to ignore
 };
 #endif  // GAUDISVC_ServiceManager_H
 

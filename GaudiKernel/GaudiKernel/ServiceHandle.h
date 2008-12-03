@@ -100,8 +100,54 @@ private:
   mutable IMessageSvc* m_pMessageSvc;
 };
 
+/** @class ServiceHandleArray ServiceHandle.h GaudiKernel/ServiceHandle.h
+
+    Array of Handles to be used in lieu of vector of naked pointers to tools. 
+    This allows better control through the framework of tool loading and usage.
+    @parameter T is the AlgTool interface class (or concrete class) of
+    the tool to use, and must derive from IAlgTool.
+
+    @author Yushu Yao <yyao@lbl.gov>
+*/
+
+template < class T >
+class ServiceHandleArray : public GaudiHandleArray< ServiceHandle<T> > {
+public:
+  //
+  // Constructors
+  //
+  /** Generic constructor. Probably not very useful...
+   **/
+  ServiceHandleArray( const std::vector< std::string >& myTypesAndNamesList, 
+		      const std::string& myComponentType, const std::string& myParentName  ): 
+    GaudiHandleArray< ServiceHandle<T> >( myTypesAndNamesList,
+					  myComponentType,
+					  myParentName)
+  {  }
+
+  ServiceHandleArray( const std::string& myParentName )
+    : GaudiHandleArray< ServiceHandle<T> >( "Service", myParentName)
+  { }
+
+  virtual bool push_back( const std::string& serviceTypeAndName ) {
+    ServiceHandle<T> handle( serviceTypeAndName,GaudiHandleInfo::parentName());
+    GaudiHandleArray< ServiceHandle<T> >::push_back( handle );
+    return true;
+  }
+  
+  virtual bool push_back( const ServiceHandle<T>& myHandle ) {
+    return push_back( myHandle.typeAndName() );
+  }
+
+};
+
 template <class T>
 inline std::ostream& operator<<( std::ostream& os, const ServiceHandle<T>& handle ) {
+  return operator<<(os, static_cast<const GaudiHandleInfo&>(handle) );
+}
+
+template <class T>
+inline std::ostream& operator<<( std::ostream& os, const ServiceHandleArray<T>& handle ) {
   return operator<<(os, static_cast<const GaudiHandleInfo&>(handle) );
 }
 

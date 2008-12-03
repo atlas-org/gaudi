@@ -57,7 +57,7 @@ public:
   virtual const IInterface*  parent() const;
 
   // State machine implementation
-  virtual StatusCode configure() { return StatusCode::SUCCESS; }
+  //OBSOLETE CLASH virtual StatusCode configure() { return StatusCode::SUCCESS; }
   virtual StatusCode initialize();
   virtual StatusCode start();
   virtual StatusCode stop();

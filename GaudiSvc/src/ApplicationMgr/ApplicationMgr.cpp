@@ -108,7 +108,10 @@ ApplicationMgr::ApplicationMgr(IInterface*) {
   // ServiceMgr Initialization loop checking
   m_propertyMgr->declareProperty("InitializationLoopCheck", m_loopCheck = true)
     ->declareUpdateHandler(&ApplicationMgr::initLoopCheckHndlr, this);
+  m_propertyMgr->declareProperty("LoopCheckIgnore", m_loopIgnore)
+    ->declareUpdateHandler(&ApplicationMgr::initLoopCheckHndlr, this);
   m_svcManager->setLoopCheckEnabled(m_loopCheck);
+  m_svcManager->setLoopCheckIgnore(m_loopIgnore);
 
   // Flag to activate the printout of properties
   m_propertyMgr->declareProperty

@@ -35,6 +35,16 @@ const IssueSeverity& StatusCode::severity() const {
   else            return dummy;
 }
 
+StatusCode& StatusCode::operator=(const StatusCode& rhs) {
+  if (this == &rhs) return *this; // Protection against self-assignment
+  d_code = rhs.d_code;
+  m_checked = rhs.m_checked;
+  rhs.m_checked = true;
+  if (m_severity) delete m_severity;
+  m_severity = rhs.m_severity ? cloneSeverity(rhs.m_severity): 0;
+  return *this;
+}
+
 StatusCode::~StatusCode() {
   if(s_checking) {
 

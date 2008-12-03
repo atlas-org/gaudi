@@ -40,7 +40,7 @@ public:
   // --- Methods from IStateful ---
   /** Configuration (from OFFLINE to CONFIGURED).
   */
-  virtual StatusCode configure() = 0;
+  //OBSOLETE CLASH virtual StatusCode configure() = 0;
 
   /** Initialization (from CONFIGURED to INITIALIZED). 
    */
