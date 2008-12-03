@@ -1,6 +1,146 @@
 Package GaudiExamples
 Package manager : Pere Mato
 
+================ GaudiExamples v20r3 ====================================
+! 2008-11-10 - Charles Leggett, Marco Clemencic
+ - Patch #1964. GaudiExample to demonstrate Service initialization loops
+   Added example and tests for the option ApplicationMgr.InitializationLoopCheck
+
+! 2008-11-04 - Marco Cattaneo
+ - Patch #2601. Introduce support for file summary records.
+   Changes to the POOLIO examples to support and test the above. The changes
+   include a trivial new algorithm, ReadTES, that looks for a list of objects in
+   the TES. Also, the POOLIO event model has been changed so that /Event is now
+   a DataObject; the Event class is written to /Event/Header.
+
+! 2008-10-30 - Marco Clemencic
+ - Added an example (options/ConfigurableUser.py) of usage of ConfigurableUser.
+
+! 2008-10-28 - Marco Clemencic
+ - Updated reference files after fix to bug #42509.
+
+! 2008-10-27 - Marco Clemencic
+ - Fixed compilation errors and some warnings on gcc 4.3.
+
+! 2008-10-22 - Marco Clemencic
+ - Added a test for bug #41136 (ToolSvc keeps tools even if initialize fails).
+
+! 2008-10-21 - Marco Clemencic
+ - Added use of AIDA (previously implied by GaudiPython).
+
+! 2008-10-20 - Marco Clemencic
+ - Added -no_auto_imports for GaudiPython.
+
+! 2008-10-17 - Marco Clemencic
+ - Updated reference files for the fix of bug #36917 (listen to all incidents).
+
+! 2008-10-10 - Marco Clemencic
+ - Updated reference files after patch #2509.
+
+! 2008-10-10 - Chris Jones
+ - Patch #2509. Suppress messages in GaudiAlg when tools are loaded multiple times
+   Minor changes to AlgTools example.
+
+! 2008-10-10 - Marco Clemencic
+ - Changed the default value of the property HistoPrint of GaudiHistos base
+   class.
+ - Updated reference files after patch #2483.
+
+! 2008-10-10 - Vanya Belyaev
+ - Patch #2073: SharedObjectsContainer and 'blind' access to TYPE::Container &
+                TYPE::Selection
+   Added an example (Selections) to illustrate the usage of 'blind' access to
+   containers and SharedObjectsContainer. 
+
+! 2008-10-09 - Pere Mato
+ - Patch #2261. Introducing name alias for Algorithms and Services 
+   Added the new macros DECLARE_NAMED_ALGORITHM_FACTORY(type,name) to be used
+   instead of the current DECLARE_ALGORITHM_FACTORY(type) for algorithms with
+   templates. Similarly for Services.
+
+! 2008-10-09 - Marco Clemencic
+ - Updated reference outputs after patch #2058.
+
+! 2008-10-09 - Vanya Belyaev
+ - Patch #2058. Extensions for AIDA::TProfile1D
+     * src/Histograms/GaudiHistoAlgorithm.cpp
+   Add the examples of booking/filling of 1D-profiles with the various options
+   and Y-ranges.
+
+! 2008-10-01 - Marco Clemencic
+ - Updated the reference file of ErrorLog after patch #1797.
+
+! 2008-10-01 - Vanya Belyaev
+ - Patch #1750.
+   Improved DataOnDemand.py options. Use the python version as default.
+
+! 2008-09-30 - Marco Clemencic
+ - Modified TupleEx2 to avoid calls to the cartesian Set methods on non
+   cartesian vectors (e.g. PtEtaPhiEVector::SetPx) because ROOT 5.21/02 throws
+   an exception.
+
+! 2008-09-29 - Marco Clemencic
+ - Moved specific reference file replacement for Aida2Root into the test.
+
+! 2008-09-26 - Marco Clemencic
+ - Temporarily disabled the DataListener test, until the configuration problem
+   is fixed (Ganga).
+
+! 2008-08-05 - Marco Clemencic
+ - Use the simplified the way to call standard validation functions in QMTest.
+ - Updated reference files because of fix to bug #39116.
+
+================ GaudiExamples v20r2 ====================================
+! 2008-07-15 - Marco Clemencic
+ - Added test for:
+   - Bug #38882: (GaudiPython) AppMgr.addAlgorithm does not work correctly
+                 after initialization
+
+================ GaudiExamples v20r1 ====================================
+================ GaudiExamples v20r0 ====================================
+! 2008-06-06 - Marco Clemencic
+ - Modified the IncidentSvc test to show BeginEvent and EndEvent incidents.
+ - Updated reference files after the change in the order of the stop of
+   services.
+
+! 2008-06-05 - Marco Clemencic
+ - Added test for:
+   - Bug #35913: Configurables type checking fails on Gaudi::Histo1DDef.
+
+! 2008-06-04 - Marco Clemencic
+ - Updated reference files after patch #1862.
+ - Updated reference files after patch #1865.
+
+! 2008-06-02 - Marco Clemencic
+ - Task #5809. Extension to Gaudi Application state machine.
+   - Updated the tests according to the changes in GaudiKernel, etc.
+
+! 2008-05-29 - Marco Clemencic
+ - Added small test for ParticlePropertySvc.
+ - Fixed reference files after latest changes.
+
+! 2008-05-15 - Marco Clemencic
+ - Fixed reference files after Patch #1801.
+
+! 2008-05-14 - Marco Clemencic
+ - Fixed reference files after Patch #1806.
+
+! 2008-05-13 - Marco Clemencic
+ - Fixed reference files after Patch #1761.
+
+! 2008-05-13 - Marco Clemencic
+ - Added python translation of Timing.opts
+ - Added Timing.py/TimingAlg to the tests.
+
+! 2008-05-13 - Vanya Belyaev
+ - Patch #1756. Improvements for Chrono/ChronoStat&IChronoSvc
+   - TimingAlg.cpp: simple example which illustrates all ways to measure the
+                    timing of some lines of code.
+   - Timing.opts: the configuration file to run TimingAlg.cpp example.
+ 
+! 2008-05-05 - Marco Clemencic
+ - Updated reference files for DataOnDemand example.
+
 ================ GaudiExamples v19r9 ====================================
 ! 2008-04-03 - Marco Clemencic
  - Updated the reference files for the changes introduced with Patch #1749.

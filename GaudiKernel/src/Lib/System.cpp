@@ -1,4 +1,4 @@
-// $Id: System.cpp,v 1.39 2008/06/05 10:04:53 marcocle Exp $
+// $Id: System.cpp,v 1.45 2008/10/27 21:30:32 marcocle Exp $
 //====================================================================
 //	System.cpp
 //--------------------------------------------------------------------
@@ -9,13 +9,15 @@
 //
 //	Author     : M.Frank
 //  Created    : 13/1/99
-//	Changes    : 
+//	Changes    :
 //====================================================================
 #define SYSTEM_SYSTEM_CPP
 #include <ctime>
 #include <cstring>
 #include <cstdlib>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <typeinfo>
 
 #include "GaudiKernel/System.h"
@@ -56,7 +58,7 @@ struct HMODULE {
 #endif
 
 // Note: __attribute__ is a GCC keyword available since GCC 3.4
-#ifdef __GNUC__ 
+#ifdef __GNUC__
 #  if __GNUC__ < 3 || \
       (__GNUC__ == 3 && (__GNUC_MINOR__ < 4 ))
 // GCC < 3.4
@@ -183,7 +185,11 @@ unsigned long System::getProcedureByName(ImageHandle handle, const std::string& 
   }
   return 1;
 #elif defined(linux)
+#if __GNUC__ < 4
   *pFunction = (EntryPoint)::dlsym(handle, name.c_str());
+#else
+  *pFunction = FuncPtrCast<EntryPoint>(::dlsym(handle, name.c_str()));
+#endif
   if ( 0 == *pFunction )    {
     errno = 0xAFFEDEAD;
    // std::cout << "System::getProcedureByName>" << getLastErrorString() << std::endl;
@@ -194,7 +200,7 @@ unsigned long System::getProcedureByName(ImageHandle handle, const std::string& 
   *pFunction = (EntryPoint)::dlsym(handle, name.c_str());
   if(!(*pFunction)) {
     // Try with an underscore :
-    std::string sname = "_" + name; 
+    std::string sname = "_" + name;
     *pFunction = (EntryPoint)::dlsym(handle, sname.c_str());
   }
   if ( 0 == *pFunction )    {
@@ -230,7 +236,8 @@ unsigned long System::getLastError()    {
 #ifdef _WIN32
   return ::GetLastError();
 #else
-  return static_cast<unsigned long>(errno);
+  // convert errno (int) to unsigned long
+  return static_cast<unsigned long>(static_cast<unsigned int>(errno));
 #endif
 }
 
@@ -245,7 +252,7 @@ const std::string System::getErrorString(unsigned long error)    {
   std::string errString =  "";
 #ifdef _WIN32
   LPVOID lpMessageBuffer;
-  ::FormatMessage( 
+  ::FormatMessage(
     FORMAT_MESSAGE_ALLOCATE_BUFFER |  FORMAT_MESSAGE_FROM_SYSTEM,
     NULL,
     error,
@@ -255,7 +262,7 @@ const std::string System::getErrorString(unsigned long error)    {
     NULL );
   errString = (const char*)lpMessageBuffer;
   // Free the buffer allocated by the system
-  ::LocalFree( lpMessageBuffer ); 
+  ::LocalFree( lpMessageBuffer );
 #else
   char *cerrString(0);
   // Remember: for linux dl* routines must be handled differently!
@@ -316,10 +323,10 @@ std::string __typeName(char*&  name) {
   if ( *name == 'Q' ) {              // Handle name spaces
     if ( *(++name) == '_' )          // >= 10 nested name spaces
       ::strtol(++name, &name, 10);   // type Q_##_...
-    return __className(++name); 
+    return __className(++name);
   }
   else if ( 't' == *name )  {
-    return __className(name); 
+    return __className(name);
   }
   else  {
     std::string result;
@@ -345,7 +352,7 @@ std::string __typeName(char*&  name) {
       return result;
     }
     else {
-      return __className(name); 
+      return __className(name);
     }
   }
 }
@@ -405,6 +412,9 @@ const std::string System::typeinfoName( const char* class_name) {
       case 'c':
         result = "char";
         break;
+      case 'a':
+        result = "signed char";
+        break;
       case 'h':
         result = "unsigned char";
         break;
@@ -462,7 +472,7 @@ const std::string System::typeinfoName( const char* class_name) {
       if (realname == 0) return class_name;
       result = realname;
       free(realname);
-      /// substitute ', ' with ','  
+      /// substitute ', ' with ','
       std::string::size_type pos = result.find(", ");
       while( std::string::npos != pos ) {
         result.replace( pos , 2 , "," ) ;
@@ -584,7 +594,7 @@ const std::vector<std::string> System::cmdLineArgs()    {
 #ifdef _WIN32
     // For compatibility with UNIX we CANNOT use strtok!
     // If we would use strtok, options like -g="My world" at
-    // the command line level would result on NT in TWO options 
+    // the command line level would result on NT in TWO options
     // instead in one as in UNIX.
     char *next, *tmp1, *tmp2;
     for(LPTSTR cmd = ::GetCommandLine(); *cmd; cmd=next)   {
@@ -637,7 +647,7 @@ const std::vector<std::string> System::cmdLineArgs()    {
 /// Const char** command line arguments including executable name as arg[0]
 char** System::argv()    {
   ///
-  if( s_argvChars.empty() ) { cmdLineArgs(); }  /// added by I.B. 
+  if( s_argvChars.empty() ) { cmdLineArgs(); }  /// added by I.B.
   ///
   // We rely here on the fact that a vector's allocation table is contiguous
   return (char**)&s_argvChars[0];
@@ -673,25 +683,62 @@ const std::vector<std::string> System::getEnv() {
   return vars;
 }
 
-bool System::backTrace(void** addresses __attribute__ ((unused)),
-                       const size_t depth __attribute__ ((unused)))
+// -----------------------------------------------------------------------------
+// backtrace utilities
+// -----------------------------------------------------------------------------
+#ifdef __linux
+#include <execinfo.h>
+#endif
+
+int System::backTrace(void** addresses __attribute__ ((unused)),
+                       const int depth __attribute__ ((unused)))
 {
 
 #ifdef __linux
-     
-  if ( backtrace( addresses, depth ) > 0 ) {
-    return true ;
+
+  int count = backtrace( addresses, depth );
+  if ( count > 0 ) {
+    return count;
   } else {
-    return false ;
+    return 0;
   }
-  
+
 #else // windows and osx parts not implemented
-  return false ;
+  return 0;
 #endif
 
 }
 
+bool System::backTrace(std::string& btrace, const int depth, const int offset)
+{
+  // Always hide the first two levels of the stack trace (that's us)
+  const int totalOffset = offset + 2;
+  const int totalDepth = depth + totalOffset;
 
+  std::string fnc, lib;
+
+  void** addresses = (void**) malloc(totalDepth*sizeof(void *));
+  if ( addresses != 0 ){
+    int count = System::backTrace(addresses,totalDepth);
+    for (int i = totalOffset; i < count; ++i) {
+      void *addr = 0;
+
+      if (System::getStackLevel(addresses[i],addr,fnc,lib)) {
+        std::ostringstream ost;
+        ost << "#" << std::setw(3) << std::setiosflags( std::ios::left ) << i-totalOffset+1;
+        ost << std::hex << addr << std::dec << " " << fnc << "  [" << lib << "]" << std::endl;
+        btrace += ost.str();
+      }
+    }
+    free(addresses);
+  }
+  else {
+    free(addresses);
+    return false;
+  }
+
+  return true;
+}
 
 bool System::getStackLevel(void* addresses  __attribute__ ((unused)),
                            void*& addr      __attribute__ ((unused)),
@@ -703,19 +750,19 @@ bool System::getStackLevel(void* addresses  __attribute__ ((unused)),
 
   Dl_info info;
 
-  if ( dladdr( addresses, &info ) && info.dli_fname 
+  if ( dladdr( addresses, &info ) && info.dli_fname
       && info.dli_fname[0] != '\0' ) {
-    const char* symbol = info.dli_sname 
+    const char* symbol = info.dli_sname
     && info.dli_sname[0] != '\0' ? info.dli_sname : 0;
 
-    lib = info.dli_fname;	
+    lib = info.dli_fname;
     addr = info.dli_saddr;
     const char* dmg(0);
 
     if (symbol != 0) {
       int stat;
       dmg = abi::__cxa_demangle(symbol,0,0,&stat);
-      fnc = (stat == 0) ? dmg : symbol;	  
+      fnc = (stat == 0) ? dmg : symbol;
     } else {
       fnc = "local";
     }
@@ -730,9 +777,9 @@ bool System::getStackLevel(void* addresses  __attribute__ ((unused)),
 #endif
 
 }
- 
+
 ///set an environment variables. @return 0 if successful, -1 if not
-int System::setEnv(const std::string &name, const std::string &value, int overwrite) 
+int System::setEnv(const std::string &name, const std::string &value, int overwrite)
 {
 #ifndef WIN32
   // UNIX version
@@ -757,6 +804,5 @@ int System::setEnv(const std::string &name, const std::string &value, int overwr
             // not to overwrite.
             // It is considered a success on Linux (man P setenv)
 #endif
-  
-}
 
+}

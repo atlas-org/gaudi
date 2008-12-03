@@ -46,11 +46,11 @@ namespace Gaudi {
     /// Access to connect string
     virtual CSTR connectInfo() const               { return m_file;                 }
     /// Parse the DOM tree of the XML catalog
-    virtual void start();
+    virtual void init();
     /// Save DOM catalog to file
     virtual void commit();
     /// Save DOM catalog to file
-    virtual void rollback()                       { if ( dirty() )  start();        }
+    virtual void rollback()                       { if ( dirty() )  init();        }
     /// Check if the catalog is read-only
     virtual bool readOnly() const                 { return m_rdOnly;                }
     /// Check if the catalog should be updated 

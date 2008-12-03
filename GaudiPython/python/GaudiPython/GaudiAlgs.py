@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # =============================================================================
-# $Id: GaudiAlgs.py,v 1.1 2007/10/29 14:11:21 mato Exp $ 
+# $Id: GaudiAlgs.py,v 1.2 2008/07/15 16:05:53 marcocle Exp $ 
 # =============================================================================
 ## @file
 #
@@ -794,7 +794,18 @@ GaudiAlgo.initialize = _initialize_
 HistoAlgo.initialize = _initialize_histo_
 TupleAlgo.initialize = _initialize_tuple_
 
-def _execute_ ( s ) :
+def _start_ ( self ) :
+    """
+    The stub 'start' method needed by the internal implementation of PyAlg<>.
+    """
+    # return self._Base.start_(self)
+    return SUCCESS
+
+GaudiAlgo.start = _start_
+HistoAlgo.start = _start_
+TupleAlgo.start = _start_
+
+def _execute_ ( self ) :
     """
     The fictive 'execute' method, which MUST be overwitten by user
     """
@@ -803,6 +814,17 @@ def _execute_ ( s ) :
 GaudiAlgo.execute = _execute_
 HistoAlgo.execute = _execute_
 TupleAlgo.execute = _execute_
+
+def _stop_ ( self ) :
+    """
+    The stub 'stop' method needed by the internal implementation of PyAlg<>.
+    """
+    # return self._Base.stop_(self)
+    return SUCCESS
+
+GaudiAlgo.stop = _stop_
+HistoAlgo.stop = _stop_
+TupleAlgo.stop = _stop_
 
 def _plot1D_    ( s, *a ) :
     """

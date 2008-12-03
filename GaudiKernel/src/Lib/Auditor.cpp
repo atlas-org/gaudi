@@ -1,14 +1,14 @@
-// $Id: Auditor.cpp,v 1.16 2008/04/03 14:40:19 marcocle Exp $
- 
+// $Id: Auditor.cpp,v 1.20 2008/10/27 19:22:21 marcocle Exp $
+
 #include "GaudiKernel/Kernel.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IMessageSvc.h"
 #include "GaudiKernel/IJobOptionsSvc.h"
+
 #include "GaudiKernel/Auditor.h"
 
-
-#include "GaudiKernel/MsgStream.h" 
-#include "GaudiKernel/GaudiException.h" 
+#include "GaudiKernel/MsgStream.h"
+#include "GaudiKernel/GaudiException.h"
 
 
 // Constructor
@@ -22,17 +22,16 @@ Auditor::Auditor( const std::string& name, ISvcLocator *pSvcLocator )
   m_isFinalized(false)
 {
   m_PropertyMgr = new PropertyMgr();
-  
+
   // Declare common Auditor properties with their defaults
   declareProperty( "OutputLevel", m_outputLevel = MSG::NIL);
   declareProperty( "Enable", m_isEnabled = true);
-  
+
 }
 
 // Default Destructor
 Auditor::~Auditor() {
   delete m_PropertyMgr;
-  if( m_MS ) m_MS->release();
 }
 
 // IAuditor implementation
@@ -103,7 +102,7 @@ StatusCode Auditor::initialize() {
   return StatusCode::SUCCESS;
 }
 
-// Implemented for backward compatibility 
+// Implemented for backward compatibility
 void Auditor::before(StandardEventType evt, INamedInterface* obj){
   switch (evt) {
   case Initialize:   beforeInitialize(obj);   break;
@@ -112,6 +111,10 @@ void Auditor::before(StandardEventType evt, INamedInterface* obj){
   case BeginRun:     beforeBeginRun(obj);     break;
   case EndRun:       beforeEndRun(obj);       break;
   case Finalize:     beforeFinalize(obj);     break;
+  case Start:        break;
+  case Stop:         break;
+  case ReStart:      break;
+  default: ;// do nothing
   }
 }
 void Auditor::before(StandardEventType, const std::string&) {}
@@ -128,6 +131,9 @@ void Auditor::after(StandardEventType evt, INamedInterface* obj, const StatusCod
   case BeginRun:     afterBeginRun(obj);     break;
   case EndRun:       afterEndRun(obj);       break;
   case Finalize:     afterFinalize(obj);     break;
+  case Start:        break;
+  case Stop:         break;
+  case ReStart:      break;
   default: ;// do nothing
   }
 }
@@ -163,7 +169,7 @@ void Auditor::afterFinalize(INamedInterface* ) {}
 StatusCode Auditor::sysFinalize() {
   StatusCode sc = StatusCode::SUCCESS;
   try{
-    // 
+    //
     // Invoke the finalize() method of the derived class if
     // it has been initilized.
     if ( m_isInitialized && ! m_isFinalized ) {
@@ -173,42 +179,46 @@ StatusCode Auditor::sysFinalize() {
     }
     return sc;                                               /// RETURN !!!
     //
-  } 
-  catch( const GaudiException& Exception )                   /// catch GaudiExeption 
+  }
+  catch( const GaudiException& Exception )                   /// catch GaudiExeption
     {
-      /// (1) perform the printout of message  
-      MsgStream log ( msgSvc() , name() + ".sysFinalize()" ); 
-      log << MSG::FATAL 
-	  << " Exception with tag=" << Exception.tag() << " is catched " << endreq; 
-      /// (2) print  the exception itself 
-      ///       (NB!  - GaudiException is a linked list of all "previous exceptions") 
-      MsgStream logEx ( msgSvc() , Exception.tag() ); 
-      logEx << MSG::ERROR 
-	    << Exception  << endreq; 
-    }
-  catch( const std::exception& Exception )                   /// catch std::exception 
-    {
-      /// (1) perform the printout of message  
-      MsgStream log ( msgSvc() , name() + ".sysFinalize()" ); 
+      /// (1) perform the printout of message
+      MsgStream log ( msgSvc() , name() + ".sysFinalize()" );
       log << MSG::FATAL
-	  << " Standard std::exception is catched " << endreq; 
-      /// (2) print  the exception itself 
-      MsgStream logEx ( msgSvc() , name() + "*std::exception*" ); 
-      logEx << MSG::ERROR 
-	    << Exception.what()  << endreq; 
+	  << " Exception with tag=" << Exception.tag() << " is catched " << endreq;
+      /// (2) print  the exception itself
+      ///       (NB!  - GaudiException is a linked list of all "previous exceptions")
+      MsgStream logEx ( msgSvc() , Exception.tag() );
+      logEx << MSG::ERROR
+	    << Exception  << endreq;
     }
-  catch( ... )                                                /// catch unknown exception 
+  catch( const std::exception& Exception )                   /// catch std::exception
     {
-      /// (1) perform the printout 
-      MsgStream log ( msgSvc() , name() + ".sysFinalize()" ); 
-      log << MSG::FATAL 
-	  << " UNKNOWN Exception is  catched " << endreq; 
+      /// (1) perform the printout of message
+      MsgStream log ( msgSvc() , name() + ".sysFinalize()" );
+      log << MSG::FATAL
+	  << " Standard std::exception is catched " << endreq;
+      /// (2) print  the exception itself
+      MsgStream logEx ( msgSvc() , name() + "*std::exception*" );
+      logEx << MSG::ERROR
+	    << Exception.what()  << endreq;
+    }
+  catch( ... )                                                /// catch unknown exception
+    {
+      /// (1) perform the printout
+      MsgStream log ( msgSvc() , name() + ".sysFinalize()" );
+      log << MSG::FATAL
+	  << " UNKNOWN Exception is  catched " << endreq;
     }
   ///
   return StatusCode::FAILURE ;
 }
 
 StatusCode Auditor::finalize() {
+  if( m_MS ) {
+    m_MS->release();
+    m_MS = 0;
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -216,7 +226,7 @@ const std::string& Auditor::name() const {
   return m_name;
 }
 
-const bool Auditor::isEnabled( ) const {
+bool Auditor::isEnabled( ) const {
   return m_isEnabled;
 }
 
@@ -249,20 +259,20 @@ unsigned long Auditor::release() {
 }
 
 StatusCode Auditor::queryInterface
-( const InterfaceID& riid   , 
-  void**             ppISvc ) 
+( const InterfaceID& riid   ,
+  void**             ppISvc )
 {
-  if ( 0 == ppISvc ) { return StatusCode::FAILURE ; } // RETURN 
+  if ( 0 == ppISvc ) { return StatusCode::FAILURE ; } // RETURN
 
-  if      ( IAuditor        ::interfaceID() . versionMatch ( riid ) ) 
+  if      ( IAuditor        ::interfaceID() . versionMatch ( riid ) )
   { *ppISvc = static_cast<IAuditor*>         ( this ) ; }
-  else if ( IProperty       ::interfaceID() . versionMatch ( riid ) ) 
+  else if ( IProperty       ::interfaceID() . versionMatch ( riid ) )
   { *ppISvc = static_cast<IProperty*>        ( this ) ; }
-  else if ( INamedInterface ::interfaceID() . versionMatch ( riid ) ) 
+  else if ( INamedInterface ::interfaceID() . versionMatch ( riid ) )
   { *ppISvc = static_cast<INamedInterface*>  ( this ) ; }
-  else if ( IInterface      ::interfaceID() . versionMatch ( riid ) ) 
+  else if ( IInterface      ::interfaceID() . versionMatch ( riid ) )
   { *ppISvc = static_cast<IInterface*>       ( this ) ; }
-  else { *ppISvc = 0 ; return StatusCode::FAILURE; } // RETURN 
+  else { *ppISvc = 0 ; return StatusCode::FAILURE; } // RETURN
   // increment the reference counter
   addRef();
   //

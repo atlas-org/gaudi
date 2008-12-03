@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/IAppMgrUI.h,v 1.5 2001/06/29 13:47:41 mato Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/IAppMgrUI.h,v 1.6 2008/06/02 14:20:38 marcocle Exp $
 #ifndef GAUDIKERNEL_IAPPMGRUI_H
 #define GAUDIKERNEL_IAPPMGRUI_H 1
 
@@ -6,11 +6,12 @@
 #include "GaudiKernel/Kernel.h"
 #include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/IInterface.h"
+#include "GaudiKernel/StateMachine.h"
 
 #include <string>
 
 // Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IAppMgrUI(12, 2 , 0);
+static const InterfaceID IID_IAppMgrUI(12, 2 , 1);
 
 /** @class IAppMgrUI IAppMgrUI.h GaudiKernel/IAppMgrUI.h
 
@@ -40,7 +41,21 @@ public:
 
   /// The identifying name of the AppMgrUI object.
   virtual const std::string& name() const = 0;
-  // current state of the AppMgrUI object
-  virtual const std::string& stateName()  const = 0;
+
+  /// Start (from INITIALIZED to RUNNING). 
+  virtual StatusCode start() = 0;
+
+  /// Stop (from RUNNING to INITIALIZED). 
+  virtual StatusCode stop() = 0;
+  
+  /// Initialization (from INITIALIZED or RUNNING to INITIALIZED, via CONFIGURED).
+  virtual StatusCode reinitialize() = 0;
+
+  /// Initialization (from RUNNING to RUNNING, via INITIALIZED). 
+  virtual StatusCode restart() = 0;
+
+  /// Get the current state.
+  virtual Gaudi::StateMachine::State FSMState() const = 0;
+
 };
 #endif  // KERNEL_IAPPMGRUI_H

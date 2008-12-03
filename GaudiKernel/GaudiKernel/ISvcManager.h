@@ -1,4 +1,4 @@
-// $Id: ISvcManager.h,v 1.5 2006/12/10 20:29:17 leggett Exp $
+// $Id: ISvcManager.h,v 1.7 2008/11/10 15:29:09 marcocle Exp $
 #ifndef GAUDIKERNEL_ISVCMANAGER_H
 #define GAUDIKERNEL_ISVCMANAGER_H
 
@@ -11,15 +11,15 @@ class IService;
 class ISvcLocator;
 class ISvcFactory;
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_ISvcManager(13, 3 , 0); 
+// Declaration of the interface ID ( interface id, major version, minor version)
+static const InterfaceID IID_ISvcManager(13, 3 , 1);
 
 /** @class ISvcManager ISvcManager.h GaudiKernel/ISvcManager.h
-    
-    The ISvcManager is the interface implemented by the Service Factory in the 
-    Application Manager to support management functions. Clients use this 
+
+    The ISvcManager is the interface implemented by the Service Factory in the
+    Application Manager to support management functions. Clients use this
     interface to declare abstract service factories, and to create concrete
-    instances of services. 
+    instances of services.
 
     @author Pere Mato
 */
@@ -63,11 +63,11 @@ public:
     *
     * @return StatusCode indicating success or failure.
     */
-  virtual StatusCode declareSvcFactory( const ISvcFactory& factory, 
+  virtual StatusCode declareSvcFactory( const ISvcFactory& factory,
                                         const std::string& svctype ) = 0;
 
   /** Declare the type of the service to be used when crating a given service name
-    * @param svcname Service name 
+    * @param svcname Service name
     * @param svctype Service type name
     *
     * @return StatusCode indicating success or failure.
@@ -75,7 +75,7 @@ public:
   virtual StatusCode declareSvcType( const std::string& svcname,
                                      const std::string& svctype ) = 0;
 
-  /** Creates and instance of a service type that has been declared beforehand and 
+  /** Creates and instance of a service type that has been declared beforehand and
     * assigns it a name. It returns a pointer to an IService.
     * @param svctype Service type name
     * @param svcname Service name to be set
@@ -93,7 +93,7 @@ public:
     *
     * @return StatusCode indicating success or failure.
     */
-  virtual StatusCode getFactory(    const std::string& svc_type, 
+  virtual StatusCode getFactory(    const std::string& svc_type,
                                     const ISvcFactory*& fac) const = 0;
 
   /** Initializes the list of "active" services
@@ -101,6 +101,18 @@ public:
     * @return StatusCode indicating success or failure.
     */
   virtual StatusCode initializeServices() = 0;
+
+  /** Starts the list of "active" services
+    *
+    * @return StatusCode indicating success or failure.
+    */
+  virtual StatusCode startServices() = 0;
+
+  /** Stops the list of "active" services
+    *
+    * @return StatusCode indicating success or failure.
+    */
+  virtual StatusCode stopServices() = 0;
 
   /** Finalizes the list of "active" services
     *
@@ -114,8 +126,20 @@ public:
     */
   virtual StatusCode reinitializeServices() = 0;
 
+  /** Restarts the list of "active" services
+    *
+    * @return StatusCode indicating success or failure.
+    */
+  virtual StatusCode restartServices() = 0;
+
   virtual int getPriority(const std::string& name) const = 0;
   virtual StatusCode setPriority(const std::string& name, int pri) = 0;
+
+  /// Get the value of the initialization loop check flag.
+  virtual bool loopCheckEnabled() const = 0;
+  /// Set the value of the initialization loop check flag.
+  virtual void setLoopCheckEnabled(bool en = true) = 0;
+
 };
 
 #endif  // GAUDIKERNEL_ISVCMANAGER_H

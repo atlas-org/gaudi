@@ -8,11 +8,15 @@ class MyAlg(ConfigurableUser):
                   "Service": "DefaultService",
                   "Members": [ "HelloWorld" ]
                  }
+    def getGaudiType(self):
+        return "Test" # To avoid skipping of ConfigurableUser
 
 class MySvc(ConfigurableUser):
     __slots__ = {
                   "OutputLevel" : INFO
                  }
+    def getGaudiType(self):
+        return "Test" # To avoid skipping of ConfigurableUser
 
 mySvc = MySvc("JustAName", OutputLevel = VERBOSE)
 

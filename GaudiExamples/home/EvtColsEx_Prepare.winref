@@ -14,7 +14,7 @@ PoolDbCacheSvc.OutputLevel = 4;                                         //GP: (1
 PoolDbCacheSvc.DomainOpts =  [ "Domain[ROOT_All].TREE_MAX_SIZE=500000000000 TYP=longlong" ] ;//GP: (1,1)
 //GP: end  "E:\Workspace\GAUDI\GaudiPoolDb\options\GaudiPoolDbRoot.opts"      (22,1)
 PoolDbCacheSvc.DLLs +=  [ "GaudiExamplesDict" ] ;                       //GP: (16,10)
-PoolDbCacheSvc.Catalog =  [ "xmlcatalog_file:EvtColsEx.xml" ] ;         //GP: (16,10)
+FileCatalog.Catalogs =  [ "xmlcatalog_file:EvtColsEx.xml" ] ;           //GP: (16,10)
 ApplicationMgr.EvtSel = "NONE";                                         //GP: (16,10)
 ApplicationMgr.OutStream +=  [ "PoolDst" ] ;                            //GP: (16,10)
 ApplicationMgr.EvtMax = 50000;                                          //GP: (16,10)
@@ -26,8 +26,8 @@ PoolDst.Output = "DATAFILE='PFN:EvtColsEx.dst' TYP='POOL_ROOTTREE' OPT='RECREATE
 JobOptionsSvc        INFO Job options successfully read in from ..\options\EvtColsEx_Prepare.opts
 ApplicationMgr    SUCCESS
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr $Revision: 1.4 $
-                                          running on MCLVIRT01 on Thu Jan 17 16:53:02 2008
+                                                   Welcome to ApplicationMgr $Revision: 1.5 $
+                                          running on MCLVIRT01 on Tue Jun 03 11:30:57 2008
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 EventPersistenc...   INFO  'CnvServices':[ 'PoolRootEvtCnvSvc' , 'PoolRootTreeEvtCnvSvc' , 'PoolRootKeyEvtCnvSvc' ]
@@ -39,10 +39,12 @@ EventLoopMgr      WARNING No events will be processed from external input.
 HistogramPersis...   INFO  'CnvServices':[ 'HbookHistSvc' , 'RootHistSvc' ]
 HistogramPersis...WARNING Histograms saving not required.
 ApplicationMgr       INFO Application Manager Initialized successfully
-EvtColsEx.dst                    SUCCESS      Root file version:51800
+ApplicationMgr       INFO Application Manager Started successfully
+EvtColsEx.dst     SUCCESS Root file version:51800
+ApplicationMgr       INFO Application Manager Stopped successfully
 PoolDst              INFO Events output: 50000
 EventLoopMgr         INFO Histograms converted successfully according to request.
-PoolRootTreeEvt...   INFO Disconnected data IO:FID:2AD15CD8-F4C4-DC11-AE72-736ED96EE153
+PoolRootTreeEvt...   INFO Disconnected data IO:406BDE9F-B6E6-DC11-92C2-C352786744BF[EvtColsEx.dst]
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
 Number of MyTrack instances:0

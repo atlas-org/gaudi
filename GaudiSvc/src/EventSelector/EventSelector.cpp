@@ -1,4 +1,4 @@
-// $Id: EventSelector.cpp,v 1.44 2007/01/16 11:58:58 hmd Exp $
+// $Id: EventSelector.cpp,v 1.46 2008/10/30 18:01:03 marcocle Exp $
 
 // Include files
 #include "GaudiKernel/xtoa.h"
@@ -23,7 +23,7 @@
 DECLARE_SERVICE_FACTORY(EventSelector)
 
 // Standard constructor
-EventSelector::EventSelector(const std::string& name, ISvcLocator* svcloc ) 
+EventSelector::EventSelector(const std::string& name, ISvcLocator* svcloc )
   : Service( name, svcloc)
 {
   m_incidentSvc       = 0;
@@ -41,7 +41,7 @@ EventSelector::EventSelector(const std::string& name, ISvcLocator* svcloc )
 }
 
 // Standard destructor
-EventSelector::~EventSelector()   
+EventSelector::~EventSelector()
 {
 }
 
@@ -67,7 +67,7 @@ void EventSelector::printEvtInfo(const EvtSelectorContext* iter) const {
     else if( m_evtPrintFrequency != -1 && (count % m_evtPrintFrequency == 0))   {
       MsgStream log(messageService(), name());
       log << MSG::ALWAYS << "Reading Event record " << count+1
-          << ". Record number within stream " << iter->ID()+1 
+          << ". Record number within stream " << iter->ID()+1
           << ": " << iter->numStreamEvent()+1 << endreq;
     }
   }
@@ -98,17 +98,17 @@ EventSelector::firstOfNextStream(bool shutDown, EvtSelectorContext& iter) const 
       }
     }
   }
-  
+
   const EventSelectorDataStream* s ;
   status = m_streamtool->getNextStream( s , iter_id );
-  
+
   if ( status.isSuccess() )   {
-    
+
     if ( !s->isInitialized() )    {
       EventSelector* thisPtr = const_cast<EventSelector*>(this);
       status = thisPtr->m_streamtool->initializeStream(const_cast<EventSelectorDataStream*>(s));
     }
-    
+
     if ( status.isSuccess() ) {
       const IEvtSelector* sel = s->selector();
       if ( sel )    {
@@ -126,7 +126,7 @@ EventSelector::firstOfNextStream(bool shutDown, EvtSelectorContext& iter) const 
       }
     }
   }
-  
+
   iter.set(this, -1, 0, 0);
   status.setChecked();
   return StatusCode::FAILURE;
@@ -151,13 +151,13 @@ EventSelector::lastOfPreviousStream(bool shutDown, EvtSelectorContext& iter) con
       }
     }
   }
-  
+
   IDataStreamTool::size_type iter_id = iter.ID()-1;
   const EventSelectorDataStream* s ;
   status = m_streamtool->getPreviousStream( s , iter_id );
-  
+
   if ( status.isSuccess() )   {
-    
+
     if ( !s->isInitialized() )    {
       EventSelector* thisPtr = const_cast<EventSelector*>(this);
       status = thisPtr->m_streamtool->initializeStream(const_cast<EventSelectorDataStream*>(s));
@@ -179,7 +179,7 @@ EventSelector::lastOfPreviousStream(bool shutDown, EvtSelectorContext& iter) con
       }
     }
   }
-  
+
   iter.set(this, -1, 0, 0);
   return StatusCode::FAILURE;
 }
@@ -204,7 +204,7 @@ StatusCode EventSelector::createContext(Context*& refpCtxt) const
     StatusCode sc = next(*refpCtxt);
     if ( sc.isFailure() ) {
       MsgStream log(messageService(), name());
-      log << MSG::ERROR << " createContext() failed to start with event number " 
+      log << MSG::ERROR << " createContext() failed to start with event number "
           << m_firstEvent << endreq;
       releaseContext(refpCtxt);
       refpCtxt = 0;
@@ -313,7 +313,7 @@ StatusCode EventSelector::rewind(Context& refCtxt) const  {
       StatusCode sc = next(*ctxt);
       if ( sc.isFailure() ) {
         MsgStream log(messageService(), name());
-        log << MSG::ERROR << "rewind() failed to start with event number " 
+        log << MSG::ERROR << "rewind() failed to start with event number "
             << m_firstEvent << endreq;
         return StatusCode::FAILURE;
       }
@@ -324,8 +324,8 @@ StatusCode EventSelector::rewind(Context& refCtxt) const  {
 }
 
 /// Create new Opaque address corresponding to the current record
-StatusCode 
-EventSelector::createAddress(const Context&   refCtxt, 
+StatusCode
+EventSelector::createAddress(const Context&   refCtxt,
                              IOpaqueAddress*& refpAddr) const
 {
   const EvtSelectorContext *cpIt  = dynamic_cast<const EvtSelectorContext*>(&refCtxt);
@@ -398,11 +398,11 @@ StatusCode EventSelector::initialize()    {
   }
   if ( m_evtMax != INT_MAX )   {
     logger << MSG::ERROR << "EvtMax is an obsolete property of the event selector." << endreq;
-    logger << MSG::ERROR << "Please set \"ApplicationMgr.EvtMax = " << m_evtMax 
+    logger << MSG::ERROR << "Please set \"ApplicationMgr.EvtMax = " << m_evtMax
            << ";\" to process the requested number of events." << endreq;
     return StatusCode::FAILURE;
   }
-  
+
   m_toolSvc = 0 ;
   sc = serviceLocator()->service( "ToolSvc" , m_toolSvc , true );
   if ( sc.isFailure() )
@@ -410,17 +410,23 @@ StatusCode EventSelector::initialize()    {
   return StatusCode::FAILURE ;}
 
   sc = m_toolSvc->retrieveTool(m_streamManager.c_str(), m_streamtool, this );
-  
+
   if( sc.isFailure() ) {
-    logger << MSG::ERROR << "Error initializing " 
+    logger << MSG::ERROR << "Error initializing "
            << m_streamManager << endreq;
     return sc;
   }
-  
+
+  sc = m_streamtool->clear();
+  if( sc.isFailure() ) {
+    // Message already printed by the tool
+    return sc;
+  }
+
   status = m_streamtool->addStreams(m_streamSpecs);
-  
+
   m_streamSpecsLast = m_streamSpecs;
- 
+
   m_streamID          = 0;
 
   return status;
@@ -428,12 +434,12 @@ StatusCode EventSelector::initialize()    {
 
 // Re-initialize
 StatusCode EventSelector::reinitialize() {
-  if ( state() != INITIALIZED ) {
+  if ( FSMState() != Gaudi::StateMachine::INITIALIZED ) {
     MsgStream logger(messageService(), name());
-    logger << MSG::ERROR << "Cannot reinitialize: service not initialized yet" << endreq;
+    logger << MSG::ERROR << "Cannot reinitialize: service not in state initialized" << endreq;
     return StatusCode::FAILURE;
   }
-  
+
   if( m_streamSpecsLast != m_streamSpecs ) {
     StatusCode status = m_streamtool->clear();
     if ( status.isFailure() ) return status;
@@ -441,22 +447,22 @@ StatusCode EventSelector::reinitialize() {
     m_reconfigure = true;
     return m_streamtool->addStreams(m_streamSpecs);
   }
-  
+
   return StatusCode::SUCCESS;
 }
 
-// 
+//
 StatusCode EventSelector::finalize()    {
 
   MsgStream log(msgSvc(), name());
 
   log << MSG::DEBUG << "finalize()" << endreq;
-  
+
   if( m_incidentSvc ) {
     m_incidentSvc->release();
     m_incidentSvc = 0 ;
   }
-    
+
   if( m_streamtool ) {
     m_streamtool->release();
     m_streamtool = 0 ;

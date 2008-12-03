@@ -1,4 +1,4 @@
-// $Id: HistogramSvc.h,v 1.15 2007/09/26 16:14:47 marcocle Exp $
+// $Id: HistogramSvc.h,v 1.16 2008/10/09 09:59:14 marcocle Exp $
 // ============================================================================
 #ifndef GAUDISVC_HISTOGRAMSVC_H
 #define GAUDISVC_HISTOGRAMSVC_H 1
@@ -229,31 +229,31 @@ public:
                          double lx: Lower histogram edge on the axis X/Y
                          double ux: Upper histogram edge on the axis X/Y
   */
-  virtual P1D* bookProf(CSTR par, CSTR rel, CSTR title, DBINS(x))
-  { return bookProf(createPath(par), rel, title, BINS(x));                     }
-  virtual P1D* bookProf(CSTR par, int hID, CSTR title, DBINS(x))
-  { return bookProf(par, _STR(hID), title, BINS(x));                           }
-  virtual P1D* bookProf(DataObject* pPar, int hID, CSTR title, DBINS(x))
-  { return bookProf(pPar, _STR(hID), title, BINS(x));                          }
-  virtual P1D* bookProf(STRPAIR loc,CSTR title, DBINS(x))
-  { return bookProf(loc.first, loc.second, title, BINS(x));                    }
-  virtual P1D* bookProf(CSTR full, CSTR title, DBINS(x))
-  { return bookProf(i_splitPath(full), title, BINS(x));                        }
-  virtual P1D* bookProf(DataObject* pPar, CSTR rel, CSTR title, DBINS(x))
-  { return i_book(pPar,rel,title,Gaudi::createProf1D(title, BINS(x),0,0));     }
+  virtual P1D* bookProf(CSTR par, CSTR rel, CSTR title, DBINS(x),CSTR opt)
+  { return bookProf(createPath(par), rel, title, BINS(x),opt);                     }
+  virtual P1D* bookProf(CSTR par, int hID, CSTR title, DBINS(x),CSTR opt )
+  { return bookProf(par, _STR(hID), title, BINS(x),opt);                           }
+  virtual P1D* bookProf(DataObject* pPar, int hID, CSTR title, DBINS(x),CSTR opt )
+  { return bookProf(pPar, _STR(hID), title, BINS(x),opt);                          }
+  virtual P1D* bookProf(STRPAIR loc,CSTR title, DBINS(x),CSTR opt)
+  { return bookProf(loc.first, loc.second, title, BINS(x),opt);                    }
+  virtual P1D* bookProf(CSTR full, CSTR title, DBINS(x),CSTR opt)
+  { return bookProf(i_splitPath(full), title, BINS(x),opt);                        }
+  virtual P1D* bookProf(DataObject* pPar, CSTR rel, CSTR title, DBINS(x),CSTR opt)
+  { return i_book(pPar,rel,title,Gaudi::createProf1D(title, BINS(x),0,0,opt));     }
 
-  virtual P1D* bookProf(CSTR par, CSTR rel, CSTR title, DBINS(x), double upper, double lower)
-  { return bookProf(createPath(par), rel, title, BINS(x), upper, lower);                     }
-  virtual P1D* bookProf(CSTR par, int hID, CSTR title, DBINS(x), double upper, double lower)
-  { return bookProf(par, _STR(hID), title, BINS(x), upper, lower);                           }
-  virtual P1D* bookProf(DataObject* pPar, int hID, CSTR title, DBINS(x), double upper, double lower)
-  { return bookProf(pPar, _STR(hID), title, BINS(x), upper, lower);                          }
-  virtual P1D* bookProf(STRPAIR loc,CSTR title, DBINS(x), double upper, double lower)
-  { return bookProf(loc.first, loc.second, title, BINS(x), upper, lower);                    }
-  virtual P1D* bookProf(CSTR full, CSTR title, DBINS(x), double upper, double lower)
-  { return bookProf(i_splitPath(full), title, BINS(x), upper, lower);                        }
-  virtual P1D* bookProf(DataObject* pPar, CSTR rel, CSTR title, DBINS(x), double upper, double lower)
-  { return i_book(pPar,rel,title,Gaudi::createProf1D(title, BINS(x), upper, lower));         }
+  virtual P1D* bookProf(CSTR par, CSTR rel, CSTR title, DBINS(x), double upper, double lower,CSTR opt)
+  { return bookProf(createPath(par), rel, title, BINS(x), upper, lower , opt);                     }
+  virtual P1D* bookProf(CSTR par, int hID, CSTR title, DBINS(x), double upper, double lower, CSTR opt)
+  { return bookProf(par, _STR(hID), title, BINS(x), upper, lower, opt );                           }
+  virtual P1D* bookProf(DataObject* pPar, int hID, CSTR title, DBINS(x), double upper, double lower, CSTR opt)
+  { return bookProf(pPar, _STR(hID), title, BINS(x), upper, lower, opt);                          }
+  virtual P1D* bookProf(STRPAIR loc,CSTR title, DBINS(x), double upper, double lower, CSTR opt)
+  { return bookProf(loc.first, loc.second, title, BINS(x), upper, lower,opt);                    }
+  virtual P1D* bookProf(CSTR full, CSTR title, DBINS(x), double upper, double lower, CSTR opt )
+  { return bookProf(i_splitPath(full), title, BINS(x), upper, lower , opt );                        }
+  virtual P1D* bookProf(DataObject* pPar, CSTR rel, CSTR title, DBINS(x), double upper, double lower, CSTR opt)
+  { return i_book(pPar,rel,title,Gaudi::createProf1D(title, BINS(x), upper, lower, opt));         }
   // ==========================================================================
   // Book 1D histogram with variable binning
   // ==========================================================================
@@ -856,25 +856,23 @@ public:
   H3D* createCopy(DataObject* pPar, CSTR rel, const H3D& h) 
   { return i_book(pPar, rel, h.title(), Gaudi::createH3D(h));                 }
   //------------------------------------------------------------------------------
-  P1D* createProfile1D(CSTR nameAndTitle, DBINS(x))
-  { return bookProf(nameAndTitle, nameAndTitle, BINS(x));                     }
-  P1D* createProfile1D(CSTR name,CSTR tit,DBINS(x)) 
-  {  return bookProf( name, tit, BINS(x));                                    }
-  P1D* createProfile1D(CSTR name,CSTR tit,DBINS(x),CSTR /*opt*/) 
-  {  return bookProf( name, tit, BINS(x));                                    }
-  P1D* createProfile1D(CSTR name,CSTR title,const Edges& x,CSTR /*opt*/)
-  {  return bookProf(name, title, x);                                         }
 
-  P1D* createProfile1D(CSTR nameAndTitle, DBINS(x),double upper, double lower)
-  { return bookProf(nameAndTitle, nameAndTitle, BINS(x), upper, lower);       }
-  P1D* createProfile1D(CSTR name,CSTR tit,DBINS(x),double upper, double lower) 
-  {  return bookProf( name, tit, BINS(x), upper, lower);                      }
-  P1D* createProfile1D(CSTR name,CSTR tit,DBINS(x),double upper, double lower,CSTR /* opt*/) 
-  {  return bookProf( name, tit, BINS(x), upper, lower);                      }
-  P1D* createProfile1D(CSTR name,CSTR title,const Edges& x,double upper, double lower)
-  {  return bookProf(name, title, x, upper, lower);                           }
-  P1D* createProfile1D(CSTR name,CSTR title,const Edges& x,double upper, double lower, CSTR /* opt */)
-  {  return bookProf(name, title, x, upper, lower);                           }
+
+  P1D* createProfile1D(CSTR name,CSTR tit,DBINS(x),CSTR opt ) 
+  {  return bookProf( name, tit, BINS(x) , opt );                             }
+  P1D* createProfile1D(CSTR name,CSTR tit,DBINS(x),double upper, double lower , CSTR opt ) 
+  {  return bookProf( name, tit, BINS(x), upper, lower , opt );               }
+  P1D* createProfile1D(CSTR name,CSTR title,const Edges& x,CSTR   /* opt */ )
+  {  return bookProf(name, title, x );                                        }
+  P1D* createProfile1D(CSTR name,CSTR title,const Edges& x,double upper, double lower, CSTR /* opt */ )
+  {  return bookProf(name, title, x, upper, lower );                          }
+  
+  P1D* createProfile1D(CSTR nametit,DBINS(x)) 
+  {  return bookProf( nametit, nametit, BINS(x) , "s");                       }
+  P1D* createProfile1D(CSTR nametit,DBINS(x),double upper, double lower ) 
+  {  return bookProf( nametit, nametit, BINS(x), upper, lower , "s");         }
+  
+
   P1D* createCopy(CSTR full, const P1D& h) 
   {  return createCopy(i_splitPath(full), h);                                 }
   P1D* createCopy(CSTR par, CSTR rel, const P1D& h) 

@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/src/Lib/ModuleInfo.cpp,v 1.7 2007/02/28 10:59:26 hmd Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/src/Lib/ModuleInfo.cpp,v 1.10 2008/10/28 10:40:19 marcocle Exp $
 //====================================================================
 //	ModuleInfo.cpp
 //--------------------------------------------------------------------
@@ -9,7 +9,7 @@
 //
 //	Author     : M.Frank
 //      Created    : 13/1/99
-//	Changes    : 
+//	Changes    :
 //====================================================================
 #define SYSTEM_MODULEINFO_CPP
 
@@ -20,6 +20,7 @@
 //#include <typeinfo>
 
 #include "GaudiKernel/ModuleInfo.h"
+#include "GaudiKernel/System.h"
 
 #ifdef _WIN32
   #define NOMSG
@@ -68,7 +69,7 @@ const std::string& System::moduleName()   {
     }
   }
   return module;
-} 
+}
 
 /// Retrieve full name of module
 const std::string& System::moduleNameFull()   {
@@ -93,7 +94,7 @@ const std::string& System::moduleNameFull()   {
 }
 
 /// Get type of the module
-const System::ModuleType System::moduleType()   {
+System::ModuleType System::moduleType()   {
   static ModuleType type = UNKNOWN;
   if ( type == UNKNOWN )    {
     const std::string& module = moduleNameFull();
@@ -142,7 +143,14 @@ System::ImageHandle System::moduleHandle()    {
       return handle;
 #elif defined(linux) || defined(__APPLE__)
       static Dl_info info;
-      if ( 0 != ::dladdr((void*)System::moduleHandle, &info) ) {
+      if ( 0 !=
+           ::dladdr(
+#if __GNUC__ < 4
+               (void*)System::moduleHandle
+#else
+               FuncPtrCast<void*>(System::moduleHandle)
+#endif
+               , &info) ) {
 	return &info;
       }
 #elif __hpux

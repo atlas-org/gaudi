@@ -1,4 +1,4 @@
-// $Id: GaudiHistos.icpp,v 1.14 2008/04/03 22:13:13 marcocle Exp $
+// $Id: GaudiHistos.icpp,v 1.17 2008/10/10 12:39:04 marcocle Exp $
 // ============================================================================
 #ifndef GAUDIALG_GAUDIHISTOS_ICPP
 #define GAUDIALG_GAUDIHISTOS_ICPP 1
@@ -67,7 +67,7 @@ void GaudiHistos<PBASE>::initGaudiHistosConstructor()
   // print the histograms at finalization
   this->declareProperty
     ( "HistoPrint"            ,
-      m_histosPrint   = true  ,
+      m_histosPrint   = false ,
       "Switch on/off the printout of histograms at finalization"    ) ;
   // check for NaN/Finite
   this->declareProperty
@@ -152,10 +152,10 @@ StatusCode GaudiHistos<PBASE>::initialize()
   }
 
   // Finally, print the location histogram will be written to
-  Print 
-    ( "The histogram path is set to be '" + histoPath() + "'", 
+  Print
+    ( "The histogram path is set to be '" + histoPath() + "'",
       StatusCode( StatusCode::SUCCESS, true )  , MSG::DEBUG );
-  
+
   return sc;
 }
 // ============================================================================
@@ -227,7 +227,7 @@ int GaudiHistos<PBASE>::printHistos ( const MSG::Level level ) const
   using namespace Gaudi::Utils::Histos ;
 
   if ( noHistos() )
-  { this->msgStream(level) << "No histograms are booked" << endreq ; }
+  { if (this->msgLevel(MSG::DEBUG)) this->msgStream(level) << "No histograms are booked" << endreq ; }
   else
   {
     MsgStream & msg = this->msgStream(level);
@@ -296,7 +296,7 @@ int GaudiHistos<PBASE>::printHistos ( const MSG::Level level ) const
           { this->error() << "IHistogram2D points to NULL" << endreq ; continue ; }
           if ( histos.end() != histos.find( toBase ( aida ) ) ) { continue ; }
           histos.insert ( toBase ( aida  ) ) ;
-          msg << std::endl 
+          msg << std::endl
               << GaudiAlg::Print2D::toString ( aida , entry->first );
         }
       }
@@ -309,13 +309,13 @@ int GaudiHistos<PBASE>::printHistos ( const MSG::Level level ) const
           { this->error() << "IHistogram2D points to NULL" << endreq ; continue ; }
           if ( histos.end() != histos.find( toBase ( aida ) ) ) { continue ; }
           histos.insert ( toBase ( aida  ) ) ;
-          msg << std::endl 
+          msg << std::endl
               << GaudiAlg::Print2D::toString ( aida , entry->first );
         }
       }
       msg << endreq ;
     }
-    
+
     if ( !histo3DMapNumID().empty() || !histo3DMapLitID().empty() )
     {
       msg << "List of booked 3D histograms in directory         "
@@ -492,9 +492,9 @@ AIDA::IHistogram1D*  GaudiHistos<PBASE>::book1D
 {
   // Check ID
   if (ID.undefined())
-  { 
-    this->Error("Undefined Histogram ID : Title='"+title+"'"); 
-    return NULL; 
+  {
+    this->Error("Undefined Histogram ID : Title='"+title+"'");
+    return NULL;
   }
 
   // exist?
@@ -625,8 +625,8 @@ AIDA::IHistogram2D*  GaudiHistos<PBASE>::book2D
 {
   // Check ID
   if (ID.undefined())
-  { 
-    this->Error("Undefined Histogram ID : Title='"+title+"'"); 
+  {
+    this->Error("Undefined Histogram ID : Title='"+title+"'");
     return NULL;
   }
 
@@ -775,7 +775,7 @@ AIDA::IHistogram3D*  GaudiHistos<PBASE>::book3D
 {
   // Check ID
   if (ID.undefined())
-  { 
+  {
     this->Error("Undefined Histogram ID : Title='"+title+"'");
     return NULL;
   }
@@ -891,7 +891,10 @@ AIDA::IProfile1D*  GaudiHistos<PBASE>::bookProfile1D
 ( const std::string&  title        ,
   const double        low          ,
   const double        high         ,
-  const unsigned long bins         ) const
+  const unsigned long bins         ,
+  const std::string&  opt          ,
+  const double        lowY         ,
+  const double        highY        ) const
 {
   // exist?
   AIDA::IProfile1D* hist = profile1D ( title ) ;
@@ -903,7 +906,7 @@ AIDA::IProfile1D*  GaudiHistos<PBASE>::bookProfile1D
   newHistoID( title, ID );
 
   // Book the histo and return
-  return this -> bookProfile1D ( ID, title, low, high, bins );
+  return this -> bookProfile1D ( ID, title, low, high, bins , opt , lowY , highY );
 }
 // ============================================================================
 // book the 1D profile histogram with forced ID (book on demand)
@@ -914,12 +917,15 @@ AIDA::IProfile1D*  GaudiHistos<PBASE>::bookProfile1D
   const std::string&  title        ,
   const double        low          ,
   const double        high         ,
-  const unsigned long bins         ) const
+  const unsigned long bins         ,
+  const std::string&  opt          ,
+  const double        lowY         ,
+  const double        highY        ) const
 {
   // Check ID
   if (ID.undefined())
-  { 
-    this->Error("Undefined Histogram ID : Title='"+title+"'"); 
+  {
+    this->Error("Undefined Histogram ID : Title='"+title+"'");
     return NULL;
   }
 
@@ -941,7 +947,10 @@ AIDA::IProfile1D*  GaudiHistos<PBASE>::bookProfile1D
                                           htitle       ,
                                           bins         ,
                                           low          ,
-                                          high         ) ;
+                                          high         ,
+                                          lowY         ,
+                                          highY        ,
+                                          opt          ) ;
   }
   else if ( ID.literal() )
   {
@@ -950,7 +959,10 @@ AIDA::IProfile1D*  GaudiHistos<PBASE>::bookProfile1D
                                           htitle       ,
                                           bins         ,
                                           low          ,
-                                          high         ) ;
+                                          high         ,
+                                          lowY         ,
+                                          highY        ,
+                                          opt          ) ;
   }
 
   // test ok
@@ -1051,8 +1063,8 @@ AIDA::IProfile2D*  GaudiHistos<PBASE>::bookProfile2D
 {
   // Check ID
   if (ID.undefined())
-  { 
-    this->Error("Undefined Histogram ID : Title='"+title+"'"); 
+  {
+    this->Error("Undefined Histogram ID : Title='"+title+"'");
     return NULL;
   }
 
@@ -1340,6 +1352,9 @@ AIDA::IProfile1D* GaudiHistos<PBASE>::profile1D
   const double        lowX         ,
   const double        highX        ,
   const unsigned long binsX        ,
+  const std::string&  opt          ,
+  const double        lowY         ,
+  const double        highY        ,
   const double        weight       ) const
 {
   AIDA::IProfile1D * h(0);
@@ -1347,7 +1362,8 @@ AIDA::IProfile1D* GaudiHistos<PBASE>::profile1D
   {
     // retrieve or book the histogram
     h = profile1D ( title ) ;
-    if ( 0 == h ) { h = bookProfile1D ( title , lowX , highX , binsX ) ; }
+    if ( 0 == h )
+    { h = bookProfile1D ( title , lowX , highX , binsX , opt , lowY , highY ) ; }
     // fill the histogram
     h = fill ( h , valueX , valueY , weight , title ) ;
   }
@@ -1365,6 +1381,9 @@ AIDA::IProfile1D* GaudiHistos<PBASE>::profile1D
   const double        lowX         ,
   const double        highX        ,
   const unsigned long binsX        ,
+  const std::string&  opt          ,
+  const double        lowY         ,
+  const double        highY        ,
   const double        weight       ) const
 {
   AIDA::IProfile1D * h(0);
@@ -1372,7 +1391,8 @@ AIDA::IProfile1D* GaudiHistos<PBASE>::profile1D
   {
     // retrieve or book the histogram
     h = profile1D ( ID ) ;
-    if ( 0 == h ) { h = bookProfile1D ( ID , title , lowX , highX , binsX ) ; }
+    if ( 0 == h )
+    { h = bookProfile1D ( ID , title , lowX , highX , binsX , opt , lowY , highY ) ; }
     // fill the histogram
     h = fill ( h , valueX , valueY , weight , title ) ;
   }
@@ -1667,7 +1687,7 @@ void GaudiHistos<PBASE>::stringSearchReplace( std::string & title,
                                               const std::string & B ) const
 {
   std::string::size_type slash = title.find_first_of ( A ) ;
-  while ( std::string::npos != slash ) 
+  while ( std::string::npos != slash )
   {
     title = title.substr(0,slash) + B + title.substr(slash+A.size());
     slash = title.find_first_of( A );

@@ -1,4 +1,4 @@
-// $Id: ParseHistos.cpp,v 1.1 2007/09/26 16:13:42 marcocle Exp $
+// $Id: ParseHistos.cpp,v 1.3 2008/10/28 14:02:18 marcocle Exp $
 // ============================================================================
 // Include files 
 // ============================================================================
@@ -103,11 +103,12 @@ StatusCode Gaudi::Parsers::parse
 ( Gaudi::Histo1DDef& histo , 
   const std::string& input ) 
 {
+  Histo1DGrammar g;
   const bool full =
     boost::spirit::parse
     ( createIterator(input), 
       IteratorT(), 
-      Histo1DGrammar()[var(histo)=arg1],
+      g[var(histo)=arg1],
       SkipperGrammar()).full;
   //
   return full && histo.ok() ? StatusCode::SUCCESS : StatusCode::FAILURE ;
@@ -126,10 +127,11 @@ StatusCode Gaudi::Parsers::parse
 ( std::map<std::string,Gaudi::Histo1DDef>& histos , 
   const std::string&                       input  ) 
 {
+  MapGrammar<StringGrammar,Histo1DGrammar> g;
   const bool full = boost::spirit::parse
     ( createIterator(input), 
       IteratorT()     ,
-      MapGrammar<StringGrammar,Histo1DGrammar>() [var(histos)=arg1],
+      g[var(histos)=arg1],
       SkipperGrammar() ).full;
   //
   if ( !full ) { return StatusCode::FAILURE ; }                 // RETURN 

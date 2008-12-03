@@ -64,9 +64,11 @@ namespace Gaudi {
   /// Copy constructor
   std::pair<DataObject*,AIDA::IProfile1D*> createProf1D(const AIDA::IProfile1D& hist);
   /// Creator of 1D profile with fixed bins
-  std::pair<DataObject*,AIDA::IProfile1D*> createProf1D(const std::string& title, int nBins, double xlow, double xup, double ylow, double yup);
+  std::pair<DataObject*,AIDA::IProfile1D*> createProf1D
+  (const std::string& title, int nBins, double xlow, double xup, double ylow, double yup, const std::string& opt="" );
   /// Creator of 1D profile with variable bins
-  std::pair<DataObject*,AIDA::IProfile1D*> createProf1D(const std::string& title, const Edges& e, double ylow, double yup);
+  std::pair<DataObject*,AIDA::IProfile1D*> createProf1D
+  (const std::string& title, const Edges& e, double ylow, double yup, const std::string& opt="");
 
   /// Copy constructor
   std::pair<DataObject*,AIDA::IProfile2D*> createProf2D(const AIDA::IProfile2D& hist);

@@ -1,4 +1,4 @@
-// $Id: HistorySvc.cpp,v 1.16.2.1 2008/06/19 21:27:23 leggett Exp $
+// $Id: HistorySvc.cpp,v 1.18 2008/06/04 12:35:15 marcocle Exp $
 
 #ifndef GAUDISVC_FASTHISTORYSVC_H
  #include "HistorySvc.h"
@@ -98,7 +98,7 @@ StatusCode HistorySvc::reinitialize() {
 
   clearState();
 
-  m_state = OFFLINE;
+  m_state = Gaudi::StateMachine::OFFLINE;
 
   return initialize();
 

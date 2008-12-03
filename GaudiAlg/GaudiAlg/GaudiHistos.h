@@ -1,4 +1,4 @@
-// $Id: GaudiHistos.h,v 1.9 2008/01/17 20:59:20 marcocle Exp $
+// $Id: GaudiHistos.h,v 1.11 2008/10/27 19:22:20 marcocle Exp $
 // ============================================================================
 #ifndef GAUDIALG_GAUDIHISTOS_H
 #define GAUDIALG_GAUDIHISTOS_H 1
@@ -14,7 +14,16 @@
 // ============================================================================
 // Include files#
 // ============================================================================
+// STD& STL
+// ============================================================================
+#include <limits>
+// ============================================================================
+// GaudiKernel
+// ============================================================================
 #include "GaudiKernel/HistoProperty.h"
+// ============================================================================
+// GaudiAlg
+// ============================================================================
 #include "GaudiAlg/Maps.h"
 #include "GaudiAlg/HbookName.h"
 // ============================================================================
@@ -109,7 +118,7 @@ public:
    *  NOT guarantee predictability of the ID a given histogram will be given when
    *  filled under conditional statements, since in these circumstances the order
    *  in which the histograms are first filled, and thus booked, will depend on the
-   *  nature of the first few events read. This is particularly problematic when 
+   *  nature of the first few events read. This is particularly problematic when
    *  users submit many parallel 'sub-jobs' and then attempt to merge the final
    *  output ROOT (or HBOOK) files, since a given histogram could have different IDs
    *  in each of the sub-jobs. Consequently it is strongly recommended that users do
@@ -343,7 +352,7 @@ public:
    *  NOT guarantee predictability of the ID a given histogram will be given when
    *  filled under conditional statements, since in these circumstances the order
    *  in which the histograms are first filled, and thus booked, will depend on the
-   *  nature of the first few events read. This is particularly problematic when 
+   *  nature of the first few events read. This is particularly problematic when
    *  users submit many parallel 'sub-jobs' and then attempt to merge the final
    *  output ROOT (or HBOOK) files, since a given histogram could have different IDs
    *  in each of the sub-jobs. Consequently it is strongly recommended that users do
@@ -509,7 +518,7 @@ public:
    *  NOT guarantee predictability of the ID a given histogram will be given when
    *  filled under conditional statements, since in these circumstances the order
    *  in which the histograms are first filled, and thus booked, will depend on the
-   *  nature of the first few events read. This is particularly problematic when 
+   *  nature of the first few events read. This is particularly problematic when
    *  users submit many parallel 'sub-jobs' and then attempt to merge the final
    *  output ROOT (or HBOOK) files, since a given histogram could have different IDs
    *  in each of the sub-jobs. Consequently it is strongly recommended that users do
@@ -703,7 +712,7 @@ public:
    *  NOT guarantee predictability of the ID a given histogram will be given when
    *  filled under conditional statements, since in these circumstances the order
    *  in which the histograms are first filled, and thus booked, will depend on the
-   *  nature of the first few events read. This is particularly problematic when 
+   *  nature of the first few events read. This is particularly problematic when
    *  users submit many parallel 'sub-jobs' and then attempt to merge the final
    *  output ROOT (or HBOOK) files, since a given histogram could have different IDs
    *  in each of the sub-jobs. Consequently it is strongly recommended that users do
@@ -860,7 +869,7 @@ public:
    *  NOT guarantee predictability of the ID a given histogram will be given when
    *  filled under conditional statements, since in these circumstances the order
    *  in which the histograms are first filled, and thus booked, will depend on the
-   *  nature of the first few events read. This is particularly problematic when 
+   *  nature of the first few events read. This is particularly problematic when
    *  users submit many parallel 'sub-jobs' and then attempt to merge the final
    *  output ROOT (or HBOOK) files, since a given histogram could have different IDs
    *  in each of the sub-jobs. Consequently it is strongly recommended that users do
@@ -1033,7 +1042,7 @@ public:
    *  NOT guarantee predictability of the ID a given histogram will be given when
    *  filled under conditional statements, since in these circumstances the order
    *  in which the histograms are first filled, and thus booked, will depend on the
-   *  nature of the first few events read. This is particularly problematic when 
+   *  nature of the first few events read. This is particularly problematic when
    *  users submit many parallel 'sub-jobs' and then attempt to merge the final
    *  output ROOT (or HBOOK) files, since a given histogram could have different IDs
    *  in each of the sub-jobs. Consequently it is strongly recommended that users do
@@ -1048,6 +1057,9 @@ public:
    *  @param lowX  low x limit for histogram
    *  @param highX high x limit for histogram
    *  @param binsX  number of bins in x
+   *  @param opt    the options, used for evaluation of errors
+   *  @param lowY   the min cut-off for y-values
+   *  @param highY  the max cut-off for y-values
    *  @param weight weight
    *  @return pointer to AIDA 1D profile histogram
    */
@@ -1058,7 +1070,10 @@ public:
     const double        lowX         ,
     const double        highX        ,
     const unsigned long binsX  = 100 ,
-    const double        weight = 1.0 ) const;
+    const std::string&  opt    = ""  ,
+    const double        lowY   = -std::numeric_limits<double>::max() ,
+    const double        highY  =  std::numeric_limits<double>::max() ,
+    const double        weight = 1.0 ) const ;
   // ==========================================================================
   /** fill the 1D profile histogram with forced ID assignment (book on demand)
    *
@@ -1119,6 +1134,9 @@ public:
    *  @param lowX  low x limit for histogram
    *  @param highX high x limit for histogram
    *  @param binsX  number of bins in x
+   *  @param opt    the options, used for evaluation of errors
+   *  @param lowY   the min cut-off for y-values
+   *  @param highY  the max cut-off for y-values
    *  @param weight weight
    *  @return pointer to AIDA 1D profile histogram
    */
@@ -1130,6 +1148,9 @@ public:
     const double        lowX         ,
     const double        highX        ,
     const unsigned long binsX  = 100 ,
+    const std::string&  opt    = ""  ,
+    const double        lowY   = -std::numeric_limits<double>::max() ,
+    const double        highY  =  std::numeric_limits<double>::max() ,
     const double        weight = 1.0 ) const;
   // ==========================================================================
   // ================================= 2D Profile =============================
@@ -1162,7 +1183,7 @@ public:
    *  NOT guarantee predictability of the ID a given histogram will be given when
    *  filled under conditional statements, since in these circumstances the order
    *  in which the histograms are first filled, and thus booked, will depend on the
-   *  nature of the first few events read. This is particularly problematic when 
+   *  nature of the first few events read. This is particularly problematic when
    *  users submit many parallel 'sub-jobs' and then attempt to merge the final
    *  output ROOT (or HBOOK) files, since a given histogram could have different IDs
    *  in each of the sub-jobs. Consequently it is strongly recommended that users do
@@ -1490,13 +1511,19 @@ public:
    *  @param low   low limit for histogram
    *  @param high  high limit for histogram
    *  @param bins  number of bins
+   *  @param opt    the options, used for evaluation of errors
+   *  @param lowY   the min cut-off for y-values
+   *  @param highY  the max cut-off for y-values
    *  @return pointer to AIDA 1D profile histogram
    */
   AIDA::IProfile1D*  bookProfile1D
   ( const std::string&  title        ,
     const double        low    =   0 ,
     const double        high   = 100 ,
-    const unsigned long bins   = 100 ) const ;
+    const unsigned long bins   = 100 ,
+    const std::string&  opt    = ""  ,
+    const double        lowY   = -std::numeric_limits<double>::max() ,
+    const double        highY  =  std::numeric_limits<double>::max() ) const;
   // ==========================================================================
   /** book the 1D profile histogram
    *
@@ -1507,6 +1534,9 @@ public:
    *  @param low   low limit for histogram
    *  @param high  high limit for histogram
    *  @param bins  number of bins
+   *  @param opt    the options, used for evaluation of errors
+   *  @param lowY   the min cut-off for y-values
+   *  @param highY  the max cut-off for y-values
    *  @return pointer to AIDA 1D profile histogram
    */
   AIDA::IProfile1D*  bookProfile1D
@@ -1514,7 +1544,10 @@ public:
     const std::string&  title        ,
     const double        low    =   0 ,
     const double        high   = 100 ,
-    const unsigned long bins   = 100 ) const ;
+    const unsigned long bins   = 100 ,
+    const std::string&  opt    = ""  ,
+    const double        lowY   = -std::numeric_limits<double>::max() ,
+    const double        highY  =  std::numeric_limits<double>::max() ) const;
   // ==========================================================================
   /** book the 2D profile histogram
    *
@@ -1773,7 +1806,7 @@ public: // trivial & non-trivial accessors
   /// get the flag for histogram path split (property "HistoSplitDir")
   inline bool               splitHistoDir () const { return m_splitHistoDir ; }
   /// get the value for histogram offset    (property "HistoOffSet")
-  inline const HistoID::NumericID histoOffSet   () const { return m_histoOffSet ; }
+  inline HistoID::NumericID histoOffSet   () const { return m_histoOffSet ; }
   /// get top-level histogram directory (property "HistoTopDir")
   inline const std::string& histoTopDir   () const { return m_histoTopDir   ; }
   /// get histogram directory           (property "HistoDir")

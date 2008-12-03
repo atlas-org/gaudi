@@ -1,4 +1,4 @@
-//$Id: IDetDataSvc.h,v 1.3 2006/01/25 16:02:48 hmd Exp $
+//$Id: IDetDataSvc.h,v 1.4 2008/10/27 19:22:20 marcocle Exp $
 #ifndef GAUDIKERNEL_IDETDATASVC_H
 #define GAUDIKERNEL_IDETDATASVC_H 1
 
@@ -17,7 +17,7 @@ namespace Gaudi { class Time; }
     Abstract interface for a DataSvc manipulating condition data
     (i.e. DataObjects implementing IValidity).
 
-    @author Andrea Valassi 
+    @author Andrea Valassi
     @date August 2001
 *///--------------------------------------------------------------------------
 
@@ -33,13 +33,13 @@ class IDetDataSvc : virtual public IInterface
 
  public:
 
-  /// Check if the event time has been set 
-  virtual const bool validEventTime() const = 0;
+  /// Check if the event time has been set
+  virtual bool validEventTime() const = 0;
 
-  /// Get the event time  
+  /// Get the event time
   virtual const Gaudi::Time& eventTime() const = 0;
 
-  /// Set the event time  
+  /// Set the event time
   virtual void setEventTime( const Gaudi::Time& ) = 0;
 
 };

@@ -1,6 +1,6 @@
-// $Id: ExtendedEvtCol.cpp,v 1.2 2007/05/24 14:36:37 hmd Exp $
+// $Id: ExtendedEvtCol.cpp,v 1.3 2008/11/04 22:49:24 marcocle Exp $
 // ============================================================================
-// CVS tag $Name:  $, version $Revision: 1.2 $
+// CVS tag $Name:  $, version $Revision: 1.3 $
 // ============================================================================
 // Include files 
 // =============================================================================
@@ -106,7 +106,7 @@ namespace
 StatusCode Gaudi::Examples::ExtendedEvtCol::execute () 
 {
   // get the event 
-  Event*          event = get<Event>          ( "/Event" ) ;
+  DataObject*     event = get<DataObject> ( "/Event" ) ;
   // get the tracks 
   MyTrackVector* tracks = get<MyTrackVector> ( m_tracks ) ;
   

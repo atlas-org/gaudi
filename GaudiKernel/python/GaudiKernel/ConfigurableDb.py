@@ -12,8 +12,8 @@ __all__ = [ 'CfgDb', 'cfgDb', 'loadConfigurableDb', 'getConfigurable' ]
 import string
 _transtable = string.maketrans('<>&*,: ().', '__rp__s___')
 
-from GaudiKernel.Logging import logging
-msg = logging.getLogger( 'ConfigurableDb' ) 
+import logging
+log = logging.getLogger( 'ConfigurableDb' ) 
 
 class _CfgDb( dict ):
     """
@@ -49,16 +49,16 @@ class _CfgDb( dict ):
         if self.has_key( configurable ):
             ## check if it comes from the same library...
             if cfg['lib'] != self[configurable]['lib']:
-                msg.verbose( "dup!! [%s] p=%s m=%s lib=%s",
-                             configurable, package, module, lib )
+                log.debug( "dup!! [%s] p=%s m=%s lib=%s",
+                           configurable, package, module, lib )
                 if self._duplicates.has_key(configurable):
                     self._duplicates[configurable] += [ cfg ]
                 else:
                     self._duplicates[configurable]  = [ cfg ]
                     pass
         else:
-            msg.verbose( "added [%s] p=%s m=%s lib=%s", 
-                         configurable, package, module, lib )
+            log.debug( "added [%s] p=%s m=%s lib=%s", 
+                       configurable, package, module, lib )
             self[configurable] = cfg
             pass
         return
@@ -97,10 +97,10 @@ def loadConfigurableDb():
     import sys
     from glob import glob
     from os.path import join as path_join
-    msg.debug( "importing confDb packages..." )
+    log.debug( "importing confDb packages..." )
     nFiles = 0
     for path in sys.path:
-        msg.verbose( "walking in [%s]..." % path )
+        log.debug( "walking in [%s]..." % path )
         if not os.path.exists(path):
             continue
         # speed-up: <project>_merged_confDb.py files are installed as :
@@ -114,21 +114,21 @@ def loadConfigurableDb():
             nFiles += 1
             # turn filename syntax into module syntax: remove path+extension and replace / with . (dot)
             confDbModule = os.path.splitext(confDb[len(path)+1:])[0].replace(os.sep,'.')
-            msg.debug( "\t-importing [%s]..." % confDbModule )
+            log.debug( "\t-importing [%s]..." % confDbModule )
             try:
                 mod = __import__( confDbModule )
             except ImportError, err:
-                msg.warning( "Could not import module [%s] !", confDbModule )
-                msg.warning( "Reason: %s", err )
+                log.warning( "Could not import module [%s] !", confDbModule )
+                log.warning( "Reason: %s", err )
                 pass
             else:
                 # don't need to keep the module
                 del mod
             pass
         pass # loop over sys.path
-    msg.debug( "importing confDb packages... [DONE]" )
+    log.debug( "importing confDb packages... [DONE]" )
     nPkgs = len( set([k['package'] for k in cfgDb.values()]) )
-    msg.debug( "imported %i confDb packages" % nPkgs )
+    log.debug( "imported %i confDb packages" % nPkgs )
     return nFiles
 
 
@@ -144,24 +144,24 @@ def getConfigurable( className, requester='', assumeCxxClass=True ):
     # get the python module
     confMod = confClassInfo and confClassInfo.get('module')
     if not confMod:
-        msg.warning( "%s: Class %s not in database", requester, className )
+        log.warning( "%s: Class %s not in database", requester, className )
         return None
     # load the module
     try:
         mod = __import__(confMod,globals(),locals(),confClass)
     except ImportError:
-        msg.warning( "%s: Module %s not found (needed for configurable %s)",
+        log.warning( "%s: Module %s not found (needed for configurable %s)",
                      requester, confMod, className )
         return None
     # get the class
     try:
         confClass = getattr(mod,confClass)
     except AttributeError:
-        msg.warning( "%s: Configurable %s not found in module %s",
+        log.warning( "%s: Configurable %s not found in module %s",
                      requester, confClass, confMod )
         return None
     # Got it!
-    msg.debug( "%s: Found configurable %s in module %s",
+    log.debug( "%s: Found configurable %s in module %s",
                requester, confClass, confMod )
 
     return confClass

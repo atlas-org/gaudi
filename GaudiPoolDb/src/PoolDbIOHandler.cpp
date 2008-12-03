@@ -1,4 +1,4 @@
-// $Id: PoolDbIOHandler.cpp,v 1.10 2006/05/23 17:53:33 hmd Exp $
+// $Id: PoolDbIOHandler.cpp,v 1.13 2008/11/12 23:39:47 marcocle Exp $
 //====================================================================
 //
 //	Package    : System (The POOL project)
@@ -15,74 +15,92 @@
 #include "GaudiKernel/IRegistry.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SmartRef.h"
-#include "Reflex/Reflex.h"
-#include "RootStorageSvc/IOHandlerStreamer.h"
 #include <stdexcept>
 #include <iostream>
 #include "TROOT.h"
+#include "TFile.h"
 #include "TClass.h"
 #include "TStreamerInfo.h"
 #include "Cintex/Cintex.h"
+#include "POOLCore/Token.h"
+#include "POOLCore/Reference.h"
+#include "StorageSvc/DbReflex.h"
+#include "StorageSvc/DataCallBack.h"
+#include "StorageSvc/DbDataHandlerGuard.h"
 
-static DataObject*       s_objPtr = 0;
-static DataObject**      s_currObj = &s_objPtr;
-static const DataObject* last_link_object = 0;
-static int last_link_hint = -1;
+#include <memory>
 
+using namespace pool;
+using namespace ROOT::Reflex;
+using namespace ROOT::Cintex;
+
+namespace ROOT { namespace Cintex  {
+  bool IsTypeOf(Type& typ, const std::string& base_name);
+}}
 namespace pool  {
   const std::string typeName(const std::type_info& typ);
 }
 
-static std::vector<DataObject**>& currentObject() {
-  static std::auto_ptr<std::vector<DataObject**> > s_current;
-  if ( 0 == s_current.get() )  {
-    s_current = std::auto_ptr<std::vector<DataObject**> >(new std::vector<DataObject**>());
-  }
-  return *(s_current.get());
+
+static const DataObject* last_link_object = 0;
+static int               last_link_hint = -1;
+
+void resetLastLink() {
+  last_link_object = 0;
+  last_link_hint   = -1;  
 }
 
+using Gaudi::getCurrentDataObject;
+
 void pushCurrentDataObject(DataObject** pobjAddr) {
-  static std::vector<DataObject**>& c = currentObject();
-  c.push_back(pobjAddr);
-  s_currObj = pobjAddr ? pobjAddr : &s_objPtr;
-  last_link_object = 0;
-  last_link_hint   = -1;
+  Gaudi::pushCurrentDataObject(pobjAddr);
+  resetLastLink();
 }
+  
 void popCurrentDataObject() {
-  static std::vector<DataObject**>& c = currentObject();
-  last_link_object = 0;
-  last_link_hint   = -1;
-  switch(c.size())  {
-    case 0:
-      s_currObj = c.back();
-      c.pop_back();
-      break;
-    default:
-      s_currObj = &s_objPtr;
-      break;
+  Gaudi::popCurrentDataObject();
+  resetLastLink();
+}
+
+
+template <class T>
+void PoolDbIOHandler<T>::operator()(TBuffer &b, void *obj)  {
+  try {
+    if ( b.IsReading() )   {
+      get(b,obj);
+    }
+    else  {
+      put(b,obj);
+    }
+  }
+  catch( const std::exception& e )    {
+    std::string err = "Class:" + std::string(m_root->GetName()) + "> Exception in object I/O";
+    err += e.what();
+    throw std::runtime_error(err);
+  }
+  catch( ... )    {
+    std::string err = "Class:" + std::string(m_root->GetName()) + "> Exception in object I/O";
+    throw std::runtime_error(err);
   }
 }
 
 template <>
-void PoolDbIOHandler<SmartRefBase>::onReadUpdate(void* obj) {
+void PoolDbIOHandler<SmartRefBase>::get(TBuffer &b, void* obj) {
+  UInt_t start, count;
   SmartRefBase* ref = (SmartRefBase*)obj;
-  // std::cout << "Link:" << ref->m_hintID << " " << ref->m_linkID << std::endl;
-  //if ( int(ref->m_hintID) == -1 )  {
-  //  std::cout << "PoolDbIOHandler<SmartRefBase>::onRead> "
-  //            << "Found invalid smart reference."
-  //            << std::endl;
-  //}
+  Version_t version = b.ReadVersion(&start, &count, m_root);
+  m_root->ReadBuffer(b, obj, version, start, count);
   switch( ref->objectType() ) {
    case SmartRefBase::DATAOBJECT:
     {
       SmartRef<DataObject>* r = (SmartRef<DataObject>*)obj;
-      (*r)(*s_currObj);
+      (*r)(getCurrentDataObject());
     }
     break;
   case SmartRefBase::CONTAINEDOBJECT: 
    {
      SmartRef<ContainedObject>* r = (SmartRef<ContainedObject>*)obj;
-     (*r)(*s_currObj);
+     (*r)(getCurrentDataObject());
    }
    break;
   default:
@@ -92,10 +110,10 @@ void PoolDbIOHandler<SmartRefBase>::onReadUpdate(void* obj) {
 }
 
 template <>
-void PoolDbIOHandler<SmartRefBase>::onWriteUpdate(void* obj) {
+void PoolDbIOHandler<SmartRefBase>::put(TBuffer &b, void* obj) {
   SmartRefBase* ref = (SmartRefBase*)obj;
   SmartRef<DataObject>* r1 = (SmartRef<DataObject>*)ref;
-  DataObject* curr = *s_currObj;
+  DataObject* curr = getCurrentDataObject();
   DataObject* pDO  = r1->data();
   int hint = r1->hintID();
   int link = r1->linkID();
@@ -136,6 +154,7 @@ void PoolDbIOHandler<SmartRefBase>::onWriteUpdate(void* obj) {
     //}
     if ( pDO == last_link_object )  {
       ref->set(curr, last_link_hint, link);
+      m_root->WriteBuffer(b, obj);
       return;
     }
     else if ( pDO ) {
@@ -157,26 +176,109 @@ void PoolDbIOHandler<SmartRefBase>::onWriteUpdate(void* obj) {
   //            << std::endl;
   //}
   ref->set(curr, hint, link);
+  m_root->WriteBuffer(b, obj);
 }
 
 template <>
-void PoolDbIOHandler<ContainedObject>::onReadUpdate(void* obj) {
+void PoolDbIOHandler<ContainedObject>::get(TBuffer &b, void* obj) {
+  UInt_t start, count;
+  Version_t version = b.ReadVersion(&start, &count, m_root);
+  m_root->ReadBuffer(b, obj, version, start, count);
   ContainedObject* p = (ContainedObject*)obj;
-  p->setParent((ObjectContainerBase*)*s_currObj);
+  p->setParent((ObjectContainerBase*)getCurrentDataObject());
 }
 
 template <>
-void PoolDbIOHandler<ContainedObject>::onWriteUpdate(void* /* obj */) {
+void PoolDbIOHandler<ContainedObject>::put(TBuffer &b, void* obj) {
+  m_root->WriteBuffer(b, obj);
+}
+
+static void getOID_40000(TBuffer& b, TClass* cl, Token::OID_t& oid) {
+  unsigned long loid[2];
+  UInt_t start, count, tmp;
+  // read the class version from the buffer
+  /* Version_t vsn = */ b.ReadVersion(&start, &count, 0);
+  switch(count) {
+  case 22:              // These tokens were written as pair<long,long>
+    b >> tmp;           //
+    b.ReadFastArray(loid,2); // There was a bug in POOL....
+    oid.first = loid[0];
+    oid.second = loid[1];
+    break;              // see TBuffer::ReadFastArray(ulong*, int)
+  case 14:              // Normal case: version:checksum+8 Bytes
+    b >> tmp;           //
+  case 10:              // Normal case: version:checksum+8 Bytes
+  case 8:               // Without checksum and version
+  default:              // No better idea
+    b.ReadFastArray(&oid.first, 2);
+    break;
+  }
+  // Check that the buffer position correesponds to the byte count
+  b.CheckByteCount(start, count, cl);
+}
+
+template <>
+void PoolDbIOHandler<Token>::get(TBuffer& b, void* obj) {
+  Token* t = (Token*)obj;
+  DataCallBack* caller = DbDataHandlerGuard::caller();
+  Int_t file_version = ((TFile*)b.GetParent())->GetVersion();
+  if ( file_version >= 40000 ) {
+    getOID_40000(b, m_root, t->oid());
+  }
+  else {
+    UInt_t start, count, tmp;
+    Version_t vsn = b.ReadVersion(&start, &count, m_root);
+    switch(vsn)  {
+    case 2:
+      b >> tmp;
+      b.ReadFastArray(&t->oid().first, 2);
+      b >> tmp;
+      break;
+    default:
+      b.SetBufferOffset(start+4);
+      b.ReadFastArray(&t->oid().first, 2);
+      break;
+    }
+  }
+  if (caller) caller->notify(DataCallBack::GET,DataCallBack::TOKEN,m_type,obj,&t->oid());
+}
+
+template <>
+void PoolDbIOHandler<Token>::put(TBuffer &b, void* obj) {
+  Token::OID_t* poid = &(((Token*)obj)->oid());
+  UInt_t count = b.WriteVersion(m_root, true);
+  DataCallBack* caller = DbDataHandlerGuard::caller();
+  if (caller) caller->notify(DataCallBack::PUT,DataCallBack::TOKEN,m_type,obj,poid);
+  b.WriteFastArray(&poid->first, 2);
+  b.SetByteCount(count, true);
+}
+
+template <>
+void PoolDbIOHandler<Reference>::get(TBuffer& b, void* obj) {
+  Token::OID_t oid(~0x0,~0x0);
+  DataCallBack* caller = DbDataHandlerGuard::caller();
+  Int_t file_version = ((TFile*)b.GetParent())->GetVersion();
+  (file_version >= 40000) ? getOID_40000(b, m_root,oid) : b.ReadFastArray(&oid.first, 2);
+  if (caller) caller->notify(DataCallBack::GET,DataCallBack::REFERENCE,m_type,obj,&oid);
+}
+
+template <>
+void PoolDbIOHandler<Reference>::put(TBuffer &b, void* obj) {
+  UInt_t count = b.WriteVersion(m_root, true);
+  DataCallBack* caller = DbDataHandlerGuard::caller();
+  Token::OID_t oid(~0x0, ~0x0);
+  if (caller) caller->notify(DataCallBack::PUT,DataCallBack::REFERENCE,m_type,obj,&oid);
+  b.WriteFastArray(&oid.first, 2);
+  b.SetByteCount(count, true);
 }
 
 template <class T> static bool makeStreamer(MsgStream& log)  {
-  std::string cl_name = pool::typeName(typeid(T));
+  std::string cl_name = typeName(typeid(T));
   ROOT::Reflex::Type t = ROOT::Reflex::Type::ByName(cl_name);
   if ( t )  {
     TClass* c = gROOT->GetClass(cl_name.c_str());
     if ( c ) {
-      pool::IIOHandler* h = new PoolDbIOHandler<T>(t);
-      TClassStreamer*   s = new pool::IOHandlerStreamer(t, c, h);
+      TClassStreamer* s = new PoolDbIOHandler<T>(t,c);
       c->AdoptStreamer(s);
       log << MSG::DEBUG << "Installed IOHandler for class " << cl_name << endmsg;
       return true;
@@ -191,137 +293,22 @@ template <class T> static bool makeStreamer(MsgStream& log)  {
   return false;
 }
 
-#include "RootStorageSvc/CINTTypedefs.h"
-#include "RootStorageSvc/ICINTStreamer.h"
-#include "RootStorageSvc/ICINTStreamerFactory.h"
-#include "RootStorageSvc/RefStreamer.h"
-#include "RootStorageSvc/IOHandlerCustomStreamer.h"
-#include "RootStorageSvc/IOHandlerStreamer.h"
-#include "RootStorageSvc/CustomStreamer.h"
-#include "StorageSvc/IIOHandlerFactory.h"
-#include "StorageSvc/IIOHandler.h"
-#include "StorageSvc/DbReflex.h"
-
-
-using namespace ROOT::Reflex;
-
-namespace {
-  /// get access to the user supplied streamer function (if any)
-  pool::ICINTStreamer* streamer(Type& cl)  {
-    // First look for custom streamers; 
-    // if there are none, check for standard streamers
-    if ( cl )   {
-      if ( !cl.IsFundamental() )  {
-	pool::ICINTStreamerFactory* f = pool::ICINTStreamerFactory::get();
-        if ( f ) {
-          std::string typ = pool::DbReflex::fullTypeName(cl);
-          if ( typ.substr(0,2) == "::" ) typ.replace(0,2,"");
-          std::string nam = "CINTStreamer<"+typ+">";
-          size_t occ;
-          // Replace namespace "::" with "__"
-          while ( (occ=nam.find("::")) != std::string::npos )    {
-            nam.replace(occ, 2, "__");
-          }
-          return f->create(nam, cl);
-        }
-      }
-    }
-    return 0;
-  }
-
-  pool::IIOHandler* ioHandler(Type& cl)  {
-    pool::IIOHandlerFactory* f = pool::IIOHandlerFactory::get();
-    if ( f ) {
-      size_t idx;
-      std::string typ = pool::DbReflex::fullTypeName(cl);
-      if ( typ.substr(0,2) == "::" ) typ.replace(0,2,"");
-      std::string nam = "IIOHandler<"+typ+">";
-      // Replace namespace "::" with "__"
-      while ( (idx=nam.find("::")) != std::string::npos )    {
-        nam.replace(idx, 2, "__");
-      }
-      return f->create(nam, cl);
-    }
-    return 0;
-  }
-}
-
-namespace ROOT { namespace Cintex  {
-  bool IsSTLinternal(const std::string& nam);
-  bool IsSTL(const std::string& nam);
-  bool IsSTLext(const std::string& nam);
-  bool IsTypeOf(Type& typ, const std::string& base_name);
-  Type CleanType(const Type& t);
-  /// Retrieve CINT class name (in Type.cpp)
-  std::string CintName(const Type&);
-  std::string CintName(const std::string&);
-}}
-using namespace ROOT::Cintex;
-
 namespace GaudiPoolDb  {
   bool patchStreamers(MsgStream& s)  {
     static bool first = true;
     if ( first ) {
       first = false;
-      //Cintex::setDebug(2);
       for ( Type_Iterator i=Type::Type_Begin(); i != Type::Type_End(); ++i)   {
-        std::auto_ptr<TClassStreamer> str;
         Type typ = *i;
         if ( !(typ.IsStruct() || typ.IsClass()) )  continue;
-	std::string nam = typ.Name(SCOPED);
-        TClass* root_class = 0;
+        TClass* cl = 0;
 	if ( IsTypeOf(typ,"pool::Reference") )  {
-	  root_class = gROOT->GetClass(nam.c_str());
-	  str = std::auto_ptr<TClassStreamer>(new pool::RefStreamer(typ, root_class, 1));
+	  cl = gROOT->GetClass(typ.Name(SCOPED).c_str());
+	  if ( cl ) cl->AdoptStreamer(new PoolDbIOHandler<Reference>(typ,cl));
 	}
 	else if ( IsTypeOf(typ,"pool::Token") )  {
-	  root_class = gROOT->GetClass(nam.c_str());
-	  str = std::auto_ptr<TClassStreamer>(new pool::RefStreamer(typ, root_class, 2));
-	}
-	else   {
-	  pool::ICINTStreamer* s = streamer(typ);
-	  pool::IIOHandler*    h = ioHandler(typ);
-	  if ( s && h )  {
-	    root_class = gROOT->GetClass(nam.c_str());
-	    str = std::auto_ptr<TClassStreamer>(new pool::IOHandlerCustomStreamer(typ, root_class, h, s));
-	  }
-	  else if ( s )  {
-	    root_class = gROOT->GetClass(nam.c_str());
-	    str = std::auto_ptr<TClassStreamer>(new pool::CustomStreamer(typ, root_class, s));
-	  }
-	  else if ( h )  {
-	    root_class = gROOT->GetClass(nam.c_str());
-	    str = std::auto_ptr<TClassStreamer>(new pool::IOHandlerStreamer(typ, root_class, h));
-	  }
-	  else   {
-	    //	    root_class->SetBit(TClass::kIsForeign);
-	  }
-	}
-	/*
-	for (size_t i = 0; i < typ.DataMemberSize(); i++) {
-	  Type t = CleanType(typ.DataMemberAt(i).TypeOf());
-	  if ( (t.IsClass() || t.IsStruct()) && t.IsAbstract() )  {
-	    for (size_t j=0, n=Type::TypeSize(); j<n; j++) {
-	      Type t1 = Type::TypeAt(j);
-	      if ( (t1.IsClass() || t1.IsStruct()) && !t1.IsAbstract() )  {
-		if ( t1.HasBase(t) )  {
-		  std::string s = CintName(t1);
-		  TClass* c = gROOT->GetClass(s.c_str(), kTRUE);
-		  if ( c )  {
-		    c->GetStreamerInfo();
-		    break;
-		  }
-		}
-	      }
-	    }
-	  }
-	}
-	*/
-	if ( str.get() )  {
-	  if ( !root_class ) {
-	    continue;
-	  }
-	  root_class->AdoptStreamer(str.release());
+	  cl = gROOT->GetClass(typ.Name(SCOPED).c_str());
+	  if ( cl ) cl->AdoptStreamer(new PoolDbIOHandler<Token>(typ,cl));
 	}
       }
       ROOT::Cintex::Cintex::Enable();      

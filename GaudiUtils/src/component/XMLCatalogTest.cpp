@@ -10,7 +10,7 @@ extern "C" int testXMLFileCatalogWrite(int argc, char** argv)   {
   if ( argc>1 ) fname = argv[1];
   if ( argc>2 ) nwrite = ::atol(argv[2]);
   XMLFileCatalog c(fname,0);
-  c.start();
+  c.init();
   std::vector<std::string> fids;
   c.getFID(fids);
   time_t start = time(0);
@@ -61,7 +61,7 @@ extern "C" int testXMLFileCatalogRead(int argc, char** argv)  {
   bool prt = argc<2;
   time_t start = time(0);
   XMLFileCatalog c(fname,0);
-  c.start();
+  c.init();
   std::cout << "File loaded in " << time(0)-start << " seconds. " << std::endl;
   start = time(0);
   c.getFID(fids);

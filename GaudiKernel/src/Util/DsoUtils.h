@@ -11,6 +11,8 @@
 // STL includes
 #include <string>
 
+#include "GaudiKernel/System.h"
+
 // Reflex includes
 #include "Reflex/Reflex.h"
 
@@ -33,7 +35,13 @@ inline std::string libNativeName( const std::string& libName )
 static std::string dsoName( const ROOT::Reflex::Member& mem )
 {
   Dl_info info;
-  if (dladdr ((void*)(mem.Stubfunction()), &info) == 0)
+  if (dladdr (
+#if __GNUC__ < 4
+      (void*)mem.Stubfunction()
+#else
+      System::FuncPtrCast<void*>(mem.Stubfunction())
+#endif
+      , &info) == 0)
     return "";
 
   const char* pos = strrchr (info.dli_fname, '/');
@@ -75,7 +83,7 @@ static std::string dsoName( const ROOT::Reflex::Member& )
 
 #endif
 
-static bool inDso( const ROOT::Reflex::Member& mem, 
+static bool inDso( const ROOT::Reflex::Member& mem,
                     const std::string& dsoname )
 {
 #ifdef _WIN32
@@ -97,7 +105,7 @@ static bool inDso( const ROOT::Reflex::Member& mem,
   } else {
     curname = dsoname.substr(pos+1);
   }
-  
+
   return srcname == curname;
 }
 

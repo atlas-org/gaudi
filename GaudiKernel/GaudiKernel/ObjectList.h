@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/ObjectList.h,v 1.9 2005/07/21 16:31:02 hmd Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/ObjectList.h,v 1.10 2008/10/09 16:46:49 marcocle Exp $
 #ifndef GAUDIKERNEL_OBJECTLIST_H
 #define GAUDIKERNEL_OBJECTLIST_H
 
@@ -44,8 +44,6 @@ public:
   typedef typename std::list<TYPE*>::reference                 reference;
   typedef typename std::list<TYPE*>::const_reference           const_reference;
 
-  typedef typename std::list<TYPE*>::size_type                 size_type;
- 
   typedef typename std::list<TYPE*>::iterator                  iterator;
   typedef typename std::list<TYPE*>::const_iterator            const_iterator;
 
@@ -76,11 +74,11 @@ public:
   }
 
   /// Retrieve pointer to class defininition structure
-  virtual const CLID& clID() const { 
-    return ObjectList<TYPE>::classID(); 
+  virtual const CLID& clID() const {
+    return ObjectList<TYPE>::classID();
   }
   static const CLID& classID() {
-    static CLID clid = TYPE::classID() + CLID_ObjectList; 
+    static CLID clid = TYPE::classID() + CLID_ObjectList;
     return clid;
   }
 
@@ -94,7 +92,7 @@ public:
 
   /// Return an iterator pointing to the beginning of the container
   typename ObjectList<TYPE>::iterator begin () {
-    return m_list.begin();    
+    return m_list.begin();
   }
 
   /// Return a const_iterator pointing to the beginning of the container
@@ -139,7 +137,7 @@ public:
     return m_list.size();
   }
   /// The same as size(), return number of objects in the container
-  virtual long numberOfObjects() const {
+  virtual typename ObjectList<TYPE>::size_type numberOfObjects() const {
     return m_list.size();
   }
 

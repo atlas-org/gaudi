@@ -1,4 +1,4 @@
-// $Id: PoolDbBaseCnv.cpp,v 1.18 2008/02/21 18:01:54 hmd Exp $
+// $Id: PoolDbBaseCnv.cpp,v 1.19 2008/10/27 16:41:33 marcocle Exp $
 //====================================================================
 //	PoolDbBaseCnv implementation
 //--------------------------------------------------------------------
@@ -9,6 +9,9 @@
 //
 //	Author     : M.Frank
 //====================================================================
+
+// FIXME: missing in CORAL
+#include <algorithm>
 
 // Framework include files
 #include "GaudiKernel/MsgStream.h"

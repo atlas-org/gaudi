@@ -1,4 +1,4 @@
-// $Id: AppMgrRunable.h,v 1.3 2006/11/30 14:57:02 mato Exp $
+// $Id: AppMgrRunable.h,v 1.4 2008/06/02 14:21:35 marcocle Exp $
 #ifndef GAUDISVC_APPMGRRUNABLE_H
 #define GAUDISVC_APPMGRRUNABLE_H 1
 
@@ -47,6 +47,10 @@ public:
   virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
   /// IService implementation: initialize the service
   virtual StatusCode initialize();
+  /// IService implementation: start the service
+  virtual StatusCode start();
+  /// IService implementation: stop the service
+  virtual StatusCode stop();
   /// IService implementation: finalize the service
   virtual StatusCode finalize();
   /// IRunable implementation : Run the class implementation

@@ -1,4 +1,4 @@
-// $Id: NTuple.h,v 1.22 2007/10/29 18:10:00 mato Exp $
+// $Id: NTuple.h,v 1.23 2008/10/27 19:22:20 marcocle Exp $
 // ============================================================================
 #ifndef GAUDIKERNEL_NTUPLE_H
 #define GAUDIKERNEL_NTUPLE_H
@@ -31,7 +31,7 @@ class NTupleDirectory;
  * @author Markus Frank
  * @author Sebastien Ponce
  */
-namespace NTuple   
+namespace NTuple
 {
   // local forward declarations
   template <class TYP> class Range;
@@ -45,7 +45,7 @@ namespace NTuple
   template <class TYP> class Matrix;
   // ==========================================================================
   /// Class defining a range
-  template <class TYP> 
+  template <class TYP>
   class Range  {
     /// Lower boundary of range
     /*const*/ TYP    m_lower;
@@ -66,20 +66,20 @@ namespace NTuple
       return *this;
     }
     /// Destructor
-    virtual ~Range()             {                               }
+    virtual ~Range()       {                               }
     /// Lower boundary of range
-    const TYP lower()    const   { return m_lower;               }
-    /// Upper boundary of range 
-    const TYP upper()    const   { return m_upper;               }
+    TYP lower()    const   { return m_lower;               }
+    /// Upper boundary of range
+    TYP upper()    const   { return m_upper;               }
     /// Distance between lower and upper range
-    const TYP distance() const   { return m_upper-m_lower;       }
+    TYP distance() const   { return m_upper-m_lower;       }
     /// Minimal number of data
-    static const TYP min() { return std::numeric_limits<TYP>::min() ; }
+    static TYP min() { return std::numeric_limits<TYP>::min() ; }
     /// Maximal number of data
-    static const TYP max() { return std::numeric_limits<TYP>::max() ; }
+    static TYP max() { return std::numeric_limits<TYP>::max() ; }
   };
   // ==========================================================================
-  template <> class Range<bool>  
+  template <> class Range<bool>
   {
   public:
     /// Standard constructor
@@ -87,27 +87,27 @@ namespace NTuple
     /// Copy constructor
     Range(const Range<bool>& /* copy */ )  {}
     /// Destructor
-    virtual ~Range()              {                               }
+    virtual ~Range()        {                               }
     /// Lower boundary of range
-    const bool lower()    const   { return false;                 }
-    /// Upper boundary of range 
-    const bool upper()    const   { return true;                  }
+    bool lower()    const   { return false;                 }
+    /// Upper boundary of range
+    bool upper()    const   { return true;                  }
     /// Distance between lower and upper range
-    const bool distance() const   { return true;                  }
+    bool distance() const   { return true;                  }
     /// Minimal number of data
-    static const bool min()       { return false;                 }
+    static bool min()       { return false;                 }
     /// Maximal number of data
-    static const bool max()       { return true;                  }
+    static bool max()       { return true;                  }
   };
   // ==========================================================================
-  template <> 
-  inline IOpaqueAddress* const 
+  template <>
+  inline IOpaqueAddress*
   Range<IOpaqueAddress* >::min()     { return (IOpaqueAddress*)0x0        ; }
-  template <> 
-  inline IOpaqueAddress* const 
+  template <>
+  inline IOpaqueAddress*
   Range<IOpaqueAddress* >::max()     { return (IOpaqueAddress*)0xffffffff ; }
-  // ==========================================================================  
-  /** Abstract class discribing basic data in an Ntuple.
+  // ==========================================================================
+  /** Abstract class describing basic data in an Ntuple.
    */
   template <class TYP> class _Data : virtual public INTupleItem  {
   protected:
@@ -122,7 +122,7 @@ namespace NTuple
     virtual const ItemRange& range() const        = 0;
   };
   // ==========================================================================
-  /** Abstract class discribing a column in a N tuple.
+  /** Abstract class describing a column in a N tuple.
    */
   template <class TYP> class _Item : virtual public _Data<TYP>  {
   public:
@@ -142,7 +142,7 @@ namespace NTuple
     /// Access to data by reference
     void       set(const TYP& item) { *this->m_buffer = item;             }
     /// Access to data by reference (CONST)
-    virtual const TYP get() const   { return *this->m_buffer;             }
+    virtual TYP get() const   { return *this->m_buffer;             }
   };
   // ==========================================================================
   /** Abstract class discribing a column-array in a N tuple.
@@ -264,31 +264,31 @@ namespace NTuple
     Item& operator -- ()            { return *this -= TYP(1);          }
     Item& operator -- (int)         { return *this -= TYP(1);          }
     /// Assignment operator
-    Item& operator=(const TYP data) { 
-      this->m_ptr->set( data ); 
+    Item& operator=(const TYP data) {
+      this->m_ptr->set( data );
       return *this;
     }
     /// Assignment operator
     template<class T>
-    Item& operator=(const Item<T>& data) { 
-      this->m_ptr->set( data->get() ); 
+    Item& operator=(const Item<T>& data) {
+      this->m_ptr->set( data->get() );
       return *this;
     }
-    Item<TYP>& operator += (const TYP data)    {                       
-      this->m_ptr->set ( this->m_ptr->get() + data );                     
-      return *this;                                                     
+    Item<TYP>& operator += (const TYP data)    {
+      this->m_ptr->set ( this->m_ptr->get() + data );
+      return *this;
     }
-    Item<TYP>& operator -= (const TYP data)    {                       
-      this->m_ptr->set ( this->m_ptr->get() - data );                     
-      return *this;                                                     
+    Item<TYP>& operator -= (const TYP data)    {
+      this->m_ptr->set ( this->m_ptr->get() - data );
+      return *this;
     }
-    Item<TYP>& operator *= (const TYP data)    {                       
-      this->m_ptr->set ( this->m_ptr->get() * data );                     
-      return *this;                                                     
+    Item<TYP>& operator *= (const TYP data)    {
+      this->m_ptr->set ( this->m_ptr->get() * data );
+      return *this;
     }
-    Item<TYP>& operator /= (const TYP data)    {                       
-      this->m_ptr->set ( this->m_ptr->get() / data );                     
-      return *this;                                                     
+    Item<TYP>& operator /= (const TYP data)    {
+      this->m_ptr->set ( this->m_ptr->get() / data );
+      return *this;
     }
   };
   // ==========================================================================
@@ -300,16 +300,16 @@ namespace NTuple
     /// Standard Constructor
     Item()                          {    }
     /// Automatic type conversion
-    operator const bool () const     { return this->m_ptr->get();             }
+    operator bool () const     { return this->m_ptr->get();             }
     /// Assignment operator
-    Item& operator=(const bool data) { 
-      this->m_ptr->set( data ); 
+    Item& operator=(const bool data) {
+      this->m_ptr->set( data );
       return *this;
     }
     /// Assignment operator
     template<class T>
-    Item& operator=(const Item<T>& data) { 
-      this->m_ptr->set( data->get() ); 
+    Item& operator=(const Item<T>& data) {
+      this->m_ptr->set( data->get() );
       return *this;
     }
   };
@@ -359,7 +359,7 @@ namespace NTuple
   /** Abstract base class which allows the user to interact with the
       actual N tuple implementation.
       The class is abstract, because the template methods must
-      be instantiated by the compiler at compile time. Otherwise the 
+      be instantiated by the compiler at compile time. Otherwise the
       references would be unresolved.
   */
   class Tuple : public DataObject, virtual public INTuple  {
@@ -482,7 +482,7 @@ namespace NTuple
       }
       return StatusCode::FAILURE;
     }
-    template <class TYPE> StatusCode 
+    template <class TYPE> StatusCode
     i_addObject(const std::string& name,_Item<TYPE*>*& result,const std::type_info& /* typ */)  {
       if ( !i_find(name) && clID() == CLID_ColumnWiseTuple )    {
         return add( result = (_Item<TYPE*>*)_Item<void*>::create(this, name, typeid(TYPE),0,0,0) );
@@ -495,38 +495,38 @@ namespace NTuple
     virtual ~Tuple()   {
     }
     /// Locate a scalar Item of data to the N tuple type safe
-    template <class TYPE> StatusCode item(const std::string& name, 
-                                          Item<TYPE>& result) 
+    template <class TYPE> StatusCode item(const std::string& name,
+                                          Item<TYPE>& result)
     {
       return i_item(name, result.m_ptr);
     }
     /// Locate a scalar Item of data to the N tuple type safe (CONST)
-    template <class TYPE> StatusCode item(const std::string& name, 
-                                          const Item<TYPE>& result)  const 
+    template <class TYPE> StatusCode item(const std::string& name,
+                                          const Item<TYPE>& result)  const
     {
       return i_item(name, result.m_ptr);
     }
     /// Locate a Array of data to the N tuple type safe
     template <class TYPE> StatusCode
-      item(const std::string& name, Array<TYPE>& result)  
+      item(const std::string& name, Array<TYPE>& result)
     {
       return i_item(name, result.m_ptr);
     }
     /// Locate a Array of data to the N tuple type safe (CONST)
-    template <class TYPE> StatusCode item(const std::string& name, 
+    template <class TYPE> StatusCode item(const std::string& name,
                                           const Array<TYPE>& result)  const
     {
       return i_item(name, result.m_ptr);
     }
     /// Locate a Matrix of data to the N tuple type safe
     template <class TYPE> StatusCode item(const std::string& name,
-                                          Matrix<TYPE>& result)    
+                                          Matrix<TYPE>& result)
     {
       return i_item(name, result.m_ptr);
     }
 
     /// Locate a Matrix of data to the N tuple type safe (CONST)
-    template <class TYPE> StatusCode item( const std::string& name, 
+    template <class TYPE> StatusCode item( const std::string& name,
                                            const Matrix<TYPE>& result)  const
     {
       return i_item(name, result.m_ptr);
@@ -540,7 +540,7 @@ namespace NTuple
         column in a column wise N-tuple.
 
         @param  name       Name of the column in the column wise N-tuple
-        @param  itm        Reference to the Item<TYPE> datatype, which 
+        @param  itm        Reference to the Item<TYPE> datatype, which
                            should be connected to the N-tuple.
 
         @return StatusCode indicating success or failure.
@@ -554,7 +554,7 @@ namespace NTuple
     /** Add an simple object item to an N tuple.
 
         @param  name       Name of the column in the column wise N-tuple
-        @param  itm        Reference to the Item<TYPE> datatype, which 
+        @param  itm        Reference to the Item<TYPE> datatype, which
                            should be connected to the N-tuple.
 
         @return StatusCode indicating success or failure.
@@ -567,7 +567,7 @@ namespace NTuple
     /** Add an address object item to an N tuple: specialized call
 
         @param  name       Name of the column in the column wise N-tuple
-        @param  itm        Reference to the Item<TYPE> datatype, which 
+        @param  itm        Reference to the Item<TYPE> datatype, which
                            should be connected to the N-tuple.
 
         @return StatusCode indicating success or failure.
@@ -586,7 +586,7 @@ namespace NTuple
         Note: Checks on the data range are not implemented!
 
         @param  name       Name of the column in the column wise N-tuple
-        @param  itm        Reference to the Item<TYPE> datatype, which 
+        @param  itm        Reference to the Item<TYPE> datatype, which
                            should be connected to the N-tuple.
         @param  low        Lower edge of client data values allowed
                            to fill into the N-tuple array.
@@ -596,9 +596,9 @@ namespace NTuple
         @return StatusCode indicating success or failure.
     */
     template <class TYPE, class RANGE> StatusCode
-      addItem(const std::string& name, 
-              Item<TYPE>& itm, 
-              const RANGE low, 
+      addItem(const std::string& name,
+              Item<TYPE>& itm,
+              const RANGE low,
               const RANGE high)
     {
       return i_addItem( name, 1, "", TYPE(low), TYPE(high), itm.m_ptr);
@@ -607,40 +607,40 @@ namespace NTuple
     /** Add an fixed-size Array of data to a column wise N tuple.
 
         You should use this entry point to add a FIXED SIZE ARRAY
-        to a column wise N-tuple. The dimension of the array must 
+        to a column wise N-tuple. The dimension of the array must
         be specified.
 
         @param  name       Name of the column in the column wise N-tuple
         @param  dim        Length of the array to be added to the N-tuple
-        @param  array      Reference to the Array<TYPE> datatype, which 
+        @param  array      Reference to the Array<TYPE> datatype, which
                            should be connected to the N-tuple.
 
         @return StatusCode indicating success or failure.
     */
-    template <class TYPE> StatusCode 
-      addItem(const std::string& name, 
-              long dim, 
-              Array<TYPE>& array)  
+    template <class TYPE> StatusCode
+      addItem(const std::string& name,
+              long dim,
+              Array<TYPE>& array)
     {
-      return i_addItem(name, 
-                       dim, 
-                       "", 
-                       Range<TYPE>::min(), 
-                       Range<TYPE>::max(), 
+      return i_addItem(name,
+                       dim,
+                       "",
+                       Range<TYPE>::min(),
+                       Range<TYPE>::max(),
                        array.m_ptr);
     }
 
     /** Add an fixed-size Array of data to a column wise N tuple with a range.
 
         You should use this entry point to add a FIXED SIZE ARRAY
-        to a column wise N-tuple. The dimension of the array must 
+        to a column wise N-tuple. The dimension of the array must
         be specified.
 
         Note: Checks on the data range are not implemented!
 
         @param  name       Name of the column in the column wise N-tuple
         @param  dim        Length of the array to be added to the N-tuple
-        @param  array      Reference to the Array<TYPE> datatype, which 
+        @param  array      Reference to the Array<TYPE> datatype, which
                            should be connected to the N-tuple.
         @param  low        Lower edge of client data values allowed
                            to fill into the N-tuple array.
@@ -650,15 +650,15 @@ namespace NTuple
         @return StatusCode indicating success or failure.
     */
     template <class TYPE, class RANGE> StatusCode
-      addItem(const std::string& name, 
-              long dim, 
+      addItem(const std::string& name,
+              long dim,
               Array<TYPE>& array,
               const RANGE low,
               const RANGE high)
     {
-      return i_addItem(name, 
+      return i_addItem(name,
                        dim,
-                       "", 
+                       "",
                        TYPE(low),
                        TYPE(high),
                        array.m_ptr);
@@ -666,13 +666,13 @@ namespace NTuple
 
     /** Add an indexed Array of data to a column wise N tuple with a range.
 
-        You should use this entry point to add a VARIABLE SIZE ARRAY 
-        to a column wise N-tuple. The dimension of the array is 
-        unspecified and depends on the data range, which you allowed 
-        for the index column. 
+        You should use this entry point to add a VARIABLE SIZE ARRAY
+        to a column wise N-tuple. The dimension of the array is
+        unspecified and depends on the data range, which you allowed
+        for the index column.
 
-        Hence you have to be careful on the allowed data range of the 
-        index column, because the index column determines the total 
+        Hence you have to be careful on the allowed data range of the
+        index column, because the index column determines the total
         allocated memory.
 
         Note: Checks on the data range are not implemented!
@@ -683,9 +683,9 @@ namespace NTuple
               please use addIndexedItem(...) instead.
 
         @param  name       Name of the column in the column wise N-tuple
-        @param  index      Reference to the scalar index column used to 
+        @param  index      Reference to the scalar index column used to
                            determine the size of the array.
-        @param  array      Reference to the Array<TYPE> datatype, which 
+        @param  array      Reference to the Array<TYPE> datatype, which
                            should be connected to the N-tuple.
         @param  low        Lower edge of client data values allowed
                            to fill into the N-tuple array.
@@ -694,38 +694,38 @@ namespace NTuple
 
         @return StatusCode indicating success or failure.
     */
-    template <class TYPE, class INDEX, class RANGE> StatusCode 
+    template <class TYPE, class INDEX, class RANGE> StatusCode
       addItem(const std::string& name,
               Item<INDEX>& index,
-              Array<TYPE>& array, 
-              const RANGE low, 
+              Array<TYPE>& array,
+              const RANGE low,
               const RANGE high)
     {
-      return i_addItem( name, 
-                        index->range().distance(), 
-                        index->name(), 
-                        TYPE(low), 
-                        TYPE(high), 
+      return i_addItem( name,
+                        index->range().distance(),
+                        index->name(),
+                        TYPE(low),
+                        TYPE(high),
                         array.m_ptr);
     }
 
     /** Add an indexed Array of data to a column wise N tuple with a range.
 
-        You should use this entry point to add a VARIABLE SIZE ARRAY 
-        to a column wise N-tuple. The dimension of the array is 
-        unspecified and depends on the data range, which you allowed 
-        for the index column. 
+        You should use this entry point to add a VARIABLE SIZE ARRAY
+        to a column wise N-tuple. The dimension of the array is
+        unspecified and depends on the data range, which you allowed
+        for the index column.
 
-        Hence you have to be careful on the allowed data range of the 
-        index column, because the index column determines the total 
+        Hence you have to be careful on the allowed data range of the
+        index column, because the index column determines the total
         allocated memory.
 
         Note: Checks on the data range are not implemented!
 
         @param  name       Name of the column in the column wise N-tuple
-        @param  index      Reference to the scalar index column used to 
+        @param  index      Reference to the scalar index column used to
                            determine the size of the array.
-        @param  array      Reference to the Array<TYPE> datatype, which 
+        @param  array      Reference to the Array<TYPE> datatype, which
                            should be connected to the N-tuple.
         @param  low        Lower edge of client data values allowed
                            to fill into the N-tuple array.
@@ -734,30 +734,30 @@ namespace NTuple
 
         @return StatusCode indicating success or failure.
     */
-    template <class TYPE, class INDEX, class RANGE> StatusCode 
+    template <class TYPE, class INDEX, class RANGE> StatusCode
       addIndexedItem( const std::string& name,
                       Item<INDEX>& index,
-                      Array<TYPE>& array, 
-                      const RANGE low, 
+                      Array<TYPE>& array,
+                      const RANGE low,
                       const RANGE high)
     {
-      return i_addItem( name, 
-                        index->range().distance(), 
-                        index->name(), 
-                        TYPE(low), 
-                        TYPE(high), 
+      return i_addItem( name,
+                        index->range().distance(),
+                        index->name(),
+                        TYPE(low),
+                        TYPE(high),
                         array.m_ptr);
     }
 
     /** Add an indexed Array of data to a column wise N tuple.
 
-        You should use this entry point to add a VARIABLE SIZE ARRAY 
-        to a column wise N-tuple. The dimension of the array is 
-        unspecified and depends on the data range, which you allowed 
-        for the index column. 
+        You should use this entry point to add a VARIABLE SIZE ARRAY
+        to a column wise N-tuple. The dimension of the array is
+        unspecified and depends on the data range, which you allowed
+        for the index column.
 
-        Hence, you have to be careful on the allowed data range of the 
-        index column, because the index column determines the total 
+        Hence, you have to be careful on the allowed data range of the
+        index column, because the index column determines the total
         allocated memory.
 
         Note: Due to confusion with the entry point to connecting
@@ -766,54 +766,54 @@ namespace NTuple
               please use addIndexedItem(...) instead.
 
         @param  name       Name of the column in the column wise N-tuple
-        @param  index      Reference to the scalar index column used to 
+        @param  index      Reference to the scalar index column used to
                            determine the size of the array.
-        @param  array      Reference to the Array<TYPE> datatype, which 
+        @param  array      Reference to the Array<TYPE> datatype, which
                            should be connected to the N-tuple.
 
         @return StatusCode indicating success or failure.
     */
     template <class TYPE, class INDEX> StatusCode
-      addItem(const std::string& name, 
-              Item<INDEX>& index, 
-              Array<TYPE>& array)   
+      addItem(const std::string& name,
+              Item<INDEX>& index,
+              Array<TYPE>& array)
     {
-      return i_addItem( name, 
-                        index->range().distance(), 
-                        index->name(), 
-                        Range<TYPE>::min(), 
+      return i_addItem( name,
+                        index->range().distance(),
+                        index->name(),
+                        Range<TYPE>::min(),
                         Range<TYPE>::max(),
                         array.m_ptr);
     }
 
     /** Add an indexed Array of data to a column wise N tuple.
 
-        You should use this entry point to add a VARIABLE SIZE ARRAY 
-        to a column wise N-tuple. The dimension of the array is 
-        unspecified and depends on the data range, which you allowed 
-        for the index column. 
+        You should use this entry point to add a VARIABLE SIZE ARRAY
+        to a column wise N-tuple. The dimension of the array is
+        unspecified and depends on the data range, which you allowed
+        for the index column.
 
-        Hence, you have to be careful on the allowed data range of the 
-        index column, because the index column determines the total 
+        Hence, you have to be careful on the allowed data range of the
+        index column, because the index column determines the total
         allocated memory.
 
         @param  name       Name of the column in the column wise N-tuple
-        @param  index      Reference to the scalar index column used to 
+        @param  index      Reference to the scalar index column used to
                            determine the size of the array.
-        @param  array      Reference to the Array<TYPE> datatype, which 
+        @param  array      Reference to the Array<TYPE> datatype, which
                            should be connected to the N-tuple.
 
         @return StatusCode indicating success or failure.
     */
     template <class TYPE, class INDEX> StatusCode
-      addIndexedItem( const std::string& name, 
-                      Item<INDEX>& index, 
-                      Array<TYPE>& array)   
+      addIndexedItem( const std::string& name,
+                      Item<INDEX>& index,
+                      Array<TYPE>& array)
     {
-      return i_addItem( name, 
-                        index->range().distance(), 
-                        index->name(), 
-                        Range<TYPE>::min(), 
+      return i_addItem( name,
+                        index->range().distance(),
+                        index->name(),
+                        Range<TYPE>::min(),
                         Range<TYPE>::max(),
                         array.m_ptr);
     }
@@ -821,49 +821,49 @@ namespace NTuple
     /** Add an fixed size Matrix of data to a column wise N tuple.
 
         You should use this entry point to add a FIXED SIZE MATRIX
-        to a column wise N-tuple. The dimension of the matrix must 
-        be specified. 
+        to a column wise N-tuple. The dimension of the matrix must
+        be specified.
 
-        Attention: Do not confuse with entry point to add a 
+        Attention: Do not confuse with entry point to add a
                    VARIABLE SIZE MATRIX!
 
         @param  name       Name of the column in the column wise N-tuple
         @param  cols       Number of data columns in the Matrix.
         @param  rows       Number of data rows in the Matrix.
-        @param  matrix     Reference to the Matrix<TYPE> datatype, which 
+        @param  matrix     Reference to the Matrix<TYPE> datatype, which
                            should be connected to the N-tuple.
 
         @return StatusCode indicating success or failure.
     */
     template <class TYPE> StatusCode
-      addItem(const std::string& name, 
+      addItem(const std::string& name,
               long cols,
               long rows,
               Matrix<TYPE>& matrix)
     {
-      return i_addItem(name, 
+      return i_addItem(name,
                        cols,
                        rows,
                        "",
                        Range<TYPE>::min(),
-                       Range<TYPE>::max(), 
+                       Range<TYPE>::max(),
                        matrix.m_ptr);
     }
 
     /** Add an fixed size Matrix of data to a column wise N tuple.
 
         You should use this entry point to add a FIXED SIZE MATRIX
-        to a column wise N-tuple. The dimension of the matrix must 
-        be specified. 
+        to a column wise N-tuple. The dimension of the matrix must
+        be specified.
 
         Note: Checks on the data range are not implemented!
-        Attention: Do not confuse with entry point to add a 
+        Attention: Do not confuse with entry point to add a
                    VARIABLE SIZE MATRIX!
 
         @param  name       Name of the column in the column wise N-tuple
         @param  cols       Number of data columns in the Matrix.
         @param  rows       Number of data rows in the Matrix.
-        @param  matrix     Reference to the Matrix<TYPE> datatype, which 
+        @param  matrix     Reference to the Matrix<TYPE> datatype, which
                            should be connected to the N-tuple.
         @param  low        Lower edge of client data values allowed
                            to fill into the N-tuple matrix.
@@ -873,31 +873,31 @@ namespace NTuple
         @return StatusCode indicating success or failure.
     */
     template <class TYPE, class RANGE> StatusCode
-      addItem(const std::string& name, 
-              long cols, 
-              long rows, 
+      addItem(const std::string& name,
+              long cols,
+              long rows,
               Matrix<TYPE>& result,
-              const RANGE low, 
+              const RANGE low,
               const RANGE high)
     {
-      return i_addItem(name, 
-                       cols, 
+      return i_addItem(name,
+                       cols,
                        rows,
                        "",
                        TYPE(low),
-                       TYPE(high), 
+                       TYPE(high),
                        result.m_ptr);
     }
 
     /** Add an variable size Matrix of data to a column wise N tuple.
 
         You should use this entry point to add a VARIABLE SIZE MATRIX
-        to a column wise N-tuple. The number of columns of the 
+        to a column wise N-tuple. The number of columns of the
         matrix is given by the allowed data range of the index column.
-        The number of rows however, which are allowed in the matrix 
+        The number of rows however, which are allowed in the matrix
         must be specified explicitly and cannot be variable.
 
-        Attention: Do not confuse with entry point to add a 
+        Attention: Do not confuse with entry point to add a
                    FIXED SIZE MATRIX.
 
         Note: Due to confusion with the entry point to connecting
@@ -906,76 +906,76 @@ namespace NTuple
               please use addIndexedItem(...) instead.
 
         @param  name       Name of the column in the column wise N-tuple
-        @param  index      Reference to the scalar index column used to 
+        @param  index      Reference to the scalar index column used to
                            determine the number of data columns in the matrix
-        @param  matrix     Reference to the Matrix<TYPE> datatype, which 
+        @param  matrix     Reference to the Matrix<TYPE> datatype, which
                            should be connected to the N-tuple.
         @param  rows       Number of data rows in the Matrix.
 
         @return StatusCode indicating success or failure.
     */
     template <class TYPE, class INDEX> StatusCode
-      addItem(const std::string& name, 
-              Item<INDEX>& index, 
+      addItem(const std::string& name,
+              Item<INDEX>& index,
               Matrix<TYPE>& matrix,
-              long rows) 
+              long rows)
     {
-      return i_addItem( name, 
-                        index->range().distance(), 
-                        rows, 
-                        index->name(), 
-                        Range<TYPE>::min(), 
-                        Range<TYPE>::max(), 
+      return i_addItem( name,
+                        index->range().distance(),
+                        rows,
+                        index->name(),
+                        Range<TYPE>::min(),
+                        Range<TYPE>::max(),
                         matrix.m_ptr);
     }
 
     /** Add an variable size Matrix of data to a column wise N tuple.
 
         You should use this entry point to add a VARIABLE SIZE MATRIX
-        to a column wise N-tuple. The number of columns of the 
+        to a column wise N-tuple. The number of columns of the
         matrix is given by the allowed data range of the index column.
-        The number of rows however, which are allowed in the matrix 
+        The number of rows however, which are allowed in the matrix
         must be specified explicitly and cannot be variable.
 
-        Attention: Do not confuse with entry point to add a 
+        Attention: Do not confuse with entry point to add a
                    FIXED SIZE MATRIX.
 
         @param  name       Name of the column in the column wise N-tuple
-        @param  index      Reference to the scalar index column used to 
+        @param  index      Reference to the scalar index column used to
                            determine the number of data columns in the matrix
         @param  rows       Number of data rows in the Matrix.
-        @param  matrix     Reference to the Matrix<TYPE> datatype, which 
+        @param  matrix     Reference to the Matrix<TYPE> datatype, which
                            should be connected to the N-tuple.
 
         @return StatusCode indicating success or failure.
     */
     template <class TYPE, class INDEX> StatusCode
-      addIndexedItem( const std::string& name, 
+      addIndexedItem( const std::string& name,
                       Item<INDEX>& col_index,
                       long rows,
                       Matrix<TYPE>& matrix)
     {
-      return i_addItem( name, 
-                        col_index->range().distance(), 
-                        rows, 
-                        col_index->name(), 
-                        Range<TYPE>::min(), 
-                        Range<TYPE>::max(), 
+      return i_addItem( name,
+                        col_index->range().distance(),
+                        rows,
+                        col_index->name(),
+                        Range<TYPE>::min(),
+                        Range<TYPE>::max(),
                         matrix.m_ptr);
     }
 
     /** Add an variable size Matrix of data to a column wise N tuple.
 
         You should use this entry point to add a VARIABLE SIZE MATRIX
-        to a column wise N-tuple. The number of columns of the 
+        to a column wise N-tuple. The number of columns of the
         matrix is given by the allowed data range of the index column.
-        The number of rows however, which are allowed in the matrix 
+        The number of rows however, which are allowed in the matrix
         must be specified explicitly and cannot be variable. Also the
-        range of allowed data values to be filled into the data area 
+        range of allowed data values to be filled into the data area
         of the matrix can be specified.
 
         Note: Checks on the data range are not implemented!
-        Attention: Do not confuse with entry point to add a 
+        Attention: Do not confuse with entry point to add a
                    FIXED SIZE MATRIX.
 
         Note: Due to confusion with the entry point to connecting
@@ -984,9 +984,9 @@ namespace NTuple
               please use addIndexedItem(...) instead.
 
         @param  name       Name of the column in the column wise N-tuple
-        @param  index      Reference to the scalar index column used to 
+        @param  index      Reference to the scalar index column used to
                            determine the number of data columns in the matrix
-        @param  matrix     Reference to the Matrix<TYPE> datatype, which 
+        @param  matrix     Reference to the Matrix<TYPE> datatype, which
                            should be connected to the N-tuple.
         @param  rows       Number of data rows in the Matrix.
         @param  low        Lower edge of client data values allowed
@@ -996,15 +996,15 @@ namespace NTuple
 
         @return StatusCode indicating success or failure.
     */
-    template <class TYPE, class INDEX, class RANGE> StatusCode 
-      addItem(const std::string& name, 
-              Item<INDEX>& index, 
+    template <class TYPE, class INDEX, class RANGE> StatusCode
+      addItem(const std::string& name,
+              Item<INDEX>& index,
               Matrix<TYPE>& matrix,
               long rows,
               const RANGE low,
-              const RANGE high) 
+              const RANGE high)
     {
-      return i_addItem( name, 
+      return i_addItem( name,
                         index->range().distance(),
                         rows,
                         index->name(),
@@ -1016,22 +1016,22 @@ namespace NTuple
     /** Add an variable size Matrix of data to a column wise N tuple.
 
         You should use this entry point to add a VARIABLE SIZE MATRIX
-        to a column wise N-tuple. The number of columns of the 
+        to a column wise N-tuple. The number of columns of the
         matrix is given by the allowed data range of the index column.
-        The number of rows however, which are allowed in the matrix 
+        The number of rows however, which are allowed in the matrix
         must be specified explicitly and cannot be variable. Also the
-        range of allowed data values to be filled into the data area 
+        range of allowed data values to be filled into the data area
         of the matrix can be specified.
 
         Note: Checks on the data range are not implemented!
-        Attention: Do not confuse with entry point to add a 
+        Attention: Do not confuse with entry point to add a
                    FIXED SIZE MATRIX.
 
         @param  name       Name of the column in the column wise N-tuple
-        @param  index      Reference to the scalar index column used to 
+        @param  index      Reference to the scalar index column used to
                            determine the number of data columns in the matrix
         @param  rows       Number of data rows in the Matrix.
-        @param  matrix     Reference to the Matrix<TYPE> datatype, which 
+        @param  matrix     Reference to the Matrix<TYPE> datatype, which
                            should be connected to the N-tuple.
         @param  low        Lower edge of client data values allowed
                            to fill into the N-tuple matrix.
@@ -1040,15 +1040,15 @@ namespace NTuple
 
         @return StatusCode indicating success or failure.
     */
-    template <class TYPE, class INDEX, class RANGE> StatusCode 
-      addIndexedItem( const std::string& name, 
-                      Item<INDEX>& index, 
+    template <class TYPE, class INDEX, class RANGE> StatusCode
+      addIndexedItem( const std::string& name,
+                      Item<INDEX>& index,
                       long rows,
                       Matrix<TYPE>& matrix,
                       const RANGE low,
-                      const RANGE high) 
+                      const RANGE high)
     {
-      return i_addItem( name, 
+      return i_addItem( name,
                         index->range().distance(),
                         rows,
                         index->name(),
@@ -1113,7 +1113,7 @@ namespace NTuple
       m_type = typ;
     }
     /// Return access type
-    const long type()      const {
+    long type()      const {
       return m_type;
     }
     /// Retrun physical file name
@@ -1144,17 +1144,17 @@ namespace NTuple
   // =========================================================================
   // inhibit certain types by defining specialized templates which do not
   // allow for construction.
-  template <> 
-  class Array <IOpaqueAddress*> 
+  template <>
+  class Array <IOpaqueAddress*>
   {
   private:
     Array(){}
   public:
-    virtual ~Array() {} 
+    virtual ~Array() {}
     virtual void dummy() = 0;
   };
-  template <> 
-  class Matrix<IOpaqueAddress*> 
+  template <>
+  class Matrix<IOpaqueAddress*>
   {
   private:
     Matrix(){}

@@ -3,11 +3,11 @@
 
 package GaudiRelease
 
-version v19r9
+version v20r3
 branches doc cmt 
 
 # CMT and Gaudi policy
-use GaudiPolicy	   v8r2
+use GaudiPolicy	   v8r6
 
 # Note for conditional use statements: only the tags which are defined
 # at the level of CMT (and CMTSITE) can be used. This means that
@@ -16,38 +16,42 @@ use GaudiPolicy	   v8r2
 # the level of the package itself with a "macro_remove constituents"
 
 # Gaudi executable
-use Gaudi          v19r9
+use Gaudi          v20r3
 
 # Gaudi libraries - generic
-use GaudiKernel    v24r0
-use GaudiSvc       v16r5
-use GaudiAud       v8r5
-use GaudiAlg       v10r5
-use GaudiGSL       v6r9
-use GaudiUtils     v1r6
+use GaudiKernel    v26r0
+use GaudiSvc       v17r2
+use GaudiAud       v8r7
+use GaudiAlg       v11r2
+use GaudiGSL       v6r10
+use GaudiUtils     v2r1
 
 # Technology-specific Persistency packages
 use HbookCnv       v14r13
-use RootHistCnv    v9r16
-use GaudiPoolDb    v3r1
-use GaudiPython    v8r19
+use RootHistCnv    v9r17
+use GaudiPoolDb    v4r1
+use GaudiPython    v9r3
 
 # Container package specifying the minimum set of core packages
-use GaudiSys       v19r9
+use GaudiSys       v20r3
 
 # Grid utilities for prestaging files
-use GaudiGridSvc   v1r5
+macro GaudiGridSvc_use "" \
+        WIN32     "" \
+	slc4-ia32 "GaudiGridSvc v1r7" \
+	slc4-amd64 "GaudiGridSvc v1r7"
+use ${GaudiGridSvc_use}
 
 # Monitoring utility. Can use also MonaLisa
-use GaudiMonitor   v1r4
+use GaudiMonitor   v1r5
 
 
 # Examples packages
-use GaudiExamples   v19r9
+use GaudiExamples   v20r3
 
 
 # Atlas packages
-use PartPropSvc      v2r6
+use PartPropSvc      v2r7
 
 #LHCb external packages
 macro COOL_use "" LHCb "COOL v* LCG_Interfaces"
@@ -62,12 +66,14 @@ macro HepMC_use "" LHCb "HepMC v* LCG_Interfaces"
 use $(HepMC_use)
 macro oracle_use "" LHCb "oracle v* LCG_Interfaces"
 use $(oracle_use)
-macro pyqt_use "" LHCb "pyqt v* LCG_Interfaces"
+macro pyqt_use "" WIN32 "" LHCb "pyqt v* LCG_Interfaces"
 use $(pyqt_use)
 macro QMtest_use "" LHCb "QMtest v* LCG_Interfaces"
 use $(QMtest_use)
 macro CppUnit_use "" LHCb "CppUnit v* LCG_Interfaces"
 use $(CppUnit_use)
+macro processing_use "" LHCb "processing v* LCG_Interfaces"
+use $(processing_use)
 
 #LHCbGrid external packages
 macro gfal_use "" LHCbGrid "gfal v* LCG_Interfaces"
@@ -79,3 +85,9 @@ use $(dcache_client_use)
 
 # Allow the generation of QMTest summary 
 apply_pattern QMTestSummarize
+
+private
+# Override the GAUDI_DOXY_HOME defined in GaudiPolicy to point to the local
+# directory instead of the release area.
+set GAUDI_DOXY_HOME $(GaudiRelease_root)/doc
+end_private

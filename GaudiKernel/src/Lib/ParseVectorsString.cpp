@@ -1,6 +1,6 @@
-// $Id: ParseVectorsString.cpp,v 1.2 2007/05/24 14:39:11 hmd Exp $
+// $Id: ParseVectorsString.cpp,v 1.4 2008/10/28 14:02:18 marcocle Exp $
 // ============================================================================
-// CVS tag $Name:  $, version $Revision: 1.2 $ 
+// CVS tag $Name:  $, version $Revision: 1.4 $ 
 // ============================================================================
 // Include files
 // ============================================================================
@@ -35,10 +35,11 @@ namespace Gaudi
     StatusCode parse ( vector<string>&             result , 
                        const string&               input  )
     {
+      VectorGrammar<StringGrammar> g;
       return parse(
           createIterator(input), 
           IteratorT(),
-          VectorGrammar<StringGrammar>()[var(result)=arg1],
+          g[var(result)=arg1],
           SkipperGrammar()).full;
     }
     // ========================================================================

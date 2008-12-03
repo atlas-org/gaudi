@@ -1,4 +1,4 @@
-// $Id: PoolDbTupleCallback.cpp,v 1.4 2008/01/17 13:20:52 marcocle Exp $
+// $Id: PoolDbTupleCallback.cpp,v 1.5 2008/10/27 16:41:33 marcocle Exp $
 //------------------------------------------------------------------------------
 //
 // Implementation of class :  PoolDbTupleCallback
@@ -6,6 +6,10 @@
 // Author :                   Markus Frank
 //
 //------------------------------------------------------------------------------
+
+// FIXME: missing in CORAL
+#include <algorithm>
+
 #include "GaudiPoolDb/PoolDbTupleCallback.h"
 #include "GaudiKernel/INTuple.h"
 #include "GaudiKernel/ISelectStatement.h"

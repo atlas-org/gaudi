@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/IMessageSvc.h,v 1.7 2007/01/18 14:53:59 hmd Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/IMessageSvc.h,v 1.8 2008/10/01 14:39:27 marcocle Exp $
 #ifndef GAUDIKERNEL_IMESSAGESVC_H
 #define GAUDIKERNEL_IMESSAGESVC_H
 
@@ -12,7 +12,7 @@ class StatusCode;
 class Message;
 
 // Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IMessageSvc(30, 1 , 0); 
+static const InterfaceID IID_IMessageSvc(30, 1 , 1); 
 
 /// Printlevels enumeration
 namespace MSG   {
@@ -54,7 +54,13 @@ public:
   /// Retrieve interface ID
   static const InterfaceID& interfaceID() { return IID_IMessageSvc; }
 
-  /** Report a message by sending a Message object to the message serivice.
+  /** Report a message by sending a Message object to the message service
+      @param message  Reference to a message object
+      @param outputLevel Output level of the message source for this message
+  */
+  virtual void reportMessage( const Message& msg, int outputLevel ) = 0;
+
+  /** Report a message by sending a Message object to the message service
       @param message  Reference to a message object
   */
   virtual void reportMessage( const Message& message ) = 0;

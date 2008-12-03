@@ -1,4 +1,4 @@
-// $Id: HistoDecorator.cpp,v 1.4 2007/08/07 12:24:38 marcocle Exp $
+// $Id: HistoDecorator.cpp,v 1.5 2008/10/09 09:59:14 marcocle Exp $
 // ============================================================================
 // Include files 
 // ============================================================================
@@ -538,28 +538,36 @@ GaudiPython::HistoDecorator::profile1D
   const double           lowX   ,
   const double           highX  ,
   const unsigned long    binsX  ,
+  const std::string&     opt    ,
+  const double           lowY   , 
+  const double           highY  ,
   const double           weight ) 
 {
   return algo.profile1D 
-    ( valueX , valueY , title , lowX , highX , binsX , weight ) ;
+    ( valueX , valueY , title , lowX , highX , binsX , 
+      opt , lowY , highY , weight ) ;
 }
 // ========================================================================      
 // 1D-profiles: by generic ID 
 // ========================================================================  
 AIDA::IProfile1D* 
 GaudiPython::HistoDecorator::profile1D
-( const GaudiHistoAlg&     algo    , 
-  const double             valueX  ,
-  const double             valueY  ,
-  const GaudiAlg::HistoID& ID      ,
-  const std::string&       title   ,
-  const double             lowX    ,
-  const double             highX   ,
-  const unsigned long      binsX   ,
-  const double             weight  ) 
+( const GaudiHistoAlg&     algo   , 
+  const double             valueX ,
+  const double             valueY ,
+  const GaudiAlg::HistoID& ID     ,
+  const std::string&       title  ,
+  const double             lowX   ,
+  const double             highX  ,
+  const unsigned long      binsX  ,
+  const std::string&       opt    ,
+  const double             lowY   , 
+  const double             highY  ,
+  const double             weight )
 {
   return algo.profile1D 
-    ( valueX , valueY , ID , title , lowX , highX , binsX , weight ) ;
+    ( valueX , valueY , ID , title , lowX , highX , binsX , 
+      opt , lowY , highY , weight ) ;
 }
 // ========================================================================      
 // 1D-profiles: by numeric ID 
@@ -574,10 +582,14 @@ GaudiPython::HistoDecorator::profile1D
   const double           lowX   ,
   const double           highX  ,
   const unsigned long    binsX  ,
-  const double           weight ) 
+  const std::string&     opt    ,
+  const double           lowY   , 
+  const double           highY  ,
+  const double           weight )
 {
   return algo.profile1D 
-    ( valueX , valueY , ID , title , lowX , highX , binsX , weight ) ;
+    ( valueX , valueY , ID , title , lowX , highX , binsX , 
+      opt , lowY , highY , weight ) ;
 }
 // ========================================================================      
 // 1D-profiles: by string ID 
@@ -592,10 +604,14 @@ GaudiPython::HistoDecorator::profile1D
   const double           lowX   ,
   const double           highX  ,
   const unsigned long    binsX  ,
+  const std::string&     opt    ,
+  const double           lowY   , 
+  const double           highY  ,
   const double           weight ) 
 {
   return algo.profile1D 
-    ( valueX , valueY , ID , title , lowX , highX , binsX , weight ) ;
+    ( valueX , valueY , ID , title , lowX , highX , binsX , 
+      opt , lowY , highY , weight ) ;
 }
 // ========================================================================  
 // 2D-profiles: by title 

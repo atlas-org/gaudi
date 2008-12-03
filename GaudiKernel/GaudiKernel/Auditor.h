@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/Auditor.h,v 1.16 2008/04/03 17:27:01 marcocle Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/Auditor.h,v 1.17 2008/10/27 19:22:20 marcocle Exp $
 #ifndef GAUDIKERNEL_AUDITOR_H
 #define GAUDIKERNEL_AUDITOR_H
 
@@ -19,18 +19,18 @@ class Algorithm;
 
 /** @class Auditor Auditor.h GaudiKernel/Auditor.h
 
-    Base class from which all concrete auditor classes should be derived. 
+    Base class from which all concrete auditor classes should be derived.
     The only base class functionality which may be used in the
-    constructor of a concrete auditor is the declaration of 
-    member variables as properties. All other functionality, 
-    i.e. the use of services, may be used only in 
+    constructor of a concrete auditor is the declaration of
+    member variables as properties. All other functionality,
+    i.e. the use of services, may be used only in
     initialise() and afterwards.
 
     @author David Quarrie
     @date   2000
     @author Marco Clemencic
     @date   2008-03
-*/ 
+*/
 class Auditor : virtual public IAuditor,
                 virtual public IProperty {
 public:
@@ -66,7 +66,7 @@ public:
   virtual void after(CustomEventTypeRef, const std::string&, const StatusCode&);
 
   // Obsolete methods
-  
+
   virtual void beforeInitialize(INamedInterface* ) ;
   virtual void afterInitialize(INamedInterface* ) ;
 
@@ -90,7 +90,7 @@ public:
 
   virtual const std::string&  name() const ;
 
-  virtual const bool isEnabled() const ;
+  virtual bool isEnabled() const ;
 
   /** The standard message service. Returns a pointer to the standard message
       service. May not be invoked before sysInitialize() has been invoked.
@@ -99,10 +99,10 @@ public:
 
   /// Retrieve the outputlevel of current auditor
   int outputLevel() const { return m_outputLevel; }
-   
+
   /// Set the outputlevel for current auditor
   void setOutputLevel( int level );
-   
+
   /** The standard service locator. Returns a pointer to the service locator service.
       This service may be used by an auditor to request any services it requires in
       addition to those provided by default.
@@ -122,7 +122,7 @@ public:
     return sc;
   }
 
-  /// Set a value of a property of an auditor. 
+  /// Set a value of a property of an auditor.
   virtual StatusCode setProperty(const Property& p);
 
   /// Implementation of IProperty::setProperty
@@ -144,54 +144,54 @@ public:
   const std::vector<Property*>& getProperties( ) const;
 
 
-  /** set the property form the value 
-   *  
-   *  @code 
+  /** set the property form the value
+   *
+   *  @code
    *
    *  std::vector<double> data = ... ;
    *  setProperty( "Data" , data ) ;
-   *  
+   *
    *  std::map<std::string,double> cuts = ... ;
    *  setProperty( "Cuts" , cuts ) ;
    *
    *  std::map<std::string,std::string> dict = ... ;
    *  setProperty( "Dictionary" , dict ) ;
-   * 
-   *  @endcode 
    *
-   *  Note: the interface IProperty allows setting of the properties either 
+   *  @endcode
+   *
+   *  Note: the interface IProperty allows setting of the properties either
    *        directly from other properties or from strings only
    *
-   *  This is very convinient in resetting of the default 
+   *  This is very convinient in resetting of the default
    *  properties in the derived classes.
-   *  E.g. without this method one needs to convert 
+   *  E.g. without this method one needs to convert
    *  everything into strings to use IProperty::setProperty
    *
-   *  @code 
-   *  
+   *  @code
+   *
    *    setProperty ( "OutputLevel" , "1"    ) ;
    *    setProperty ( "Enable"      , "True" ) ;
    *    setProperty ( "ErrorMax"    , "10"   ) ;
    *
-   *  @endcode 
+   *  @endcode
    *
-   *  For simple cases it is more or less ok, but for complicated properties 
+   *  For simple cases it is more or less ok, but for complicated properties
    *  it is just ugly..
    *
-   *  @param name      name of the property 
+   *  @param name      name of the property
    *  @param value     value of the property
    *  @see Gaudi::Utils::setProperty
    *  @author Vanya BELYAEV ibelyaev@physics.syr.edu
-   *  @date 2007-05-13 
-   */ 
+   *  @date 2007-05-13
+   */
   template <class TYPE>
-  StatusCode setProperty 
-  ( const std::string& name  , 
-    const TYPE&        value ) 
+  StatusCode setProperty
+  ( const std::string& name  ,
+    const TYPE&        value )
   { return Gaudi::Utils::setProperty ( m_PropertyMgr , name , value ) ; }
-  
+
   /** Set the auditor's properties. This method requests the job options service
-      to set the values of any declared properties. The method is invoked from 
+      to set the values of any declared properties. The method is invoked from
       within sysInitialize() by the framework and does not need to be explicitly
       called by a concrete auditor.
   */
@@ -202,28 +202,28 @@ public:
    *
    *  @code
    *
-   *  MyAuditor( ... ) 
-   *     : Auditor ( ...  ) 
+   *  MyAuditor( ... )
+   *     : Auditor ( ...  )
    *     , m_property1   ( ... )
    *     , m_property2   ( ... )
    *   {
-   *     // declare the property 
+   *     // declare the property
    *     declareProperty( "Property1" , m_property1 , "Doc fro property #1" ) ;
    *
    *     // declare the property and attach the handler  to it
-   *     declareProperty( "Property2" , m_property2 , "Doc for property #2" ) 
+   *     declareProperty( "Property2" , m_property2 , "Doc for property #2" )
    *        -> declareUpdateHandler( &MyAlg::handler_2 ) ;
-   *  
+   *
    *   }
    *  @endcode
-   *  
-   *  @see PropertyMgr 
-   *  @see PropertyMgr::declareProperty 
-   *  
-   *  @param name the property name 
-   *  @param proeprty the property itself, 
+   *
+   *  @see PropertyMgr
+   *  @see PropertyMgr::declareProperty
+   *
+   *  @param name the property name
+   *  @param proeprty the property itself,
    *  @param doc      the documentation string
-   *  @return the actual property objects 
+   *  @return the actual property objects
    */
   template <class T>
   Property* declareProperty( const std::string& name, T& property,

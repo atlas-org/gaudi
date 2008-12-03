@@ -1,4 +1,4 @@
-// $Id: AppMgrRunable.cpp,v 1.7 2007/12/12 16:03:19 marcocle Exp $
+// $Id: AppMgrRunable.cpp,v 1.8 2008/06/02 14:21:35 marcocle Exp $
 #define  GAUDISVC_APPMGRRUNABLE_CPP
 
 #include "GaudiKernel/SmartIF.h"
@@ -47,6 +47,18 @@ StatusCode AppMgrRunable::initialize()   {
       setProperty(props->getProperty("EvtMax")).ignore();
     }
   }
+  return sc;
+}
+
+// IService implementation: initialize the service
+StatusCode AppMgrRunable::start()   {
+  StatusCode sc = Service::start();
+  return sc;
+}
+
+// IService implementation: initialize the service
+StatusCode AppMgrRunable::stop()   {
+  StatusCode sc = Service::stop();
   return sc;
 }
 

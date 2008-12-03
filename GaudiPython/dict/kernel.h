@@ -1,6 +1,6 @@
 // $Id:
 // ============================================================================
-// CVS tag $Name:  $, version $Revision: 1.32 $
+// CVS tag $Name:  $, version $Revision: 1.37 $
 // ============================================================================
 #include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/ParticleProperty.h"
@@ -10,6 +10,7 @@
 #include "GaudiKernel/ChronoEntity.h"
 #include "GaudiKernel/Stat.h"
 #include "GaudiKernel/StatEntity.h"
+#include "GaudiKernel/SerializeSTL.h"
 
 #include "AIDA/IHistogram.h"
 #include "AIDA/IHistogram1D.h"
@@ -38,39 +39,46 @@
 #include "GaudiAlg/GaudiAlgorithm.h"
 #include "GaudiAlg/GaudiCommon.h"
 #include "GaudiAlg/IErrorTool.h"
+#include "GaudiAlg/IGenericTool.h"
 #include "GaudiAlg/IHistoTool.h"
 #include "GaudiAlg/ITupleTool.h"
-#include "GaudiAlg/ISequencerTimerTool.h"
 #include "GaudiAlg/ISequencerTimerTool.h"
 // Added to avoid warnings about inlined functions never implemented.
 #include "GaudiAlg/GaudiHistos.icpp"
 
 #include "GaudiUtils/Aida2ROOT.h"
+#include "GaudiUtils/IFileCatalog.h"
+#include "GaudiUtils/IFileCatalogMgr.h"
+#include "GaudiUtils/IIODataManager.h"
 
-
+#include "GaudiPython/PyROOTPickle.h"
+#include "GaudiPython/TESSerializer.h"
 #include <iostream>
 #include <istream>
 
+// needed to find operator<< implemented in GaudiUtils.
+using namespace GaudiUtils;
+
 namespace GaudiPython
 {
-  
+
   template <class TYPE>
   struct _Property
   {
     TYPE                       m_type ;
     SimpleProperty<TYPE>       m_prop ;
     SimplePropertyRef<TYPE>    m_ref  ;
-    // constructor 
-    _Property() 
-      : m_type() 
+    // constructor
+    _Property()
+      : m_type()
       , m_prop()
-      , m_ref ( "" , m_type ) 
+      , m_ref ( "" , m_type )
     {}
     //
   } ;
 
-  //--- Templace instantiations
-  struct __Instantiations 
+  //--- Template instantiations
+  struct __Instantiations
   {
     std::vector<Property*>              i0      ;
     std::vector<const Property*>        i00     ;
@@ -79,22 +87,24 @@ namespace GaudiPython
     std::allocator<IRegistry*>          a0  ;
     std::allocator<IAlgorithm*>         a1  ;
     std::allocator<IService*>           a2  ;
-    
+
     std::list<IAlgorithm*>              i01     ;
     std::list<IService*>                i02     ;
     std::list<const IFactory*>          i023    ;
 
+    //Gaudi::IIODataManager              *gu_i1000;
+
     GaudiUtils::VectorMap<int,double>   i034 ;
-    
-        
+
+
     GaudiPython::PyAlg<GaudiAlgorithm>  _alg0 ;
     GaudiPython::PyAlg<GaudiHistoAlg>   _alg1 ;
     GaudiPython::PyAlg<GaudiTupleAlg>   _alg2 ;
-    
+
     GaudiPython::Matrix _mtrx ;
     GaudiPython::Vector _vctr ;
     std::vector<std::vector<double> > _vct1 ;
-    
+
     // primitives:
     _Property<bool>                                               pp_01 ;
     _Property<char>                                               pp_02 ;
@@ -112,7 +122,7 @@ namespace GaudiPython
     _Property<double>                                             pp_14 ;
     _Property<long double>                                        pp_15 ;
     _Property<std::string>                                        pp_16 ;
-    
+
     // vectors of primitives
     _Property<std::vector<bool> >                                 vp_01 ;
     _Property<std::vector<char> >                                 vp_02 ;
@@ -130,7 +140,7 @@ namespace GaudiPython
     _Property<std::vector<double> >                               vp_14 ;
     _Property<std::vector<long double> >                          vp_15 ;
     _Property<std::vector<std::string> >                          vp_16 ;
-    
+
     // some extended types
     _Property<std::pair<int,int> >                                ep_01 ;
     _Property<std::pair<double,double> >                          ep_02 ;
@@ -151,7 +161,7 @@ namespace GaudiPython
 
 }; // end of namespace GaudiPython
 
-namespace __gnu_cxx { struct dummy {}; }  // hack to please CINT 
+namespace __gnu_cxx { struct dummy {}; }  // hack to please CINT
 
 #ifdef _WIN32
 #pragma warning ( disable : 4345 )
@@ -159,9 +169,9 @@ namespace __gnu_cxx { struct dummy {}; }  // hack to please CINT
 #endif
 
 // ============================================================================
-// The END 
+// The END
 // ============================================================================
 
 
 
- 
+

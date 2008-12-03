@@ -1,9 +1,110 @@
 import os, sys, re
 
+import logging
+_log = logging.getLogger(__name__)
+
+class LogFormatter(logging.Formatter):
+    def __init__(self, fmt=None, datefmt=None, prefix = "# "):
+        logging.Formatter.__init__(self, fmt, datefmt)
+        self.prefix = prefix
+    def format(self, record):
+        fmsg = logging.Formatter.format(self, record)
+        if record.levelno >= logging.WARNING:
+            s = "%s%s: %s" % ( self.prefix, record.levelname, fmsg )
+        else:
+            s = "%s%s" % ( self.prefix, fmsg )
+        return s
+
+class LogFilter(logging.Filter):
+    def __init__(self, name = ""):
+        logging.Filter.__init__(self, name)
+        self.printing_level = 0
+        self.enabled = True
+        self.threshold = logging.WARNING
+    def filter(self, record):
+        return record.levelno >= self.threshold or (self.enabled and self.printing_level <= 0)
+    def printOn(self, step = 1, force = False):
+        """
+        Decrease the printing_level of 'step' units. ( >0 means no print)
+        The level cannot go below 0, unless the force flag is set to True.
+        A negative value of the treshold disables subsequent "PrintOff"s.
+        """
+        if force:
+            self.printing_level -= step
+        else:
+            if self.printing_level > step:
+                self.printing_level -= step
+            else:
+                self.printing_level = 0
+    def printOff(self, step = 1):
+        """
+        Increase the printing_level of 'step' units. ( >0 means no print)
+        """
+        self.printing_level += step
+    def disable(self, allowed = logging.WARNING):
+        self.enabled = False
+        self.threshold = allowed
+    def enable(self, allowed = logging.WARNING):
+        self.enabled = True
+        self.threshold = allowed
+
+class ConsoleHandler(logging.StreamHandler):
+    def __init__(self, strm = None, prefix = None):
+        if strm is None:
+            strm = sys.stdout
+        logging.StreamHandler.__init__(self, strm = strm)
+        if prefix is None:
+            prefix = "# "
+        self._filter = LogFilter(_log.name)
+        self._formatter = LogFormatter(prefix = prefix)
+        self.setFormatter(self._formatter)
+        self.addFilter(self._filter)
+    def setPrefix(self, prefix):
+        self._formatter.prefix = prefix
+    def printOn(self, step = 1, force = False):
+        """
+        Decrease the printing_level of 'step' units. ( >0 means no print)
+        The level cannot go below 0, unless the force flag is set to True.
+        A negative value of the treshold disables subsequent "PrintOff"s.
+        """
+        self._filter.printOn(step, force)
+    def printOff(self, step = 1):
+        """
+        Increase the printing_level of 'step' units. ( >0 means no print)
+        """
+        self._filter.printOff(step)
+    def disable(self, allowed = logging.WARNING):
+        self._filter.disable(allowed)
+    def enable(self, allowed = logging.WARNING):
+        self._filter.enable(allowed)
+
+_consoleHandler = None
+def GetConsoleHandler(prefix = None):
+    global _consoleHandler
+    if _consoleHandler is None:
+        _consoleHandler = ConsoleHandler(prefix = prefix)
+    elif prefix is not None:
+        _consoleHandler.setPrefix(prefix)
+    return _consoleHandler
+
+def InstallRootLoggingHandler(prefix = None, level = None):
+    root_logger = logging.getLogger()
+    if not root_logger.handlers:
+        root_logger.addHandler(GetConsoleHandler(prefix))
+        root_logger.setLevel(logging.WARNING)
+    if level is not None:
+        root_logger.setLevel(level)
+
+def PrintOn(step = 1, force = False):
+    GetConsoleHandler().printOn(step, force)
+def PrintOff(step = 1):
+    GetConsoleHandler().printOff(step)
+
 class ParserError(RuntimeError):
     pass
 
 def _find_file(f):
+    # expand environment variables in the filename 
     f = os.path.expandvars(f)
     if os.path.isfile(f):
         return os.path.realpath(f)
@@ -18,24 +119,17 @@ def _find_file(f):
 _included_files = set()
 def _to_be_included(f):
     if f in _included_files:
-        print "# Warning: file '%s' already included, ignored."%f
+        _log.warning("file '%s' already included, ignored.", f)
         return False
     _included_files.add(f)
     return True
-
-printing_level = 0
-def _print(msg):
-    if printing_level <= 0:
-        print msg
-    #print msg
-
 
 class JobOptsParser:
     comment = re.compile(r'(//.*)$')
     # non-perfect R-E to check if '//' is inside a string
     # (a tokenizer would be better)
     comment_in_string = re.compile(r'(["\']).*//.*\1') 
-    directive = re.compile(r'^\s*#\s*(\w+)\s*(.*)\s*$')
+    directive = re.compile(r'^\s*#\s*([\w!]+)\s*(.*)\s*$')
     comment_ml = ( re.compile(r'/\*'), re.compile(r'\*/') )
     statement_sep = ";"
     reference = re.compile(r'^@([\w.]*)$')
@@ -50,13 +144,11 @@ class JobOptsParser:
     def _include(self,file,function):
         file = _find_file(file)
         if _to_be_included(file):
-            _print("# --> Including file '%s'"%file)
+            _log.info("--> Including file '%s'", file)
             function(file)
-            _print("# <-- End of file '%s'"%file)
+            _log.info("<-- End of file '%s'", file)
         
     def parse(self,file):
-        global printing_level
-        
         # states for the "translation unit"
         statement = ""
         
@@ -66,14 +158,25 @@ class JobOptsParser:
         
         f = open(_find_file(file))
         l = f.readline()
+        if l.startswith("#!"):
+            # Skip the first line if it starts with "#!".
+            # It allows to use options files as scripts.
+            l = f.readline()
+        
         while l:
             l = l.rstrip()+'\n' # normalize EOL chars (to avoid problems with DOS new-line on Unix)
             
             # single line comment
             m = self.comment.search(l)
-            if m and not self.comment_in_string.search(l):
-                l = l[:m.start()]+l[m.end():]
-        
+            if m:
+                # check if the '//' is part of a string
+                m2 = self.comment_in_string.search(l)
+                # the '//' is part of a string if we find the quotes around it
+                # and they are not part of the comment itself  
+                if not ( m2 and m2.start() < m.start() ):
+                    # if it is not the case, we can remove the comment from the
+                    # statement 
+                    l = l[:m.start()]+l[m.end():]
             # process directives
             m = self.directive.search(l)
             if m:
@@ -106,12 +209,11 @@ class JobOptsParser:
                     if pragma[0] == "print":
                         if len(pragma) > 1:
                             if pragma[1].upper() in [ "ON", "TRUE", "1" ]:
-                                if printing_level > 0:
-                                    printing_level -= 1
+                                PrintOn()
                             else:
-                                printing_level += 1
+                                PrintOff()
                 else:
-                    print "# // Warning: unknown directive '%s'"%directive_name
+                    _log.warning("unknown directive '%s'", directive_name)
                 l = f.readline()
                 continue
             
@@ -138,6 +240,10 @@ class JobOptsParser:
                 statement += l[:i]
                 self._eval_statement(statement.replace("\n","").strip())
                 statement = l[i+1:]
+                # it may happen (bug #37479) that the rest of the statement
+                # contains a comment.
+                if statement.lstrip().startswith("//"):
+                    statement = ""
             else:
                 statement += l
             
@@ -156,9 +262,11 @@ class JobOptsParser:
             self.units[unit] = value
 
     def _eval_statement(self,statement):
-        from GaudiKernel.Proxy.Configurable import ConfigurableGeneric, Configurable
+        from GaudiKernel.Proxy.Configurable import (ConfigurableGeneric,
+                                                    Configurable,
+                                                    PropertyReference)
         #statement = statement.replace("\n","").strip()
-        _print("# %s%s"%(statement,self.statement_sep))
+        _log.info("%s%s", statement, self.statement_sep)
         
         property,value = statement.split("=",1)
         
@@ -184,13 +292,15 @@ class JobOptsParser:
         #        cfg = ConfigurableGeneric(component)
         #    parent_cfg = cfg
         
+        # remove spaces around dots
+        property = '.'.join([w.strip() for w in property.split('.')])
         component, property = property.rsplit('.',1)
         if component in Configurable.allConfigurables:
             cfg = Configurable.allConfigurables[component]
         else:
             cfg = ConfigurableGeneric(component)
         
-        value = os.path.expandvars(value)
+        #value = os.path.expandvars(value)
         value = value.replace('true','True').replace('false','False')
         if value[0] == '{' :
             # Try to guess if the values looks like a dictionary
@@ -207,7 +317,7 @@ class JobOptsParser:
         m = self.reference.match(value)
         if m:
             # this allows late binding of references
-            value = Configurable.PropertyReference(m.group(1))
+            value = PropertyReference(m.group(1))
         else:
             value = eval(value,self.units)
         
@@ -219,7 +329,7 @@ class JobOptsParser:
             lprop = property.lower()
             for p in cfg.__slots__:
                 if lprop == p.lower():
-                    _print("# WARNING: property '%s' was requested for %s, but the correct spelling is '%s'"%(property,cfg.name(),p))
+                    _log.warning("property '%s' was requested for %s, but the correct spelling is '%s'", property, cfg.name(), p)
                     property = p
                     break
         
@@ -242,13 +352,13 @@ class JobOptsParser:
                         if k in prop:
                             del prop[k]
                         else:
-                            _print("# Warning: key '%s' not in %s.%s"%(k,cfg.name(),property))
+                            _log.warning("key '%s' not in %s.%s", k, cfg.name(), property)
                 else:
                     for k in value:
                         if k in prop:
                             prop.remove(k)
                         else:
-                            _print("# Warning: value '%s' not in %s.%s"%(k,cfg.name(),property))
+                            _log.warning("value '%s' not in %s.%s", k, cfg.name(), property)
         else:
             setattr(cfg,property,value)
 
@@ -261,38 +371,37 @@ class _TempSysPath:
 
 _parser = JobOptsParser()
 
-def _import_module(file):
-    dirname, basname = os.path.split(file)
-    basname, ext = os.path.splitext(basname) 
-    guard = _TempSysPath([dirname] + sys.path)
-    __import__(basname)
+def _import_python(file):
+    execfile(file, {})
 
 def _import_pickle(file):
     import pickle
     input = open(file, 'rb')
     catalog = pickle.load(input)
-    print '# Unpickled', len(catalog), 'configurables'
+    _log.info('Unpickled %d configurables', len(catalog))
 
 def _import_opts(file):
     _parser.parse(file)
 
 _import_function_mapping = {
-                             ".py"   : _import_module,
+                             ".py"   : _import_python,
                              ".pkl"  : _import_pickle,
                              ".opts" : _import_opts,
                             }
 
 def importOptions( optsfile ) :
+    # expand environment variables before checking the extension
+    optsfile = os.path.expandvars(optsfile)
     # check the file type (extension)
     dummy, ext = os.path.splitext(optsfile)
     if ext in _import_function_mapping:
         # check if the file has been already included
         optsfile = _find_file(optsfile)
         if _to_be_included(optsfile):
-            _print("# --> Including file '%s'"%optsfile)
+            _log.info("--> Including file '%s'", optsfile)
             # include the file
             _import_function_mapping[ext](optsfile)
-            _print("# <-- End of file '%s'"%optsfile)
+            _log.info("<-- End of file '%s'", optsfile)
     else:
         raise ParserError("Unknown file type '%s' ('%s')" % (ext,optsfile))
 

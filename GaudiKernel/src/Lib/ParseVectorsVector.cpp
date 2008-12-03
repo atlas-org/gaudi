@@ -1,6 +1,6 @@
-// $Id: ParseVectorsVector.cpp,v 1.3 2007/11/15 14:01:06 marcocle Exp $
+// $Id: ParseVectorsVector.cpp,v 1.5 2008/10/28 14:02:18 marcocle Exp $
 // ============================================================================
-// CVS tag $Name:  $, version $Revision: 1.3 $ 
+// CVS tag $Name:  $, version $Revision: 1.5 $ 
 // ============================================================================
 // Include files
 // ============================================================================
@@ -36,10 +36,11 @@ namespace Gaudi
     ( std::vector< std::vector<std::string> >& result , 
       const std::string&                       input  )
     {
+      VectorGrammar< VectorGrammar<StringGrammar> > g;
       return parse
         ( createIterator(input), 
           IteratorT(),
-          VectorGrammar< VectorGrammar<StringGrammar> >()[var(result)=arg1],
+          g[var(result)=arg1],
           SkipperGrammar()).full ;
     }
     // ========================================================================
@@ -47,11 +48,11 @@ namespace Gaudi
     ( std::vector< std::vector<double> >& result , 
       const std::string&                  input  )
     {
+      VectorGrammar< VectorGrammar< RealGrammar< double > > > g;
       return parse
         ( createIterator(input), 
           IteratorT(),
-          VectorGrammar< VectorGrammar< RealGrammar< double > > >()
-          [var(result)=arg1],
+          g[var(result)=arg1],
           SkipperGrammar()).full;
     }
     // ========================================================================
@@ -59,11 +60,11 @@ namespace Gaudi
     ( std::vector< std::pair< double , double > >& result , 
       const string&                                input  )
     {
+      VectorGrammar<PairGrammar<RealGrammar<double>,RealGrammar<double> > > g;
       return parse
         ( createIterator(input), 
           IteratorT(),
-          VectorGrammar<PairGrammar<RealGrammar<double>,RealGrammar<double> > >()
-          [var(result)=arg1],
+          g[var(result)=arg1],
           SkipperGrammar()).full;
     }
     // ========================================================================
@@ -71,11 +72,11 @@ namespace Gaudi
     ( std::vector< std::pair< int , int > >& result , 
       const string&                          input  )
     {
+      VectorGrammar<PairGrammar<IntGrammar<int>,IntGrammar<int> > > g;
       return parse
         ( createIterator(input), 
           IteratorT(),
-          VectorGrammar<PairGrammar<IntGrammar<int>,IntGrammar<int> > >()
-          [var(result)=arg1],
+          g[var(result)=arg1],
           SkipperGrammar()).full;
     }
     // ========================================================================

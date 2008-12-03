@@ -5,6 +5,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/INamedInterface.h"
 #include "GaudiKernel/AudFactory.h"
+#include "GaudiKernel/IChronoStatSvc.h"
 #include "GaudiKernel/Chrono.h"
 
 DECLARE_AUDITOR_FACTORY(ChronoAuditor);
@@ -68,15 +69,14 @@ ChronoAuditor::before(CustomEventTypeRef evt, const std::string& caller) {
     if ( (m_types.value())[0] == "none") {
       return;
     }
-    
-    if ( find(m_types.value().begin(), m_types.value().end(), evt) == 
+
+    if ( find(m_types.value().begin(), m_types.value().end(), evt) ==
 	 m_types.value().end() ) {
       return;
     }
   }
 
-  
-  chronoSvc( )->chronoStop( caller + ":" + evt ) ;
+  chronoSvc( )->chronoStart( caller + ":" + evt ) ;
 
 }
 
@@ -87,13 +87,13 @@ ChronoAuditor::after(CustomEventTypeRef evt, const std::string& caller, const St
     if ( (m_types.value())[0] == "none") {
       return;
     }
-    
-    if ( find(m_types.value().begin(), m_types.value().end(), evt) == 
+
+    if ( find(m_types.value().begin(), m_types.value().end(), evt) ==
 	 m_types.value().end() ) {
       return;
     }
   }
-  
+
   chronoSvc( )->chronoStop( caller + ":" + evt ) ;
 
 }

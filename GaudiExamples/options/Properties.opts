@@ -60,6 +60,10 @@ PropertyAlg.PStringArray = {"one", "two", "four" };
 PropertyAlg.PBoolArray   = { true, false, true, false };
 
 
+PropertyAlg.IntPairArray = [ (1,2), (3,4), (5,6) ];
+PropertyAlg.DoublePairArray = [ (1.1,2.1), (2.3,4.5), (5.6, 6.7) ];
+
+
 PropertyProxy.String = "This is set by the proxy";
 
 // MessageSvc Properties testing

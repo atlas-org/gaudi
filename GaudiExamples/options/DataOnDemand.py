@@ -1,3 +1,4 @@
+#!/usr/bin/env gaudirun.py 
 ###############################################################
 # Job options file
 #==============================================================
@@ -7,13 +8,26 @@ from Configurables import MyDataAlgorithm, DataCreator
 importOptions('Common.opts')
 MessageSvc().OutputLevel = INFO
 
-mdigi = DataCreator('MuonDigits', Data = 'Rec/Muon/Digits')
-mfoo  = DataCreator('MuonFoos',   Data = 'Rec/Muon/Foos')
-dondem = DataOnDemandSvc( UsePreceedingPath = True,
-                          NodeMap = {'Rec': 'DataObject' , 
-                                     'Rec/Muon' : 'DataObject' },
-                          AlgMap  = { mdigi.Data : mdigi.getFullName() ,
-                                      mfoo.Data  : mfoo.getFullName() } )
+mdigi  = DataCreator ( 'MuonDigits', Data = 'Rec/Muon/Digits')
+mfoo   = DataCreator ( 'MuonFoos'  , Data = 'Rec/Muon/Foos'  )
+mold   = DataCreator ( 'MuonOld'   , Data = 'Rec/Muon/Old'   )
+dondem = DataOnDemandSvc(
+    UsePreceedingPath = True,
+    NodeMap = { 'Rec': 'DataObject', 
+                'Rec/Muon'  : 'DataObject',
+                'Rec/Foo'   : 'DataObject',
+                },
+    AlgMap  = { mdigi.Data  : mdigi,
+                mfoo.Data   : mfoo  
+                },
+    # obsolete property:
+    Algorithms = [ "DATA='%s' TYPE='%s'"%
+                   (mold.Data, mold.getFullName())
+                   ],
+    # obsolete property:
+    Nodes = [ "DATA='Rec/Obsolete' TYPE='DataObject'"],
+    Dump = False    
+    )
 pcache = PoolDbCacheSvc( Dlls = ['GaudiKernelDict'] )
 
 ApplicationMgr( TopAlg = [ MyDataAlgorithm() ],

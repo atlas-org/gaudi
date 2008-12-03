@@ -4,13 +4,22 @@
 typedef Gaudi::Profile1D P1D;
 DECLARE_DATAOBJECT_FACTORY(P1D)
 
-std::pair<DataObject*,AIDA::IProfile1D*> Gaudi::createProf1D(const std::string& title, int nBins, double xlow, double xup, double ylow, double yup)  {
-  Profile1D* p = new Profile1D(new TProfile(title.c_str(),title.c_str(),nBins,xlow,xup,ylow,yup,"s"));
+std::pair<DataObject*,AIDA::IProfile1D*> Gaudi::createProf1D
+( const std::string& title , 
+  int nBins  , double xlow, double xup, 
+  double ylow, double yup, const std::string& opt )  
+{
+  TProfile* _p = new TProfile(title.c_str(),title.c_str(),nBins,xlow,xup,ylow,yup,opt.c_str() ) ;
+  Profile1D* p = new Profile1D(_p);
   return std::pair<DataObject*,AIDA::IProfile1D*>(p,p);
 }
 
-std::pair<DataObject*,AIDA::IProfile1D*> Gaudi::createProf1D(const std::string& title, const Edges& e, double ylow, double yup)  {
-  Profile1D* p = new Profile1D(new TProfile(title.c_str(),title.c_str(),e.size()-1,&e.front(),ylow,yup,"s"));
+std::pair<DataObject*,AIDA::IProfile1D*> Gaudi::createProf1D
+( const std::string& title, 
+  const Edges& e, double ylow, double yup , 
+  const std::string& opt )  
+{  
+  Profile1D* p = new Profile1D(new TProfile(title.c_str(),title.c_str(),e.size()-1,&e.front(),ylow,yup,opt.c_str()));
   return std::pair<DataObject*,AIDA::IProfile1D*>(p,p);
 }
 
@@ -69,7 +78,7 @@ void Gaudi::Profile1D::init(const std::string& title, bool initialize_axis) {
   if ( initialize_axis )  {
     axis().initialize(m_rep->GetXaxis(),false);
   }
-  m_rep->SetErrorOption("s"); 
+  //m_rep->SetErrorOption("s"); 
   m_rep->SetDirectory(0);
   m_sumEntries = 0;
 }

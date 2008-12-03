@@ -1,4 +1,4 @@
-// $Id: MyAlgorithm.cpp,v 1.9 2008/01/11 13:43:49 marcocle Exp $
+// $Id: MyAlgorithm.cpp,v 1.10 2008/10/10 15:18:56 marcocle Exp $
 
 // Include files
 #include "GaudiKernel/MsgStream.h"
@@ -59,6 +59,12 @@ StatusCode MyAlgorithm::initialize() {
     log << MSG::ERROR<< "Error retrieving the private tool with name" << endreq;
     return sc;
   }
+
+  sc = toolSvc()->retrieveTool("MyGaudiTool", m_privateOtherInterface, this );
+  if( sc.isFailure() ) {
+    log << MSG::ERROR << "Error retrieving the Gaudi private tool with second interface" << endreq;
+    return sc;
+  }
   
   log << MSG::INFO << "....initialization done" << endreq;
 
@@ -77,7 +83,8 @@ StatusCode MyAlgorithm::execute() {
   m_publicGTool->doIt();
   m_privateGTool->doIt();
   m_privateToolWithName->doIt();
-  
+  m_privateOtherInterface->doItAgain();
+
   return StatusCode::SUCCESS;
 }
 
@@ -93,6 +100,7 @@ StatusCode MyAlgorithm::finalize() {
   toolSvc()->releaseTool( m_publicGTool ).ignore();
   toolSvc()->releaseTool( m_privateGTool ).ignore();
   toolSvc()->releaseTool( m_privateToolWithName ).ignore();
+  toolSvc()->releaseTool( m_privateOtherInterface ).ignore();
 
   return StatusCode::SUCCESS;
 }

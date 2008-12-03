@@ -1,9 +1,9 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/DataTypeInfo.h,v 1.4 2006/03/13 15:56:49 hmd Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/DataTypeInfo.h,v 1.6 2008/10/27 19:22:20 marcocle Exp $
 #ifndef GAUDIKERNEL_DATATYPES_H
 #define GAUDIKERNEL_DATATYPES_H
 
 #include <string>
-#include <typeinfo>
+#include <cstring>
 #include "GaudiKernel/SmartRef.h"
 
 class DataObject;
@@ -21,7 +21,7 @@ private:
 public:
   // Accepted Data type definitions
   enum Type  {
-        UNKNOWN = 0,        
+        UNKNOWN = 0,
         UCHAR,        USHORT,        UINT,        ULONG,
         CHAR,         SHORT,         INT,         LONG,
         BOOL,         FLOAT,         DOUBLE,
@@ -30,42 +30,42 @@ public:
         LONG_STRING,  LONG_NTCHAR
   };
   /// Access to type information: bool
-  static const Type ID( const bool)             { return BOOL;          }
+  static Type ID( const bool)             { return BOOL;          }
   /// Access to type information: char
-  static const Type ID( const char)             { return CHAR;          }
+  static Type ID( const char)             { return CHAR;          }
   /// Access to type information: short
-  static const Type ID( const short)            { return SHORT;         }
+  static Type ID( const short)            { return SHORT;         }
   /// Access to type information: int
-  static const Type ID( const int)              { return INT;           }
+  static Type ID( const int)              { return INT;           }
   /// Access to type information: long
-  static const Type ID( const long)             { return LONG;          }
+  static Type ID( const long)             { return LONG;          }
   /// Access to type information: unsigned char
-  static const Type ID( const unsigned char)    { return UCHAR;         }
+  static Type ID( const unsigned char)    { return UCHAR;         }
   /// Access to type information: unsigned short
-  static const Type ID( const unsigned short)   { return USHORT;        }
+  static Type ID( const unsigned short)   { return USHORT;        }
   /// Access to type information: unsigned int
-  static const Type ID( const unsigned int)     { return UINT;          }
+  static Type ID( const unsigned int)     { return UINT;          }
   /// Access to type information: unsigned long
-  static const Type ID( const unsigned long)    { return ULONG;         }
+  static Type ID( const unsigned long)    { return ULONG;         }
   /// Access to type information: float
-  static const Type ID( const float)            { return FLOAT;         }
+  static Type ID( const float)            { return FLOAT;         }
   /// Access to type information: float
-  static const Type ID( const double)           { return DOUBLE;        }
+  static Type ID( const double)           { return DOUBLE;        }
   /// Access to type information: std::string
-  static const Type ID( const std::string&)     { return STRING;        }
+  static Type ID( const std::string&)     { return STRING;        }
   /// Access to type information: char* (NULL terminated)
-  static const Type ID( const char*)            { return NTCHAR;        }
+  static Type ID( const char*)            { return NTCHAR;        }
   /// Access to type information: IOpaqueAddress
-  static const Type ID( const IOpaqueAddress*)  { return OBJECT_ADDR;   }
+  static Type ID( const IOpaqueAddress*)  { return OBJECT_ADDR;   }
   /// Access to type information: Pointers
-  static const Type ID( const void*)            { return POINTER;       }
+  static Type ID( const void*)            { return POINTER;       }
   /// Access to type information: DataObject
-  static const Type ID( const SmartRef<DataObject>&)      { return OBJECT_REF;    }
+  static Type ID( const SmartRef<DataObject>&)      { return OBJECT_REF;    }
   /// Access to type information: Contained object
-  static const Type ID( const SmartRef<ContainedObject>&) { return CONTAINED_REF; }
+  static Type ID( const SmartRef<ContainedObject>&) { return CONTAINED_REF; }
 
   /// Access to type information: the reverse way
-  static const Type ID( const std::type_info& typ )   {
+  static Type ID( const std::type_info& typ )   {
     if ( typ == typeid(unsigned char) )
       return UCHAR;
     else if ( typ == typeid(unsigned short) )
@@ -151,7 +151,7 @@ public:
   }
 
   /// Access to type information: the reverse way
-  static const long size( long typ )   {
+  static long size( long typ )   {
     switch(typ)   {
     case UCHAR:
       return sizeof(unsigned char);
@@ -194,12 +194,12 @@ public:
   }
 
   /// Access to type information: the reverse way
-  static const long size( const std::type_info& typ )   {
+  static long size( const std::type_info& typ )   {
     return size( ID(typ) );
   }
 
   /// Copy data
-  static const int copy( void* tar, const void* src, long typ, int numObj )   {
+  static int copy( void* tar, const void* src, long typ, int numObj )   {
     switch(typ)   {
     case UCHAR:      numObj *= sizeof(unsigned char);       break;
     case USHORT:     numObj *= sizeof(unsigned short);      break;
@@ -220,11 +220,11 @@ public:
   }
 
   // Access the type name by type ID
-  static const std::string name(long typ);
+  static std::string name(long typ);
   // Access the type name by type_info
-  static const std::string name(const std::type_info& typ);
+  static std::string name(const std::type_info& typ);
   /// Access to type information
-  static const Type idByName( const std::string& typ );
+  static Type idByName( const std::string& typ );
   /// Access to type information
   static const std::type_info& typeByName( const std::string& typ );
 };

@@ -8,7 +8,7 @@
 //
 //	Author     : M.Frank
 //  Created    : 13/1/99
-//	Changes    : 
+//	Changes    :
 //====================================================================
 #ifndef GAUDIKERNEL_MODULEINFO_H
 #define GAUDIKERNEL_MODULEINFO_H
@@ -32,10 +32,10 @@ namespace System  {
   typedef void* ProcessHandle;
   /// Get the name of the (executable/DLL) file without file-type
   const std::string& moduleName();
-  /// Get the full name of the (executable/DLL) file 
+  /// Get the full name of the (executable/DLL) file
   const std::string& moduleNameFull();
   /// Get type of the module
-  const ModuleType moduleType();
+  ModuleType moduleType();
   /// Handle to running process
   ProcessHandle processHandle();
   /// Handle to currently executed module

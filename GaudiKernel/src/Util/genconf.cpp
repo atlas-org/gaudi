@@ -1,4 +1,4 @@
-//$Id: genconf.cpp,v 1.33 2008/04/03 17:56:40 marcocle Exp $	//
+//$Id: genconf.cpp,v 1.35 2008/10/15 21:51:24 marcocle Exp $	//
 
 #ifdef _WIN32
 // Disable a warning in Boost program_options headers:
@@ -396,6 +396,14 @@ int main ( int argc, char** argv )
   return sc;
 }
 
+/// Given a Reflex::Member object, return the id for the configurable (name or id, if it is a string).
+/// non-string ids are used for the persistency (DataObjects)
+inline std::string getId(const Member & m) {
+      return (m.Properties().HasProperty("id") && (m.Properties().PropertyValue("id").TypeInfo() == typeid(std::string))) ? 
+             m.Properties().PropertyAsString("id") : 
+             m.Properties().PropertyAsString("name") ;
+}
+
 //-----------------------------------------------------------------------------
 int configGenerator::genConfig( const Strings_t& libs )
 //-----------------------------------------------------------------------------
@@ -443,7 +451,7 @@ int configGenerator::genConfig( const Strings_t& libs )
     if ( !isGaudiSvc ) {
       for ( Member_Iterator it = factories.FunctionMember_Begin(); 
             it != factories.FunctionMember_End(); ++it ) {
-        string ident = it->Properties().PropertyAsString("name");
+        string ident = getId(*it);
         if ( PluginService::Debug() > 0 ) {
           cout << "::: " << ident << endl;
         }
@@ -464,7 +472,7 @@ int configGenerator::genConfig( const Strings_t& libs )
     for ( Member_Iterator it = factories.FunctionMember_Begin(); 
           it != factories.FunctionMember_End(); 
           ++it ) {
-      const string ident = it->Properties().PropertyAsString("name");
+      const string ident = getId(*it);
       if ( bkgNames.find(ident) != bkgNamesEnd ) {
         if ( PluginService::Debug() > 0 ) {
           cout << "\t==> skipping [" << ident << "]..." << endl;

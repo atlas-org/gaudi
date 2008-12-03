@@ -1,4 +1,4 @@
-// $Id: MyGaudiTool.cpp,v 1.3 2006/05/04 15:17:33 hmd Exp $
+// $Id: MyGaudiTool.cpp,v 1.4 2008/10/10 15:18:56 marcocle Exp $
 // Framework include files
 #include "GaudiKernel/ToolFactory.h"
 #include "GaudiKernel/MsgStream.h"
@@ -11,17 +11,19 @@
 #include "MyGaudiTool.h"
 
 // Declaration of the AlgTool Factory
-DECLARE_TOOL_FACTORY(MyGaudiTool)
+DECLARE_TOOL_FACTORY(MyGaudiTool);
 
 //------------------------------------------------------------------------------
 MyGaudiTool::MyGaudiTool( const std::string& type,
-                const std::string& name, 
-                const IInterface* parent )
-//------------------------------------------------------------------------------
-: GaudiTool( type, name, parent ) {
+                          const std::string& name,
+                          const IInterface* parent )
+  //------------------------------------------------------------------------------
+  : GaudiTool( type, name, parent ) {
 
-  // declare my special interface
+  // declare my interface
   declareInterface<IMyTool>(this);
+  // declare my second interface
+  declareInterface<IMyOtherTool>(this);
 
   // declare properties
   declareProperty( "Int",    m_int    = 100);
@@ -31,8 +33,8 @@ MyGaudiTool::MyGaudiTool( const std::string& type,
 }
 
 //------------------------------------------------------------------------------
-const std::string&  MyGaudiTool::message() const 
-//------------------------------------------------------------------------------
+const std::string&  MyGaudiTool::message() const
+  //------------------------------------------------------------------------------
 {
   static std::string msg("It works!!!");
   return msg;
@@ -40,46 +42,47 @@ const std::string&  MyGaudiTool::message() const
 
 //------------------------------------------------------------------------------
 void  MyGaudiTool::doIt()
+  //------------------------------------------------------------------------------
+{
+  info()  << "doIt() has been called" << endreq;
+  debug() << "doIt() [DEBUG] has been called" << endreq;
+}
+
+//------------------------------------------------------------------------------
+void MyGaudiTool::doItAgain()
 //------------------------------------------------------------------------------
 {
-  MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "doIt() has been called" << endreq;
-  log << MSG::DEBUG << "doIt() [DEBUG] has been called" << endreq;
+  info()  << "doItAgain() has been called" << endreq; 
 }
 
 //------------------------------------------------------------------------------
 StatusCode  MyGaudiTool::initialize()
-//------------------------------------------------------------------------------
+  //------------------------------------------------------------------------------
 {
-  // Make use of svc<>
-  IMessageSvc* msg = svc<IMessageSvc>("MessageSvc");
-  MsgStream log(msg, name());
-  log << MSG::INFO << "intialize() has been called" << endreq;
+  info() << "intialize() has been called" << endreq;
 
   // Make use of tool<>
 
-  log << MSG::INFO << "Int    = " << m_int    << endreq;
-  log << MSG::INFO << "Double = " << m_double << endreq;
-  log << MSG::INFO << "String = " << m_string << endreq;
-  log << MSG::INFO << "Bool   = " << m_bool   << endreq;
+  info() << "Int    = " << m_int    << endreq;
+  info() << "Double = " << m_double << endreq;
+  info() << "String = " << m_string << endreq;
+  info() << "Bool   = " << m_bool   << endreq;
 
   return StatusCode::SUCCESS;
 }
 //------------------------------------------------------------------------------
 StatusCode  MyGaudiTool::finalize()
-//------------------------------------------------------------------------------
+  //------------------------------------------------------------------------------
 {
-  MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "finalize() has been called" << endreq;
+  info() << "finalize() has been called" << endreq;
   return StatusCode::SUCCESS;
 }
 
 //------------------------------------------------------------------------------
 MyGaudiTool::~MyGaudiTool( )
-//------------------------------------------------------------------------------
-{ 
-  MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "destructor has been called" << endreq;
+  //------------------------------------------------------------------------------
+{
+  info() << "destructor has been called" << endreq;
 }
 
 

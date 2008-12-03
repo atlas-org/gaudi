@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiSvc/src/AuditorSvc/AuditorSvc.cpp,v 1.17 2008/04/03 14:41:15 marcocle Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiSvc/src/AuditorSvc/AuditorSvc.cpp,v 1.19 2008/10/27 19:22:21 marcocle Exp $
 
 // Include Files
 #include "GaudiKernel/MsgStream.h"
@@ -17,8 +17,8 @@ DECLARE_SERVICE_FACTORY(AuditorSvc)
 using ROOT::Reflex::PluginService;
 //
 // ClassName:   AuditorSvc
-//  
-// Description: This service manages Auditors. 
+//
+// Description: This service manages Auditors.
 //------------------------------------------------------------------
 
 //- private helpers ---
@@ -30,11 +30,13 @@ IAuditor* AuditorSvc::newAuditor_( MsgStream& log, const std::string& name ) {
   aud = PluginService::Create<IAuditor*>( item.type(), item.name(), serviceLocator() );
   if ( aud ) {
     aud->addRef();
-    sc = aud->sysInitialize();
-    if ( sc.isFailure() ) {
-      log << MSG::WARNING << "Failed to initialize Auditor " << name << endreq;
-      aud->release();
-      aud = 0;
+    if ( m_targetState >= Gaudi::StateMachine::INITIALIZED ) {
+      sc = aud->sysInitialize();
+      if ( sc.isFailure() ) {
+        log << MSG::WARNING << "Failed to initialize Auditor " << name << endreq;
+        aud->release();
+        aud = 0;
+      }
     }
   }
   else {
@@ -63,7 +65,7 @@ StatusCode AuditorSvc::syncAuditors_() {
   if ( m_audNameList.size() == m_pAudList.size() )
     return StatusCode::SUCCESS;
 
-  MsgStream log( msgSvc(), name() ); 
+  MsgStream log( msgSvc(), name() );
   StatusCode sc;
 
 //   if ( sc.isFailure() ) {
@@ -95,51 +97,32 @@ StatusCode AuditorSvc::syncAuditors_() {
 //   Input:  name   String with service name
 //   Input:  svc    Pointer to service locator interface
 AuditorSvc::AuditorSvc( const std::string& name, ISvcLocator* svc )
-: Service(name, svc), m_state( OFFLINE ) {
+: Service(name, svc) {
   declareProperty("Auditors", m_audNameList );
   declareProperty("Enable", m_isEnabled = true);
   m_pAudList.clear();
 }
-    
+
 // Destructor.
-AuditorSvc::~AuditorSvc() { 
+AuditorSvc::~AuditorSvc() {
 }
 
 // Inherited Service overrides:
 //
   // Initialize the service.
 StatusCode AuditorSvc::initialize() {
-  StatusCode sc = StatusCode::FAILURE;
-
-  // (re)initialize the Service Base class
-  sc = Service::state() != INITIALIZED ? Service::initialize() : Service::reinitialize();
-
-  // base improper or we're done?
-  if ( sc.isFailure() || m_state == INITIALIZED )
-    return sc;
-
-  // set my own (AuditorSvc) properties via the jobOptionService 
-  sc = setProperties();
+  StatusCode sc = Service::initialize();
   if ( sc.isFailure() )
-     return sc;
+    return sc;
 
   // create auditor objects for all named auditors
   sc = syncAuditors_();
 
-  if ( sc.isSuccess() )
-     m_state = INITIALIZED;
-
   return sc;
 }
-  
+
   // Finalise the service.
 StatusCode AuditorSvc::finalize() {
-
-  // Finalize this specific service
-  StatusCode sc = Service::finalize();
-  if ( sc.isFailure() ) {
-    return sc;
-  }
 
   for (ListAudits::iterator it = m_pAudList.begin() ; it != m_pAudList.end(); it++) {
     if((*it)->isEnabled()) {
@@ -148,11 +131,11 @@ StatusCode AuditorSvc::finalize() {
     (*it)->release();
   }
   m_pAudList.clear();
-  m_state = FINALIZED;
 
-  return StatusCode::SUCCESS;
+  // Finalize this specific service
+  return Service::finalize();
 }
-  
+
   // Query the interfaces.
   //   Input: riid, Requested interface ID
   //          ppvInterface, Pointer to requested interface
@@ -276,7 +259,7 @@ OBSOLETION(beforeFinalize)
 OBSOLETION(afterFinalize)
 
 
-const bool AuditorSvc::isEnabled( ) const {
+bool AuditorSvc::isEnabled( ) const {
   return m_isEnabled;
 }
 
@@ -292,7 +275,7 @@ IAuditor* AuditorSvc::getAuditor( const std::string& name ) {
   // by interactively setting properties, auditors might be out of sync
   if ( !syncAuditors_().isSuccess() ) {
     // as we didn't manage to sync auditors, the safest bet is to assume the
-    // worse... 
+    // worse...
     // So don't let clients play with an AuditorSvc in an inconsistent state
     return 0;
   }

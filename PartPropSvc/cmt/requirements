@@ -1,5 +1,5 @@
 package PartPropSvc
-version v2r6
+version v2r7
 
 branches src cmt doc
 
@@ -14,11 +14,6 @@ apply_pattern install_more_includes more=PartPropSvc
 
 library PartPropSvc ../src/*.cpp
 apply_pattern component_library library=PartPropSvc
-
-# define link options
-
-macro_append HepPDT_linkopts " -lHepPID " \
-             WIN32           " HepPID.lib "
 
 path_append DATAPATH "${PARTPROPSVCROOT}/share"
 

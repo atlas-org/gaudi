@@ -1,4 +1,4 @@
-// $Id: PoolDbCnvSvc.cpp,v 1.29 2008/02/21 18:01:54 hmd Exp $
+// $Id: PoolDbCnvSvc.cpp,v 1.30 2008/10/27 16:41:33 marcocle Exp $
 //====================================================================
 //	PoolDbCnvSvc implementation
 //--------------------------------------------------------------------
@@ -40,6 +40,7 @@
 
 #include <sstream>
 #include <set>
+#include <memory>
 
 using ROOT::Reflex::PluginService;
 

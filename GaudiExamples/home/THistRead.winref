@@ -1,27 +1,27 @@
-JobOptionsSvc        INFO 
+JobOptionsSvc        INFO
 //GP:================================================================================
 //GP: include "..\options\THistRead.opts"                                     (0,0)
-AuditorSvc.Auditors =  [ "ChronoAuditor" ] ;                            //GP: (5,1)
-ApplicationMgr.TopAlg =  [ "THistRead" ] ;                              //GP: (12,1)
-MessageSvc.OutputLevel = 3;                                             //GP: (15,1)
-MessageSvc.UseColors = 1;                                               //GP: (16,1)
-THistSvc.OutputLevel = 2;                                               //GP: (17,1)
-ApplicationMgr.OutputLevel = 1;                                         //GP: (18,1)
-ServiceManager.OutputLevel = 2;                                         //GP: (19,1)
-StatusCodeSvc.OutputLevel = 1;                                          //GP: (20,1)
-THistSvc.Input =  [ "read1 DATAFILE='tuple2.rt' TYP='ROOT' OPT='READ'" ] ;//GP: (24,1)
-THistSvc.Input +=  [ "read2 DATAFILE='tuple3.rt' TYP='ROOT' OPT='READ'" ] ;//GP: (25,1)
-THistSvc.PrintAll = 1;                                                  //GP: (27,1)
-ApplicationMgr.EvtMax = 20;                                             //GP: (32,1)
-ApplicationMgr.EvtSel = "NONE";                                         //GP: (33,1)
+AuditorSvc.Auditors =  [ "ChronoAuditor" ] ;                            //GP: (1,1)
+ApplicationMgr.TopAlg =  [ "THistRead" ] ;                              //GP: (1,1)
+MessageSvc.OutputLevel = 3;                                             //GP: (1,1)
+MessageSvc.UseColors = 1;                                               //GP: (1,1)
+THistSvc.OutputLevel = 2;                                               //GP: (1,1)
+ApplicationMgr.OutputLevel = 1;                                         //GP: (1,1)
+ServiceManager.OutputLevel = 2;                                         //GP: (1,1)
+StatusCodeSvc.OutputLevel = 1;                                          //GP: (1,1)
+THistSvc.Input =  [ "read1 DATAFILE='tuple2.rt' TYP='ROOT' OPT='READ'" ] ;//GP: (1,1)
+THistSvc.Input +=  [ "read2 DATAFILE='tuple3.rt' TYP='ROOT' OPT='READ'" ] ;//GP: (1,1)
+THistSvc.PrintAll = 1;                                                  //GP: (1,1)
+ApplicationMgr.EvtMax = 20;                                             //GP: (1,1)
+ApplicationMgr.EvtSel = "NONE";                                         //GP: (1,1)
 //GP: end  "..\options\THistRead.opts"                                        (35,1)
 //GP:================================================================================
 
 JobOptionsSvc        INFO Job options successfully read in from ..\options\THistRead.opts
-ApplicationMgr    SUCCESS 
+ApplicationMgr    SUCCESS
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr $Revision: 1.3 $
-                                          running on MCLVIRT01 on Tue Sep 25 15:43:16 2007
+                                                   Welcome to ApplicationMgr $Revision: 1.6 $
+                                          running on MCLVIRT01 on Tue Jun 03 13:56:11 2008
 ====================================================================================================================================
 ApplicationMgr    VERBOSE declareMultiSvcType: declared service EvtDataSvc/EventDataSvc
 ApplicationMgr    VERBOSE declareMultiSvcType: declared service DetDataSvc/DetectorDataSvc
@@ -53,7 +53,7 @@ THistRead            INFO profile: 0
 THistSvc            DEBUG Read in TTree  "treename" from file tuple3.rt
 ******************************************************************************
 *Tree    :treename  : tree title                                             *
-*Entries :     1000 : Total =           14243 bytes  File  Size =       2225 *
+*Entries :     1000 : Total =           14243 bytes  File  Size =       2228 *
 *        :          : Tree compression factor =   1.00                       *
 ******************************************************************************
 *Br    0 :branch1   : point1/I                                               *
@@ -70,11 +70,13 @@ THistSvc            DEBUG Read in TTree  "treename" from file tuple3.rt
 *............................................................................*
 THistSvc            DEBUG Registering TTree title: "tree title"  id: "/read2/trees/stuff/treename"  dir: tuple3.rt:/trees/stuff  file: tuple3.rt
 THistRead            INFO treename: 1000
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
+EventLoopMgr      WARNING Unable to locate service "EventSelector"
 EventLoopMgr      WARNING No events will be processed from external input.
 HistogramPersis...   INFO  'CnvServices':[ 'HbookHistSvc' , 'RootHistSvc' ]
 HistogramPersis...WARNING Histograms saving not required.
 ApplicationMgr       INFO Application Manager Initialized successfully
+ApplicationMgr       INFO Application Manager Started successfully
+ApplicationMgr       INFO Application Manager Stopped successfully
 EventLoopMgr         INFO Histograms converted successfully according to request.
 THistSvc            DEBUG THistSvc::finalize
 THistSvc            DEBUG uid: "/read1/xxx/1Dgauss"  temp: 0  dir: tuple2.rt:/xxx
@@ -82,12 +84,17 @@ THistSvc            DEBUG uid: "/read2/2Dgauss"  temp: 0  dir: tuple3.rt:/
 THistSvc            DEBUG uid: "/read2/3Dgauss"  temp: 0  dir: tuple3.rt:/
 THistSvc            DEBUG uid: "/read2/profile"  temp: 0  dir: tuple3.rt:/
 THistSvc            DEBUG uid: "/read2/trees/stuff/treename"  temp: 0  dir: tuple3.rt:/trees/stuff
-THistSvc             INFO Listing contents of ROOT files: 
+THistSvc            DEBUG THistSvc::write()::List of Files connected in ROOT
+THistSvc            DEBUG THistSvc::write()::List of Files connected in ROOT: "tuple2.rt"
+THistSvc            DEBUG THistSvc::write()::List of Files connected in ROOT: "tuple3.rt"
+THistSvc             INFO Listing contents of ROOT files:
+THistSvc            DEBUG finalizing stream/file read1:tuple2.rt
 THistSvc             INFO ==> File: tuple2.rt  stream: read1
 TFile: name=tuple2.rt, title=, option=READ
 TH1.Print Name  = 1Dgauss, Entries= 20000, Total sum= 19984
           Title = 1D Gaussian
           NbinsX= 100, xmin= -50, xmax=50
+THistSvc            DEBUG finalizing stream/file read2:tuple3.rt
 THistSvc             INFO ==> File: tuple3.rt  stream: read2
 TFile: name=tuple3.rt, title=, option=READ
 TH1.Print Name  = 2Dgauss, Entries= 20000, Total sum= 19978
@@ -101,7 +108,7 @@ TH1.Print Name  = profile, Entries= 0, Total sum= 0
           NbinsX= 100, xmin= -50, xmax=-50
 ******************************************************************************
 *Tree    :treename  : tree title                                             *
-*Entries :     1000 : Total =           14243 bytes  File  Size =       2225 *
+*Entries :     1000 : Total =           14243 bytes  File  Size =       2228 *
 *        :          : Tree compression factor =   1.00                       *
 ******************************************************************************
 *Br    0 :branch1   : point1/I                                               *

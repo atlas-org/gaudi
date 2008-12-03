@@ -52,6 +52,7 @@
   <class name="IDataStreamTool"/>
   <class name="IDetDataSvc"/>        
   <class name="IEventProcessor"/>    
+  <class name="IEventTimeDecoder"/>
   <class name="IEvtSelector"/>       
   <class name="IExceptionSvc"/>       
   <!--class name="IFactory"/-->           
@@ -74,6 +75,7 @@
   <!--class name="IObjManager"/-->        
   <class name="IOpaqueAddress"/>     
   <class name="IParticlePropertySvc"/>
+  <class name="IPartPropSvc"/>
   <class name="IPartitionControl"/>  
   <class name="IPersistencySvc"/>    
   <class name="IProperty"/>          
@@ -87,7 +89,8 @@
   <class name="ISelectStatement"/>   
   <class name="ISerialize"/>         
   <class name="IService"/>           
-  <class name="IStagerSvc"/>         
+  <class name="IStagerSvc"/>
+  <class name="IStateful"/>
   <class name="IStatusCodeSvc"/>         
   <!--class name="ISvcFactory"/-->        
   <class name="ISvcLocator"/>        
@@ -223,11 +226,30 @@
 
   <function pattern="System::*"/>
   <function pattern="Gaudi::*"/>
+  
+  <enum name="Gaudi::StateMachine::State"/>
+  <enum name="Gaudi::StateMachine::Transition"/>
   </selection>
   
   <exclusion>
     <!-- Marco Cl.: This is needed because with ROOT >= 5.16 we get some dictionaries that we do not need. -->
-    <class name="NTuple::Item<IOpaqueAddress*>"/>
+    <class name="NTuple::Item&lt;IOpaqueAddress*&gt;"/>
+
+    <class pattern="NTuple::Item&lt;bool&gt;">
+      <method pattern="=*"/>
+    </class>
+    <class pattern="NTuple::*&lt;*&gt;">
+      <method name="="/>
+    </class>
+    <class pattern="NTuple::_Acc*::_Acc*">
+      <method name="="/>
+    </class>
+    <class pattern="Rndm::*">
+      <method name="="/>
+    </class>
+    <class name="IRndmGen::Param">
+      <method name="="/>
+    </class>
 
     <!-- @FIXME Marco Cl.: work-around for ROOT bug #34282. -->
     <!-- Temporary commented out because it does not work and the feature in

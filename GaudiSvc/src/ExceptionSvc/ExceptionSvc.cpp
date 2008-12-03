@@ -1,6 +1,6 @@
-// $Id: ExceptionSvc.cpp,v 1.6 2007/05/24 14:41:22 hmd Exp $ 
+// $Id: ExceptionSvc.cpp,v 1.7 2008/06/02 14:21:35 marcocle Exp $ 
 // ============================================================================
-// CVS tag $Name:  $ , version $Revision: 1.6 $
+// CVS tag $Name:  $ , version $Revision: 1.7 $
 // ============================================================================
 // Include files 
 // ============================================================================
@@ -65,7 +65,7 @@ ExceptionSvc::initialize() {
   } else {
     log << MSG::ERROR << "Unknown value for property \"State\". Must be"
 	<< " one of \"all\", \"none\", or \"list\"" << endreq;
-    m_state = OFFLINE;
+    m_state = Gaudi::StateMachine::OFFLINE;
     return StatusCode::FAILURE;
   }
 
@@ -98,7 +98,7 @@ ExceptionSvc::initialize() {
 	    << "\" for Algorithm " << alg << std::endl
 	    << "Must be one of: DEFAULT, SUCCESS, FAILURE, RECOVERABLE, RETHROW"
 	    << endreq;
-	m_state = OFFLINE;
+	m_state = Gaudi::StateMachine::OFFLINE;
 	return StatusCode::FAILURE;
       }
     }

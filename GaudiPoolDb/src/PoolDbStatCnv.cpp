@@ -1,4 +1,4 @@
-// $Id: PoolDbStatCnv.cpp,v 1.5 2006/11/30 14:50:45 mato Exp $
+// $Id: PoolDbStatCnv.cpp,v 1.6 2008/10/27 16:41:33 marcocle Exp $
 //------------------------------------------------------------------------------
 //
 // Implementation of class :  PoolDbStatCnv
@@ -19,6 +19,8 @@
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbObjectCallBack.h"
+
+#include <memory>
 
 // Standard Constructor
 PoolDbStatCnv::PoolDbStatCnv (long typ, 

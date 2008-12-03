@@ -1,4 +1,4 @@
-// $Id: GaudiAlgorithm.cpp,v 1.11 2007/09/25 16:12:41 marcocle Exp $ 
+// $Id: GaudiAlgorithm.cpp,v 1.12 2008/11/04 22:49:25 marcocle Exp $ 
 // ============================================================================
 #define  GAUDIALG_GAUDIALGORITHM_CPP 1
 // ============================================================================
@@ -7,6 +7,7 @@
 // GaudiKernel
 // ============================================================================
 #include "GaudiKernel/IAlgContextSvc.h"
+#include "GaudiKernel/DataObject.h"
 // ============================================================================
 // GaudiAlg
 // ============================================================================
@@ -42,6 +43,9 @@ GaudiAlgorithm::GaudiAlgorithm ( const std::string&  name        ,
   // enforce the algorithm registration for Algorithm Context Service
   , m_registerContext ( true )
 {
+  m_vetoObjs.clear();
+  m_requireObjs.clear();
+  
   declareProperty 
     ( "ContextService" , 
       m_contextSvcName , 
@@ -50,6 +54,10 @@ GaudiAlgorithm::GaudiAlgorithm ( const std::string&  name        ,
     ( "RegisterForContextService" , 
       m_registerContext  , 
       "The flag to enforce the registration for Algorithm Context Service") ;
+  declareProperty( "VetoObjects", m_vetoObjs,
+                   "Skip execute if one or more of these TES objects exists" );
+  declareProperty( "RequireObjects", m_requireObjs,
+                   "Execute only if one or more of these TES objects exists" );
 }
 // ============================================================================
 // Destructor
@@ -126,8 +134,33 @@ StatusCode GaudiAlgorithm::sysExecute ()
   if ( registerContext() ) { ctx = contextSvc() ; }
   // Lock the context 
   Gaudi::Utils::AlgContext cnt ( ctx , this ) ;  ///< guard/sentry
-  /// execute the generic method:
-  return Algorithm::sysExecute() ;
+
+  // Do not execute if one or more of the m_vetoObjs exist in TES
+  for( std::vector<std::string>::iterator it  = m_vetoObjs.begin();
+                                          it != m_vetoObjs.end(); it++ ) {
+    if( exist<DataObject>(*it) ) {
+      debug() << *it << " found, skipping event " << endmsg;
+      return StatusCode::SUCCESS;
+    }
+  }
+
+  // Execute if m_requireObjs is empty
+  bool doIt = m_requireObjs.empty() ? true : false;
+
+  // Execute also if one or more of the m_requireObjs exist in TES
+  for( std::vector<std::string>::iterator it  = m_requireObjs.begin();
+                                          it != m_requireObjs.end(); it++ ) {
+    if( exist<DataObject>(*it) ) {
+      doIt = true;
+      break;
+    }
+  }
+
+  if( doIt )
+    // execute the generic method:
+    return Algorithm::sysExecute() ;
+  else
+    return StatusCode::SUCCESS;
 }
 // ============================================================================
 

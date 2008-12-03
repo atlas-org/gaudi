@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/src/Lib/MsgStream.cpp,v 1.12 2007/04/04 08:22:27 hmd Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/src/Lib/MsgStream.cpp,v 1.13 2008/10/01 14:39:28 marcocle Exp $
 //====================================================================
 //	MsgStream.cpp
 //--------------------------------------------------------------------
@@ -53,10 +53,7 @@ MsgStream& MsgStream::doOutput()       {
   if ( isActive() )   {
     Message msg(m_source,m_currLevel,m_stream.str());
     if ( m_service != 0 )   {
-      MSG::Level lvl = MSG::Level(m_service->outputLevel(m_source));
-      m_service->setOutputLevel(m_source, m_currLevel);
-      m_service->reportMessage (msg);
-      m_service->setOutputLevel(m_source, lvl);
+      m_service->reportMessage (msg, m_currLevel);
     }
     else     {
       std::cout << msg << std::endl;

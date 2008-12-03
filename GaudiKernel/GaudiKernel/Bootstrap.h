@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/Bootstrap.h,v 1.8.4.1 2008/08/18 16:34:35 leggett Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/Bootstrap.h,v 1.8 2006/11/30 14:43:12 mato Exp $
 #ifndef GAUDIKERNEL_BOOTSTRAP_H
 #define GAUDIKERNEL_BOOTSTRAP_H
 
@@ -43,7 +43,6 @@ namespace  Gaudi {
       @return   Previous instance of service locator object.
   */
   IAppMgrUI* setInstance(IAppMgrUI* newInstance);
-  bool hasApplicationMgr();
 
 }
 

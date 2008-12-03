@@ -2,8 +2,9 @@
 <extension class="GaudiTest.GaudiExeTest" kind="test">
   <argument name="program"><text>../../python/bug_34121.py</text></argument>
 <argument name="validator"><text>
-reference_block = '''
+findReferenceBlock('''
 ApplicationMgr       INFO Application Manager Initialized successfully
+ApplicationMgr       INFO Application Manager Started successfully
 Alg                  INFO executing....
 Alg.Tool             INFO Double = 0
 Alg                  INFO executing....
@@ -14,8 +15,8 @@ Alg                  INFO executing....
 Alg.Tool             INFO Double = 3
 Alg                  INFO executing....
 Alg.Tool             INFO Double = 4
+ApplicationMgr       INFO Application Manager Stopped successfully
 Alg                  INFO finalizing....
-'''
-findReferenceBlock(reference_block, stdout, result, causes)
+''')
 </text></argument>
 </extension>

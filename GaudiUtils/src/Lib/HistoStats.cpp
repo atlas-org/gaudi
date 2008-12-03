@@ -1,4 +1,4 @@
-// $Id: HistoStats.cpp,v 1.4 2008/04/03 22:12:27 marcocle Exp $
+// $Id: HistoStats.cpp,v 1.5 2008/06/04 08:18:22 marcocle Exp $
 // ============================================================================
 // Include files 
 // ============================================================================
@@ -162,7 +162,7 @@ double Gaudi::Utils::HistoStats::skewness
   if ( 0 == histo ) { return s_bad ; }                      // RETURN
   const double mu3 = centralMoment ( histo , 3 ) ;
   const double s3  = std::pow ( rms ( histo ) , 3 ) ;
-  return mu3/s3 ;
+  return ( std::fabs(s3)>0 ? mu3/s3 : 0.0 );
 }
 // ======================================================================
 // get the error in skewness 
@@ -187,7 +187,7 @@ double Gaudi::Utils::HistoStats::kurtosis
   if ( 0 == histo ) { return s_bad ; }                    // RETURN 
   const double mu4 = centralMoment ( histo , 4 ) ;
   const double s4  = std::pow ( rms ( histo ) , 4 ) ;
-  return mu4/s4 - 3.0 ;
+  return ( std::fabs(s4)>0 ? mu4/s4 - 3.0 : 0.0 );
 }
 // ======================================================================
 // get the error in kurtosis

@@ -1,6 +1,14 @@
 Package: GaudiGridSvc
 Package manager : Hubert Degaudenzi
 
+================ GaudiGridSvc v1r7 ====================================
+! 2008-10-27 - Marco Clemencic
+ - Disabled on gcc 4.3 (missing externals).
+
+================ GaudiGridSvc v1r6 ====================================
+! 2008-04-06 - Marco Clemencic
+ - Disabled on osx105.
+   
 ================ GaudiGridSvc v1r5 ====================================
 ! 2008-01-14 - Marco Clemencic
  - patch #1611.

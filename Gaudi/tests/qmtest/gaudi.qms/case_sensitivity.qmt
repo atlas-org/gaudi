@@ -20,7 +20,7 @@ if conf_dict != expected:
     result["GaudiTest.configuration.found"] = result.Quote(pp.pformat(conf_dict))
 
 warnings = [ "WARNING: property 'testproperty' was requested for MyAlg1, but the correct spelling is 'TestProperty'",
-             "Py:Configurable   WARNING Option 'testproperty' was used for MyAlg2, but the correct spelling is 'TestProperty'"]
+             "WARNING: Option 'testproperty' was used for MyAlg2, but the correct spelling is 'TestProperty'"]
 
 # extract all the warning messages 
 all_warnings = filter(lambda l: "warning" in l.lower(), stdout.splitlines())

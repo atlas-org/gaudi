@@ -1,4 +1,5 @@
 #include "GaudiKernel/Environment.h"
+#include <cstdlib>
 
 namespace {
   std::string i_resolve(std::string& source, int recursions)  {

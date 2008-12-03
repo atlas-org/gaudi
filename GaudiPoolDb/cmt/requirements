@@ -1,5 +1,5 @@
 package GaudiPoolDb
-version v3r1
+version v4r1
 
 branches  cmt doc src GaudiPoolDb options main test
 
@@ -7,11 +7,12 @@ use GaudiKernel  v*
 use GaudiUtils   v*
 #
 use POOL         v* LCG_Interfaces -no_auto_imports
-use SEAL         v* LCG_Interfaces -no_auto_imports
+use CORAL        v* LCG_Interfaces -no_auto_imports
 use Reflex       v* LCG_Interfaces -no_auto_imports
 use RELAX        v* LCG_Interfaces -no_auto_imports
-macro rx_use "" WIN32 "rx v* LCG_Interfaces -no_auto_imports"
-use $(rx_use)
+
+macro SEAL_linkopts ""
+
 #===========================================================================
 apply_pattern install_more_includes more=GaudiPoolDb
 #===========================================================================
@@ -19,18 +20,14 @@ document reflex_dictionary_generator GaudiPoolDbGen $(GAUDIPOOLDBROOT)/src/PoolD
 macro_append GaudiPoolDb_reflex_options '--select=$(GAUDIPOOLDBROOT)/src/PoolDb_dict.xml $(gccxmlopts) --gccxmlpath=$(GCCXML_home)/bin -I"$(POOL_base)/include" $(includes) '
 #===========================================================================
 # Linker + Component library (we have the _dll, _load files!)
-library     GaudiPoolDb ../src/*.cpp ../$(tag)/dict/GaudiPoolDb/*.cpp -import=SEAL -import=Boost -import=Reflex -import=POOL
+library     GaudiPoolDb ../src/*.cpp ../$(tag)/dict/GaudiPoolDb/*.cpp -import=Boost -import=Reflex -import=POOL
 
 apply_pattern linker_library library=GaudiPoolDb
 apply_pattern generate_rootmap library=GaudiPoolDb
 apply_pattern generate_configurables library=GaudiPoolDb
 
-macro POOL_linkopts '-L$(POOL_home)/lib $(POOL_FileMgt_libset) -llcg_StorageSvc -llcg_POOLCore -llcg_RootStorageSvc -lCintex ' \
-      WIN32         '/libpath:"$(POOL_home)/lib" $(POOL_FileMgt_libset)  lcg_StorageSvc.lib lcg_POOLCore.lib lcg_RootStorageSvc.lib libCintex.lib '
-
-
-path_remove SEAL_PLUGINS    "/GaudiPoolDb/" WIN32 "\GaudiPoolDb\"
-path_append SEAL_PLUGINS    "$(GaudiPoolDbDir)/modules"
+macro POOL_linkopts '-L$(POOL_home)/lib -llcg_StorageSvc -llcg_POOLCore -lCintex ' \
+      WIN32         '/libpath:"$(POOL_home)/lib" lcg_StorageSvc.lib lcg_POOLCore.lib libCintex.lib '
 
 macro_append GaudiPoolDb_dependencies GaudiPoolDbGen
 

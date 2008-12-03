@@ -1,4 +1,4 @@
-// $Id: GaudiTuples.h,v 1.6 2008/01/17 15:06:06 marcocle Exp $
+// $Id: GaudiTuples.h,v 1.7 2008/10/27 19:22:20 marcocle Exp $
 #ifndef GAUDIALG_GAUDITUPLES_H
 #define GAUDIALG_GAUDITUPLES_H 1
 
@@ -79,7 +79,7 @@ public:
    *  NOT guarantee predictability of the ID a given NTuple will be given when
    *  filled under conditional statements, since in these circumstances the order
    *  in which the NTuple are first filled, and thus booked, will depend on the
-   *  nature of the first few events read. This is particularly problematic when 
+   *  nature of the first few events read. This is particularly problematic when
    *  users submit many parallel 'sub-jobs' and then attempt to merge the final
    *  output ROOT (or HBOOK) files, since a given NTuple could have different IDs
    *  in each of the sub-jobs. Consequently it is strongly recommended that users do
@@ -154,7 +154,7 @@ public:
    *  NOT guarantee predictability of the ID a given  Event Tag Collection will be given when
    *  filled under conditional statements, since in these circumstances the order
    *  in which the  Event Tag Collection are first filled, and thus booked, will depend on the
-   *  nature of the first few events read. This is particularly problematic when 
+   *  nature of the first few events read. This is particularly problematic when
    *  users submit many parallel 'sub-jobs' and then attempt to merge the final
    *  output ROOT (or HBOOK) files, since a given  Event Tag Collection could have different IDs
    *  in each of the sub-jobs. Consequently it is strongly recommended that users do
@@ -223,7 +223,7 @@ public:  // trivial accessors
   /// get the N-Tuple directory           (property "NTupleDir")
   const std::string& nTupleDir      () const { return m_nTupleDir      ; }
   /// get the value for N-Tuple offset    (property "NTupleOffSet")
-  const TupleID::NumericID nTupleOffSet   () const { return m_nTupleOffSet   ; }
+  TupleID::NumericID nTupleOffSet   () const { return m_nTupleOffSet   ; }
   /// get the constructed N-Tuple path
   std::string        nTuplePath     () const
   {
@@ -242,7 +242,7 @@ public:  // trivial accessors
   /// get the Event Tag Collection directory           (property "EvtColsDir")
   const std::string& evtColDir      () const { return m_evtColDir      ; }
   /// get the value for Event Tag Collection offset    (property "EvtColsOffSet")
-  const TupleID::NumericID     evtColOffSet   () const { return m_evtColOffSet   ; }
+  TupleID::NumericID evtColOffSet   () const { return m_evtColOffSet   ; }
   /// get the constructed Event Tag Collection path
   std::string        evtColPath     () const
   {

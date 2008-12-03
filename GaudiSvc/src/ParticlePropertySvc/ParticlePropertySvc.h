@@ -1,6 +1,6 @@
-// $Id: ParticlePropertySvc.h,v 1.8 2007/05/24 14:41:22 hmd Exp $
+// $Id: ParticlePropertySvc.h,v 1.9 2008/05/09 12:43:29 marcocle Exp $
 // ============================================================================
-// CVS tag $Name:  $, version $Revision: 1.8 $
+// CVS tag $Name:  $, version $Revision: 1.9 $
 // ============================================================================
 #ifndef PARTICLEPROPERTYSVC_PARTICLEPROPERTYSVC_H
 #define PARTICLEPROPERTYSVC_PARTICLEPROPERTYSVC_H
@@ -17,6 +17,9 @@
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/SvcFactory.h"
 #include "GaudiKernel/IParticlePropertySvc.h"
+
+class IFileAccess;
+
 // ============================================================================
 /** @class ParticlePropertySvc ParticlePropertySvc.h 
  *
@@ -204,6 +207,8 @@ private:
   // local storage of ALL properties  
   Set                           m_owned    ;
   std::set<std::string>         m_replaced ;
+  
+  IFileAccess *m_fileAccess;
 };
 
 // =============================================================================

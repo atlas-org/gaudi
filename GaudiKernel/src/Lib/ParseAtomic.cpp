@@ -1,6 +1,6 @@
-// $Id: ParseAtomic.cpp,v 1.2 2007/05/24 14:39:11 hmd Exp $
+// $Id: ParseAtomic.cpp,v 1.4 2008/10/28 14:02:18 marcocle Exp $
 // ============================================================================
-// CVS tag $Name:  $, version $Revision: 1.2 $ 
+// CVS tag $Name:  $, version $Revision: 1.4 $ 
 // ============================================================================
 // Include files
 // ============================================================================
@@ -79,10 +79,11 @@ namespace Gaudi
     StatusCode parse ( bool&               result , 
                        const string&       input  )
     {
+      BoolGrammar g;
       return parse( 
           createIterator(input), 
           IteratorT(),
-          BoolGrammar()[var(result)=arg1]).full;
+          g[var(result)=arg1]).full;
     }
     // ========================================================================
     StatusCode parse ( float&              result , 
@@ -100,10 +101,11 @@ namespace Gaudi
     StatusCode parse ( string&             result , 
                        const string&       input  )
     {
+      StringGrammar g;
       if ( !parse(
               createIterator(input), 
               IteratorT(),
-              StringGrammar()[var(result)=arg1]).full ){ result = input ; }
+              g[var(result)=arg1]).full ){ result = input ; }
       /// @attention always!!!
       return true ;
     }

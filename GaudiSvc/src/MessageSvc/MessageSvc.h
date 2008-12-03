@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiSvc/src/MessageSvc/MessageSvc.h,v 1.13 2007/07/11 08:06:17 marcocle Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiSvc/src/MessageSvc/MessageSvc.h,v 1.15 2008/10/21 16:25:55 marcocle Exp $
 #ifndef GAUDI_MESSAGESVC_H
 #define GAUDI_MESSAGESVC_H
 
@@ -15,27 +15,27 @@
 #include "GaudiKernel/Message.h"
 #include "GaudiKernel/Property.h"
 
-#include <boost/thread/mutex.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 
 // Forward declarations
 class ISvcLocator;
 
 //
-// ClassName:   MessageSvc 
-//  
+// ClassName:   MessageSvc
+//
 // Description: The MessageSvc service implements the IMessageSvc interface anbd provides the
-//              basic messaging needed by batch oriented applications. 
+//              basic messaging needed by batch oriented applications.
 //
 // Author:      Iain Last
 //
 class MessageSvc : public Service,
-                   virtual public IMessageSvc { 
+                   virtual public IMessageSvc {
 public:
   typedef std::pair< std::string, std::ostream* > NamedStream;
   typedef std::multimap< int, NamedStream > StreamMap;
   typedef std::multimap< StatusCode, Message > MessageMap;
   typedef std::map< std::string, int > ThresholdMap;
-  
+
   // Default constructor.
   MessageSvc( const std::string& name, ISvcLocator* svcloc );
   // Destructor.
@@ -52,6 +52,9 @@ public:
   virtual void reportMessage( const Message& message );
 
   // Implementation of IMessageSvc::reportMessage()
+  virtual void reportMessage( const Message& msg, int outputLevel );
+
+  // Implementation of IMessageSvc::reportMessage()
   virtual void reportMessage( const StatusCode& code, const std::string& source = "");
 
   // Implementation of IMessageSvc::reportMessage()
@@ -59,7 +62,7 @@ public:
 
   // Implementation of IMessageSvc::reportMessage()
   virtual void reportMessage( const std::string& source, int type, const std::string& message);
-  
+
   // Implementation of IMessageSvc::insertMessage()
   virtual void insertMessage( const StatusCode& code, const Message& message );
 
@@ -74,13 +77,13 @@ public:
 
   // Implementation of IMessageSvc::insertStream()
   virtual void insertStream( int message_type, const std::string& name, std::ostream* stream );
-  
+
   // Implementation of IMessageSvc::eraseStream()
   virtual void eraseStream();
-  
+
   // Implementation of IMessageSvc::eraseStream()
   virtual void eraseStream( int message_type );
-  
+
   // Implementation of IMessageSvc::eraseStream()
   virtual void eraseStream( int message_type, std::ostream* stream );
 
@@ -88,13 +91,13 @@ public:
   virtual void eraseStream( std::ostream* stream );
 
   // Implementation of IMessageSvc::desaultStream()
-  virtual std::ostream* defaultStream() const { 
-    return m_defaultStream; 
+  virtual std::ostream* defaultStream() const {
+    return m_defaultStream;
   }
 
   // Implementation of IMessageSvc::setDefaultStream()
   virtual void setDefaultStream( std::ostream* stream ) {
-    boost::mutex::scoped_lock lock(m_reportMutex);
+    boost::recursive_mutex::scoped_lock lock(m_reportMutex);
     m_defaultStream = stream;
   }
 
@@ -165,15 +168,15 @@ private:
   void tee( const std::string& sourceName, const std::string& logFileName,
 	    const std::set<std::string>& declaredOutFileNames );
 
-  /// Mutex to synchronize multiple threads printing. 
-  mutable boost::mutex m_reportMutex;
-  
-  /// Mutex to synchronize multiple access to m_messageMap. 
-  mutable boost::mutex m_messageMapMutex;
-  
+  /// Mutex to synchronize multiple threads printing.
+  mutable boost::recursive_mutex m_reportMutex;
+
+  /// Mutex to synchronize multiple access to m_messageMap.
+  mutable boost::recursive_mutex m_messageMapMutex;
+
   /// Mutex to synchronize multiple access to m_thresholdMap
-  /// (@see MsgStream::doOutput). 
-  mutable boost::mutex m_thresholdMapMutex;
+  /// (@see MsgStream::doOutput).
+  mutable boost::recursive_mutex m_thresholdMapMutex;
 };
 
 #endif

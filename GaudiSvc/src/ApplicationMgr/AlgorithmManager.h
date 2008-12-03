@@ -1,10 +1,12 @@
-// $Id: AlgorithmManager.h,v 1.3 2006/11/30 20:51:35 mato Exp $	//
+// $Id: AlgorithmManager.h,v 1.4 2008/06/02 14:21:35 marcocle Exp $	//
 #ifndef GAUDISVC_ALGORITHMMANAGER_H
 #define GAUDISVC_ALGORITHMMANAGER_H
 
 // Include files
 #include "GaudiKernel/Kernel.h"
 #include "GaudiKernel/IAlgManager.h"
+#include "GaudiKernel/IStateful.h"
+#include "GaudiKernel/SmartIF.h"
 #include <string>
 #include <list>
 #include <map>
@@ -58,16 +60,28 @@ class AlgorithmManager : virtual public  IAlgManager  {
   virtual std::list<IAlgorithm*>& getAlgorithms( ) const;
   /// implementation of IAlgManager::initializeAlgorithms
   virtual StatusCode initializeAlgorithms();
+  /// implementation of IAlgManager::startAlgorithms
+  virtual StatusCode startAlgorithms();
+  /// implementation of IAlgManager::stopAlgorithms
+  virtual StatusCode stopAlgorithms();
   /// implementation of IAlgManager::finalizeAlgorithms
   virtual StatusCode finalizeAlgorithms();
+  /// implementation of IAlgManager::initializeAlgorithms
+  virtual StatusCode reinitializeAlgorithms();
+  /// implementation of IAlgManager::startAlgorithms
+  virtual StatusCode restartAlgorithms();
 
 private:
+  
+  IMessageSvc *msgSvc();
+  
   IInterface*   m_pOuter;      ///< Interface hub reference (ApplicationMgr)
   unsigned long m_refcount;    ///< Reference counter
   ListAlg*      m_listalg;     ///< List of algorithms maintained by AlgorithmManager
   ListAlg*      m_listmgralg;  ///< List of managed algorithms maintained by AlgorithmManager
   ISvcLocator*  m_svclocator;  ///< Service locator reference
   IMessageSvc*  m_msgsvc;      ///< Pointer to the message service if it exists
+  SmartIF<IStateful> m_statemgr; ///< Pointer to the state machine
 };
 #endif  // GAUDISVC_ALGORITHMFACTORY_H
 

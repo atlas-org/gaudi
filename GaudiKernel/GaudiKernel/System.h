@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/System.h,v 1.13 2006/11/29 18:46:30 hmd Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/System.h,v 1.17 2008/10/28 10:40:19 marcocle Exp $
 #ifndef GAUDIKERNEL_SYSTEM_H
 #define GAUDIKERNEL_SYSTEM_H
 
@@ -20,7 +20,7 @@
 #endif
 
 /** Note: OS specific details as well as Gaudi details may not occur
-    in this definition file, because this header is the used by both, the 
+    in this definition file, because this header is the used by both, the
     OS specific implementations and the gaudi specific implementation.
     Since e.g. IID is defined in both, this would lead automatically to
     complete comilation failures.....
@@ -92,7 +92,32 @@ namespace System  {
   ///thread handle "accessor"
   inline ThreadHandle threadSelf() { return (void*)0; }
 #endif
-  bool backTrace(void** addresses, const size_t depth);
+  int  backTrace(void** addresses, const int depth);
+  bool backTrace(std::string& btrace, const int depth, const int offset = 0);
   bool getStackLevel(void* addresses, void*& addr, std::string& fnc, std::string& lib) ;
+
+#if __GNUC__ >= 4
+  /// Small helper function that allows the cast from void * to function pointer
+  /// and vice versa without the message
+  /// <verbatim>
+  /// warning: ISO C++ forbids casting between pointer-to-function and pointer-to-object
+  /// </verbatim>
+  /// It is an ugly trick but works.<br/>
+  /// See:
+  /// <ul>
+  ///  <li>http://www.trilithium.com/johan/2004/12/problem-with-dlsym/</li>
+  ///  <li>http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_active.html#573</li>
+  ///  <li>http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#195</li>
+  /// </ul>
+  template <typename DESTPTR, typename SRCPTR>
+  inline DESTPTR FuncPtrCast(SRCPTR ptr) {
+    union {
+      SRCPTR src;
+      DESTPTR dst;
+    } p2p;
+    p2p.src = ptr;
+    return p2p.dst;
+  }
+#endif
 }
 #endif    // SYSTEM_SYSTEM_H

@@ -1,6 +1,6 @@
-// $Id: GaudiTuples.icpp,v 1.9 2008/04/04 15:35:32 marcocle Exp $
+// $Id: GaudiTuples.icpp,v 1.10 2008/05/15 08:50:32 marcocle Exp $
 // ============================================================================
-// CVS tag $Name:  $, version $Revision: 1.9 $
+// CVS tag $Name:  $, version $Revision: 1.10 $
 // ============================================================================
 // Include files
 // ============================================================================
@@ -53,7 +53,8 @@ StatusCode GaudiTuples<PBASE>::initialize()
     if ( 0 == this->ntupleSvc() )
     { return  this->Error( "INTupleSvc* points to NULL!" ); }
     // Print ntuple path
-    Print( "The N-Tuple   path is set to be '" + nTuplePath() + "'").ignore();
+    Print( "The N-Tuple   path is set to be '" + nTuplePath() + "'", 
+           StatusCode(StatusCode::SUCCESS, true) , MSG::DEBUG);
   }
   else
   { this->debug() << "Production of N-Tuples is switched OFF" << endreq; }
@@ -378,7 +379,7 @@ long GaudiTuples<PBASE>::printTuples  () const
   if ( nTupleMapTitle().empty() &&
        nTupleMapNumID().empty() &&
        nTupleMapLitID().empty() )
-  { this->always() << "No N-Tuples   are booked" << endreq ; }
+  { if (this->msgLevel(MSG::DEBUG)) this->debug() << "No N-Tuples   are booked" << endreq ; }
   else
   { this->always() << "List of booked N-Tuples in directory "
                    << "\"" << nTuplePath() << "\"" << endreq ; }

@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/MinimalEventLoopMgr.h,v 1.2 2007/11/16 18:32:49 marcocle Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/MinimalEventLoopMgr.h,v 1.4 2008/07/15 12:48:18 marcocle Exp $
 #ifndef GAUDIKERNEL_MINIMALEVENTLOOPMGR_H
 #define GAUDIKERNEL_MINIMALEVENTLOOPMGR_H 1
 
@@ -82,10 +82,16 @@ public:
   virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
   /// implementation of IService::initalize
   virtual StatusCode initialize();
+  /// implementation of IService::start
+  virtual StatusCode start();
+  /// implementation of IService::stop
+  virtual StatusCode stop();
   /// implementation of IService::finalize
   virtual StatusCode finalize();
   /// implementation of IService::reinitialize
   virtual StatusCode reinitialize();
+  /// implementation of IService::restart
+  virtual StatusCode restart();
 
   /// implementation of IEventProcessor::nextEvent
   virtual StatusCode nextEvent(int maxevt);

@@ -1,16 +1,18 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiPython/src/Test/RandomNumberAlg.h,v 1.2 2003/11/27 10:28:51 mato Exp $	//
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiPython/src/Test/RandomNumberAlg.h,v 1.3 2008/10/27 19:22:21 marcocle Exp $	//
 #ifndef GAUDIEXAMPLES_RANDOMNUMBERALG_H
 #define GAUDIEXAMPLES_RANDOMNUMBERALG_H
 
 // Framework include files
-#include "GaudiKernel/Algorithm.h" 
+#include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/RndmGenerators.h"
 
-class AIDA::IHistogram1D;
-class AIDA::IHistogram2D;
+namespace AIDA {
+  class IHistogram1D;
+  class IHistogram2D;
+}
 
 
-/** @class RandomNumberAlg 
+/** @class RandomNumberAlg
     A small algorithm class using the random number service
 
     @author M.Frank
@@ -30,7 +32,7 @@ class RandomNumberAlg : public Algorithm     {
 
 public:
   /// Constructor: A constructor of this form must be provided.
-  RandomNumberAlg(const std::string& name, ISvcLocator* pSvcLocator); 
+  RandomNumberAlg(const std::string& name, ISvcLocator* pSvcLocator);
   /// Standard Destructor
   virtual ~RandomNumberAlg();
   /// Customized initialisation

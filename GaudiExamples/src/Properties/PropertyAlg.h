@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiExamples/src/Properties/PropertyAlg.h,v 1.5 2006/12/04 17:15:11 mato Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiExamples/src/Properties/PropertyAlg.h,v 1.6 2008/10/30 22:40:56 marcocle Exp $
 #ifndef GAUDIEXAMPLE_PROPERTYALG_H
 #define GAUDIEXAMPLE_PROPERTYALG_H
 
@@ -10,14 +10,14 @@
 template <class T> class AlgFactory;
 
 /** @class PropertyAlg
-    Trivial Algorithm for tutotial purposes
-    
+    Trivial Algorithm for tutorial purposes
+
     @author nobody
 */
 class PropertyAlg : public Algorithm {
 protected:
   /// Constructor of this form must be provided
-  PropertyAlg(const std::string& name, ISvcLocator* pSvcLocator); 
+  PropertyAlg(const std::string& name, ISvcLocator* pSvcLocator);
 public:
   friend class AlgFactory<PropertyAlg>;
   /// Three mandatory member functions of any algorithm
@@ -31,7 +31,7 @@ public:
 
 private:
   /// These data members are used in the execution of this algorithm
-  /// They are set in the initialisation phase by the job options service
+  /// They are set in the initialization phase by the job options service
 
   int         m_int;
   double      m_double;
@@ -45,6 +45,9 @@ private:
   std::vector<double>      m_emptyarray;
   std::vector<double>      u_doublearrayunits;
   std::vector<double>      u_doublearray;
+
+  std::vector<std::pair<int,int> > u_intpairarray;
+  std::vector<std::pair<double,double> > u_doublepairarray;
 
   IntegerProperty  p_int;
   DoubleProperty   p_double;

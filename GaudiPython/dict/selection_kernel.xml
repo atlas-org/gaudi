@@ -3,6 +3,8 @@
   <!--class pattern = "GaudiPython::Interface<*>"/-->
   <class pattern = "std::unary_function<*>"/>
   <class name    = "GaudiPython::Helper"/>
+  <class name    = "GaudiPython::PyROOTPickle"/>
+  <class name    = "GaudiPython::TESSerializer"/>
 
   <class name    = "std::vector<Property*>" />
   <class name    = "std::vector<const Property*>"/>
@@ -70,10 +72,18 @@
   <class name    = "ParticleProperty"/>
   <class name    = "InterfaceID"/>
 
-  <class name = "ITupleTool" />
+  <class name = "IErrorTool" />
+  <class name = "IGenericTool" />
   <class name = "IHistoTool" />
+  <class name = "ITupleTool" />
+  <class name = "ISequencerTimerTool" />
   
   <function name= "Gaudi::Utils::hasProperty" />
+  
+  <class name = "Gaudi::IFileCatalog" />
+  <class name = "Gaudi::IFileCatalogMgr" />
+  <class name = "Gaudi::IDataConnection" />
+  <class name = "Gaudi::IIODataManager" />
   
   <exclusion>
     <class name    = "GaudiAlg::ID::LiteralID" />
@@ -86,5 +96,20 @@
     <class pattern = "std::unary_function<std::pair<*,Tuples::*>" />
     <class pattern = "std::unary_function<std::pair<*,NTuple::*>" />
     <class pattern = "std::unary_function<std::pair<*,AIDA::*>"   />
+    <class name    = "GaudiPython::CallbackStreamBuf">
+      <!-- assignement operator and copy constructor cannot compile -->
+      <method name="="/>
+      <method proto_pattern="CallbackStreamBuf*CallbackStreamBuf*"/>
+    </class>
+    <class pattern = "std::basic_ostream&lt;char*">
+      <!-- assignement operator and copy constructor cannot compile -->
+      <method name="="/>
+      <!-- We should exclude only the copy constructor, but I did not manage to do it -->
+      <method pattern="basic_ostream*"/>
+    </class>
+    <class pattern = "std::basic_stringbuf&lt;char*">
+      <!-- assignement operator cannot compile -->
+      <method name="="/>
+    </class>
   </exclusion>
 </lcgdict>

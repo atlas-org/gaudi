@@ -3,5 +3,5 @@
 <argument name="args"><set><text>../options/DataListener.opts</text></set></argument>
   <argument name="workdir"><text>../../home</text></argument>
   <argument name="reference"><text>DataListener.ref</text></argument>
-  <argument name="unsupported_platforms"><set><text>win32</text></set></argument>
+  <argument name="unsupported_platforms"><set><text>win32</text><text>.*</text></set></argument>
 </extension>

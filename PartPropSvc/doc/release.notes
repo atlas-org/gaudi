@@ -1,6 +1,11 @@
 Package : ParticleProp
 Package manager : Charles Leggett
 
+! 20081028 Marco Clemencic
+ - Removed extra "-lHepPID" from link options (already included in the LCG
+   interface package). 
+
+================ PartPropSvc v2r7 ====================================
 ================ PartPropSvc v2r6 =========================================
 ! 20070605 Paolo Calafiura
  Patch #1186.

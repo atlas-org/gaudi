@@ -1,35 +1,35 @@
-JobOptionsSvc        INFO 
+JobOptionsSvc        INFO
 //GP:================================================================================
 //GP: include "..\options\History.opts"                                       (0,0)
 //GP: include "E:\Workspace\GAUDI\GaudiExamples\options\Common.opts"          (5,10)
 //GP: include "E:\Workspace\GAUDI\GaudiExamples\options\Services.opts"        (7,10)
-AuditorSvc.Auditors =  [ "ChronoAuditor" ] ;                            //GP: (12,1)
+AuditorSvc.Auditors =  [ "ChronoAuditor" ] ;                            //GP: (1,1)
 //GP: end  "E:\Workspace\GAUDI\GaudiExamples\options\Services.opts"           (24,1)
-ApplicationMgr.StatusCodeCheck = 1;                                     //GP: (9,1)
+ApplicationMgr.StatusCodeCheck = 1;                                     //GP: (7,10)
 //GP: end  "E:\Workspace\GAUDI\GaudiExamples\options\Common.opts"             (16,1)
-ApplicationMgr.TopAlg =  [ "History" ] ;                                //GP: (10,1)
-ApplicationMgr.ActivateHistory = 1;                                     //GP: (11,1)
-MessageSvc.OutputLevel = 1;                                             //GP: (16,1)
-MessageSvc.useColors = 1;                                               //GP: (17,1)
-MessageSvc.setVerbose +=  [ "HistorySvc" ] ;                            //GP: (19,1)
-MessageSvc.setDebug +=  [ "FastHistorySvc" ] ;                          //GP: (20,1)
-MessageSvc.setDebug +=  [ "StatusCodeSvc" , "IncidentSvc" ] ;           //GP: (21,1)
-HistorySvc.Dump = 0;                                                    //GP: (23,1)
-HistorySvc.OutputFile = "history.dat";                                  //GP: (24,1)
-HistorySvc.OutputLevel = 0;                                             //GP: (25,1)
-FastHistorySvc.Dump = 1;                                                //GP: (27,1)
-FastHistorySvc.OutputFile = "history.dat";                              //GP: (28,1)
-ApplicationMgr.EvtMax = 2;                                              //GP: (35,1)
-ApplicationMgr.EvtSel = "NONE";                                         //GP: (36,1)
+ApplicationMgr.TopAlg =  [ "History" ] ;                                //GP: (5,10)
+ApplicationMgr.ActivateHistory = 1;                                     //GP: (5,10)
+MessageSvc.OutputLevel = 1;                                             //GP: (5,10)
+MessageSvc.useColors = 1;                                               //GP: (5,10)
+MessageSvc.setVerbose +=  [ "HistorySvc" ] ;                            //GP: (5,10)
+MessageSvc.setDebug +=  [ "FastHistorySvc" ] ;                          //GP: (5,10)
+MessageSvc.setDebug +=  [ "StatusCodeSvc" , "IncidentSvc" ] ;           //GP: (5,10)
+HistorySvc.Dump = 0;                                                    //GP: (5,10)
+HistorySvc.OutputFile = "history.dat";                                  //GP: (5,10)
+HistorySvc.OutputLevel = 0;                                             //GP: (5,10)
+FastHistorySvc.Dump = 1;                                                //GP: (5,10)
+FastHistorySvc.OutputFile = "history.dat";                              //GP: (5,10)
+ApplicationMgr.EvtMax = 2;                                              //GP: (5,10)
+ApplicationMgr.EvtSel = "NONE";                                         //GP: (5,10)
 //GP: end  "..\options\History.opts"                                          (43,1)
 //GP:================================================================================
 
 JobOptionsSvc        INFO Job options successfully read in from ..\options\History.opts
 ApplicationMgr      DEBUG Getting my own properties
-ApplicationMgr    SUCCESS 
+ApplicationMgr    SUCCESS
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr $Revision: 1.5 $
-                                          running on MCLVIRT01 on Tue Sep 25 15:43:13 2007
+                                                   Welcome to ApplicationMgr $Revision: 1.7 $
+                                          running on MCLVIRT01 on Thu Jun 05 15:42:04 2008
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 ServiceManager      DEBUG Initializing service StatusCodeSvc
@@ -40,13 +40,14 @@ AppMgrRunable       DEBUG Service base class initialized successfully
 ServiceManager      DEBUG Initializing service EventLoopMgr
 EventLoopMgr        DEBUG Service base class initialized successfully
 IncidentSvc         DEBUG Service base class initialized successfully
+IncidentSvc         DEBUG Adding [AbortEvent] listener '<unknown>' with priority 0
 EventLoopMgr        DEBUG Creating Top Algorithm History with name History
 History           VERBOSE ServiceLocatorHelper::createService: found service HistorySvc
 History              INFO got historySvc: HistorySvc
 EventDataSvc        DEBUG Service base class initialized successfully
 EventDataSvc      VERBOSE ServiceLocatorHelper::createService: found service IncidentSvc
 EventPersistenc...  DEBUG Service base class initialized successfully
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
+EventLoopMgr      WARNING Unable to locate service "EventSelector"
 EventLoopMgr      WARNING No events will be processed from external input.
 HistogramDataSvc    DEBUG Service base class initialized successfully
 HistogramDataSvc  VERBOSE ServiceLocatorHelper::createService: found service IncidentSvc
@@ -59,9 +60,26 @@ HistorySvc          DEBUG Service base class initialized successfully
 HistorySvc          DEBUG Initializing HistorySvc
 AlgContextSvc       DEBUG Service base class initialized successfully
 AlgContextSvc     VERBOSE ServiceLocatorHelper::createService: found service IncidentSvc
+IncidentSvc         DEBUG Adding [BeginEvent] listener 'AlgContextSvc' with priority 0
+IncidentSvc         DEBUG Adding [EndEvent] listener 'AlgContextSvc' with priority 0
 HistorySvc        VERBOSE ServiceLocatorHelper::createService: found service AlgContextSvc
 HistorySvc        VERBOSE ServiceLocatorHelper::createService: found service IncidentSvc
+ToolSvc             DEBUG Service base class initialized successfully
+HistorySvc.Serv...VERBOSE ServiceLocatorHelper::createService: found service ToolSvc/ToolSvc
+IncidentSvc         DEBUG Adding [BeginEvent] listener 'HistorySvc' with priority -2147483648
 ApplicationMgr       INFO Application Manager Initialized successfully
+ServiceManager      DEBUG Starting service StatusCodeSvc
+ServiceManager      DEBUG Starting service AppMgrRunable
+ServiceManager      DEBUG Starting service IncidentSvc
+ServiceManager      DEBUG Starting service EventPersistencySvc
+ServiceManager      DEBUG Starting service EventDataSvc
+ServiceManager      DEBUG Starting service HistogramPersistencySvc
+ServiceManager      DEBUG Starting service HistogramDataSvc
+ServiceManager      DEBUG Starting service AlgContextSvc
+ServiceManager      DEBUG Starting service ToolSvc
+ServiceManager      DEBUG Starting service EventLoopMgr
+ServiceManager      DEBUG Starting service HistorySvc
+ApplicationMgr       INFO Application Manager Started successfully
 HistorySvc        VERBOSE ServiceLocatorHelper::createService: found service JobOptionsSvc
 HistorySvc          DEBUG Registering algorithm: History
 HistorySvc           INFO Registered 1 Algorithms
@@ -78,21 +96,39 @@ HistorySvc          DEBUG Registering Service: EventPersistencySvc
 HistorySvc          DEBUG Registering Service: HistogramDataSvc
 HistorySvc          DEBUG Registering Service: HistogramPersistencySvc
 HistorySvc          DEBUG Registering Service: AlgContextSvc
-HistorySvc           INFO Registered 12 Services
+HistorySvc          DEBUG Registering Service: ToolSvc
+HistorySvc           INFO Registered 13 Services
+ServiceManager      DEBUG Stopping service StatusCodeSvc
+ServiceManager      DEBUG Stopping service AppMgrRunable
+ServiceManager      DEBUG Stopping service IncidentSvc
+ServiceManager      DEBUG Stopping service EventPersistencySvc
+ServiceManager      DEBUG Stopping service EventDataSvc
+ServiceManager      DEBUG Stopping service HistogramPersistencySvc
+ServiceManager      DEBUG Stopping service HistogramDataSvc
+ServiceManager      DEBUG Stopping service AlgContextSvc
+ServiceManager      DEBUG Stopping service ToolSvc
+ServiceManager      DEBUG Stopping service EventLoopMgr
+ServiceManager      DEBUG Stopping service HistorySvc
+ApplicationMgr       INFO Application Manager Stopped successfully
 ServiceManager      DEBUG Finalizing service HistorySvc
 HistorySvc           INFO Service finalised successfully
 ServiceManager      DEBUG Finalizing service EventLoopMgr
+IncidentSvc         DEBUG Removing [AbortEvent] listener '<unknown>'
 EventLoopMgr         INFO Histograms converted successfully according to request.
+ServiceManager      DEBUG Finalizing service ToolSvc
+ToolSvc              INFO Removing all tools created by ToolSvc
+ToolSvc             DEBUG   Tool List :
+ToolSvc             DEBUG Deleting 0 finalized tools
 ServiceManager      DEBUG Finalizing service AlgContextSvc
-ServiceManager      DEBUG Finalizing service HistogramDataSvc
-ServiceManager      DEBUG Finalizing service HistogramPersistencySvc
+IncidentSvc         DEBUG Removing [BeginEvent] listener 'AlgContextSvc'
+IncidentSvc         DEBUG Removing [EndEvent] listener 'AlgContextSvc'
 ServiceManager      DEBUG Finalizing service EventDataSvc
 ServiceManager      DEBUG Finalizing service EventPersistencySvc
 ServiceManager      DEBUG Finalizing service IncidentSvc
 ServiceManager      DEBUG Finalizing service AppMgrRunable
+ServiceManager      DEBUG Finalizing service HistogramDataSvc
+ServiceManager      DEBUG Finalizing service HistogramPersistencySvc
 ServiceManager      DEBUG Finalizing service StatusCodeSvc
-StatusCodeSvc       DEBUG Service base class initialized successfully
-StatusCodeSvc        INFO initialize
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
 Number of MyTrack instances:0

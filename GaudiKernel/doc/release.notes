@@ -1,5 +1,178 @@
 Package : GaudiKernel
-Package manager : Pere Mato
+Package manager : Marco Clemencic
+
+================ GaudiKernel v26r0 ====================================
+! 2008-11-13 - Pere Mato
+ - Added the functions pushCurrentDataObject and popCurrentDataObject, taken
+   from GaudiPoolDb.
+
+! 2008-11-12 - Marco Clemencic
+ - Added the possibility of specifying post-config actions (functions to be
+   called after the call of all __apply_configuration__ methods) with the
+   functions appendPostConfigAction and removePostConfigAction from
+   GaudiKernel.Configurable (exposed via Gaudi.Configuration too).
+
+! 2008-11-11 - Marco Clemencic
+ - Added a small script (make_patch.py) to simplify the generation of patches.
+
+! 2008-11-10 - Marco Clemencic
+ - Minor change to ISvcManager to allow enable/disable of the initialization
+   loop check.
+
+! 2008-11-07 - Marco Clemencic
+ - Added automatic registration of ConfigurableUser specializations to the
+   database of configurables.
+
+! 2008-11-06 - Marco Clemencic
+ - Re-enabled the GaudiHandleProprtyProxy.
+ - Modified the ConfigurableUser base class so that the ConfigurableUser classes
+   declared as used are not active by default and they get activated the when
+   they get instantiated explicitly. The test has been updated too.
+
+! 2008-11-01 - Marco Clemencic
+ - Fixed bug #43420. IPartPropSvc not accessible from Python
+   Added the missing interface to the dictionary.
+
+! 2008-10-30 - Marco Clemencic
+ - Fixed a compilation problem on gcc4.3 with properties of type vector<pair>.
+   (order of specializations in GaudiKernel/ToStream.h)
+ - Replaced operator<<(MsgStream,vector) with the one in GaudiKernel/SerializeSTL.h
+ - Modified the base class ConfigurableUser to allow automatic apply. If the
+   ConfigurableUser derived class should touch other ConfigurableUser instances,
+   the classes must be added to the class data member __used_configurables__
+   (see tests/scripts/test_configurable_users.py in the package Gaudi).
+ - Added the function GaudiKernel.Configurable.applyConfigurableUsers() which
+   actually does the job of calling the apply method of all the ConfigurableUser
+   instances.
+ - Added the methods getProp and setProp to Configurable (LHCb contibution) and
+   propagateProperty and propagateProperties to ConfigurableUsers (adaptations from
+   LHCb contributions).
+
+! 2008-10-28 - Marco Clemencic
+ - Fixed bug #43314. Memory leak in StatusCode
+   Added protection against self-assignment and delete of the owned
+   IssueSeverity instance.
+
+! 2008-10-27 - Marco Clemencic
+ - Fixed warnings reported by gcc 4.3:
+   - type qualifiers ignored on function return type
+   - ../src/Lib/StatusCode.cpp:59: warning: the address of ‘addresses’ will
+     always evaluate as ‘true’
+   - ISO C++ forbids casting between pointer-to-function and pointer-to-object
+     (only active for gcc >= 4)
+ - Modified ConfigurableAlgTool.toStringProperty to use getFullName (to get rid
+   of the parent name in front of the instance name).
+ - Fixed a glitch in Configurable.__str__ when the property is a GaudiHandle.
+ - Do not use the full path to genconf.exe with install area.
+ - Fixed compilation errors and some warnings on gcc 4.3.
+
+! 2008-10-23 - Marco Clemencic
+ - Reverted old implementation of the reinitialize method of Algorithm, Service
+   and AlgTool, i.e. do nothing. Fixes bug #39706.
+ - Fixed bug #42428. Properties of clones are not cloned.
+   - Modified the method clone to create copies of the properties if they are of
+     types: [ str, list, dict, tuple ].
+ - Fixed bug #43065. Error when unpickling GaudiHandles.
+   - Modified the constructor of GaudiHandle to accept a GaudiHandle (or any
+     instance with the method "toStringProperty") as argument.
+
+! 2008-10-21 - Marco Clemencic
+ - Improvements in the logging of GaudiKernel.ProcessJobOptions. "Print OFF" and
+   "print ON" can be obtained using the GaudiKernel.ProcessJobOptions.PrintOn and
+   GaudiKernel.ProcessJobOptions.PrintOff functions.
+
+! 2008-10-20 - Marco Clemencic
+ - Fixed the cast of errno from "int" to "unsigned long". (Fixes bug #25460)
+
+! 2008-10-17 - Sebastien Binet
+ - Fixed bug #42005. System::typeinfoName is missing 'signed char'
+   - Added the missing case.
+
+! 2008-10-17 - Marco Clemencic
+ - Patch #2303. Improve/extend IAlgorithm interface
+   Added the methods
+    - setExecuted
+    - isEnabled
+    - filterPassed
+    - setFilterPassed
+ - Fixed bug #39846. gaudirun.py creates invalid entries in flattened options
+   Modified filter "getNeededConfigurables" (GaudiKernel.Proxy.Configurable) to
+   exclude ConfigurableUser instances.
+
+! 2008-10-15 - Marco Clemencic
+ - Excluded a couple of problematic methods from the dictionary (not preseent with
+   ROOT 5.18, but causing problems with ROOT 5.21).
+ - Fixed a problem with patch #2261. The usage of "id" for the aliases was
+   conflicting with its usage for the DataObject factories.
+
+! 2008-10-10 - Vanya Belyaev
+ - Patch #2073: SharedObjectsContainer and 'blind' access to TYPE::Container &
+                TYPE::Selection
+   Added SharedObjectsContainer.
+
+! 2008-10-09 - Pere Mato
+ - Patch #2261. Introducing name alias for Algorithms and Services 
+   Added the new macros DECLARE_NAMED_ALGORITHM_FACTORY(type,name) to be used
+   instead of the current DECLARE_ALGORITHM_FACTORY(type) for algorithms with
+   templates. Similarly for Services.
+
+! 2008-10-09 - Marco Clemencic
+ - Modified the return type of the "size" methods of ObjectContainerBase,
+   KeyedContainer, ObjectList and ObjectVector to be size_t (i.e. "unsigned long")
+   instead of long.
+   It avoids some compilation warnings.
+
+! 2008-10-09 - Vanya Belyaev
+ - Patch #2058. Extensions for AIDA::TProfile1D
+   IHistogramSvc : few new methods are added for booking of 1D-profiles with
+                   Y-range and options
+
+! 2008-10-03 - Marco Clemencic
+ - Added ITHistSvc::getGraphs(), needed by patch #1963.
+
+! 2008-10-01 - Marco Clemencic
+ - Minor change in System::backTrace interface.
+
+! 2008-10-01 - Frank Winklmeier
+ - Patch #1797: Backtrace utility for System
+   Generalized version of the code taken from IssueLogger::getTraceBack()
+   (GaudiSvc).
+ - Patch #1796: Performance improvement for message reporting
+
+! 2008-08-06 - Marco Clemencic
+ - Fixed bug #39809 (wrong configuration of public tools).
+
+! 2008-08-05 - Marco Clemencic
+ - Fixed bug #39250. Cannot use configurable instances as values for properties
+                     of type map<str,str>.
+ - Fixed bug #39117. gaudirun.py export to old options does not handle correctly
+                     GaudiHandles.
+   Added the method getFullName. 
+ - Fixed bug #39116. gaudirun.py export to old options prints '#' instead of '//'
+   The fix required a review of the way messages are printed across the whole
+   Configurables machinery. The Python standard logging module is now used and
+   the customization in GaudiKernel.Logging has been removed.
+   In printout in Python job option files should be done with the log instance
+   accessible from Gaudi.Configuration.
+
+================ GaudiKernel v25r2 ====================================
+! 2008-07-17 - Marco Clemencic
+ - Added the interface IEventTimeDecoder (from LHCb detector description), and
+   the Reflex dictionary for it.
+
+! 2008-07-15 - Marco Clemencic
+ - Fixed bug #38868. MinimalEventLoopMgr does not restart algorithms
+   Implemented restart so that it calls the restart of all the algorithms. 
+   Fixed the implementation of reinitialize too.
+
+! 2008-07-15 - Gerhard Raven
+ - Fixed bug #38855. Inconsistent check in Service::sysRestart.
+   Fixed a the result of a bad cut & paste.
+
+! 2008-07-15 - Vanya Belyaev
+ - Patch #1756. Decrease the probability for FPE in StatEntity::addFlag
+   Added a check in StatEntity::addFlag to avoid floating point exceptions
+   (underflows).
 
 ! 2008-07-11 - Charles Leggett
  - requirements: tweak genconfig_cmd macro to work with GAUDI_ATLAS tag

@@ -1,5 +1,5 @@
 package GaudiSvc
-version v16r5
+version v17r2
 
 branches src cmt doc
 use GaudiKernel v*
@@ -35,6 +35,7 @@ library GaudiSvc -import=AIDA -import=Boost -import=CLHEP -import=ROOT \
                  ToolSvc/*.cpp \
                  THistSvc/*.cpp \
                  FastContainersSvc/*.cpp \
+                 VFSSvc/*.cpp \
                  Dll/GaudiSvc*.cpp
 
 
@@ -52,19 +53,7 @@ apply_pattern generate_configurables_internal library=GaudiSvcTest group=tests
 apply_pattern library_Clinkopts library=GaudiSvcTest import=ROOT import2=Reflex import3=Boost
 apply_pattern libraryShr        library=GaudiSvcTest
 
-#macro_append Boost_linkopts "$(Boost_linkopts_filesystem) $(Boost_linkopts_regex) $(Boost_linkopts_thread)"
-
-# This is needed because the library used with $(Boost_linkopts_filesystem)
-# is the non multithread one.
-macro_append Boost_linkopts " $(Boost_linkopts_regex) $(Boost_linkopts_thread)"
-
-# FIXME: (MCl) the check for the tag ROOT_GE_5_15 is a temporary hack for LCG
-#              nightlies
-macro_append Boost_linkopts ' -lboost_filesystem-gcc-mt ' \
-         ROOT_GE_5_15&Linux ' -lboost_filesystem-$(Boost_compiler_version)-mt ' \
-        ROOT_GE_5_15&Darwin ' -lboost_filesystem-mt-$(Boost_file_version) ' \
-                     Darwin ' -lboost_filesystem-$(Boost_file_version) ' \
-                     WIN32  ' boost_filesystem-vc71-mt-$(Boost_file_version).lib '
+macro_append Boost_linkopts " $(Boost_linkopts_system) $(Boost_linkopts_filesystem) $(Boost_linkopts_regex) $(Boost_linkopts_thread) "
 
 apply_pattern ld_library_path
 

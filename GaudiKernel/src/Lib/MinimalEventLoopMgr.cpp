@@ -1,4 +1,4 @@
-// $Id: MinimalEventLoopMgr.cpp,v 1.5 2008/01/18 21:48:11 marcocle Exp $
+// $Id: MinimalEventLoopMgr.cpp,v 1.7 2008/07/15 12:48:18 marcocle Exp $
 #define  GAUDIKERNEL_MINIMALEVENTLOOPMGR_CPP
 
 #include "GaudiKernel/SmartIF.h"
@@ -208,6 +208,64 @@ StatusCode MinimalEventLoopMgr::initialize()    {
 
   return StatusCode::SUCCESS;
 }
+//--------------------------------------------------------------------------------------------
+// implementation of IAppMgrUI::start
+//--------------------------------------------------------------------------------------------
+StatusCode MinimalEventLoopMgr::start()    {
+
+  StatusCode sc = Service::start();
+  if ( ! sc.isSuccess() ) return sc;
+  
+  MsgStream log(msgSvc(), name());
+  
+  ListAlg::iterator ita;
+  // Start all the new TopAlgs. In fact Algorithms are protected against getting
+  // started twice.
+  for (ita = m_topAlgList.begin(); ita != m_topAlgList.end(); ita++ ) {
+    sc = (*ita)->sysStart();
+    if( !sc.isSuccess() ) {
+      log << MSG::ERROR << "Unable to initialize Algorithm: " << (*ita)->name() << endreq;
+      return sc;
+    }
+  }
+  for (ita = m_outStreamList.begin(); ita != m_outStreamList.end(); ita++ ) {
+    sc = (*ita)->sysStart();
+    if( !sc.isSuccess() ) {
+      log << MSG::ERROR << "Unable to initialize Output Stream: " << (*ita)->name() << endreq;
+      return sc;
+    }
+  }
+  return StatusCode::SUCCESS;
+}
+//--------------------------------------------------------------------------------------------
+// implementation of IAppMgrUI::stop
+//--------------------------------------------------------------------------------------------
+StatusCode MinimalEventLoopMgr::stop()    {
+
+  StatusCode sc = StatusCode::SUCCESS;
+  
+  MsgStream log(msgSvc(), name());
+  
+  ListAlg::iterator ita;
+  // Start all the new TopAlgs. In fact Algorithms are protected against getting
+  // started twice.
+  for (ita = m_topAlgList.begin(); ita != m_topAlgList.end(); ita++ ) {
+    sc = (*ita)->sysStop();
+    if( !sc.isSuccess() ) {
+      log << MSG::ERROR << "Unable to initialize Algorithm: " << (*ita)->name() << endreq;
+      return sc;
+    }
+  }
+  for (ita = m_outStreamList.begin(); ita != m_outStreamList.end(); ita++ ) {
+    sc = (*ita)->sysStop();
+    if( !sc.isSuccess() ) {
+      log << MSG::ERROR << "Unable to initialize Output Stream: " << (*ita)->name() << endreq;
+      return sc;
+    }
+  }
+  
+  return Service::stop();
+}
 
 //--------------------------------------------------------------------------------------------
 // implementation of IService::reinitialize
@@ -217,19 +275,44 @@ StatusCode MinimalEventLoopMgr::reinitialize() {
   StatusCode sc = StatusCode::SUCCESS;
   ListAlg::iterator ita;
 
-  // Initialize all the new TopAlgs. In fact Algorithms are protected against getting
-  // initialized twice.
+  // Renitialize all the TopAlgs.
   for (ita = m_topAlgList.begin(); ita != m_topAlgList.end(); ita++ ) {
-    sc = (*ita)->sysInitialize();
+    sc = (*ita)->sysReinitialize();
     if( !sc.isSuccess() ) {
-      log << MSG::ERROR << "Unable to initialize Algorithm: " << (*ita)->name() << endreq;
+      log << MSG::ERROR << "Unable to reinitialize Algorithm: " << (*ita)->name() << endreq;
       return sc;
     }
   }
   for (ita = m_outStreamList.begin(); ita != m_outStreamList.end(); ita++ ) {
-    sc = (*ita)->sysInitialize();
+    sc = (*ita)->sysReinitialize();
     if( !sc.isSuccess() ) {
-      log << MSG::ERROR << "Unable to initialize Output Stream: " << (*ita)->name() << endreq;
+      log << MSG::ERROR << "Unable to reinitialize Output Stream: " << (*ita)->name() << endreq;
+      return sc;
+    }
+  }
+
+  return sc;
+}
+//--------------------------------------------------------------------------------------------
+// implementation of IService::restart
+//--------------------------------------------------------------------------------------------
+StatusCode MinimalEventLoopMgr::restart() {
+  MsgStream log( msgSvc(), name() );
+  StatusCode sc = StatusCode::SUCCESS;
+  ListAlg::iterator ita;
+
+  // Restart all the TopAlgs.
+  for (ita = m_topAlgList.begin(); ita != m_topAlgList.end(); ita++ ) {
+    sc = (*ita)->sysRestart();
+    if( !sc.isSuccess() ) {
+      log << MSG::ERROR << "Unable to restart Algorithm: " << (*ita)->name() << endreq;
+      return sc;
+    }
+  }
+  for (ita = m_outStreamList.begin(); ita != m_outStreamList.end(); ita++ ) {
+    sc = (*ita)->sysRestart();
+    if( !sc.isSuccess() ) {
+      log << MSG::ERROR << "Unable to restart Output Stream: " << (*ita)->name() << endreq;
       return sc;
     }
   }

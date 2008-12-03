@@ -1,9 +1,12 @@
-// $Id: GaudiAlgorithm.h,v 1.17 2007/09/25 16:12:41 marcocle Exp $
+// $Id: GaudiAlgorithm.h,v 1.19 2008/11/04 22:49:25 marcocle Exp $
 // ============================================================================
 #ifndef GAUDIALG_GaudiAlgorithm_H
 #define GAUDIALG_GaudiAlgorithm_H 1
 // ============================================================================
 // Include files
+// ============================================================================
+#include <vector>
+#include <string>
 // ============================================================================
 // GaudiKernel
 // ============================================================================
@@ -243,9 +246,10 @@ public:
    *  @return pointer to the data object
    */
   template < class TYPE  >
-  inline TYPE* get  ( IDataProviderSvc*  svc       ,
-                      const std::string& location  ,
-                      const bool useRootInTES = true ) const
+  inline typename Gaudi::Utils::GetData<TYPE>::return_type  
+  get  ( IDataProviderSvc*  svc       ,
+         const std::string& location  ,
+         const bool useRootInTES = true ) const
   {
     return GaudiCommon<Algorithm>::get<TYPE> ( svc , location , useRootInTES ) ;
   }
@@ -277,8 +281,9 @@ public:
    *  @return         Pointer to the data object
    */
   template < class TYPE  >
-  inline TYPE* get  ( const std::string& location,
-                      const bool useRootInTES = true ) const
+  inline typename Gaudi::Utils::GetData<TYPE>::return_type  
+  get  ( const std::string& location,
+         const bool useRootInTES = true ) const
   {
     return GaudiCommon<Algorithm>::get<TYPE> ( evtSvc() , location , useRootInTES ) ;
   }
@@ -559,6 +564,11 @@ private:
   std::string             m_contextSvcName ; ///< Algorithm Context Service 
   // enforce the algorithm registration for Algorithm Context Service
   bool    m_registerContext ; ///< register in Algorithm Context Service
+  /// skip the event if any of these objects are present in TES
+  std::vector<std::string> m_vetoObjs;
+  /// process the event only if one or more of these objects are present in TES
+  std::vector<std::string> m_requireObjs;
+  
   // ==========================================================================
 };
 // ============================================================================

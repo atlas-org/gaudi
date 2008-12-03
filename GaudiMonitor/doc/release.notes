@@ -1,6 +1,11 @@
 Package: GaudiMonitor
 Package manager : Hubert Degaudenzi
 
+================ GaudiMonitor v1r5 ====================================
+! 2008-10-27 - Marco Clemencic
+ - Fixed warnings reported by gcc 4.3:
+   - ‘<unnamed>::nIncidents’ defined but not used
+
 ================ GaudiMonitor v1r4 ====================================
 ! 2008-01-15 - Marco Clemencic
  - Fixed bug #31950. Missing call to Service::finalize.

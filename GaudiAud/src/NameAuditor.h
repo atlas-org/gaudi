@@ -9,7 +9,6 @@
 // Author: M. Shapiro, LBNL
 //
 #include "GaudiKernel/Auditor.h"
-#include "GaudiKernel/Property.h"
 
 class INamedInterface;
 

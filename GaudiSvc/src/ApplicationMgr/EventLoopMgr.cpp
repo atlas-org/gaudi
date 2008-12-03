@@ -1,4 +1,4 @@
-// $Id: EventLoopMgr.cpp,v 1.23 2007/11/16 18:33:10 marcocle Exp $
+// $Id: EventLoopMgr.cpp,v 1.26 2008/10/09 13:40:18 marcocle Exp $
 #define  GAUDISVC_EVENTLOOPMGR_CPP
 
 #include "GaudiKernel/SmartIF.h"
@@ -29,11 +29,14 @@ EventLoopMgr::EventLoopMgr(const std::string& nam, ISvcLocator* svcLoc)
   m_evtDataMgrSvc     = 0;
   m_evtDataSvc        = 0;
   m_evtSelector       = 0;
-  m_evtContext       = 0;
+  m_evtContext        = 0;
+  m_endEventFired     = true;
   
   // Declare properties
   declareProperty("HistogramPersistency", m_histPersName = "");
-  declareProperty( "EvtSel", m_evtsel );
+  declareProperty("EvtSel", m_evtsel );
+  declareProperty("Warnings",m_warnings=true,
+		  "Set this property to false to suppress warning messages");
 }
 
 //--------------------------------------------------------------------------------------------
@@ -52,10 +55,9 @@ EventLoopMgr::~EventLoopMgr()   {
 // implementation of IAppMgrUI::initalize
 //--------------------------------------------------------------------------------------------
 StatusCode EventLoopMgr::initialize()    {
-  MsgStream log(msgSvc(), name());
-
   // initilaize the base class
   StatusCode sc = MinimalEventLoopMgr::initialize();
+  MsgStream log(msgSvc(), name());
   if( !sc.isSuccess() ) {
     log << MSG::DEBUG << "Error Initializing base class MinimalEventLoopMgr." << endreq;
     return sc;
@@ -104,8 +106,10 @@ StatusCode EventLoopMgr::initialize()    {
   else {
     m_evtSelector = 0;
     m_evtContext = 0;
-    log << MSG::WARNING << "Unable to locate service \"EventSelector\" " << endreq;    
-    log << MSG::WARNING << "No events will be processed from external input." << endreq;    
+    if ( m_warnings ) {
+      log << MSG::WARNING << "Unable to locate service \"EventSelector\" " << endreq;    
+      log << MSG::WARNING << "No events will be processed from external input." << endreq;
+    }
   }
 
   // Setup access to histogramming services
@@ -127,7 +131,7 @@ StatusCode EventLoopMgr::initialize()    {
 //--------------------------------------------------------------------------------------------
 StatusCode EventLoopMgr::reinitialize() {
   MsgStream log(msgSvc(), name());
-
+  
   // initilaize the base class
   StatusCode sc = MinimalEventLoopMgr::reinitialize();
   if( !sc.isSuccess() ) {
@@ -145,7 +149,7 @@ StatusCode EventLoopMgr::reinitialize() {
     if( sc.isSuccess() && ( theEvtSel != m_evtSelector ) ) {
       // Setup Event Selector
       m_evtSelector = theEvtSel;
-      if (theSvc->state() == IService::INITIALIZED) {
+      if (theSvc->FSMState() == Gaudi::StateMachine::INITIALIZED) {
         sc = theSvc->reinitialize();
         if( !sc.isSuccess() ) {
           log << MSG::ERROR << "Failure Reinitializing EventSelector "
@@ -189,20 +193,32 @@ StatusCode EventLoopMgr::reinitialize() {
   return StatusCode::SUCCESS;
 }
 
+
+//--------------------------------------------------------------------------------------------
+// implementation of IService::stop
+//--------------------------------------------------------------------------------------------
+StatusCode EventLoopMgr::stop()    {
+  if ( ! m_endEventFired ) {
+    // Fire pending EndEvent incident
+    m_incidentSvc->fireIncident(Incident(name(),IncidentType::EndEvent));
+    m_endEventFired = true;
+  }
+  return MinimalEventLoopMgr::stop();
+}
+
 //--------------------------------------------------------------------------------------------
 // implementation of IAppMgrUI::finalize
 //--------------------------------------------------------------------------------------------
 StatusCode EventLoopMgr::finalize()    {
   StatusCode sc;
   MsgStream log(msgSvc(), name());
-
+  
   // Finalize base class
   sc = MinimalEventLoopMgr::finalize();
   if (! sc.isSuccess()) {
     log << MSG::ERROR << "Error finalizing base class" << endreq;
     return sc;
   }
-  
 
   // Save Histograms Now
   if ( 0 != m_histoPersSvc )    {
@@ -265,6 +281,7 @@ StatusCode EventLoopMgr::finalize()    {
 // executeEvent(void* par)
 //--------------------------------------------------------------------------------------------
 StatusCode EventLoopMgr::executeEvent(void* par)    {
+
   // Fire BeginEvent "Incident"
   m_incidentSvc->fireIncident(Incident(name(),IncidentType::BeginEvent));
   // An incident may schedule a stop, in which case is better to exit before the actual execution.
@@ -276,8 +293,6 @@ StatusCode EventLoopMgr::executeEvent(void* par)    {
 
   // Execute Algorithms
   StatusCode sc = MinimalEventLoopMgr::executeEvent(par);
-  // Fire EndEvent "Incident"
-  m_incidentSvc->fireIncident(Incident(name(),IncidentType::EndEvent));
 
   // Check if there was an error processing current event
   if( !sc.isSuccess() ){
@@ -317,6 +332,12 @@ StatusCode EventLoopMgr::nextEvent(int maxevt)   {
     }
     // Clear the event store, if used in the event loop
     if( 0 != total_nevt ) {
+      
+      if ( ! m_endEventFired ) {
+        // Fire EndEvent "Incident" (it is considered part of the clearsing of the TS)
+        m_incidentSvc->fireIncident(Incident(name(),IncidentType::EndEvent));
+        m_endEventFired = true;
+      }
       sc = m_evtDataMgrSvc->clearStore();
       if( !sc.isSuccess() )  {
         log << MSG::DEBUG << "Clear of Event data store failed" << endreq;
@@ -352,6 +373,7 @@ StatusCode EventLoopMgr::nextEvent(int maxevt)   {
     }
     // Execute event for all required algorithms
     sc = executeEvent(NULL);
+    m_endEventFired = false;
     if( !sc.isSuccess() ){
       log << MSG::ERROR << "Terminating event processing loop due to errors" << endreq;
       break;

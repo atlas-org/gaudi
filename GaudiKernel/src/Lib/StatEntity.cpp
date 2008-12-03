@@ -1,6 +1,6 @@
-// $Id: StatEntity.cpp,v 1.7 2007/08/06 08:39:39 marcocle Exp $ 
+// $Id: StatEntity.cpp,v 1.8 2008/07/15 10:53:26 marcocle Exp $ 
 // ============================================================================
-// CVS tag $Name:  $, version $Revision: 1.7 $
+// CVS tag $Name:  $, version $Revision: 1.8 $
 // ============================================================================
 #define GAUDIKERNEL_STATENTITY_CPP 1 
 // ============================================================================
@@ -179,13 +179,15 @@ unsigned long StatEntity::addFlag ( const double Flag )
   //
   if      ( 0 <  m_se_nEntriesBeforeReset ) { --m_se_nEntriesBeforeReset; }
   else if ( 0 == m_se_nEntriesBeforeReset ) { reset(); } ///< reset everything
-  // accumulate the flag
-  m_se_accumulatedFlag   += Flag        ; ///< accumulate the flag
-  // evaluate min/max 
-  m_se_minimalFlag = std::min ( m_se_minimalFlag , Flag ) ; ///< evaluate min/max 
-  m_se_maximalFlag = std::max ( m_se_maximalFlag , Flag ) ; ///< evaluate min/max 
-  // accumulate statistics:
-  m_se_accumulatedFlag2  += Flag * Flag ; ///< accumulate statistics:
+  /// accumulate the flag
+  m_se_accumulatedFlag   += Flag        ; // accumulate the flag
+  /// evaluate min/max 
+  m_se_minimalFlag = std::min ( m_se_minimalFlag , Flag ) ; // evaluate min/max 
+  m_se_maximalFlag = std::max ( m_se_maximalFlag , Flag ) ; // evaluate min/max 
+  // accumulate statistics, but avoid FPE for small flags... 
+  static const double s_min1 = 2 * ::sqrt ( std::numeric_limits<double>::min() ) ;
+  if ( s_min1 < Flag || -s_min1 > Flag )  
+  { m_se_accumulatedFlag2  += Flag * Flag ; }// accumulate statistics:
   //
   return ++m_se_nEntries ;  
 }

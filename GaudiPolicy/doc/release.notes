@@ -1,6 +1,136 @@
 package GaudiPolicy
 package manager: Pere Mato
 
+================ GaudiPolicy v8r6 ====================================
+! 2008-11-07 - Marco Clemencic
+ - Added automatic registration of ConfigurableUser specializations to the
+   database of configurables.
+ - Improved the test function "findReferenceBlock" to allow more than one call
+   in the same validation code.
+
+! 2008-10-30 - Hubert Degaudenzi
+ - Added cmt action to create .pyc file in the InstallArea. This action is called
+   by "cmt CompilePython". This is not added by default to the build procedure 
+   since these created files are location dependent. They have to be created at 
+   installation time.
+ 
+! 2008-10-28 - Marco Clemencic
+ - Fixed bug #43114. Python clean make target not removing .pyc files
+   - Modified install.py to remove the corresponding .py[co] files when removing
+     a .py file.
+
+! 2008-10-27 - Marco Clemencic
+ - Fixed warnings reported by gcc 4.3:
+   - hash_map: deprecated header (temporary work-around until gccxml understands
+     std::tr1::unordered_map)
+
+! 2008-10-20 - Marco Clemencic
+ - Modified GaudiTest.py to report the content of the environment for failing
+   tests.
+
+! 2008-10-17 - Marco Clemencic, Hubert Degaudenzi
+ - Added environment variables needed to generate doxygen documentation
+   (<project>VERS, many <external>VERS, GAUDI_DOXY_HOME).
+
+! 2008-10-16 - Marco Clemencic
+ - GaudiTests.py:
+   - Improved the handling of positional arguments in the CallWrapper class
+     (allowing backward compatibility).
+
+! 2008-10-15 - Marco Clemencic
+ - GaudiTests.py:
+   - Added a function to check the consistency or GaudiHistos summaries:
+     CheckHistosSummaries (similar to CheckTTreesSummaries).
+
+! 2008-09-30 - Marco Clemencic
+ - GaudiTests.py:
+   - Added a function (with some helpers) to check the consistency or TTree
+     summaries: CheckTTreesSummaries.
+   - Excluded TTree summaries from the basic reference file comparison, replaced
+     by a call to CheckTTreesSummaries in ValidateWithReference.
+   - Moved the code to generate a new reference file from ReferenceFileValidator
+     to ValidateWithReference.
+   - Excluded (temporarily) the ROOT message:
+       'Note: (file "(tmpfile)", line 2) File "set" already loaded'
+     present only with ROOT >= 5.21 (HEAD).
+   - Added a boolean field to the test description to allow the usage of a
+     temporary directory (use_temp_dir), false by default.
+   - Converts paths to absolute in program name, arguments and reference files
+     to simplify the usage of temporary directories.
+
+! 2008-09-29 - Marco Clemencic
+ - GaudiTests.py:
+   - Added "countErrorLines" to the validation functions.
+   - Extended "validateWithReference" to accept a custom preprocessor.
+   - Moved specific reference file replacement for Aida2Root into the test.
+   - Added hack to hide bug #34177/bug #33971.
+
+! 2008-08-06 - Marco Clemencic
+ - Fixed bug #35792: merge_genconfDb fragment does not need -dependencies
+   Removed the '-dependencies' as suggested. Remoed it from the python_init
+   fragment too.
+ 
+! 2008-08-05 - Marco Clemencic
+ - Fixed bug #39272. Cannot use cmt TestPackage before cmt make
+   Now the binary directory (to hold the results report of the tests) is
+   automatically created if not present.
+ - Simplified the way to call standard validation functions in the validator
+   section of the .qmt files. Now the standard arguments (stdout, stderr,
+   results, causes) are passed automatically.
+
+! 2008-08-04 - Marco Clemencic
+ - Fixed bug #39273. Need separate qmtest reference files for slc4_ia32 and
+                     slc4_amd64 platforms
+   The reference file name matching has been improved to match also names like
+   "<specified_name>.<platform_prefix>", where <platform_prefix> is a substring
+   of platform string. E.g. "RefFile.ref.slc4_ia32" will be valid for
+   slc4_ia32_gcc34, slc4_ia32_gcc34_dbg, slc4_ia32_gcc41.
+
+! 2008-07-31 - Hubert Degaudenzi
+ - added the application of the linker library pattern to the genconf 
+   helper library. This will ensure the creation of the dll on windows.
+ - fixed the gcov support for gcc 3.4 and above.
+ - added the ccache support. It works with/without distcc
+
+================ GaudiPolicy v8r5 ====================================
+! 2008-07-11 - Hubert Degaudenzi
+ - Applied the linker_library to the genconf helper library. Otherwise the
+   dll file is not created on windows.
+
+================ GaudiPolicy v8r4 ====================================
+! 2008-06-25 - Marco Clemencic
+ - Fixed bug #38208: The pattern GaudiApp does not work if inherited.
+   Modified the pattern to use <package> and <version> instead of $(package) and
+   $(version).
+
+================ GaudiPolicy v8r3 ====================================
+! 2008-06-19 - Marco Clemencic
+ - Removed hard-coded package prefix in cmt/fragments/qmtest_summarize.py.
+ - Defined a macro for the location of the qmtest_summarize.py script.
+
+! 2008-06-13 - Marco Clemencic
+ - Added a pattern to generate a header file containing macros to identify the
+   version of a project at compile-time.
+   It is enough to add the line
+   
+     apply_pattern ProjectVersionHeader
+   
+   to a package that has the same version number of the project (like the
+   steering project) and it will create a file called "<PROJECT>_VERSION.h" in
+   InstallArea/include.  
+
+! 2008-05-29 - Charles Leggett
+ - Changed the name of the extension for libraries on OSX from ".dylib" to ".so".
+
+! 2008-05-28 - Hubert Degaudenzi
+ - Added a path cleaner to the global Gaudi setup. This is removing invalid or 
+   empty components in the PATH, LD_LIBRARY_PATH, JOBOPTSEARCHPATH, PYTHONPATH
+ - Added the pattern pyd_module in order to be able to create python binary 
+   modules (.pyd files).
+ - Added generic "template" document/fragment which allows to transform some
+   spam.txt.tmpl file into spam.txt expanding all the cmt macros. It uses internally
+   "cmt filter"
+
 ================ GaudiPolicy v8r2 ====================================
 ! 2008-04-11 - Marco Clemencic
  - Fixed a problem introduced with Patch #1724.

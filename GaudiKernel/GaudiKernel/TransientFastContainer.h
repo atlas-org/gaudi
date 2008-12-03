@@ -1,4 +1,4 @@
-// $Id: TransientFastContainer.h,v 1.5 2006/11/29 18:46:31 hmd Exp $
+// $Id: TransientFastContainer.h,v 1.6 2008/10/27 16:41:33 marcocle Exp $
 #ifndef GAUDIKERNEL_TRANSIENTFASTCONTAINER_H
 #define GAUDIKERNEL_TRANSIENTFASTCONTAINER_H 1
 
@@ -150,13 +150,13 @@ public:
   inline pointer operator[] (size_type index)
   { return (index < size()) ? m_storage[index] : throw std::out_of_range("index out of range"), (pointer)NULL; }
   /// Const accessor to the object at the given index. Throws std::out_of_range if index is greater than size().
-  inline const_pointer operator[] (size_type index) const
+  inline const contained_type* operator[] (size_type index) const
   { return (index < size()) ? m_storage[index] : throw std::out_of_range("index out of range"), (const_pointer)NULL; }
 
   /// Same as operator[]().
   inline pointer at(size_type index) { return operator[] (index); }
   /// Same as operator[]() const.
-  inline const_pointer at(size_type index) const { return operator[] (index); }
+  inline const contained_type* at(size_type index) const { return operator[] (index); }
 
 private:
 

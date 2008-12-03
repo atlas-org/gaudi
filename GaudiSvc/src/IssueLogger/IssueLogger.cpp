@@ -29,7 +29,7 @@ inline void toupper(std::string &s)
 
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *//
 
-IssueLogger::IssueLogger( const std::string& name, ISvcLocator* svc ) 
+IssueLogger::IssueLogger( const std::string& name, ISvcLocator* svc )
   : Service(name, svc) {
 
   declareProperty ("Output", m_outputfile );
@@ -79,7 +79,7 @@ IssueLogger::IssueLogger( const std::string& name, ISvcLocator* svc )
   m_levelTrans[IssueSeverity::WARNING]     = "WARNING";
   m_levelTrans[IssueSeverity::RECOVERABLE] = "RECOVERABLE";
   m_levelTrans[IssueSeverity::ERROR]       = "ERROR";
-  m_levelTrans[IssueSeverity::FATAL]       = "FATAL"; 
+  m_levelTrans[IssueSeverity::FATAL]       = "FATAL";
   m_levelTrans[IssueSeverity::ALWAYS]      = "ALWAYS";
 
   m_levelSTrans["VERBOSE"]     = IssueSeverity::VERBOSE;
@@ -91,7 +91,7 @@ IssueLogger::IssueLogger( const std::string& name, ISvcLocator* svc )
   m_levelSTrans["WARNING"]     = IssueSeverity::WARNING;
   m_levelSTrans["RECOVERABLE"] = IssueSeverity::RECOVERABLE;
   m_levelSTrans["ERROR"]       = IssueSeverity::ERROR;
-  m_levelSTrans["FATAL"]       = IssueSeverity::FATAL; 
+  m_levelSTrans["FATAL"]       = IssueSeverity::FATAL;
   m_levelSTrans["ALWAYS"]      = IssueSeverity::ALWAYS;
 
 
@@ -104,19 +104,19 @@ IssueLogger::~IssueLogger() {
 }
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *//
 
-StatusCode IssueLogger::queryInterface( const InterfaceID& riid, 
+StatusCode IssueLogger::queryInterface( const InterfaceID& riid,
 					void** ppvInterface ) {
   StatusCode sc = StatusCode::FAILURE;
   if ( ppvInterface ) {
     *ppvInterface = 0;
-    
+
     if ( IIssueLogger::interfaceID().versionMatch(riid) )    {
       *ppvInterface = static_cast<IIssueLogger*>(this);
       sc = StatusCode::SUCCESS;
       addRef();
     }
     else
-      sc = Service::queryInterface( riid, ppvInterface );    
+      sc = Service::queryInterface( riid, ppvInterface );
   }
   return sc;
 }
@@ -168,48 +168,30 @@ IssueLogger::finalize() {
 
 void
 IssueLogger::getTraceBack(std::string& stack) {
-
-   size_t depth = 21;
-   void** addresses = 0 ;
-   
-   addresses = (void**) malloc(depth*sizeof(void *));
-
-   std::string fnc, lib;
-   void *addr(0);
- 
-   if ( (addresses != 0) && System::backTrace(addresses,depth)) { 
-     for (size_t i=7; i<depth; ++i) {
-       addr = 0 ;
-	
-       if (System::getStackLevel(addresses[i],addr,fnc,lib)) {
-         std::ostringstream ost;
-         ost << hex << addr << " " << fnc << "  [" << lib << "]\n";
-         stack += ost.str();
-       } 
-     }
-     free(addresses);
-   }
+  const int depth = 30;
+  const int offset = 5;
+  System::backTrace(stack, depth, offset);
 }
 
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *//
 
 StatusCode
 IssueLogger::connect(const std::string& ident) {
-  
+
   MsgStream log ( msgSvc(), name() );
   Tokenizer tok(true);
-  
+
   string::size_type loc = ident.find(" ");
   string stream = ident.substr(0,loc);
 //   typedef std::pair<std::string,std::string>      Prop;
 //   std::vector<Prop> props;
   string val,VAL,TAG,filename;
-  
+
   tok.analyse(ident.substr(loc+1,ident.length()), " ", "", "", "=", "'", "'");
-  
-  for ( Tokenizer::Items::iterator i = tok.items().begin(); 
+
+  for ( Tokenizer::Items::iterator i = tok.items().begin();
 	i != tok.items().end(); i++)    {
-    const std::string& tag = (*i).tag();  
+    const std::string& tag = (*i).tag();
     TAG = tag;
     toupper(TAG);
 
@@ -246,33 +228,33 @@ IssueLogger::connect(const std::string& ident) {
 
     if (val == "MsgSvc") {
       m_logger[level] = new StreamLogger(msgSvc(), m_sevMsgMap[level]);
-      m_log[level] = 
+      m_log[level] =
 	boost::bind(&StreamLogger::WriteToMsgSvc, m_logger[level],
 		    _1);
     } else if (val == "STDERR") {
       m_logger[level] = new StreamLogger(std::cerr);
-      m_log[level] = 
-	boost::bind(&StreamLogger::WriteToStream, m_logger[level], 
+      m_log[level] =
+	boost::bind(&StreamLogger::WriteToStream, m_logger[level],
 		    _1);
     } else if (val == "STDOUT") {
       m_logger[level] = new StreamLogger(std::cout);
-      m_log[level] = 
-	boost::bind(&StreamLogger::WriteToStream, m_logger[level], 
+      m_log[level] =
+	boost::bind(&StreamLogger::WriteToStream, m_logger[level],
 		    _1);
     } else { // A file
       try {
         m_logger[level] = new StreamLogger(val.c_str());
-      } 
+      }
       catch (std::exception&) {
         m_logger[level] = 0;
-        log << MSG::ERROR << "Unable to open file \"" << VAL 
+        log << MSG::ERROR << "Unable to open file \"" << VAL
 	    << "\" for writing issues at level " << TAG << endreq;
         return StatusCode::FAILURE;
       }
-      m_log[level] = 
+      m_log[level] =
         boost::bind(&StreamLogger::WriteToStream, m_logger[level], _1);
     }
-    log << MSG::DEBUG << "Writing " << m_levelTrans[level] 
+    log << MSG::DEBUG << "Writing " << m_levelTrans[level]
 	<< " issues to " << m_logger[level]->name() << endreq;
 
   }
@@ -283,17 +265,17 @@ IssueLogger::connect(const std::string& ident) {
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *//
 
 void
-IssueLogger::report(IssueSeverity::Level lev, const std::string& str, 
+IssueLogger::report(IssueSeverity::Level lev, const std::string& str,
 		    const std::string& org) {
 
   if ( lev < m_reportLevel) return;
-  
+
   std::string msg = m_levelTrans[lev] + "  " + org + "  \"" + str + "\"";
-  
+
   if (m_showTime) {
     const time_t t = time( 0 );
     tm *tt = localtime( &t );
-    
+
     ostringstream os;
     os << (tt->tm_hour < 10 ? "0" : "" ) << tt->tm_hour << ":"
        << (tt->tm_min < 10 ? "0" : "" )  << tt->tm_min << ":"
@@ -327,7 +309,7 @@ IssueLogger::report(IssueSeverity::Level lev, const std::string& str,
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *//
 
 
-void 
+void
 IssueLogger::report( const IssueSeverity &err ) {
 
   report(err.getLevel(), err.getMsg(), err.getOrigin());
@@ -336,7 +318,7 @@ IssueLogger::report( const IssueSeverity &err ) {
 
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *//
 
-void 
+void
 IssueLogger::setupLevels(Property& prop) {
 
 
@@ -353,8 +335,8 @@ IssueLogger::setupLevels(Property& prop) {
   if (prop.name() == "ReportLevel") {
     if (m_levelSTrans.find(val) == m_levelSTrans.end()) {
       MsgStream log ( msgSvc(), name() );
-      log << MSG::ERROR 
-	  << "Option ReportLevel: unknown Issue Severity level \"" 
+      log << MSG::ERROR
+	  << "Option ReportLevel: unknown Issue Severity level \""
 	  << val << "\". Setting it WARNING" << endreq;
       m_reportLevel = IssueSeverity::WARNING;
       return;
@@ -364,8 +346,8 @@ IssueLogger::setupLevels(Property& prop) {
   } else if (prop.name() == "TracebackLevel") {
     if (m_levelSTrans.find(val) == m_levelSTrans.end()) {
       MsgStream log ( msgSvc(), name() );
-      log << MSG::ERROR 
-	  << "Option TracebackLevel: unknown Issue Severity level \"" 
+      log << MSG::ERROR
+	  << "Option TracebackLevel: unknown Issue Severity level \""
 	  << val << "\". Setting it to ERROR" << endreq;
       m_traceLevel = IssueSeverity::ERROR;
       return;
@@ -380,7 +362,7 @@ IssueLogger::setupLevels(Property& prop) {
   }
 
 }
-    
+
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *//
 
 void
@@ -416,11 +398,11 @@ IssueLogger::setupDefaultLogger() {
       IssueSeverity::Level j = IssueSeverity::Level (i);
 
       m_logger[j] = new StreamLogger(msgSvc(), m_sevMsgMap[j]);
-      m_log[j] = boost::bind(&StreamLogger::WriteToMsgSvc, m_logger[j], 
+      m_log[j] = boost::bind(&StreamLogger::WriteToMsgSvc, m_logger[j],
 			     _1);
 
       MsgStream log ( msgSvc(), name() );
-      log << MSG::DEBUG << "Writing " << m_levelTrans[j] 
+      log << MSG::DEBUG << "Writing " << m_levelTrans[j]
 	  << " issues to " << m_logger[j]->name() << endreq;
 
     }

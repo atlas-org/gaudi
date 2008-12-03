@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/src/Lib/DataTypeInfo.cpp,v 1.4 2006/03/13 15:56:49 hmd Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/src/Lib/DataTypeInfo.cpp,v 1.5 2008/10/27 19:22:21 marcocle Exp $
 //	====================================================================
 //
 //	DataTypeInfo.cpp
@@ -22,7 +22,7 @@
 #include "GaudiKernel/IOpaqueAddress.h"
 
 // Access to type information
-const DataTypeInfo::Type DataTypeInfo::idByName( const std::string& typ )   {
+DataTypeInfo::Type DataTypeInfo::idByName( const std::string& typ )   {
   if ( typ == "unsigned char"         || typ == "const unsigned char" )
     return UCHAR;
   else if ( typ == "unsigned short"   || typ == "const unsigned short" )
@@ -102,7 +102,7 @@ const std::type_info& DataTypeInfo::typeByName( const std::string& typ )   {
 }
 
 // Access the type name by type ID
-const std::string DataTypeInfo::name(long typ)   {
+std::string DataTypeInfo::name(long typ)   {
   switch(typ)   {
   case UCHAR:
     return System::typeinfoName(typeid(unsigned char));
@@ -149,7 +149,7 @@ const std::string DataTypeInfo::name(long typ)   {
 }
 
 // Access the type name by type_info
-const std::string DataTypeInfo::name(const std::type_info& typ)    {
+std::string DataTypeInfo::name(const std::type_info& typ)    {
   if ( typ == typeid(unsigned char) )
     return DataTypeInfo::name(UCHAR);
   else if ( typ == typeid(unsigned short) )

@@ -1,4 +1,4 @@
-//$Id: Sequencer.cpp,v 1.6 2008/02/21 11:30:54 marcocle Exp $
+//$Id: Sequencer.cpp,v 1.7 2008/06/02 14:22:04 marcocle Exp $
 
 // Sequencer class
 // Implements:
@@ -50,7 +50,7 @@ Sequencer::initialize()
 {
   StatusCode result = StatusCode::SUCCESS;
   MsgStream log( msgSvc( ), name( ) );
-  
+
   std::vector<Algorithm*>* theAlgs;
   std::vector<Algorithm*>::iterator it;
   std::vector<Algorithm*>::iterator itend;
@@ -89,9 +89,7 @@ Sequencer::initialize()
       return result;
     }
   }
-
-  // Set the initialized state.
-  setInitialized( );
+  
   return result;
 }
 
@@ -100,7 +98,7 @@ Sequencer::reinitialize()
 {
   // Bypass the loop if this sequencer is disabled
   if ( isEnabled( ) ) {
-    
+
     // Loop over all members calling their reinitialize functions
     // if they are not disabled.
     std::vector<Algorithm*>* theAlgms = subAlgorithms( );
@@ -122,6 +120,7 @@ Sequencer::reinitialize()
         theAlgorithm->reinitialize( ).ignore();
       }
     }
+    
   }
   return StatusCode::SUCCESS;
 }
@@ -189,7 +188,77 @@ Sequencer::finalize()
     if (theAlgorithm->sysFinalize( ).isFailure()) {
       MsgStream log( msgSvc( ), name( ) );
       log << MSG::ERROR << "Unable to finalize Algorithm " 
-	  << theAlgorithm->name() << endreq;
+          << theAlgorithm->name() << endreq;
+    }
+  }
+  return StatusCode::SUCCESS;
+}
+
+StatusCode
+Sequencer::start()
+{
+  StatusCode result = StatusCode::SUCCESS;
+  MsgStream log( msgSvc( ), name( ) );
+
+  std::vector<Algorithm*>* theAlgs;
+  std::vector<Algorithm*>::iterator it;
+  std::vector<Algorithm*>::iterator itend;
+  
+  // Loop over all sub-algorithms
+  theAlgs = subAlgorithms( );
+  itend   = theAlgs->end( );
+  for (it = theAlgs->begin(); it != itend; it++) {
+    Algorithm* theAlgorithm = (*it);
+    result = theAlgorithm->sysStart( );
+    if( result.isFailure() ) {
+      log << MSG::ERROR << "Unable to start Algorithm " << theAlgorithm->name() << endreq;
+      return result;
+    }
+  }
+
+  // Loop over all branches
+  theAlgs = branchAlgorithms( );
+  itend   = theAlgs->end( );
+  for (it = theAlgs->begin(); it != itend; it++) {
+    Algorithm* theAlgorithm = (*it);
+    result = theAlgorithm->sysStart( );
+    if( result.isFailure() ) {
+      log << MSG::ERROR << "Unable to start Algorithm " << theAlgorithm->name() << endreq;
+      return result;
+    }
+  }
+  
+  return result;
+}
+
+StatusCode
+Sequencer::stop()
+{
+  // Loop over all branch members calling their finalize functions
+  // if they are not disabled.
+  std::vector<Algorithm*>* theAlgs;
+  std::vector<Algorithm*>::iterator it;
+  std::vector<Algorithm*>::iterator itend;
+  
+  theAlgs = subAlgorithms( );
+  itend   = theAlgs->end( );
+  for (it = theAlgs->begin(); it != itend; it++) {
+    Algorithm* theAlgorithm = (*it);
+    if (theAlgorithm->sysStop( ).isFailure()) {
+      MsgStream log( msgSvc( ), name( ) );
+      log << MSG::ERROR << "Unable to stop Algorithm " 
+          << theAlgorithm->name() << endreq;
+    }
+  }
+  
+  theAlgs = branchAlgorithms( );
+  itend   = theAlgs->end( );
+  for (it = theAlgs->begin(); it != itend; it++) {
+    Algorithm* theAlgorithm = (*it);
+    if (theAlgorithm->sysStop( ).isFailure()) {
+      MsgStream log( msgSvc( ), name( ) );
+      log << MSG::ERROR << "Unable to stop Algorithm " 
+          << theAlgorithm->name() << endreq;
     }
   }
   return StatusCode::SUCCESS;
@@ -218,6 +287,11 @@ Sequencer::beginRun()
         log << MSG::ERROR << "Unable to initialize Algorithm " << theAlgorithm->name() << endreq;
         break;
       }
+      result = theAlgorithm->sysStart( );
+      if( result.isFailure() ) {
+        log << MSG::ERROR << "Unable to start Algorithm " << theAlgorithm->name() << endreq;
+        break;
+      }
     }
     
     // Loop over all members calling their beginRun functions
@@ -240,6 +314,11 @@ Sequencer::beginRun()
       result = theAlgorithm->sysInitialize( );
       if( result.isFailure() ) {
         log << MSG::ERROR << "Unable to initialize Algorithm " << theAlgorithm->name() << endreq;
+        break;
+      }
+      result = theAlgorithm->sysStart( );
+      if( result.isFailure() ) {
+        log << MSG::ERROR << "Unable to start Algorithm " << theAlgorithm->name() << endreq;
         break;
       }
     }

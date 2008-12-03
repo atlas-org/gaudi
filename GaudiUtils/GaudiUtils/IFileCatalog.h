@@ -42,7 +42,7 @@ namespace Gaudi {
     /// Access to connect string
     virtual const std::string& connectInfo() const = 0;
     /// Parse the DOM tree of the XML catalog
-    virtual void start() = 0;
+    virtual void init() = 0;
     /// Save catalog to file
     virtual void commit() = 0;
     /// Save catalog to file

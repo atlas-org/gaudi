@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/SvcFactory.h,v 1.10 2007/01/23 09:13:07 mato Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/SvcFactory.h,v 1.11 2008/10/09 21:00:37 marcocle Exp $
 #ifndef KERNEL_SVCFACTORY_H
 #define KERNEL_SVCFACTORY_H
 
@@ -41,6 +41,7 @@ namespace ROOT {
 // Macros to declare component factories
 
 #define DECLARE_SERVICE_FACTORY(x)              PLUGINSVC_FACTORY(x,IService*(std::string, ISvcLocator*))
+#define DECLARE_NAMED_SERVICE_FACTORY(x,n)      PLUGINSVC_FACTORY_WITH_ID(x,std::string(#n), IService*(std::string, ISvcLocator*))
 #define DECLARE_NAMESPACE_SERVICE_FACTORY(n,x)  using n::x; PLUGINSVC_FACTORY(x,IService*(std::string, ISvcLocator*))
 #define DECLARE_SERVICE(x)  /*dummy*/
 #define DECLARE_NAMESPACE_SERVICE(n,x) /*dummy*/

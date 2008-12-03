@@ -23,7 +23,7 @@ void StatusCode::disableChecking() {
   s_checking = false;
 }
 
-IssueSeverity* StatusCode::cloneSeverity(const IssueSeverity* sev) 
+IssueSeverity* StatusCode::cloneSeverity(const IssueSeverity* sev)
 {
   if( sev ) return new IssueSeverity(*sev);
   else      return 0;
@@ -38,7 +38,7 @@ const IssueSeverity& StatusCode::severity() const {
 StatusCode::~StatusCode() {
   if(s_checking) {
 
-    if (!m_checked ) {      
+    if (!m_checked ) {
 
       IMessageSvc* msg = 0 ;
       if(Gaudi::svcLocator()->service("MessageSvc", msg, true).isFailure()) {
@@ -52,14 +52,14 @@ StatusCode::~StatusCode() {
 
       const size_t depth = 21;
       void* addresses[depth];
-      
+
       std::string lib, fnc;
       void* addr = 0;
+      /// @FIXME : (MCl) use backTrace(std::string&, const int, const int) instead
+      if (System::backTrace(addresses, depth)) {
 
-      if ( addresses && System::backTrace(addresses, depth)) {      
-	
         if (System::getStackLevel(addresses[2], addr, fnc, lib)) {
-          
+
           if (scs) {
             scs->regFnc(fnc,lib);
           } else {

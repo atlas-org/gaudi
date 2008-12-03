@@ -10,12 +10,6 @@ __author__  = 'Wim Lavrijsen (WLavrijsen@lbl.gov)'
 
 __all__ = [ 'ConfigurableMeta' ]
 
-
-## for messaging; note that defaultLogLevel is fixed to level from CLI options
-from GaudiKernel.Logging import logging, AthenaLogger
-log = logging.getLogger( 'ConfigurableMeta' )
-
-
 ### this metaclass installs PropertyProxy descriptors for Gaudi properties
 class ConfigurableMeta( type ):
    """The setting of Gaudi component properties needs to be deferred and

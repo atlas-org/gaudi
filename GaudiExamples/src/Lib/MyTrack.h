@@ -1,30 +1,37 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiExamples/src/Lib/MyTrack.h,v 1.4 2007/09/28 11:48:17 marcocle Exp $
+// $Id: MyTrack.h,v 1.5 2008/10/10 08:06:32 marcocle Exp $
+// ============================================================================
 #ifndef GAUDIPOOLDB_TEST_MYTRACK_H
 #define GAUDIPOOLDB_TEST_MYTRACK_H
-
+// ============================================================================
 // Include files
+// ============================================================================
+// GaudiKernel
+// ============================================================================
 #include "GaudiKernel/ContainedObject.h"
 #include "GaudiKernel/SmartRefVector.h"
 #include "GaudiKernel/KeyedContainer.h"
-
+#include "GaudiKernel/ObjectVector.h"
+#include "GaudiKernel/SharedObjectsContainer.h"
+// =============================================================================
 #include "Event.h"
+// ============================================================================
 
-
-
-namespace Gaudi {
-  namespace Examples {
-
+namespace Gaudi 
+{
+  namespace Examples 
+  {
+    
     // Forward declarations
     class MyVertex ;
     template <class T> class GaudiObjectHandler;
-
+    
     // CLID definition
     static const CLID& CLID_MyTrack = 355;
-
+    
     /** @class MyTack
-
+        
     Simple class that represents a track for testing purposes
-
+    
     @author Markus Frank
     @author Pere Mato
     */
@@ -33,10 +40,26 @@ namespace Gaudi {
 #ifdef __PLAIN_GAUDI
       : public ContainedObject
 #else
-	: public KeyedObject<int> 
+        : public KeyedObject<int> 
 #endif
     {
       friend class GaudiObjectHandler<MyTrack>;
+    public:
+      // ======================================================================
+      /// the type of plain vector 
+      typedef std::vector<MyTrack*>                           Vector ;
+      /// the type of vector of const-pointers 
+      typedef std::vector<const MyTrack*>                ConstVector ;
+      /// the type of selection 
+      typedef SharedObjectsContainer<MyTrack>              Selection ;
+#ifdef __PLAIN_GAUDI
+      /// the actual type of container in TES 
+      typedef ObjectVector<MyTrack>                        Container ;
+#else 
+      /// the actual type of container in TES 
+      typedef KeyedContainer<MyTrack, Containers::HashMap> Container ;
+#endif
+      // ======================================================================
     protected:
       /// The track momentum
       float                    m_px, m_py, m_pz;
@@ -46,7 +69,7 @@ namespace Gaudi {
       SmartRef<MyVertex>       m_originVertex;
       /// Links to all decay vertices
       SmartRefVector<MyVertex> m_decayVertices;
-
+      
     public:
       /// Standard constructor
       MyTrack();

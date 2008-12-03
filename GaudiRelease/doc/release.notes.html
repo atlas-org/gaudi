@@ -1,6 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  
   <title>Gaudi Release Notes</title>
   <script type="text/javascript" language="JavaScript">
 <!-- Work around for old browsers
@@ -14,17 +16,20 @@
   // replaces the occurrences of (patch|task|bug)+number with the link to the savannah page
   function LinkToSavannah()
   {
-    patch = "<a href='https://savannah.cern.ch/patch/index.php?$1'>Patch&nbsp;#$1</a>";
-    bug = "<a href='https://savannah.cern.ch/bug/index.php?$1'>Bug&nbsp;#$1</a>";
-    task = "<a href='https://savannah.cern.ch/task/index.php?$1'>Task&nbsp;#$1</a>";
+    patch = "<a href='https://savannah.cern.ch/patch/index.php?$2'>$1&nbsp;#$2</a>";
+    bug = "<a href='https://savannah.cern.ch/bug/index.php?$2'>$1&nbsp;#$2</a>";
+    task = "<a href='https://savannah.cern.ch/task/index.php?$2'>$1&nbsp;#$2</a>";
     s = document.getElementsByTagName("body")[0].innerHTML;
-    s = s.replace(/patch #([0-9]*)/ig,patch);
-    s = s.replace(/task #([0-9]*)/ig,task);
-    s = s.replace(/bug #([0-9]*)/ig,bug);
+    s = s.replace(/([Pp]atch) #([0-9]*)/g,patch);
+    s = s.replace(/([Tt]ask) #([0-9]*)/g,task);
+    s = s.replace(/([Bb]ug) #([0-9]*)/g,bug);
     document.getElementsByTagName("body")[0].innerHTML = s;
   }
 // -->
   </script>
+  <style type="text/css">
+span.author { color: #737373; }
+  </style>
 </head>
 <body onload="javascript:LinkToSavannah()">
 <pre>
@@ -32,6 +37,444 @@ Package: GaudiRelease<br>
 Package Coordinator: Pere Mato, Charles Leggett<br>
 Purpose: Gaudi common set of packages<br><br>
 </pre>
+<!-- ====================================================================== -->
+<h2><a name="v20r3">Gaudi v20r3</a> (2008-11-10)</h2>
+<h3>Externals version: <a href="https://twiki.cern.ch/twiki/bin/view/SPI/LcgConfiguration55b">LCGCMT_55b</a></h3>
+<h3>Packages Changes</h3>
+<ul>
+<li>GaudiKernel (v26r0):<ul>
+<li>Major improvements in the usability of ConfigurableUser specializations.
+    Mainly the automatic call of the method ConfigurableUser.__apply_configuration__
+    (or applyConf) and the addition of ConfigurableUser specialization to the
+    database of configurables (see release notes)<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Various fixed for Python job options ()<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed compilation errors and warnings on gcc 4.3<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #43420. IPartPropSvc not accessible from Python<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #43314. Memory leak in StatusCode<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #42428. Properties of clones are not cloned.<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #43065. Error when unpickling GaudiHandles.<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Reverted old implementation (pre-FSM) of the reinitialize method of
+    Algorithm, Service and AlgTool, i.e. do nothing. Fixes bug #39706<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #42005. System::typeinfoName is missing 'signed char'<br/>
+    (<span class="author">Sebastien Binet</span>)</li>
+<li>Fixed the cast of errno from "int" to "unsigned long". Fixes bug #25460.<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Patch #2303. Improve/extend IAlgorithm interface<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #39846. gaudirun.py creates invalid entries in flattened options<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Patch #2073. SharedObjectsContainer and 'blind' access to TYPE::Container &amp;
+    TYPE::Selection<br/>
+    (<span class="author">Vanya Belyaev</span>)</li>
+<li>Patch #2261. Introducing name alias for Algorithms and Services<br/>
+    (<span class="author">Pere Mato</span>)</li>
+<li>Patch #2058. Extensions for AIDA::TProfile1D<br/>
+    (<span class="author">Vanya Belyaev</span>)</li>
+<li>Patch #1797: Backtrace utility for System<br/>
+    (<span class="author">Frank Winklmeier</span>)</li>
+<li>Patch #1796: Performance improvement for message reporting<br/>
+    (<span class="author">Frank Winklmeier</span>)</li>
+<li>Fixed bug #39809 (wrong configuration of public tools).<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #39250. Cannot use configurable instances as values for properties
+    of type map&lt;str,str&gt;.<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #39117. gaudirun.py export to old options does not handle correctly
+    GaudiHandles.<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #39116. gaudirun.py export to old options prints '#' instead of '//'<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Added PrintOn and PrintOff functions to GaudiKernel.ProcessJobOptions to
+    mimic the old "#pragma print"<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul>
+</li>
+<li>GaudiPython (v9r3):<ul>
+<li>Improvements in usability of ConfigurableUser specializations.<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed compilation errors and warnings on gcc 4.3<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #38442. Support for alternative ApplicationMgr in GaudiPython<br/>
+    (<span class="author">Charles Leggett</span>)</li>
+<li>Added support for serialization/deserialization of TES<br/>
+    (<span class="author">Pere Mato</span>)</li>
+<li>Patch #2058. Extensions for AIDA::TProfile1D<br/>
+    (<span class="author">Vanya Belyaev</span>)</li>
+<li>Patch #1938: Draw the native AIDA histograms through their internal ROOT
+    representation<br/>
+    (<span class="author">Vanya Belyaev</span>)</li>
+</ul>
+</li>
+<li>GaudiGSL (v6r10):<ul>
+<li>Fixed compilation errors and warnings on gcc 4.3<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul>
+</li>
+<li>GaudiPolicy (v8r6):<ul>
+<li>Added automatic registration of ConfigurableUser specializations to the
+    database of configurables.<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed compilation errors and warnings on gcc 4.3<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Improvements in the QMTest test class GaudiTest.py. (see release notes)<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Added cmt action to create .pyc file in the InstallArea. To be called explicitly.<br/>
+    (<span class="author">Hubert Degaudenzi</span>)</li>
+<li>Fixed bug #43114. Python clean make target not removing .pyc files<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #35792: merge_genconfDb fragment does not need -dependencies<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #39272. Cannot use cmt TestPackage before cmt make<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #39273. Need separate qmtest reference files for slc4_ia32 and
+    slc4_amd64 platforms<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Added the ccache support and fixed gcov for gcc &gt;= 3.4<br/>
+    (<span class="author">Hubert Degaudenzi</span>)</li>
+</ul>
+</li>
+<li>GaudiAud (v8r7):<ul>
+<li>Patch #2183. Link to Atlas error policy in AlgErrorAuditor<br/>
+    (<span class="author">Charles Leggett</span>)</li>
+<li>Patch #1939. Allow auditors to catch CustomEventTypes<br/>
+    (<span class="author">Charles Leggett</span>)</li>
+</ul>
+</li>
+<li>GaudiPoolDb (v4r1):<ul>
+<li>Fixed compilation errors and warnings on gcc 4.3<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul>
+</li>
+<li>Gaudi (v20r3):<ul>
+<li>Improvements in gaudirun.py and Configurables (see release notes)<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Added tests for various bugs (bug #42428, bug #43065, bug #39846,
+    bug #39809, bug #39116)<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #39846. gaudirun.py creates invalid entries in flattened options<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #39116. gaudirun.py export to old options prints '#' instead of '//'<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul>
+</li>
+<li>GaudiUtils (v2r1):<ul>
+<li>Patch #2073: SharedObjectsContainer and 'blind' access to TYPE::Container &amp;
+    TYPE::Selection<br/>
+    (<span class="author">Vanya Belyaev</span>)</li>
+<li>Patch #1943. Added update handler to MultiFileCatalog.Catalogs<br/>
+    (<span class="author">Vanya Belyaev</span>)</li>
+</ul>
+</li>
+<li>GaudiSvc (v17r2):<ul>
+<li>Fixed compilation errors and warnings on gcc 4.3<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Patch #2608. Thread-safe IncidentSvc<br/>
+    (<span class="author">Frank Winklmeier</span>)</li>
+<li>Added an option to ApplicationMgr to enable/disable the initialization loop
+    check. (Patch #2199)<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Patch #2601. Introduce support for file summary records.<br/>
+    (<span class="author">Marco Cattaneo</span>)</li>
+<li>Fixed bug #38572. THistSvc initialize/finalize cycles<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #42509. Allow THistSvc to write multiple streams to the same file<br/>
+    (<span class="author">Charles Leggett</span>)</li>
+<li>Fixed bug #41136. ToolSvc keeps tools even if initialize fails<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #37049. Use recursive mutexes in MessageSvc<br/>
+    (<span class="author">Marco Clemencic, Frank Winklmeier</span>)</li>
+<li>Fixed bug #41058. Better warning messages when a factory can't be loaded<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #36917. Listen to all incidents<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Patch #2261. Introducing name alias for Algorithms and Services<br/>
+    (<span class="author">Pere Mato</span>)</li>
+<li>Patch #2400. Allow to suppress warnings in the EventLoopMgr<br/>
+    (<span class="author">Markus Frank</span>)</li>
+<li>Patch #2058. Extensions for AIDA::TProfile1D<br/>
+    (<span class="author">Vanya Belyaev</span>)</li>
+<li>Patch #1963. Add getGraphs() method to THistSvc<br/>
+    (<span class="author">Charles Leggett</span>)</li>
+<li>Reimplemented IssueLogger::getTraceBack() in terms of the version of 
+    System::backTrace() introduced with patch #1797.<br/>
+    (<span class="author">Marco Clemencic, Frank Winklmeier</span>)</li>
+<li>Patch #1796: Performance improvement for message reporting<br/>
+    (<span class="author">Frank Winklmeier</span>)</li>
+<li>Patch #1750. Improved printout of Data-On-Demand Service<br/>
+    (<span class="author">Vanya Belyaev</span>)</li>
+</ul>
+</li>
+<li>GaudiExamples (v20r3):<ul>
+<li>Fixed compilation errors and warnings on gcc 4.3<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Patch #1964. GaudiExample to demonstrate Service initialization loops<br/>
+    (<span class="author">Charles Leggett, Marco Clemencic</span>)</li>
+<li>Patch #2601. Introduce support for file summary records.<br/>
+    (<span class="author">Marco Cattaneo</span>)</li>
+<li>Added an example (options/ConfigurableUser.py) of usage of ConfigurableUser.<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Added test for few bug #41136.<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Updated few reference files.<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Patch #2509. Suppress messages in GaudiAlg when tools are loaded multiple times<br/>
+    (<span class="author">Chris Jones</span>)</li>
+<li>Patch #2073: SharedObjectsContainer and 'blind' access to TYPE::Container &amp;
+    TYPE::Selection<br/>
+    (<span class="author">Vanya Belyaev</span>)</li>
+<li>Patch #2261. Introducing name alias for Algorithms and Services<br/>
+    (<span class="author">Pere Mato</span>)</li>
+<li>Patch #2058. Extensions for AIDA::TProfile1D<br/>
+    (<span class="author">Vanya Belyaev</span>)</li>
+<li>Temporarily disabled the DataListener test, until the configuration problem
+    is fixed (Ganga).<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul>
+</li>
+<li>GaudiMonitor (v1r5):<ul>
+<li>Fixed compilation errors and warnings on gcc 4.3<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul>
+</li>
+<li>GaudiAlg (v11r2):<ul>
+<li>Fixed compilation errors and warnings on gcc 4.3<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Patch #2601. Introduce support for file summary records.<br/>
+    (<span class="author">Marco Cattaneo</span>)</li>
+<li>Patch #2509. Suppress messages in GaudiAlg when tools are loaded multiple times<br/>
+    (<span class="author">Chris Jones</span>)</li>
+<li>Patch #2506. GaudiSequencer: bug in setFilterPassed logic in case
+    ModeOR=true, IgnoreFilterPassed=true<br/>
+    (<span class="author">Gerhard Raven</span>)</li>
+<li>Patch #2483. Return pointer to 'put' object in GaudiCommon::put<br/>
+    (<span class="author">Gerhard Raven</span>)</li>
+<li>Patch #2073: SharedObjectsContainer and 'blind' access to TYPE::Container &amp;
+    TYPE::Selection<br/>
+    (<span class="author">Vanya Belyaev</span>)</li>
+<li>Patch #2058. Extensions for AIDA::TProfile1D<br/>
+    (<span class="author">Vanya Belyaev</span>)</li>
+<li>Temporarily disabled the DataListener test, until the configuration problem
+    is fixed (Ganga).<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul>
+</li>
+</ul>
+<!-- ====================================================================== -->
+<h2><a name="v20r2">Gaudi v20r2</a> (2008-07-17)</h2>
+<h3>Externals version: <a href="https://twiki.cern.ch/twiki/bin/view/SPI/LcgConfiguration55a">LCGCMT_55a</a></h3>
+<h3>Packages Changes</h3>
+<ul>
+<li>GaudiKernel (v25r2):<ul>
+<li>Added the interface IEventTimeDecoder (from LHCb).<br>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #38868. MinimalEventLoopMgr does not restart algorithms<br>
+    Implemented restart so that it calls the restart of all the algorithms. 
+    Fixed the implementation of reinitialize too.<br>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #38855. Inconsistent check in Service::sysRestart.
+    Fixed a the result of a bad cut &amp; paste.<br>
+    (<span class="author">Gerhard Raven</span>)</li>
+<li>Patch #1756. Decrease the probability for FPE in StatEntity::addFlag<br>
+    Added a check in StatEntity::addFlag to avoid floating point exceptions.<br>
+    (<span class="author">Vanya Belyaev</span>)</li>
+</ul></li>
+<li>GaudiAlg (v11r1):<ul>
+<li>Added the interface IGenericTool (from LHCb).<br>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul></li>
+<li>GaudiPython (v9r2):<ul>
+<li>Added dictionary for IGenericTool.<br>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed:
+  <ul>
+    <li>bug #38885: no execute method for algorithms in GaudiPython</li>
+    <li>bug #38882: AppMgr.addAlgorithm does not work correctly after
+                    initialization</li>
+  </ul>
+  (<span class="author">Marco Clemencic</span>)</li>
+</ul></li>
+<li>GaudiExamples (v20r2):<ul>
+<li>Added test for bug #38882.<br>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul></li>
+</ul>
+<!-- ====================================================================== -->
+<h2><a name="v20r1">Gaudi v20r1</a> (2008-06-30)</h2>
+<h3>Externals version: <a
+ href="https://twiki.cern.ch/twiki/bin/view/SPI/LcgConfiguration55">LCGCMT_55</a></h3>
+<h3>Packages Changes</h3>
+<ul>
+<li>GaudiPolicy (v8r4):
+<ul>
+<li>Fixed bug #38208: The pattern GaudiApp does not work if inherited.<br>
+    Modified the pattern to use &lt;package&gt; and &lt;version&gt; instead of
+    $(package) and $(version).<br>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul></li>
+<li>GaudiKernel (v25r1):
+<ul>
+<li>Fixed:
+  <ul>
+    <li>bug #38206: gaudirun.py fails to set a list property from a property
+                    reference.</li>
+    <li>bug #38194: gaudirun.py expands too many environment variables
+                    Avoid to expand the environment variables in the
+                    strings.</li>
+  </ul>
+  (<span class="author">Marco Clemencic</span>)</li>
+</ul></li>
+<li>GaudiPython (v9r1):
+<ul>
+<li>Fixed bug #38194: gaudirun.py expands too many environment variables
+    Expand the environment variables in the strings before passing them to the
+    C++ services (ApplicationMgr, MessageSvc and JobOptionsSvc).<br>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul></li>
+<li>Gaudi (v20r1):
+<ul>
+<li>Added tests for bug #38206 and bug #38194.<br>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul></li>
+</ul>
+<!-- ====================================================================== -->
+<h2><a name="v20r0">Gaudi v20r0</a> (2008-06-13)</h2>
+<h3>Externals version: <a
+ href="https://twiki.cern.ch/twiki/bin/view/SPI/LcgConfiguration55">LCGCMT_55</a></h3>
+<h3>Packages Changes</h3>
+<ul>
+<li>GaudiPolicy (v8r3):
+<ul>
+<li>Added a pattern to generate a header file containing macros to identify
+    the version of the project.<br>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Changed the name of the extension for libraries on OSX from ".dylib" to
+    ".so".<br>
+    (<span class="author">Charles Leggett</span>)</li>
+<li>Added a path cleaner to the global Gaudi setup. This is removing invalid or 
+    empty components in the PATH, LD_LIBRARY_PATH, JOBOPTSEARCHPATH, PYTHONPATH.<br>
+    (<span class="author">Hubert Degaudenzi</span>)</li>
+<li>Added the pattern pyd_module in order to be able to create python binary 
+    modules (.pyd files).<br>
+    (<span class="author">Hubert Degaudenzi</span>)</li>
+</ul></li>
+<li>GaudiKernel (v25r0):
+<ul>
+<li>Fixed bug #37690: message svc release() in Auditor destructor.
+    (<span class="author">Charles Leggett, Marco Clemencic</span>)</li>
+<li>Fixed few bugs:
+  <ul>
+    <li>bug #36742: Cannot pickle options using "PropertyReference"</li>
+    <li>bug #37479: gaudirun.py fails parsing old option lines with comments
+        and quotes</li>
+    <li>bug #37488: importOptions does not expand environment variables</li>
+    <li>bug #35347: Cannot import 2 Python option files with the same name</li>
+    <li>bug #35913: Configurables type checking fails on Gaudi::Histo1DDef</li>
+    <li>bug #34769: Assigning a configurable to a list property does not fail</li>
+  </ul>
+  (<span class="author">Marco Clemencic</span>)</li>
+<li>Patch #1865. Better printouts for HistorySvc.<br>
+    (<span class="author">Charles Leggett</span>)</li>
+<li>Task #5809. Extension to Gaudi Application state machine (see release notes
+    of the package).<br>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Patch #1865. Improvements for Chrono/ChronoStat&amp;IChronoSvc.<br>
+    (<span class="author">Vanya Belyaev</span>)</li>
+<li>Added small interface (IFileAccess) for services/tools that allow read-only
+    file access agnostic of the storage backend (filesystem, web, CondDB, ...).<br>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul></li>
+<li>GaudiSvc (v17r0):
+<ul>
+<li>Modified the way the EndEvent incident is fired by the EventLoopMgr. Instead
+   of after the top algorithms, it is now fired before BeginEvent (if
+   appropriate) and at the beginning of EventLoopMgr::stop.<br>
+   (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #26327. JobOptionsSvc::finalize is never invoked.<br>
+   (<span class="author">Marco Clemencic</span>)</li>
+<li>Patch #1865. Better printouts for HistorySvc.<br>
+    (<span class="author">Charles Leggett</span>)</li>
+<li>Patch #1819. Fix printout in THistSvc.<br>
+    (<span class="author">Charles Leggett</span>)</li>
+<li>Task #5809. Extension to Gaudi Application state machine (see release notes
+    of the package).<br>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Patch #1806. Reduced default print-out of DataOnDemandSvc.<br>
+    (<span class="author">Patrick Koppenburg</span>)</li>
+<li>Patch #1801. Allow exclusion in HistogramPersistencySvc.<br>
+    (<span class="author">Vanya Belyaev</span>)</li>
+<li>Patch #1761. Fixed print-out in ToolSvc.<br>
+    (<span class="author">Vanya Belyaev</span>)</li>
+<li>Patch #1756. Improvements for Chrono/ChronoStat&amp;IChronoSvc.<br>
+    (<span class="author">Vanya Belyaev</span>)</li>
+<li>Minimal implementation of IFileAccess interface:
+  <ul>
+    <li>Added small service (VFSSvc, Virtual File System Service) implementing the
+      interface IFileAccess, to dispatch the call to tools implementing the actual
+      protocols.</li>
+    <li>Added a tool to provide the basic implementation of IFileAccess to access
+      files on the filesystem.</li>
+    <li>Modified the ParticlePropertySvc to use VFSSvc to open the file containing
+      particle properties.</li>
+  </ul>
+  (<span class="author">Marco Clemencic</span>)</li>
+</ul></li>
+<li>GaudiUtils (v2r0):<ul>
+<li>Patch #1861. Prevent division-by-zero results in skewness and kurtosis.<br>
+    (<span class="author">Chris Rob Jones</span>)</li>
+<li>Task #5809. Extension to Gaudi Application state machine (see release notes
+    of the package).<br>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul></li>
+<li>GaudiPoolDb (v4r0):<ul>
+<li>Patch #1794.
+  <ul>
+    <li>Adapt GaudiPoolDb to SEAL-free implementation of POOL.</li>
+    <li>Fixed bug #34176: Remove link dependencies on POOL component libraries.</li>
+  </ul>
+  (<span class="author">Markus Frank</span>)</li>
+</ul></li>
+<li>GaudiAlg (v11r0):<ul>
+<li>Fixed bug #36021. Unchecked StatusCodes in GaudiCommon&lt;T&gt;::releaseTool.<br>
+    (<span class="author">Chris Rob Jones</span>)</li>
+<li>Patch #1862. Extend space for 'counter' name in GaudiAlg summary.<br>
+    (<span class="author">Chris Rob Jones</span>)</li>
+<li>Task #5809. Extension to Gaudi Application state machine (see release notes
+    of the package).<br>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Patch #1807. Reduced default print-out of GaudiHistos and GaudiTuples.<br>
+    (<span class="author">Patrick Koppenburg</span>)</li>
+</ul></li>
+<li>GaudiPython (v9r0):<ul>
+<li>Patch #1866. Enable pickle support in GaudiPython.<br>
+    (<span class="author">Pere Mato</span>)</li>
+<li>Task #5809. Extension to Gaudi Application state machine (see release notes
+    of the package).<br>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul></li>
+<li>Gaudi (v20r0):<ul>
+<li>Added tests for bug #36742, bug #37479, bug #37488, bug #35347, bug #34769.<br>
+  (<span class="author">Marco Clemencic</span>)</li>
+<li>Added to the command line option "--option" to gaudirun.py.
+   It allows to specify Python lines to be executed after the standard
+   configuration to modify it. E.g.:
+   <div><tt>
+     gaudirun.py default.py --option "MessageSvc().OutputLevel = DEBUG"
+   </tt></div>
+   (<span class="author">Marco Clemencic</span>)</li>
+</ul></li>
+<li>GaudiExamples (v20r0):<ul>
+<li>Updated reference files and tests (see release notes of the package).<br>
+  (<span class="author">Marco Clemencic</span>)</li>
+</ul></li>
+</ul>
 <!-- ====================================================================== -->
 <h2><a name="v19r9">Gaudi v19r9</a> (2008-04-11)</h2>
 <h3>Externals version: <a
@@ -43,44 +486,44 @@ Purpose: Gaudi common set of packages<br><br>
 <li>Added patterns to produce and use helper libraries for genconf. The helper
     libraries are useful if the constructors of the compenents need special
     actions to be taken before the instantiation.<br>
-    (<font color="#737373">Hubert Degaudenzi</font>)</li>
+    (<span class="author">Hubert Degaudenzi</span>)</li>
 <li>Patch #1724. Do not create stamp files in the InstallArea for merged files.<br>
     The stamp files created by merge_files.py for rootmap files are read by ROOT
     because it thinks they are real rootmap files, slowing down the application
     startup. The script and the related fragments have been modified to create
     the stamp files in the same directories of the files to be merged.<br>
-    (<font color="#737373">Sebastien Binet</font>)</li>
+    (<span class="author">Sebastien Binet</span>)</li>
 <li>Added a pattern to define the environment variables GAUDIAPPNAME and
     GAUDIAPPVERSION, used by gaudirun.py to set the default values for the
     corresponding ApplicationMgr properties.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Added a generic fragment/document to call a script.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 </ul>
 <li>GaudiKernel (v24r0):</li>
 <ul>
 <li>Patch #1751. Fixed a typo in <tt>Stat::operator-=</tt>.<br>
-    (<font color="#737373">Vanya Belyaev</font>)</li>
+    (<span class="author">Vanya Belyaev</span>)</li>
 <li>Fixed Bug #35201. Python options parser '//' interpreted as comment in strings.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Fixed Bug #34680. Some obsolete methods were not forwarding the call to
     the relevant new methods.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Patch #1757. Detect creation/initialization loops for services.<br>
     Modified the way the state of the service is set:
     <ul><li>the base class initialize sets the state to CONFIGURED</li>
         <li>the service becomes INITIALIZED in the sysInitialized, after the
         specialized service completed (successfully) the initialization</li></ul>
-    (<font color="#737373">Charles Leggett</font>)</li>
+    (<span class="author">Charles Leggett</span>)</li>
 <li>Modified DataStreamTool to call <tt>sysInitialize</tt> instead of <tt>initialize</tt> for
     conversion services. (related to Patch #1757)<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Bug #34752/Patch #1747. Fixed a problem with <tt>GaudiHandleArray.__getstate__</tt> preventing pickling.<br>
-    (<font color="#737373">Sebastien Binet / Martin Woudstra</font>)</li>
+    (<span class="author">Sebastien Binet / Martin Woudstra</span>)</li>
 <li>Patch #1751. Changed the signature of <tt>declareProperty</tt>/<tt>declareRemoteProperty</tt>
     methods to get <tt>Property*</tt> instead of <tt>void</tt> or a <tt>StatusCode</tt> that is
     always success.<br>
-    (<font color="#737373">Vanya Belyaev</font>)</li>
+    (<span class="author">Vanya Belyaev</span>)</li>
 <li>Patch #1725. New IAuditor interface.
    <ul>
    <li>The Auditor member functions are now only 8, for all the combinations of:
@@ -100,7 +543,7 @@ Purpose: Gaudi common set of packages<br><br>
    <li>The standard event types defined in the enum IAuditor::StandardEventType
      can be printed and converted to strings with operator&lt;&lt;.</li>
    </ul>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Python job options:<br>
    <ul>
    <li>Removed the possibility of assigning a tool to an attribute of a
@@ -111,31 +554,31 @@ Purpose: Gaudi common set of packages<br><br>
      as first argument (as well as an instance) to avoid the instantiation of an
      unneeded instance of the public tool configurable.</li>
    </ul>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Added a work around for ROOT bug #34282 in dict/dictionary.xml (excluded few
     data members of <tt>Gaudi::Time</tt>).<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Fixed Bug #34046. False warning when mixing Python options and old options.
     The check on the case of old options have been improved.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Modified genconf to take an extra argument "--load-library" to which
     the full path of a helper library is passed.<br>
-    (<font color="#737373">Hubert Degaudenzi</font>)</li>
+    (<span class="author">Hubert Degaudenzi</span>)</li>
 </ul>
 <li>GaudiSvc (v16r5):</li>
 <ul>
 <li>Patch #1765. Allow THistSvc to write to the same file storegate is writing
     to. This functionality is needed for the UserDataSvc in ATLAS.<br>
-    (<font color="#737373">Yushu Yao</font>)</li>
+    (<span class="author">Yushu Yao</span>)</li>
 <li>Hack to change the order of finalization such that HistorgamDataSvc is
     finalized after ToolSvc (avoids segmentation faults).<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Patch #1757. Detect creation/initialization loops for services.<br>
     Modified the way the state of the service is set:
     <ul><li>the base class initialize sets the state to CONFIGURED</li>
         <li>the service becomes INITIALIZED in the sysInitialized, after the
         specialized service completed (successfully) the initialization</li></ul>
-    (<font color="#737373">Charles Leggett</font>)</li>
+    (<span class="author">Charles Leggett</span>)</li>
 <li>Fixed problems introduced with patch #1757.<br>
     <ul>
     <li>Modified ApplicationMgr to call sysInitialize instead of initialize for
@@ -143,65 +586,65 @@ Purpose: Gaudi common set of packages<br><br>
     <li>Modified also NTupleSvc, TagCollectionSvc and RndmGenSvc to use sysInitialize
     instead of initialize for their sub-services.</li>
     </ul>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Patch #1763. Demote some ERROR messages to WARNINGs in HistorySvc.<br>
-    (<font color="#737373">Charles Leggett</font>)</li>
+    (<span class="author">Charles Leggett</span>)</li>
 <li>Patch #1744. Speed up HistorySvc by caching a MsgStream.<br>
-    (<font color="#737373">Charles Leggett</font>)</li>
+    (<span class="author">Charles Leggett</span>)</li>
 <li>Fixed Bug #34121. Solved a problem in the check on the emptiness of
     tool type/name in <tt>ToolSvc::retrieve</tt>.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 
 </ul>
 <li>GaudiUtils (v1r6):</li>
 <ul>
 <li>Patch #1749. Improve some printout of the histogram.<br>
-    (<font color="#737373">Vanya Belyaev</font>)</li>
+    (<span class="author">Vanya Belyaev</span>)</li>
 <li>Fixed Bug #33372 (Patch #1746). Fixed memory leak in XmlFileCatalog.<br>
-    (<font color="#737373">Markus Frank</font>)</li>
+    (<span class="author">Markus Frank</span>)</li>
 </ul>
 <li>GaudiAlg (v10r5):</li>
 <ul>
 <li>Bug #35199: GaudiSequencer segfaults if an algorithm cannot be loaded.
     Implemented the suggested check even if the bug is not reproducible with a
     simple test.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Fixed Bug #34565: Unchecked StatusCode in GaudiTuples&lt;&gt;::initialize().<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Patch #1749. Improvements of print-outs.<br>
-    (<font color="#737373">Vanya Belyaev</font>)</li>
+    (<span class="author">Vanya Belyaev</span>)</li>
 <li>Patch #1725.
     Modified TimingAuditor to implement the new IAuditor interface for both
     standard events and user events.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 </ul>
 <li>GaudiAud (v8r5):</li>
 <ul>
 <li>Patch #1717. Audit memory at initialize time.<br>
     Uncommented the function to get the memory utilization after initialize (in
     MemStatAuditor).<br>
-    (<font color="#737373">Charles Leggett</font>)</li>
+    (<span class="author">Charles Leggett</span>)</li>
 </ul>
 <li>Gaudi (v19r9):</li>
 <ul>
 <li>Added a test for bug #35201.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Fixed Bug #34046. False warning when mixing Python options and old options.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Modified Gaudi.Main.gaudimain to use the environment variables GAUDIAPPNAME
     and GAUDIAPPVERSION to set the default values for the ApplicationMgr
     properties AppName and AppVersion.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 </ul>
 <li>GaudiExamples (v19r9):</li>
 <ul>
 <li>Added an example/test to show how to audit some pieces of user code
     (AuditorTestAlg), and how to write a minimal auditor (LoggingAuditor).<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Updated the reference files for the changes introduced with Patch #1749.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Added a test for bug #34121.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 </ul>
 </ul>
 <!-- ====================================================================== -->
@@ -213,96 +656,96 @@ Purpose: Gaudi common set of packages<br><br>
 <li>GaudiPolicy (v8r1):</li>
 <ul>
   <li>Minor improvements.<br>
-  (<font color="#737373">Marco Clemencic</font>,
-   <font color="#737373">Hubert Degaudenzi</font>)</li>
+  (<span class="author">Marco Clemencic</span>,
+   <span class="author">Hubert Degaudenzi</span>)</li>
 </ul>
 <li>GaudiKernel (v23r4):</li>
 <ul>
 <li>Modified IInterface::hash32 to use and return <tt>unsigned&nbsp;int</tt>
     instead of <tt>unsigned&nbsp;long</tt> for portability.<br>
-    (<font color="#737373">Vanya Belyaev</font>)</li>
+    (<span class="author">Vanya Belyaev</span>)</li>
 <li>Patch #1666, Patch #1687. Interface changes to allow the implementation of
-    special tools in Athena.<br>(<font color="#737373">Yushu Yao</font>)</li>
+    special tools in Athena.<br>(<span class="author">Yushu Yao</span>)</li>
 <li>Patch #1668. Hack to avoid a problem with ServiceHandles in Python 2.5
     (<tt>__str__</tt> called instead of <tt>toStringProperty</tt>).<br>
-    (<font color="#737373">Charles Leggett</font>)</li>
+    (<span class="author">Charles Leggett</span>)</li>
 <li>Improvements to Python options: Fixed bug #33209 and added a (limited) lock
     on configurables to try to avoid that people use them after the
     ApplicationMgr has been instantiated.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Patch #1710. Convenience method for removing entries from GaudiHandleArray
     by name.<br>
-    (<font color="#737373">Wim Lavrijsen</font>)</li>
+    (<span class="author">Wim Lavrijsen</span>)</li>
 <li>Patch #1711. Get all instances of a tool type, function used in the Atlas
     event display.<br>
-    (<font color="#737373">Charles Leggett</font>)</li>
+    (<span class="author">Charles Leggett</span>)</li>
 <li>Hack to avoid a conflict in the way Configurables are used in Athena and
     Gaudi.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 </ul>
 <li>GaudiSvc (v16r4):</li>
 <ul>
 <li>Patch #1652, fixed reference counting in HistorySvc.<br>
-    (<font color="#737373">Charles Leggett</font>)</li>
+    (<span class="author">Charles Leggett</span>)</li>
 <li>Patch #1656, improved debugging messages for IncidentSvc.<br>
-    (<font color="#737373">Frank Winklmeier</font>)</li>
+    (<span class="author">Frank Winklmeier</span>)</li>
 <li>Fixed Bug #33036, unchecked StatusCode in HistorySvc::initialize.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Patch #1711. Get all instances of a tool type, function used in the Atlas
     event display.<br>
-    (<font color="#737373">Charles Leggett</font>)</li>
+    (<span class="author">Charles Leggett</span>)</li>
 </ul>
 <li>GaudiUtils (v1r5):</li>
 <ul>
 <li>Patch #1700, fixed the filter mechanism to reduce the number of messages 
     for inaccessible objects.<br>
-    (<font color="#737373">Markus Frank</font>)</li>
+    (<span class="author">Markus Frank</span>)</li>
 <li>Fixed Bug #33372, tiny memory leak in XmlFileCatalog.<br>
-    (<font color="#737373">Markus Frank</font>)</li>
+    (<span class="author">Markus Frank</span>)</li>
 <li> Patch #1722, fixed dataset access by LFN. Was simply not working.<br>
-    (<font color="#737373">Markus Frank</font>)</li>
+    (<span class="author">Markus Frank</span>)</li>
 </ul>
 <li>GaudiPoolDb (v3r1):</li>
 <ul>
 <li>Patch #1700, fixed the filter mechanism to reduce the number of messages 
     for inaccessible objects.<br>
-    (<font color="#737373">Markus Frank</font>)</li>
+    (<span class="author">Markus Frank</span>)</li>
 </ul>
 <li>GaudiAlg (v10r4):</li>
 <ul>
 <li>Fixed Bug #30209, added support for namespaced algorithms in Sequencer.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 </ul>
 <li>GaudiGSL (v6r9):</li>
 <ul>
 <li>Fixed a linkage problem with libgsl.so and libgslcblas.so.<br>
-    (<font color="#737373">Hubert Degaudenzi</font>,
-     <font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Hubert Degaudenzi</span>,
+     <span class="author">Marco Clemencic</span>)</li>
 </ul>
 <li>GaudiPython (v8r19):</li>
 <ul>
 <li>Fixed Bug #32854, MessageSvc options ignored in Python.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Hack to avoid a conflict in the way Configurables are used in Athena and
     Gaudi.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 </ul>
 <li>Gaudi (v19r8):</li>
 <ul>
 <li>Added aliases for the configurables <tt>FileCatalog</tt>
     (<tt>Gaudi::MultiFileCatalog</tt>) and <tt>IODataManager</tt>
     (<tt>Gaudi::IODataManager</tt>).<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 <li>Modified python/Gaudi/CommonGaudiConfigurables.py to ignore missing packages,
     essentially to allow the import of Gaudi.Configuration when GaudiPoolDb is
     missing.<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 </ul>
 <li>GaudiExamples (v19r8):</li>
 <ul>
 <li>Added test for bug #30209 (support of namespaced algorithms in
     Sequencer).<br>
-    (<font color="#737373">Marco Clemencic</font>)</li>
+    (<span class="author">Marco Clemencic</span>)</li>
 </ul>
 </ul>
 <!-- ====================================================================== -->
@@ -314,26 +757,26 @@ Purpose: Gaudi common set of packages<br><br>
 <li>GaudiPolicy (v8r0):</li>
 <ul>
 <li>Improvements in the QMTest infrastructure and the tests. Simplified actions to run the test:
-    TestPackage and TestProject.<br>(<font color="#737373">Marco Clemencic</font>)
+    TestPackage and TestProject.<br>(<span class="author">Marco Clemencic</span>)
 <li>Removed the genmap related macros and fragments, now available in LCG_Interfaces/ROOT (needs
     <font color="red">LCGCMT &gt;= 54</font>)
-<li>Fixes for Python 2.5.<br>(<font color="#737373">Marco Clemencic</font>)
+<li>Fixes for Python 2.5.<br>(<span class="author">Marco Clemencic</span>)
 <li>Fixed bug #32341. install.py uses absolute path if the source and 
-the destination files are on different windows drives.<br>(<font color="#737373">Hubert Degaudenzi</font>)
+the destination files are on different windows drives.<br>(<span class="author">Hubert Degaudenzi</span>)
 </ul>
 <li>GaudiKernel (v23r3):</li>
 <ul>
 <li>Fixed bug #32549.
     Changed the level of the message about the AbortEvent incident from ERROR to
-    DEBUG.<br>(<font color="#737373">Marco Clemencic</font>)
+    DEBUG.<br>(<span class="author">Marco Clemencic</span>)
 <li>Patch #1581. Added support to std::map&lt;int,std::string&gt; and std::map&lt;unsigned int,std::string&gt;
-    in the parser.<br>(<font color="#737373">Vanya Belyaev</font>)
+    in the parser.<br>(<span class="author">Vanya Belyaev</span>)
 <li>Patch #1621 (bug #32466).
     Add to IToolSvc/ToolSvc the possibility of using observers to monitor the
-    creation of and retrieval of tools.<br>(<font color="#737373">Gerhard Raven</font>)
-<li>Many fixes and improvements in Python job options.<br>(<font color="#737373">Marco Clemencic</font>)
+    creation of and retrieval of tools.<br>(<span class="author">Gerhard Raven</span>)
+<li>Many fixes and improvements in Python job options.<br>(<span class="author">Marco Clemencic</span>)
 <li>Improved the message of DataSvc when re-throwing a std::exception. Now the
-    message contains the type of the exception.<br>(<font color="#737373">Marco Clemencic</font>)
+    message contains the type of the exception.<br>(<span class="author">Marco Clemencic</span>)
 <li>Patch #1585.
   <ul>
   <li> Added the templated function pp_cast&lt;DEST&gt;(SRC**) to replace the common casts
@@ -342,11 +785,11 @@ the destination files are on different windows drives.<br>(<font color="#737373"
       <tt>(IInterface&nbsp;*&amp;)m_mySvc</tt>
      to avoid the warning <cite>&quot;dereferencing type-punned pointer will break strict-aliasing rules&quot;</cite>.
   <li> Fixed warnings about breaking of strict-aliasing rules (gcc 4.1 optimized).
-  </ul>(<font color="#737373">Marco Clemencic</font>)
-<li>Improvements in DsoUtils.h (support for Win32 and OSX).<br>(<font color="#737373">Markus Frank &amp; Marco Clemencic</font>)
+  </ul>(<span class="author">Marco Clemencic</span>)
+<li>Improvements in DsoUtils.h (support for Win32 and OSX).<br>(<span class="author">Markus Frank &amp; Marco Clemencic</span>)
 <li>Fix for bug #31677.
-    Move GaudiHandles.py from GaudiPython to GaudiKernel.<br>(<font color="#737373">Marco Clemencic</font>)
-<li>Fixed various compilation warnings.<br>(<font color="#737373">Marco Clemencic</font>)
+    Move GaudiHandles.py from GaudiPython to GaudiKernel.<br>(<span class="author">Marco Clemencic</span>)
+<li>Fixed various compilation warnings.<br>(<span class="author">Marco Clemencic</span>)
 </ul>
 <li>GaudiSvc (v16r3):</li>
 <ul>
@@ -355,112 +798,112 @@ the destination files are on different windows drives.<br>(<font color="#737373"
     <li>ChronoStatSvc
     <li>IssueLogger
     <li>THistSvc
-  </ul>(<font color="#737373">Marco Clemencic</font>)
-<li>Fixed bug #32476. Missing checks of few status codes.<br>(<font color="#737373">Marco Clemencic</font>)
+  </ul>(<span class="author">Marco Clemencic</span>)
+<li>Fixed bug #32476. Missing checks of few status codes.<br>(<span class="author">Marco Clemencic</span>)
 <li>Patch #1610.
-   If StatusCodeSvc.AbortOnError was set to true, the filter list was ignored.<br>(<font color="#737373">Charles Leggett</font>)
+   If StatusCodeSvc.AbortOnError was set to true, the filter list was ignored.<br>(<span class="author">Charles Leggett</span>)
 <li>Patch #1607.
    Fixed a memory leak in HistorySvc, occurring when an algorithm or a tool
-   was registered twice.<br>(<font color="#737373">Charles Leggett</font>)
+   was registered twice.<br>(<span class="author">Charles Leggett</span>)
 <li>Patch #1584.
    Fixed a crash (WIN32) or an infinite loop (Linux) when the DataOnDemandSvc
-   is configured but not initialized.<br>(<font color="#737373">Chris Rob Jones</font>)
+   is configured but not initialized.<br>(<span class="author">Chris Rob Jones</span>)
 <li>Patch #1621 (bug #32466).
    Add to IToolSvc/ToolSvc the possibility of using observers to monitor the
-   creation of and retrieval of tools.<br>(<font color="#737373">Gerhard Raven</font>)
+   creation of and retrieval of tools.<br>(<span class="author">Gerhard Raven</span>)
 <li>Modified ToolSvc to allow to specify the name of a tool in the type argument
-   (Type/Name), which takes precedence over the provided name.<br>(<font color="#737373">Marco Clemencic</font>)
+   (Type/Name), which takes precedence over the provided name.<br>(<span class="author">Marco Clemencic</span>)
 <li>Patch #1585.
-    Fixed warnings about breaking of strict-aliasing rules (gcc 4.1 optimized).<br>(<font color="#737373">Marco Clemencic</font>)
+    Fixed warnings about breaking of strict-aliasing rules (gcc 4.1 optimized).<br>(<span class="author">Marco Clemencic</span>)
 <li>Simplified the implementation of MultiStoreSvc fixing a segmentation fault
-   occurring on gcc 4.1 optimized.<br>(<font color="#737373">Marco Clemencic &amp; Markus Frank</font>)
-<li>Fixed a problem preventing the parsing of option files with Boost 1.34.1.<br>(<font color="#737373">Sascha Mazurov</font>)
+   occurring on gcc 4.1 optimized.<br>(<span class="author">Marco Clemencic &amp; Markus Frank</span>)
+<li>Fixed a problem preventing the parsing of option files with Boost 1.34.1.<br>(<span class="author">Sascha Mazurov</span>)
 </ul>
 <li>GaudiMonitor (v1r4):</li>
 <ul>
 <li>Fixed bug #31950. Missing call to Service::finalize in
   <ul>
     <li>DataListenerSvc
-  </ul>(<font color="#737373">Marco Clemencic</font>)
-<li>Fixed compilation warnings.<br>(<font color="#737373">Marco Clemencic</font>)
+  </ul>(<span class="author">Marco Clemencic</span>)
+<li>Fixed compilation warnings.<br>(<span class="author">Marco Clemencic</span>)
 </ul>
 <li>GaudiGridSvc (v1r5):</li>
 <ul>
-<li>Patch #1611. Build disabled for ATLAS.<br>(<font color="#737373">Marco Clemencic</font>)
+<li>Patch #1611. Build disabled for ATLAS.<br>(<span class="author">Marco Clemencic</span>)
 </ul>
 <li>RootHistCnv (v9r16):</li>
 <ul>
 <li>Patch #1585.
-    Fixed warnings about breaking of strict-aliasing rules (gcc 4.1 optimized).<br>(<font color="#737373">Marco Clemencic</font>)
+    Fixed warnings about breaking of strict-aliasing rules (gcc 4.1 optimized).<br>(<span class="author">Marco Clemencic</span>)
 </ul>
 <li>HbookCnv (v14r13):</li>
 <ul>
 <li>Disable the build of the package on AMD64 because it doesn't work on that
-    platform.<br>(<font color="#737373">Marco Clemencic</font>)
+    platform.<br>(<span class="author">Marco Clemencic</span>)
 </ul>
 <li>GaudiUtils (v1r4):</li>
 <ul>
 <li>Patch #1622. Reduce printout level on unsuccessful catalog lookup.
                 (MultiFileCatalog) 
    An unsuccessful catalog lookup is not an error, but rather a normal operation
-   if e.g. the existence of a file should be checked.<br>(<font color="#737373">Markus Frank</font>)
+   if e.g. the existence of a file should be checked.<br>(<span class="author">Markus Frank</span>)
 <li>Patch #1585.
-    Fixed warnings about breaking of strict-aliasing rules (gcc 4.1 optimized).<br>(<font color="#737373">Marco Clemencic</font>)
+    Fixed warnings about breaking of strict-aliasing rules (gcc 4.1 optimized).<br>(<span class="author">Marco Clemencic</span>)
 </ul>
 <li>GaudiPoolDb (v3r0):</li>
 <ul>
 <li>Removed the (obsolete) namespace "poolDb"
-   (needs <font color="red">LCGCMT &gt;= 54</font>).<br>(<font color="#737373">Marco Clemencic</font>)
-<li>Patch #1603. Use file catalog implementation in GaudiUtils.<br>(<font color="#737373">Markus Frank</font>)
+   (needs <font color="red">LCGCMT &gt;= 54</font>).<br>(<span class="author">Marco Clemencic</span>)
+<li>Patch #1603. Use file catalog implementation in GaudiUtils.<br>(<span class="author">Markus Frank</span>)
 <li>Patch #1585.
-    Fixed warnings about breaking of strict-aliasing rules (gcc 4.1 optimized).<br>(<font color="#737373">Marco Clemencic</font>)
+    Fixed warnings about breaking of strict-aliasing rules (gcc 4.1 optimized).<br>(<span class="author">Marco Clemencic</span>)
 </ul>
 <li>GaudiAlg (v10r3):</li>
 <ul>
 <li>Fixed bug #32541.
    Modified the logic of GaudiCommon&lt;PBASE&gt;::fullTESLocation to return RootInTES
-   when the user asks for "" or "/Event" (and the rootInTES flag is true).<br>(<font color="#737373">Marco Clemencic</font>)
+   when the user asks for "" or "/Event" (and the rootInTES flag is true).<br>(<span class="author">Marco Clemencic</span>)
 <li>Patch #1625.
     Introduce fix for the problem of non-deterministic automatically 
     assigned numerical IDs in the GaudiTuples and GaudiHistos base 
-    classes.<br>(<font color="#737373">Chris Rob Jones</font>)
+    classes.<br>(<span class="author">Chris Rob Jones</span>)
 <li>Patch #1620 (bug #32030).
   <ul>
     <li>Modified GaudiSequencer to use createSubAlgorithm instead of creating them
         via the ApplicationManager. This allow also some clean up.
     <li>Added the property ShortCircuit (true by default) to allow to run all the
         sub-algorithms regardless the accumulated result.
-  </ul>(<font color="#737373">Gerhard Raven</font>)
+  </ul>(<span class="author">Gerhard Raven</span>)
 <li>Patch #1585.
-    Fixed warnings about breaking of strict-aliasing rules (gcc 4.1 optimized).<br>(<font color="#737373">Marco Clemencic</font>)
+    Fixed warnings about breaking of strict-aliasing rules (gcc 4.1 optimized).<br>(<span class="author">Marco Clemencic</span>)
 </ul>
 <li>GaudiGSL (v6r8):</li>
 <ul>
-<li>Fixed compilation warnings.<br>(<font color="#737373">Marco Clemencic</font>)
+<li>Fixed compilation warnings.<br>(<span class="author">Marco Clemencic</span>)
 </ul>
 <li>GaudiPython (v8r18):</li>
 <ul>
-<li>Fixed macro for test_GPyTestDict needed after change in the reflex test dictionary pattern.<br>(<font color="#737373">Pere Mato</font>)
-<li>Fixed a bug in Pythonization._loadDict. Missing "import sys".<br>(<font color="#737373">Wim Lavrijsen</font>)
-<li>Improvements and fixes to Python job options.<br>(<font color="#737373">Marco Clemencic, Wim Lavrijsen</font>)
-<li>Fixed compilation problem with Python 2.5.<br>(<font color="#737373">Marco Clemencic</font>)
+<li>Fixed macro for test_GPyTestDict needed after change in the reflex test dictionary pattern.<br>(<span class="author">Pere Mato</span>)
+<li>Fixed a bug in Pythonization._loadDict. Missing "import sys".<br>(<span class="author">Wim Lavrijsen</span>)
+<li>Improvements and fixes to Python job options.<br>(<span class="author">Marco Clemencic, Wim Lavrijsen</span>)
+<li>Fixed compilation problem with Python 2.5.<br>(<span class="author">Marco Clemencic</span>)
 <li>Fixed bug #31677.
    Move GaudiHandles.py from GaudiPython to GaudiKernel. Added a fake module for
-   backward compatibility.<br>(<font color="#737373">Marco Clemencic</font>)
-<li>Fixed bug #31819: Reduce GaudiPython dictionaries to strict minimum.<br>(<font color="#737373">Pere Mato</font>)
+   backward compatibility.<br>(<span class="author">Marco Clemencic</span>)
+<li>Fixed bug #31819: Reduce GaudiPython dictionaries to strict minimum.<br>(<span class="author">Pere Mato</span>)
 <li>Patch #1550. Fix to compile with Python 2.5 (backward compatible).
-    <br>(<font color="#737373">Paolo Calafiura, Sebastien Binet &amp; Marco Clemencic</font>)
+    <br>(<span class="author">Paolo Calafiura, Sebastien Binet &amp; Marco Clemencic</span>)
 </ul>
 <li>Gaudi (v19r7):</li>
 <ul>
-<li>Added few tests for Python job options.<br>(<font color="#737373">Marco Clemencic</font>)
+<li>Added few tests for Python job options.<br>(<span class="author">Marco Clemencic</span>)
 </ul>
 <li>GaudiExamples (v19r7):</li>
 <ul>
 <li>Modified GaudiCommonTests to expose bug #32541 (cannot retrieve RootOnTES
-   node).<br>(<font color="#737373">Marco Clemencic</font>)
+   node).<br>(<span class="author">Marco Clemencic</span>)
 <li>Improvements and updates of the tests and updates the reference files.
-    <br>(<font color="#737373">Marco Clemencic, Vanya Belyaev</font>)
+    <br>(<span class="author">Marco Clemencic, Vanya Belyaev</span>)
 </ul>
 </ul>
 <!-- ====================================================================== -->
@@ -3421,13 +3864,13 @@ stl_hash.h: GaudiUtils::Map, GaudiUtils::Hash and GaudiUtils::HashMap (<font
       <li>Change output level data member in Algorithms and AlgTools
 from int to IntegerProperty, and add a non-const access method for this
 property. Allows uses to <b>attach callback handle methods</b> to this
-property. (<font color="#808080">Chris Jones</font>)</li>
+property. (<span class="author">Chris Jones</span>)</li>
       <li>Added new methods to IAlgorithm: isInitialized(),
 isFinalized() and isExecuted()</li>
       <li>Fixed problems of KeyedContainer when using keys with
 explicit constructors.</li>
       <li>Added new class GaudiUtils::VectorMap that implements an
-associative vector (<font color="#808080">Vanya Belyaev</font>)</li>
+associative vector (<span class="author">Vanya Belyaev</span>)</li>
       <li>Converted the Gaudi class in Bootstrap.h into a namespace.
 Needed as namespace. </li>
     </ul>
@@ -3785,7 +4228,7 @@ addRef(). (<span style="color: rgb(115, 115, 115);">Pere Mato</span>)</li>
   <li>GaudiAlg (v8r8)</li>
   <ul>
     <li>Extensions of the TupleAlg algorithm. Please have a look at the
-release notes of the package. (<font color="#737373"><tt>Ivan Belyaev</tt></font>)</li>
+release notes of the package. (<span class="author"><tt>Ivan Belyaev</tt></span>)</li>
     <li>Change the time normalisation in SequencerTimerTool: Default is
 not to normalise, i.e. to print measured time, but we always print the
 value of the normalisation factor, now compared to 2.8 GHz Xeon (<span
@@ -3844,7 +4287,7 @@ the application manager with GSLTools.exe.</li>
   <li>GaudiAlg (v8r7)</li>
   <ul>
     <li>removed memory leaks from GaudiTool and GaudiAlgorithm finalize
-methods (<font color="#737373"><tt>Ivan Belyaev and Chris Jones</tt></font>)<br>
+methods (<span class="author"><tt>Ivan Belyaev and Chris Jones</tt></span>)<br>
     </li>
   </ul>
 </ul>

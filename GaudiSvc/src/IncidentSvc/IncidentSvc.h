@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiSvc/src/IncidentSvc/IncidentSvc.h,v 1.5 2007/05/24 17:05:07 marcocle Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiSvc/src/IncidentSvc/IncidentSvc.h,v 1.7 2008/11/10 16:00:23 marcocle Exp $
 #ifndef IncidentSvc_IncidentSvc_H
 #define IncidentSvc_IncidentSvc_H
 
@@ -10,19 +10,24 @@
 #include <map>
 #include <list>
 
+#include <boost/thread/recursive_mutex.hpp>
+
 // Forward declarations
 
-//------------------------------------------------------------------
-//
-// ClassName:   IncidentSvc
-//  
-// Description: This service manages Auditors. 
-//              Auditors can be inserted in the system to audit the Algorithms is 
-//              in their functions.
-//------------------------------------------------------------------
+/**
+ * @class IncidentSvc
+ * @brief Default implementation of the IIncidentSvc interface.
+ *
+ * This implementation is thread-safe with the following features:
+ *  - Calls to fireIncident(), addListener() and removeListener() are
+ *    synchronized across threads.
+ *  - Calls to IIncidentListener::handle() are serialized, i.e. at any time
+ *    there is at most one incident handler being executed across all threads.
+ */
+ 
 class IncidentSvc : public Service, virtual public IIncidentSvc {
 
-public: 
+public:
 
   struct Listener {
     IIncidentListener* iListener;
@@ -30,13 +35,12 @@ public:
     bool rethrow;
     bool singleShot;
 
-    Listener(IIncidentListener* il, long pri, bool thr=false, bool single=false): 
+    Listener(IIncidentListener* il, long pri, bool thr=false, bool single=false):
       iListener(il), priority(pri), rethrow(thr), singleShot(single){}
 
   };
-  
+
 // Typedefs
-//  typedef std::pair<IIncidentListener*,long> Listener;
   typedef std::list<Listener> ListenerList;
   typedef std::map<std::string, ListenerList*> ListenerMap;
 
@@ -45,25 +49,36 @@ public:
   virtual StatusCode initialize();
   virtual StatusCode finalize();
   virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface );
-    
+
 // IIncidentSvc interfaces overwrite
-// 
+//
   virtual void addListener(IIncidentListener* lis, const std::string& type = "",
-			                     long priority = 0, bool rethrow=false, bool singleShot=false);
+                           long priority = 0, bool rethrow=false, bool singleShot=false);
+  
   virtual void removeListener(IIncidentListener* lis, const std::string& type = "");
   virtual void fireIncident( const Incident& incident );
- 
+
   // Standard Constructor.
   IncidentSvc( const std::string& name, ISvcLocator* svc );
   // Destructor.
   virtual ~IncidentSvc();
 
 private:
-  // List of auditor names
+  /// Internal function to allow incidents listening to all events
+  void i_fireIncident(const Incident& incident, const std::string& type);
+
+  /// List of auditor names
   ListenerMap  m_listenerMap;
+  
   /// Incident being fired. It is used to know if we can safely remove a listener or
   /// we have to schedule its removal for later.
   const std::string *m_currentIncidentType;
+
+  /// Internal MsgStream
+  MsgStream m_log;
+  
+  /// Mutex to synchronize access to m_listenerMap
+  boost::recursive_mutex m_listenerMapMutex;
 };
 
 #endif

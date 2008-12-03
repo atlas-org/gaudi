@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/ObjectContainerBase.h,v 1.4 2001/11/12 08:42:59 mato Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/ObjectContainerBase.h,v 1.5 2008/10/09 16:46:49 marcocle Exp $
 #ifndef GAUDI_OBJECTCONTAINERBASE_H
 #define GAUDI_OBJECTCONTAINERBASE_H 1
 
@@ -13,7 +13,7 @@ class ContainedObject;
     ObjectContainerBase is the base class for Gaudi container classes. The main motivation
     is to allow contained object to be removed from the container on deletion and also for
     knowing it own index (e.g. distance, key, ...) in the container.
-    
+
     @author Pavel Binko
     @author Pere Mato
 */
@@ -29,6 +29,9 @@ protected:
 
 public:
 
+  /// size_type, to conform the STL container interface
+  typedef size_t size_type;
+
   /// Distance of a given object from the beginning of its container
   virtual long index( const ContainedObject* obj ) const = 0;
 
@@ -36,10 +39,10 @@ public:
   virtual ContainedObject* containedObject( long dist ) const = 0;
 
   /// Number of objects in the container
-  virtual long numberOfObjects() const = 0;
+  virtual size_type numberOfObjects() const = 0;
 
   /** Virtual functions (forwards to the concrete container definitions)
-      Add an object to the container. On success the object's index is 
+      Add an object to the container. On success the object's index is
       returned.                                                      */
   virtual long add(ContainedObject* pObject) = 0;
 

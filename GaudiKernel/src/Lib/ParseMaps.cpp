@@ -1,4 +1,4 @@
-// $Id: ParseMaps.cpp,v 1.4 2008/01/14 19:42:56 marcocle Exp $
+// $Id: ParseMaps.cpp,v 1.6 2008/10/28 14:02:18 marcocle Exp $
 // ============================================================================
 // Include files
 // ============================================================================
@@ -34,11 +34,11 @@ namespace Gaudi
     ( map< int , int >& result , 
       const string&     input  )
     {
+      MapGrammar< IntGrammar<int> , IntGrammar<int> > g;
       return parse
         ( createIterator(input)  , 
           IteratorT()            ,
-          MapGrammar< IntGrammar<int> , IntGrammar<int> >()
-          [var(result)=arg1],
+          g[var(result)=arg1],
           SkipperGrammar()).full;
     }
     // ========================================================================
@@ -46,11 +46,11 @@ namespace Gaudi
     ( map< int , double >& result , 
       const string&        input  )
     {
+      MapGrammar< IntGrammar<int> , RealGrammar<double> > g;
       return parse
         ( createIterator(input), 
           IteratorT(),
-          MapGrammar< IntGrammar<int> , RealGrammar<double> >()
-          [var(result)=arg1],
+          g[var(result)=arg1],
           SkipperGrammar()).full;
     }
     // ========================================================================
@@ -58,10 +58,11 @@ namespace Gaudi
     ( map<string,double>&  result , 
       const string&        input  )
     {
+      MapGrammar<StringGrammar,RealGrammar<double> > g;
       return parse
         ( createIterator(input), 
           IteratorT(),
-          MapGrammar<StringGrammar,RealGrammar<double> >()[var(result)=arg1],
+          g[var(result)=arg1],
           SkipperGrammar()).full;
     }
     // ========================================================================
@@ -69,10 +70,11 @@ namespace Gaudi
     ( map< string , string >& result , 
       const string&           input  ) 
     {
+      MapGrammar<StringGrammar,StringGrammar> g;
       return parse
         ( createIterator(input), 
           IteratorT(),
-          MapGrammar<StringGrammar,StringGrammar>()[var(result)=arg1],
+          g[var(result)=arg1],
           SkipperGrammar()).full;
     }
     // ========================================================================
@@ -80,10 +82,11 @@ namespace Gaudi
     ( map< string , int >& result , 
       const string&        input  )
     {
+      MapGrammar<StringGrammar,IntGrammar<int> > g;
       return parse
         ( createIterator(input), 
           IteratorT(),
-          MapGrammar<StringGrammar,IntGrammar<int> >()[var(result)=arg1],
+          g[var(result)=arg1],
           SkipperGrammar()).full;
     }
     // ========================================================================
@@ -91,11 +94,11 @@ namespace Gaudi
     ( map< std::string , std::vector< std::string > >& result , 
       const string&                                    input  )
     {
+      MapGrammar<StringGrammar,VectorGrammar<StringGrammar> > g;
       return parse
         ( createIterator(input), 
           IteratorT(),
-          MapGrammar<StringGrammar,VectorGrammar<StringGrammar> >()
-          [var(result)=arg1],
+          g[var(result)=arg1],
           SkipperGrammar()).full;
     }
     // ========================================================================
@@ -103,11 +106,11 @@ namespace Gaudi
     ( map< std::string , std::vector< int > >& result , 
       const string&                            input  )
     {
+      MapGrammar<StringGrammar,VectorGrammar<IntGrammar<int> > > g;
       return parse
         ( createIterator(input), 
           IteratorT(),
-          MapGrammar<StringGrammar,VectorGrammar<IntGrammar<int> > >()
-          [var(result)=arg1],
+          g[var(result)=arg1],
           SkipperGrammar()).full;
     }
     // ========================================================================
@@ -115,11 +118,11 @@ namespace Gaudi
     ( map< std::string , std::vector< double > >& result , 
       const string&                               input  )
     {
+      MapGrammar<StringGrammar,VectorGrammar<RealGrammar<double> > > g;
       return parse
         ( createIterator(input), 
           IteratorT(),
-          MapGrammar<StringGrammar,VectorGrammar<RealGrammar<double> > >()
-          [var(result)=arg1],
+          g[var(result)=arg1],
           SkipperGrammar()).full;
     }
     // ========================================================================
@@ -167,10 +170,11 @@ namespace Gaudi
     ( map<int,std::string>& result , 
       const string&         input  )
     {
+      MapGrammar<IntGrammar<int>,StringGrammar> g;
       return parse
         ( createIterator(input), 
           IteratorT(),
-          MapGrammar<IntGrammar<int>,StringGrammar>()[var(result)=arg1],
+          g[var(result)=arg1],
           SkipperGrammar()).full;
     }
     // ========================================================================
@@ -178,11 +182,11 @@ namespace Gaudi
     ( map<unsigned int,std::string>& result , 
       const string&         input  )
     {
+      MapGrammar<IntGrammar<unsigned int>,StringGrammar> g;
       return parse
         ( createIterator(input), 
           IteratorT(),
-          MapGrammar<IntGrammar<unsigned int>,
-          StringGrammar>()[var(result)=arg1],
+          g[var(result)=arg1],
           SkipperGrammar()).full;
     }
     // ========================================================================

@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiExamples/src/POOLIO/EvtCollectionWrite.cpp,v 1.6 2007/02/21 14:07:33 hmd Exp $
+// $Id: EvtCollectionWrite.cpp,v 1.7 2008/11/04 22:49:24 marcocle Exp $
 //	====================================================================
 //  EvtCollection.Write.cpp
 //	--------------------------------------------------------------------
@@ -72,14 +72,15 @@ StatusCode EvtCollectionWrite::initialize()   {
 // Event callback
 StatusCode EvtCollectionWrite::execute() {
   MsgStream log(msgSvc(), name());
-  SmartDataPtr<Event> evt(eventSvc(),"/Event");
+  SmartDataPtr<DataObject> evtRoot(eventSvc(),"/Event");
+  SmartDataPtr<Event> evt(eventSvc(),"/Event/Header");
   if ( evt != 0 )    {
     int evt_num = evt->event();
-    SmartDataPtr<MyTrackVector> trkCont(evt, "/MyTracks");
+    SmartDataPtr<MyTrackVector> trkCont(eventSvc(), "/Event/MyTracks");
     if ( trkCont != 0 )    {
       // Force an object update since now the original tracks should be
       // present and the local pointers can be updated!
-      m_evtAddrColl = evt->registry()->address();
+      m_evtAddrColl = evtRoot->registry()->address();
       m_ntrkColl    = trkCont->size();
       m_eneColl     = 0.0;
       int cnt = 0;
@@ -112,6 +113,6 @@ StatusCode EvtCollectionWrite::execute() {
       return StatusCode::SUCCESS;
     }
   }
-  log << MSG::ERROR << "Unable to retrieve Event object" << endreq;
+  log << MSG::ERROR << "Unable to retrieve Event Header object" << endreq;
   return StatusCode::FAILURE;
 }

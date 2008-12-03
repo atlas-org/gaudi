@@ -1,6 +1,6 @@
-// $Id: ToStream.h,v 1.7 2007/07/16 13:40:14 hmd Exp $
+// $Id: ToStream.h,v 1.8 2008/10/30 23:38:46 marcocle Exp $
 // ============================================================================
-// CVS tag $Name:  $, version $Revision: 1.7 $
+// CVS tag $Name:  $, version $Revision: 1.8 $
 // ============================================================================
 #ifndef GAUDIPROPERTYPARSERS_PARSERVALUETOSTREAM_H
 #define GAUDIPROPERTYPARSERS_PARSERVALUETOSTREAM_H 1
@@ -93,6 +93,24 @@ namespace Gaudi
       return s << std::setprecision ( 10 ) << obj << std::setprecision ( p ) ;
     }
     // ========================================================================
+    /** the partial template specialization of 
+     *  <c>std::pair<KTYPE,VTYPE></c> printout 
+     *  the pair is printed a'la Python tuple: " ( a , b )"
+     *  @author Alexander MAZUROV Alexander.Mazurov@gmail.com
+     *  @author Vanya BELYAEV ibelyaev@physics.syr.edu
+     *  @date 2006-05-12
+     */     
+    template<class KTYPE, class VTYPE> 
+    inline std::ostream& toStream 
+    ( const std::pair<KTYPE,VTYPE>& obj, std::ostream& s)
+    {
+      s << "( "  ; 
+      toStream ( obj.first  , s ) ;
+      s << " , " ;
+      toStream ( obj.second , s ) ;
+      return s << " )" ;
+    }
+    // ========================================================================
     /** the partial template specialization of <c>std::vector<TYPE,ALLOCATOR></c> 
      *  printout. The vector is printed a'la Python list: "[ a, b, c ]"
      *  @author Alexander MAZUROV Alexander.Mazurov@gmail.com
@@ -131,24 +149,6 @@ namespace Gaudi
         toStream ( *cur , s ) ;
       }
       return s << " ]";
-    }
-    // ========================================================================
-    /** the partial template specialization of 
-     *  <c>std::pair<KTYPE,VTYPE></c> printout 
-     *  the pair is printed a'la Python tuple: " ( a , b )"
-     *  @author Alexander MAZUROV Alexander.Mazurov@gmail.com
-     *  @author Vanya BELYAEV ibelyaev@physics.syr.edu
-     *  @date 2006-05-12
-     */     
-    template<class KTYPE, class VTYPE> 
-    inline std::ostream& toStream 
-    ( const std::pair<KTYPE,VTYPE>& obj, std::ostream& s)
-    {
-      s << "( "  ; 
-      toStream ( obj.first  , s ) ;
-      s << " , " ;
-      toStream ( obj.second , s ) ;
-      return s << " )" ;
     }
     // ========================================================================
     /** the partial template specialization of <c>std::set<TYPE,CMP,ALLOCATOR></c> 

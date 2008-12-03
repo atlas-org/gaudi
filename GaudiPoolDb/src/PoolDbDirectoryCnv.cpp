@@ -1,4 +1,4 @@
-// $Id: PoolDbDirectoryCnv.cpp,v 1.7 2008/01/17 13:20:52 marcocle Exp $
+// $Id: PoolDbDirectoryCnv.cpp,v 1.8 2008/10/27 16:41:33 marcocle Exp $
 //------------------------------------------------------------------------------
 //
 // Implementation of class :  PoolDbDirectoryCnv
@@ -6,6 +6,11 @@
 // Author :                   Markus Frank
 //
 //------------------------------------------------------------------------------
+
+// FIXME: Missing in CORAL
+#include <algorithm>
+
+#include <memory>
 
 // Include files
 #include "GaudiPoolDb/IPoolDbMgr.h"

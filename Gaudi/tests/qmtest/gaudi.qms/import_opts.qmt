@@ -24,7 +24,7 @@ if conf_dict != expected:
     result["GaudiTest.configuration.found"] = result.Quote(pp.pformat(conf_dict))
 
 import re
-expected_warning = 'Warning: file \'.*test1.opts\' already included, ignored'
+expected_warning = 'WARNING: file \'.*test1.opts\' already included, ignored'
 if not re.search(expected_warning,stdout):
     causes.append("missing warning message")
     result["GaudiTest.expected_warning"] = result.Quote(expected_warning)

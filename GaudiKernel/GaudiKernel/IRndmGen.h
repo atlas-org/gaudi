@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/IRndmGen.h,v 1.4 2004/07/06 10:17:40 mato Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/IRndmGen.h,v 1.5 2008/10/27 19:22:20 marcocle Exp $
 #ifndef GAUDIKERNEL_IRNDMGEN_H
 #define GAUDIKERNEL_IRNDMGEN_H
 
@@ -9,7 +9,7 @@
 // Framework include files
 #include "GaudiKernel/IInterface.h"
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
+// Declaration of the interface ID ( interface id, major version, minor version)
 static const InterfaceID IID_IRndmGen(140, 1, 0);
 static const InterfaceID IID_IRndmBit(150, 1, 0);
 static const InterfaceID IID_IRndmFlat(151, 1, 0);
@@ -41,7 +41,7 @@ public:
   protected:
     /// Type of the generator
     const InterfaceID  m_type;
-  public: 
+  public:
     /// Standard constructor
     Param( const InterfaceID& type = IID_IRndmFlat ) : m_type(type) {
     }
@@ -65,13 +65,13 @@ public:
   /// Random number generator type
   virtual const InterfaceID& type() const = 0;
   /// Random generator ID
-  virtual const long ID() const = 0;
+  virtual long ID() const = 0;
   /// Access to random number generator parameters
   virtual const IRndmGen::Param* parameters() const = 0;
   /// Single shot returning single random number according to specified distribution
   virtual double shoot() const = 0;
   /** Multiple shots returning vector with random number according to specified distribution.
-      @param  array    Array containing random numbers 
+      @param  array    Array containing random numbers
       @param  howmany  fill 'howmany' random numbers into array
       @param  start    ... starting at position start
       @param Statuscode indicating success or failure

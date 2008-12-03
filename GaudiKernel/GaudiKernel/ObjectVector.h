@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/ObjectVector.h,v 1.10 2005/07/25 15:58:37 hmd Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/ObjectVector.h,v 1.11 2008/10/09 16:46:49 marcocle Exp $
 #ifndef GAUDIKERNEL_OBJECTVECTOR_H
 #define GAUDIKERNEL_OBJECTVECTOR_H
 
@@ -13,7 +13,7 @@
 #include <iomanip>
 
 
-// Definition of the CLID for this class defined in ClassID.h 
+// Definition of the CLID for this class defined in ClassID.h
 //static const CLID CLID_ObjectList = (1<<17);  // ObjectVector   (bit 17 set)
 
 /** @class ObjectVector ObjectVector.h GaudiKernel/ObjectVector.h
@@ -44,8 +44,6 @@ public:
 
   typedef typename std::vector<TYPE*>::reference               reference;
   typedef typename std::vector<TYPE*>::const_reference         const_reference;
-
-  typedef typename std::vector<TYPE*>::size_type               size_type;
 
   typedef typename std::vector<TYPE*>::iterator                iterator;
   typedef typename std::vector<TYPE*>::const_iterator          const_iterator;
@@ -98,7 +96,7 @@ public:
 
   /// Return an iterator pointing to the beginning of the container
   typename ObjectVector<TYPE>::iterator begin () {
-    return m_vector.begin();    
+    return m_vector.begin();
   }
 
   /// Return a const_iterator pointing to the beginning of the container
@@ -139,14 +137,14 @@ public:
 
   /** Return the size of the container.
       Size means the number of objects stored in the container,
-      independently on the amount of information stored in each object 
+      independently on the amount of information stored in each object
   */
   typename ObjectVector<TYPE>::size_type size () const {
     return m_vector.size();
   }
 
   /// The same as size(), return number of objects in the container
-  virtual long numberOfObjects() const {
+  virtual typename ObjectVector<TYPE>::size_type numberOfObjects() const {
     return m_vector.size();
   }
 
@@ -296,13 +294,13 @@ public:
   }
 
   /// Return the reference to the n'th object in the container
-  typename ObjectVector<TYPE>::reference 
+  typename ObjectVector<TYPE>::reference
     operator[] (typename ObjectVector<TYPE>::size_type n) {
     return m_vector[n];
   }
 
   /// Return the const_reference to the n'th object in the container
-  typename ObjectVector<TYPE>::const_reference 
+  typename ObjectVector<TYPE>::const_reference
     operator[] (typename ObjectVector<TYPE>::size_type n) const {
     return m_vector[n];
   }

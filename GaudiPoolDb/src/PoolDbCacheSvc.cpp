@@ -1,18 +1,20 @@
-// $Id: PoolDbCacheSvc.cpp,v 1.19 2008/01/30 13:49:09 marcocle Exp $
+// $Id: PoolDbCacheSvc.cpp,v 1.21 2008/10/27 16:41:33 marcocle Exp $
 //====================================================================
 //	PoolDbCacheSvc implementation
 //--------------------------------------------------------------------
 //	Author     : M.Frank
 //
 //====================================================================
+
+// FIXME: missing in CORAL
+#include <algorithm>
+
 #include "GaudiPoolDb/PoolDbCacheSvc.h"
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/strcasecmp.h"
 #include "GaudiKernel/SvcFactory.h"
-
-#include "POOLCore/POOLContext.h"
-
+#include "StorageSvc/DbPrint.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/IDbOptionProxy.h"
 #include "StorageSvc/DbInstanceCount.h"
@@ -22,41 +24,41 @@
 #include "Reflex/Reflex.h"
 
 namespace GaudiPoolDb  {  bool patchStreamers(MsgStream& log);     }
-namespace pool         {  void setLogLevel(seal::Msg::Level lvl);  }
 
 static pool::DbInstanceCount::Counter* s_count = 
   pool::DbInstanceCount::getCounter(typeid(PoolDbCacheSvc));
 
 DECLARE_SERVICE_FACTORY(PoolDbCacheSvc);
 
-namespace {
-  class Context {
-  public:
-    Context() {
-      pool::POOLContext::loadComponent( "SEAL/Services/MessageService" );
-      setVerbosity( seal::Msg::Info );
-    }
-    virtual ~Context() {
-    }
-    static Context& instance()  {
-      std::auto_ptr<Context> s_context;
-      if ( 0 == s_context.get() ) {
-        s_context = std::auto_ptr<Context>(new Context());
-      }
-      return *(s_context.get());
-    }
-    void setVerbosity( seal::Msg::Level lvl) {
-      pool::POOLContext::setMessageVerbosityLevel( lvl );
-    }
-  };
-}
+/** @class MsgReporter MessageStream.h CoralBase/MessageStream.h
+ *
+ * Default reporter implementation
+ *
+ * @author   Markus Frank
+ * @version  1.0
+ * @date     15/07/2002
+ */
+class PoolDbMsgReporter : public coral::MsgReporter  {
+protected:
+  /// Reference to message reporter
+  IMessageSvc* m_svc;
+  int m_lvl;
+public:
+  /// Default constructor
+  PoolDbMsgReporter(IMessageSvc* s, int l) : coral::MsgReporter(), m_svc(s), m_lvl(l)  {}
+  /// Destructor
+  virtual ~PoolDbMsgReporter()               { }
+  /// Report a message
+  virtual void report(int lvl, const std::string& src, const std::string& msg) {
+    if ( lvl >= m_lvl ) m_svc->reportMessage(src,lvl,msg);
+  }
+};
 
 /// Standard constructor
 PoolDbCacheSvc::PoolDbCacheSvc(const std::string& nam, ISvcLocator* svc)
   : Service(nam, svc), m_callbackHandler(0)
 {
   s_count->increment();
-  Context::instance();
   m_callbackHandler = this;
   declareProperty("Dlls",               m_dlls);
   declareProperty("DomainOpts",         m_domainOpts);
@@ -93,10 +95,11 @@ StatusCode PoolDbCacheSvc::initialize()  {
         << endmsg;
     return status;
   }
+  coral::MessageStream::installMsgReporter(new PoolDbMsgReporter(messageService(),m_outputLevel.value()));
+  coral::MessageStream::setMsgVerbosity(static_cast<coral::MsgLevel>(m_outputLevel.value()));
+
   log << MSG::INFO << "POOL output threshold:" << m_outputLevel
       << endmsg;
-  //Context::instance().setVerbosity( static_cast<seal::Msg::Level>(m_outputLevel.value()) );
-  pool::setLogLevel(static_cast<seal::Msg::Level>(m_outputLevel.value()));
   status = loadLibraries();
   if ( !status.isSuccess() ) {
     log << MSG::ERROR << "Failed to load POOL libraries."
@@ -125,6 +128,7 @@ StatusCode PoolDbCacheSvc::finalize()   {
     }
   }
   m_sharedHdls.clear();
+  coral::MessageStream::installMsgReporter(0);
   return Service::finalize();
 }
 

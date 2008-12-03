@@ -45,10 +45,21 @@ if "CMTINSTALLAREA" not in os.environ:
 # Find the packages (their cmt dirs)
 cmt_br_header_re = re.compile(r"^# Now trying.*in (.*) \([0-9]+/[0-9]+\)")
 dirs = []
-for l in os.popen("cmt broadcast -global -select=Gaudi","r"):
+
+# Hack to work around a problem with cmt broadcast and CMTUSERCONTEXT.
+old_CMTUSERCONTEXT = None
+if "CMTUSERCONTEXT" in os.environ:
+    old_CMTUSERCONTEXT = os.environ["CMTUSERCONTEXT"]
+    del os.environ["CMTUSERCONTEXT"]
+
+for l in os.popen("cmt broadcast","r"):
     m = cmt_br_header_re.match(l)
     if m:
         dirs.append(m.group(1))
+
+# Restore original CMTUSERCONTEXT, if it was set. 
+if old_CMTUSERCONTEXT is not None:
+    os.environ["CMTUSERCONTEXT"] = old_CMTUSERCONTEXT
 
 # Find the results.qmr files
 results = filter(os.path.isfile,[ os.path.realpath(os.path.join(d,'..',os.environ["CMTCONFIG"],"results.qmr")) for d in dirs ])

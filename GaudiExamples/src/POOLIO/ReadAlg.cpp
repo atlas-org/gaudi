@@ -41,8 +41,8 @@ StatusCode ReadAlg::initialize() {
 StatusCode ReadAlg::execute() {
   // This just makes the code below a bit easier to read (and type)
 	MsgStream log(msgSvc(), name());
-  SmartDataPtr<Event> evt(eventSvc(),"/Event");
-  SmartDataPtr<MyTrackVector> myTracks(evt, "/MyTracks");
+  SmartDataPtr<Event> evt(eventSvc(),"/Event/Header");
+  SmartDataPtr<MyTrackVector> myTracks(eventSvc(), "/Event/MyTracks");
   if ( evt != 0 )    {
     int evt_num = evt->event();
     if ( evt_num <= 10 || evt_num%100==0 )  {
@@ -59,8 +59,8 @@ StatusCode ReadAlg::execute() {
       }
       log << endmsg;
     }
-    SmartDataPtr<MyTrackVector> myTracks(evt, "/MyTracks");
-    SmartDataPtr<MyVertexVector> myVtx(evt, "/Collision_0/MyVertices");
+    SmartDataPtr<MyTrackVector> myTracks(eventSvc(), "/Event/MyTracks");
+    SmartDataPtr<MyVertexVector> myVtx(eventSvc(), "/Event/Collision_0/MyVertices");
     if ( myTracks != 0 )    {
       int count = 0;
       for ( MyTrackVector::iterator i = myTracks->begin(); i != myTracks->end() && count++ < 5; i++ )   {
@@ -121,8 +121,10 @@ StatusCode ReadAlg::execute() {
 	      }
       }
     }
+    else
+      log << MSG::WARNING << "No tracks found, Event " << evt->event() << endmsg;
     return StatusCode::SUCCESS;
   }
-  log << MSG::ERROR << "Unable to retrieve Event object" << endreq;
+  log << MSG::ERROR << "Unable to retrieve Event Header object" << endreq;
   return StatusCode::FAILURE;
 }

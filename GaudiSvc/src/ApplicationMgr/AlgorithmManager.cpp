@@ -1,4 +1,4 @@
-// $Id: AlgorithmManager.cpp,v 1.8 2007/12/12 16:03:19 marcocle Exp $
+// $Id: AlgorithmManager.cpp,v 1.11 2008/10/20 20:58:10 marcocle Exp $
 
 // Include files
 #include "AlgorithmManager.h"
@@ -8,11 +8,16 @@
 #include "GaudiKernel/System.h"
 #include "GaudiKernel/MsgStream.h"
 #include <iostream>
+#ifndef _WIN32
+#include <errno.h>
+#endif
 
 using ROOT::Reflex::PluginService;
 
 // constructor
-AlgorithmManager::AlgorithmManager(IInterface* iface) {
+AlgorithmManager::AlgorithmManager(IInterface* iface):
+  m_statemgr(iface)
+{
   m_pOuter = iface;
   m_pOuter->queryInterface(IID_ISvcLocator, pp_cast<void>(&m_svclocator)).ignore();
   m_msgsvc     = 0;
@@ -46,16 +51,16 @@ unsigned long AlgorithmManager::release() {
 
 // queryInterface
 StatusCode AlgorithmManager::queryInterface(const InterfaceID& iid, void** pinterface) {
-  if( iid == IID_IInterface ) {  
+  if( iid == IID_IInterface ) {
     *pinterface = (IInterface*)this;
     addRef();
     return StatusCode::SUCCESS;
-  } 
+  }
   else if ( iid == IID_IAlgManager ) {
     *pinterface = (IAlgManager*)this;
     addRef();
     return StatusCode::SUCCESS;
-  } 
+  }
   else {
     return m_pOuter->queryInterface(iid, pinterface);
   }
@@ -81,23 +86,21 @@ StatusCode AlgorithmManager::removeAlgorithm( IAlgorithm* alg ) {
 }
 
 // createService
-StatusCode AlgorithmManager::createAlgorithm( const std::string& algtype, 
+StatusCode AlgorithmManager::createAlgorithm( const std::string& algtype,
                                               const std::string& algname,
                                               IAlgorithm*& algorithm,
-                                              bool managed) 
+                                              bool managed)
 {
-  // Access the message service if not yet done already
-  if( m_msgsvc == 0 ) {
-    IMessageSvc **ptr = &m_msgsvc;
-    m_svclocator->getService( "MessageSvc", IID_IMessageSvc, (IInterface*&)*ptr ).ignore();
-  }
-  MsgStream log(m_msgsvc, "AlgorithmManager");
+  MsgStream log(msgSvc(), "AlgorithmManager");
   // Check is the algorithm is already existing
   if( existsAlgorithm( algname ) ) {
     // return an error because an algorithm with that name already exists
     return StatusCode::FAILURE;
   }
   algorithm = PluginService::Create<IAlgorithm*>(algtype, algname, m_svclocator);
+  if ( !algorithm ) {
+    algorithm = PluginService::CreateWithId<IAlgorithm*>(algtype, algname, m_svclocator);
+  }
   if ( algorithm ) {
     // Check the compatibility of the version of the interface obtained
     if( !isValidInterface(algorithm) ) {
@@ -109,7 +112,14 @@ StatusCode AlgorithmManager::createAlgorithm( const std::string& algtype,
     if ( managed ) {
       algorithm->addRef();
       m_listmgralg->push_back( algorithm );
-      rc = algorithm->sysInitialize();
+
+      // Bring the created service to the same state of the ApplicationMgr
+      if (m_statemgr->FSMState() >= Gaudi::StateMachine::INITIALIZED) {
+        rc = algorithm->sysInitialize();
+        if (rc.isSuccess() && m_statemgr->FSMState() >= Gaudi::StateMachine::RUNNING) {
+          rc = algorithm->sysStart();
+        }
+      }
       if ( !rc.isSuccess() )  {
         log << MSG::ERROR << "Failed to initialize algorithm: "
             << "[" << algname << "]" << endmsg;
@@ -117,8 +127,17 @@ StatusCode AlgorithmManager::createAlgorithm( const std::string& algtype,
     }
     return rc;
   }
-  log << MSG::ERROR << "Algorithm of type " << algtype 
+  log << MSG::ERROR << "Algorithm of type " << algtype
       << " is unknown (No factory available)." << endmsg;
+#ifndef _WIN32
+  errno = 0xAFFEDEAD; // code used by Gaudi for library load errors: forces getLastErrorString do use dlerror (on Linux)
+#endif
+  std::string err = System::getLastErrorString();
+  if (! err.empty()) {
+    log << MSG::ERROR << err << endmsg;
+  }
+  log << MSG::ERROR << "More information may be available by setting the global jobOpt \"ReflexPluginDebugLevel\" to 1" << endmsg;
+
   return StatusCode::FAILURE;
 }
 
@@ -138,7 +157,7 @@ StatusCode AlgorithmManager::getAlgorithm( const std::string& name, IAlgorithm*&
 bool AlgorithmManager::existsAlgorithm( const std::string& name ) const {
   ListAlg::const_iterator it;
   for (it = m_listalg->begin(); it != m_listalg->end(); it++ ) {
-	  if( (*it)->name() == name ) {
+    if( (*it)->name() == name ) {
       return true;
     }
   }
@@ -156,7 +175,27 @@ StatusCode AlgorithmManager::initializeAlgorithms() {
   ListAlg::const_iterator it;
   for (it = m_listmgralg->begin(); it != m_listmgralg->end(); it++ ) {
     rc = (*it)->sysInitialize();
-    if ( rc.isFailure() ) return rc; 
+    if ( rc.isFailure() ) return rc;
+  }
+  return rc;
+}
+
+StatusCode AlgorithmManager::startAlgorithms() {
+  StatusCode rc;
+  ListAlg::const_iterator it;
+  for (it = m_listmgralg->begin(); it != m_listmgralg->end(); it++ ) {
+    rc = (*it)->sysStart();
+    if ( rc.isFailure() ) return rc;
+  }
+  return rc;
+}
+
+StatusCode AlgorithmManager::stopAlgorithms() {
+  StatusCode rc;
+  ListAlg::const_iterator it;
+  for (it = m_listmgralg->begin(); it != m_listmgralg->end(); it++ ) {
+    rc = (*it)->sysStop();
+    if ( rc.isFailure() ) return rc;
   }
   return rc;
 }
@@ -173,3 +212,39 @@ StatusCode AlgorithmManager::finalizeAlgorithms() {
   return rc;
 }
 
+StatusCode AlgorithmManager::reinitializeAlgorithms() {
+  StatusCode rc;
+  ListAlg::const_iterator it;
+  for (it = m_listmgralg->begin(); it != m_listmgralg->end(); it++ ) {
+    rc = (*it)->sysReinitialize();
+    if( rc.isFailure() ){
+      MsgStream log(msgSvc(), "AlgorithmManager");
+      log << MSG::ERROR << "Unable to re-initialize Service: " << (*it)->name() << endreq;
+      return rc;
+    }
+  }
+  return rc;
+}
+
+StatusCode AlgorithmManager::restartAlgorithms() {
+  StatusCode rc;
+  ListAlg::const_iterator it;
+  for (it = m_listmgralg->begin(); it != m_listmgralg->end(); it++ ) {
+    rc = (*it)->sysRestart();
+    if( rc.isFailure() ){
+      MsgStream log(msgSvc(), "AlgorithmManager");
+      log << MSG::ERROR << "Unable to re-initialize Service: " << (*it)->name() << endreq;
+      return rc;
+    }
+  }
+  return rc;
+}
+
+IMessageSvc *AlgorithmManager::msgSvc(){
+  // Access the message service if not yet done already
+  if( m_msgsvc == 0 ) {
+    m_svclocator->getService( "MessageSvc", IID_IMessageSvc,
+                              *pp_cast<IInterface>(&m_msgsvc) ).ignore();
+  }
+  return m_msgsvc;
+}

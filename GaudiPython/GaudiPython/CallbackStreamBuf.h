@@ -10,7 +10,7 @@
 
 namespace GaudiPython
 {
-  int call_python_method(PyObject* self , char* method, char* buf);
+  int call_python_method(PyObject* self, const char* method, char* buf);
 
   class CallbackStreamBuf : public  std::stringbuf
   {

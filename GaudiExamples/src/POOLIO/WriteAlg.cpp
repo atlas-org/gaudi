@@ -54,10 +54,9 @@ StatusCode WriteAlg::execute() {
   evt->setRun(runnum);
   evt->setTime(Gaudi::Time::current());
 
-  IDataManagerSvc* evtmgr = dynamic_cast<IDataManagerSvc*>(eventSvc());
-  sc = evtmgr->setRoot("/Event", evt);
+  sc = eventSvc()->registerObject("/Event","Header",evt);
   if( sc.isFailure() ) {
-    log << MSG::ERROR << "Unable to register /Event object" << endreq;
+    log << MSG::ERROR << "Unable to register Event Header" << endreq;
     return sc;
   }
 
@@ -166,5 +165,12 @@ StatusCode WriteAlg::execute() {
 // Finalize
 //--------------------------------------------------------------------
 StatusCode WriteAlg::finalize() {
+  
+  MsgStream log(msgSvc(), name());
+  DataObject* p_FSR = new DataObject();
+  StatusCode sc = eventSvc()->registerObject("/Event","FSR",p_FSR);
+  if( sc.isFailure() ) {
+    log << MSG::ERROR << "Unable to register FSR" << endreq;
+  }
   return StatusCode::SUCCESS;
 }

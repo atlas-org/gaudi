@@ -24,8 +24,8 @@ ApplicationMgr.EvtSel = "NONE";                                         //GP: (1
 JobOptionsSvc        INFO Job options successfully read in from ../options/ErrorLog.opts
 ApplicationMgr    SUCCESS
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr $Revision: 1.1 $
-                                          running on macphsft02.cern.ch on Fri Nov  2 16:23:20 2007
+                                                   Welcome to ApplicationMgr $Revision: 1.2 $
+                                          running on macphsft06.cern.ch on Tue Jun  3 04:54:58 2008
 ====================================================================================================================================[m
 ApplicationMgr    VERBOSE declareMultiSvcType: declared service EvtDataSvc/EventDataSvc[m
 ApplicationMgr    VERBOSE declareMultiSvcType: declared service DetDataSvc/DetectorDataSvc[m
@@ -46,14 +46,16 @@ IssueLogger         DEBUG Writing INFO issues to MsgStream[m
 IssueLogger         DEBUG Writing RECOVERABLE issues to MsgStream[m
 IssueLogger         DEBUG Writing FATAL issues to MsgStream[m
 IssueLogger         DEBUG Writing ALWAYS issues to MsgStream[m
-[94;101;1mIssueLogger         FATAL FATAL  ../src/ErrorLog/ErrorLogTest.cpp:38  "this is a fatal" [00:00:00 1970-01-01]
+[94;101;1mIssueLogger         FATAL FATAL  ../src/ErrorLog/ErrorLogTest.cpp:38  "this is a fatal" [04:54:58 2008/06/03  ]
 [m
-IssueLogger          INFO INFO  ../src/ErrorLog/ErrorLogTest.cpp:44  "info ErrObj" [00:00:00 1970-01-01][m
+IssueLogger          INFO INFO  ../src/ErrorLog/ErrorLogTest.cpp:44  "info ErrObj" [04:54:58 2008/06/03  ][m
 [93;1mEventLoopMgr      WARNING Unable to locate service "EventSelector" [m
 [93;1mEventLoopMgr      WARNING No events will be processed from external input.[m
 HistogramPersis...   INFO  'CnvServices':[ 'HbookHistSvc' , 'RootHistSvc' ][m
 [93;1mHistogramPersis...WARNING Histograms saving not required.[m
 ApplicationMgr       INFO Application Manager Initialized successfully[m
+ApplicationMgr       INFO Application Manager Started successfully[m
+ApplicationMgr       INFO Application Manager Stopped successfully[m
 [93;1mErrorLogTest      WARNING Finalizing...[m
 EventLoopMgr         INFO Histograms converted successfully according to request.[m
 IssueLogger         DEBUG IssueLogger::finalize[m

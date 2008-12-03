@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/IAuditor.h,v 1.8 2008/04/03 14:40:19 marcocle Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/IAuditor.h,v 1.11 2008/10/27 19:22:20 marcocle Exp $
 #ifndef GAUDI_IAUDITOR_H
 #define GAUDI_IAUDITOR_H
 
@@ -6,13 +6,13 @@
 #include "GaudiKernel/INamedInterface.h"
 #include <string>
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IAuditor(18, 2 , 0); 
+// Declaration of the interface ID ( interface id, major version, minor version)
+static const InterfaceID IID_IAuditor(18, 2 , 0);
 
 /** @class IAuditor IAuditor.h GaudiKernel/IAuditor.h
 
     The IAuditor is the interface implmented by the AlgAuditor base class.
-    Concrete auditors, derived from the AlgAuditor base class are controlled 
+    Concrete auditors, derived from the AlgAuditor base class are controlled
     via this interface.
 
     @author Marjorie Shapiro, LBNL
@@ -23,7 +23,7 @@ class IAuditor : virtual public INamedInterface {
 
   /// Retrieve interface ID
   static const InterfaceID& interfaceID() { return IID_IAuditor; }
-  
+
   /// Defines the standard (= used by the framework) auditable event types.
   enum StandardEventType {
     Initialize,
@@ -31,9 +31,12 @@ class IAuditor : virtual public INamedInterface {
     Execute,
     BeginRun,
     EndRun,
-    Finalize
+    Finalize,
+    Start,
+    Stop,
+    ReStart
   };
-  
+
   /// Type used to allow users to specify a custom event to be audit.
   /// Examples of custom events are callbacks (see
   /// <a href="https://savannah.cern.ch/patch/index.php?1725">patch #1725</a>).
@@ -62,8 +65,8 @@ class IAuditor : virtual public INamedInterface {
   virtual void after(CustomEventTypeRef, const std::string&, const StatusCode& sc = StatusCode(StatusCode::SUCCESS,true)) = 0;
 
   /// Tell if the auditor is enabled or not.
-  virtual const bool isEnabled() const = 0;
-  
+  virtual bool isEnabled() const = 0;
+
 // ------- Obsolete interface ------
   /// \deprecated use before
   virtual void beforeInitialize(INamedInterface* ) = 0;
@@ -111,6 +114,9 @@ inline std::ostream & operator << (std::ostream & s, IAuditor::StandardEventType
     case IAuditor::BeginRun     : return s << "BeginRun";
     case IAuditor::EndRun       : return s << "EndRun";
     case IAuditor::Finalize     : return s << "Finalize";
+    case IAuditor::Start        : return s << "Start";
+    case IAuditor::Stop         : return s << "Stop";
+    case IAuditor::ReStart      : return s << "ReStart";
   }
   return s; // cannot be reached, but make the compiler happy
 }

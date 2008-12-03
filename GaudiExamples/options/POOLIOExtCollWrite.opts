@@ -1,9 +1,7 @@
-// $Id: POOLIOExtCollWrite.opts,v 1.4 2008/01/30 17:06:49 marcocle Exp $ 
-// ============================================================================
-// CVS tag $Name:  $, version $Revision: 1.4 $
+// $Id: POOLIOExtCollWrite.opts,v 1.5 2008/11/04 22:49:25 marcocle Exp $ 
 // ============================================================================
 /** @file
- *  Configuratuon file to run ExtendedEvtCol example
+ *  Configuration file to run ExtendedEvtCol example
  *  @see Gaudi::Examples::ExtendedEvtCol
  *  @see ExtendedEvtCol.cpp
  *  @author Vanya BELYAEV ibelyaev@physics.syr.edu
@@ -27,12 +25,13 @@ EventSelector.Input += {"DATAFILE='PFN:POOLIO.mdst'  TYP='POOL_ROOT' OPT='READ'"
 EvtTupleSvc.Output   = {"EXTEVT DATAFILE='PFN:POOLIO.etags' OPT='RECREATE' TYP='POOL_ROOTTREE'" };
 // ============================================================================
 
-
-
-ApplicationMgr.TopAlg  = { "Gaudi::Examples::ExtendedEvtCol/Fill" };
+ApplicationMgr.TopAlg = { "GaudiSequencer/EventAlgs" };
+EventAlgs.Members = { "Gaudi::Examples::ExtendedEvtCol/Fill" };
+EventAlgs.VetoObjects = {"FSR"};
 Fill.EvtColLUN   = "EXTEVT" ; /// Logical unit for Event Tag Collection 
 
-
+// Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
+ToolSvc.SequencerTimerTool.OutputLevel = 4 ;
 
 EventSelector.PrintFreq = 100;
 ApplicationMgr.EvtMax   = -1 ;

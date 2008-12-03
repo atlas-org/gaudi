@@ -1,7 +1,7 @@
 import unittest
-import gaudimodule
+import GaudiPython
 
-g = gaudimodule.AppMgr(outputlevel=5)
+g = GaudiPython.AppMgr(outputlevel=5)
 g.initialize()
 
 class BasicTests(unittest.TestCase):
@@ -28,7 +28,7 @@ class BasicTests(unittest.TestCase):
   def test02Properties(self):
     properties = g.properties()
     for p in properties :
-      self.failUnlessEqual(properties[p], getattr(g, str(p)))
+      self.failUnlessEqual(properties[p].value(), getattr(g, str(p)))
 
   def test03Properties(self) :  
     g.Dlls   += ['GPyTest']
@@ -39,6 +39,7 @@ class BasicTests(unittest.TestCase):
     p.Bool = False
     self.failUnlessEqual( p.Bool, False )
     #---Char
+    """
     self.failUnlessEqual( p.Char, chr(100) )
     p.Char = chr(99)
     self.failUnlessEqual( p.Char, chr(99) )    
@@ -47,7 +48,8 @@ class BasicTests(unittest.TestCase):
     self.failUnlessEqual( p.Schar, chr(99) )    
     self.failUnlessEqual( p.Uchar, chr(100) )
     p.Uchar = chr(99)
-    self.failUnlessEqual( p.Uchar, chr(99) )    
+    self.failUnlessEqual( p.Uchar, chr(99) )
+    """
     #---Short
     self.failUnlessEqual( p.Short, 100 )
     p.Short = -99
@@ -148,7 +150,7 @@ class BasicTests(unittest.TestCase):
   def test04EventStore(self):
     evt = g.datasvc('EventDataSvc')
     objs = []
-    for i in range(10) : objs.append(gaudimodule.DataObject())
+    for i in range(10) : objs.append(GaudiPython.gbl.DataObject())
     for o in objs : o.addRef()    # To keep the ownership
     self.failUnless(evt)
     self.failUnless(evt.setRoot('Root',objs[1]).isSuccess())
@@ -232,7 +234,7 @@ class BasicTests(unittest.TestCase):
     f.close()
     g.config( files = ['tmp2.opts'], 
               options = ['ApplicationMgr.Go = 123'] )
-    self.failUnlessEqual(g.DLLs, ['GaudiAlg'])
+    self.failUnlessEqual(g.DLLs, ['GPyTest', 'GaudiAlg'])
     self.failUnlessEqual(g.Go, 123)
     
   def test07NTupleSvc(self) :
@@ -242,7 +244,7 @@ class BasicTests(unittest.TestCase):
     self.failUnless(ntsvc.initialize().isSuccess())
     
   def test08Buffer(self) :
-    gbl = gaudimodule.gbl
+    gbl = GaudiPython.gbl
     vi = gbl.std.vector(int)()
     vi.push_back(10)
     vi.push_back(20)
@@ -312,14 +314,24 @@ class BasicTests(unittest.TestCase):
   def test11ostreamcallback(self) :
     def test11do_msg(s) : self.got_it = True
     self.got_it = False
-    buf  = gaudimodule.CallbackStreamBuf(test11do_msg)
-    ostream = gaudimodule.gbl.ostream(buf)
-    msgSvc = g.service('MessageSvc', gaudimodule.gbl.IMessageSvc)
+    buf  = GaudiPython.CallbackStreamBuf(test11do_msg)
+    ostream = GaudiPython.gbl.basic_ostream('char','char_traits<char>')(buf)
+    msgSvc = g.service('MessageSvc', GaudiPython.gbl.IMessageSvc)
     original = msgSvc.defaultStream()
     msgSvc.setDefaultStream(ostream)
     msgSvc.reportMessage('TEST',7,'This is a test message')
     msgSvc.setDefaultStream(original)
     self.failUnless(self.got_it)
+
+  def test12pickle(self) :
+    import pickle
+    o = GaudiPython.gbl.TH1F('sss','aaa',10,0.,1.)
+    self.failUnlessEqual(o.GetName(), pickle.loads(pickle.dumps(o)).GetName() )
+    o = GaudiPython.gbl.std.vector('double')()
+    o.push_back(10.)
+    o.push_back(20.)
+    self.failUnlessEqual([i for i in o], [i for i in pickle.loads(pickle.dumps(o))])
+
 
 suite = unittest.makeSuite(BasicTests,'test')
 

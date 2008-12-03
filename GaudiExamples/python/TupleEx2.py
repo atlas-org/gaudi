@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # =============================================================================
-# $Id: TupleEx2.py,v 1.7 2007/12/12 16:41:53 mato Exp $
+# $Id: TupleEx2.py,v 1.8 2008/09/30 13:07:04 marcocle Exp $
 # =============================================================================
-# CVS tag $Name:  $, version $Revision: 1.7 $
+# CVS tag $Name:  $, version $Revision: 1.8 $
 # =============================================================================
 ## @file
 #
@@ -67,11 +67,12 @@ class TupleEx2(TupleAlgo) :
             lv1.SetPz ( gauss () )
             lv1.SetE  ( gauss () )
 
-            lv2 = Math.PtEtaPhiEVector() 
-            lv2.SetPx ( flat  () )
-            lv2.SetPy ( flat  () )
-            lv2.SetPz ( flat  () )
-            lv2.SetE  ( flat  () )
+            lv2 = Math.PtEtaPhiEVector()
+            x = flat()
+            y = flat()
+            z = flat()
+            e = flat()
+            lv2.SetPxPyPzE(x, y, z, e)
             
             tup.column( 'lv1' , lv1 ) 
             tup.column( 'lv2' , lv2 ) 
@@ -88,19 +89,22 @@ class TupleEx2(TupleAlgo) :
             v1.SetZ ( gauss () )
             
             v2 = Math.Polar3DVector()
-            v2.SetX ( flat  () ) 
-            v2.SetY ( flat  () ) 
-            v2.SetZ ( flat  () ) 
+            x = flat() 
+            y = flat() 
+            z = flat() 
+            v2.SetXYZ(x, y, z)
 
             v3 = Math.RhoEtaPhiVector()
-            v3.SetX ( breit () ) 
-            v3.SetY ( breit () ) 
-            v3.SetZ ( breit () ) 
+            x = breit() 
+            y = breit() 
+            z = breit()
+            v3.SetXYZ(x, y, z)
 
             v4 = Math.RhoZPhiVector()
-            v4.SetX ( gauss () ) 
-            v4.SetY ( flat  () ) 
-            v4.SetZ ( breit () ) 
+            x = gauss() 
+            y = flat() 
+            z = breit()
+            v4.SetXYZ(x, y, z)
 
             tup.column ( "v1" , v1 ) 
             tup.column ( "v2" , v2 ) 
@@ -119,19 +123,22 @@ class TupleEx2(TupleAlgo) :
             p1.SetZ ( gauss () )
             
             p2 = Math.Polar3DPoint()
-            p2.SetX ( flat  () ) 
-            p2.SetY ( flat  () ) 
-            p2.SetZ ( flat  () ) 
+            x = flat() 
+            y = flat() 
+            z = flat() 
+            p2.SetXYZ(x, y, z)
 
             p3 = Math.RhoEtaPhiPoint()
-            p3.SetX ( breit () ) 
-            p3.SetY ( breit () ) 
-            p3.SetZ ( breit () ) 
+            x = breit() 
+            y = breit() 
+            z = breit()
+            p3.SetXYZ(x, y, z)
 
             p4 = Math.RhoZPhiPoint()
-            p4.SetX ( gauss () ) 
-            p4.SetY ( flat  () ) 
-            p4.SetZ ( breit () ) 
+            x = gauss() 
+            y = flat() 
+            z = breit()
+            p4.SetXYZ(x, y, z)
 
             tup.column ( "p1" , p1 ) 
             tup.column ( "p2" , p2 ) 

@@ -1,6 +1,6 @@
 from Gaudi.Configuration import *
 
-print "#### This is 'test1.py'"
+log.info(" === This is 'test1.py' === ")
 
 MessageSvc().OutputLevel = WARNING
 

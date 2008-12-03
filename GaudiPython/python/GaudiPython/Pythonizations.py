@@ -55,10 +55,32 @@ def _container__iter__(self) :
     yield sequential.__getitem__(count)
     count += 1
 
+def _draw_aida_ ( self , *args ) :
+  """
+  Draw AIDA histogram (through access to internal ROOT histogram
+
+  >>> aida = ...    # get the historgam 
+  >>> aida.Draw()
+  
+  """
+  _fun = PyCintex.gbl.Gaudi.Utils.Aida2ROOT.aida2root
+  _root = _fun ( self ) 
+  return _root.Draw( *args )
+
 gbl = PyCintex.gbl
+
 gbl.AIDA.IHistogram1D.__repr__ = _printHisto1D
 gbl.AIDA.IHistogram1D.contents = _contentsHisto1D
 gbl.AIDA.IHistogram2D.__repr__ = _printHisto2D
+for h in (  gbl.AIDA.IHistogram   ,
+            gbl.AIDA.IHistogram1D ,
+            gbl.AIDA.IHistogram2D ,
+            gbl.AIDA.IHistogram3D , 
+            gbl.AIDA.IProfile1D   , 
+            gbl.AIDA.IProfile2D   ) :
+  h.Draw = _draw_aida_
+  h.plot = _draw_aida_
+
 gbl.StatusCode.__repr__ = _printStatusCode
 try: gbl._Bit_reference.__repr__ = _printBitReference
 except: pass
@@ -74,3 +96,8 @@ gbl.IUpdateManagerSvc.invalidate = lambda self,obj: gbl.IUpdateManagerSvc.Python
 #---Globals--------------------------------------------------------------------
 gbl.StatusCode.SUCCESS = 1 
 gbl.StatusCode.FAILURE = 0
+
+#---Enabling Pickle support----------------------------------------------------
+if  gbl.gROOT.GetVersionInt() <= 51800 :
+  import libPyROOT
+  gbl.GaudiPython.PyROOTPickle.Initialize(libPyROOT, libPyROOT.ObjectProxy)   

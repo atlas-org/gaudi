@@ -1,7 +1,7 @@
-# $Id: requirements,v 1.9 2008/04/04 18:05:55 marcocle Exp $ 
+# $Id: requirements,v 1.11 2008/11/10 18:54:35 marcocle Exp $ 
 # =============================================================================
 package GaudiUtils
-version v1r6
+version v2r1
 
 # ============== structure ====================================================	
 branches        GaudiUtils src cmt doc

@@ -1,4 +1,4 @@
-// $Id: Service.h,v 1.22 2008/04/03 17:27:01 marcocle Exp $
+// $Id: Service.h,v 1.23 2008/06/02 14:20:37 marcocle Exp $
 // ============================================================================
 #ifndef GAUDIKERNEL_SERVICE_H
 #define GAUDIKERNEL_SERVICE_H
@@ -8,6 +8,7 @@
 #include "GaudiKernel/IService.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IProperty.h"
+#include "GaudiKernel/IStateful.h"
 #include "GaudiKernel/PropertyMgr.h"
 #include "GaudiKernel/Property.h"
 #include "GaudiKernel/IAuditorSvc.h"
@@ -27,7 +28,8 @@ class ServiceManager;
  *  @author Pere Mato
  */
 class Service : public virtual IService,
-                public virtual IProperty {
+                public virtual IProperty,
+                public virtual IStateful {
 public:
   friend class ServiceManager;
   /** Query interfaces of Interface
@@ -46,17 +48,31 @@ public:
   virtual const std::string& name() const;
   /** Retrieve ID of the Service                 */
   virtual const InterfaceID& type() const;
-  /** Retrieve state of the Service              */
-  State state( ) const { return m_state; }
-  /** Initilize Service                          */
+
+  // State machine implementation
+  virtual StatusCode configure() { return StatusCode::SUCCESS; }
   virtual StatusCode initialize();
-  virtual StatusCode sysInitialize();
-  /** Finalize Service                           */
+  virtual StatusCode start();
+  virtual StatusCode stop();
   virtual StatusCode finalize();
+  virtual StatusCode terminate() { return StatusCode::SUCCESS; }
+  virtual Gaudi::StateMachine::State FSMState() const { return m_state; }
+  virtual Gaudi::StateMachine::State targetFSMState() const { return m_targetState; }
+  virtual StatusCode reinitialize();
+  virtual StatusCode restart();
+  
+  /** Initilize Service                          */
+  virtual StatusCode sysInitialize();
+  /** Initilize Service                          */
+  virtual StatusCode sysStart();
+  /** Initilize Service                          */
+  virtual StatusCode sysStop();
+  /** Finalize Service                           */
   virtual StatusCode sysFinalize();
   /// Re-initialize the Service 
   virtual StatusCode sysReinitialize();
-  virtual StatusCode reinitialize();
+  /// Re-initialize the Service 
+  virtual StatusCode sysRestart();
 
   // Default implementations for ISetProperty
   virtual StatusCode setProperty(const Property& p);
@@ -209,7 +225,9 @@ protected:
   /** Service output level                       */
   IntegerProperty m_outputLevel;
   /** Service state                              */
-  State         m_state;
+  Gaudi::StateMachine::State    m_state;
+  /** Service state                              */
+  Gaudi::StateMachine::State    m_targetState;
   /** MessageSvc reference                       */
   mutable IMessageSvc*  m_messageSvc;
 
@@ -241,7 +259,11 @@ private:
   mutable IAuditorSvc*  m_pAuditorSvc;
   BooleanProperty       m_auditInit;
   bool                  m_auditorInitialize;
+  bool                  m_auditorStart;
+  bool                  m_auditorStop;
   bool                  m_auditorFinalize;
+  bool                  m_auditorReinitialize;
+  bool                  m_auditorRestart;
 
   /** callback for output level property */
   void initOutputLevel(Property& prop);

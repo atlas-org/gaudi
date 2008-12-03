@@ -1,6 +1,10 @@
 Package: RootHistCnv
 Package manager : David Quarrie
 
+================ RootHistCnv v9r17 ====================================
+! 2008-01-29 - Marco Clemencic
+ - Modified the fix for libNet on OSX to be compatible with LCGCMT 53.
+
 ================ RootHistCnv v9r16 ====================================
 ! 2007-12-12 - Marco Clemencic
  - patch #1585.

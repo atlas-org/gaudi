@@ -1,4 +1,4 @@
-// $Id: IChronoStatSvc.cpp,v 1.1 2007/08/06 08:39:39 marcocle Exp $
+// $Id: IChronoStatSvc.cpp,v 1.2 2008/05/13 12:36:54 marcocle Exp $
 // ============================================================================
 // Include files 
 // ============================================================================
@@ -19,7 +19,7 @@
 // ============================================================================
 const InterfaceID& IChronoSvc::interfaceID() 
 {
-  static const InterfaceID s_iid ( "IChronoSvc" , 1 , 0 ) ;
+  static const InterfaceID s_iid ( "IChronoSvc" , 2 , 0 ) ;
   return s_iid ;
 }
 // ============================================================================

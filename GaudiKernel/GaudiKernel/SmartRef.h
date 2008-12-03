@@ -14,6 +14,8 @@
 #include "GaudiKernel/SmartRefBase.h"
 #include "GaudiKernel/ContainedObject.h"
 
+#include <typeinfo>
+
 // Forward declarations
 template <class TYPE> class SmartRefArray;
 template <class TYPE> class SmartRefList;

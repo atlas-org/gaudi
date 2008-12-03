@@ -1,5 +1,5 @@
-// $Id: MyGaudiTool.h,v 1.2 2004/07/12 13:30:19 mato Exp $
-#ifndef GAUDIEXANMPLES_MYGAUDITOOL_H 
+// $Id: MyGaudiTool.h,v 1.3 2008/10/10 15:18:56 marcocle Exp $
+#ifndef GAUDIEXANMPLES_MYGAUDITOOL_H
 #define GAUDIEXANMPLES_MYGAUDITOOL_H 1
 
 // Include files
@@ -13,29 +13,34 @@
  *  @date   14/10/2001
  */
 class MyGaudiTool : public GaudiTool,
-                    virtual public IMyTool {
+                    virtual public IMyTool,
+                    virtual public IMyOtherTool {
 public:
-  
+
   /// Standard Constructor
-  MyGaudiTool(const std::string& type, 
+  MyGaudiTool(const std::string& type,
               const std::string& name,
               const IInterface* parent);
 
-  /// IMyTool interface
+  // IMyTool interface
   virtual const std::string&  message() const;
   virtual void  doIt();
+
+  // IMyOtherTool interface
+  virtual void doItAgain();
+
   /// Overriding initialize and finalize
   virtual StatusCode initialize();
   virtual StatusCode finalize();
 
 protected:
   /// Standard destructor
-   virtual ~MyGaudiTool( );
+  virtual ~MyGaudiTool( );
 private:
   /// Properties
   int          m_int;
   double       m_double;
   std::string  m_string;
   bool         m_bool;
- };
+};
 #endif // GAUDIEXANMPLES_MYTOOL_H

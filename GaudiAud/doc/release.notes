@@ -1,6 +1,18 @@
 Package: GaudiAud
 Package manager : David Quarrie
 
+================ GaudiAud v8r7 ====================================
+! 2008-11-10 - Charles Leggett
+ - Patch #2183. Link to Atlas error policy in AlgErrorAuditor
+
+! 2008-10-02 - Charles Leggett
+ - Patch #1939. Allow auditors to catch CustomEventTypes
+
+================ GaudiAud v8r6 ====================================
+! 2008-05-13 - Marco Clemencic
+ - Fixed compilation problem introduced with patch #1756.
+   Explicit include of IChronoStatSvc.h was needed in ChronoAuditor.cpp.
+
 ================ GaudiAud v8r5 ====================================
 ! 2007-03-11 - Charles Leggett
  - Patch #1717. Audit memory at initialize time.

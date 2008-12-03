@@ -1,5 +1,5 @@
 package GaudiPolicy
-version v8r2
+version v8r6
 
 branches cmt doc
 
@@ -32,7 +32,8 @@ pattern install_more_includes \
 make_fragment install_more_includes -header=install_more_includes_header
 
 cmtpath_pattern \
-   macro <project>_home "<path>"
+   macro <project>_home "<path>" ; \
+   set   <project>_HOME "<path>"
    
 
 cmtpath_pattern_reverse \
@@ -173,9 +174,10 @@ pattern install_python_modules \
     macro <package>_install_python "" \
          <project>_without_installarea&Unix "$(<package>_root)/python" \
          <project>_without_installarea&WIN32 "$(<package>_root)\python" ; \
-    path_remove  PYTHONPATH ${<package>_install_python} ; \ 
+    path_remove  PYTHONPATH ${<package>_install_python} ; \
     path_prepend PYTHONPATH ${<package>_install_python} ; \
     document install_python <package>_python ; \
+    apply_pattern genconfuser ; \
     apply_pattern install_python_init ; \
     macro_append <package>_python_init_dependencies " <package>_python " ;
     
@@ -195,8 +197,40 @@ make_fragment install_python -header=install_python_header
 pattern install_python_init \
 	document python_init <package>_python_init package=<package>
 
-make_fragment python_init -header=python_init_header -dependencies
+make_fragment python_init -header=python_init_header
 
+# creates an python extension binary modules with the "pyd" file extension
+
+pattern pyd_module \
+  macro <package>_install_pyd_module "" \
+        <project>_without_installarea&Unix "$(<package>_root)/$(tag)" \
+        <project>_without_installarea&WIN32 "$(<package>_root)\$(tag)" ; \
+  path_remove  PYTHONPATH $(<package>_install_pyd_module) ; \ 
+  path_prepend PYTHONPATH $(<package>_install_pyd_module) ; \
+  macro <module>_shlibflags  "$(libraryshr_linkopts) $(use_linkopts)" ;\
+  macro_append <module>_dependencies " <name> " ; \
+  private ; \
+  macro shlibsuffix "$(shlibsuffix)" target_<module> "pyd" ; \
+  macro library_prefix "$(library_prefix)" target_<module> "" ; \
+  macro <module>_install_dir "$(CMTINSTALLAREA)/$(tag)/python" WIN32 "$(CMTINSTALLAREA)\$(tag)\python" ; \
+  library <module> -import=Python -target_tag install_dir="$(<module>_install_dir)" <files> ; \
+  end_private ; \
+  macro_append <module>_cppflags " -ftemplate-depth-64" WIN32 "" ;
+
+cmtpath_pattern \
+   macro <project>_install_pyd_module "" \
+         <project>_without_installarea "" \
+         <project>_with_installarea&Unix "<path>/$(<project>_installarea_prefix)/$(tag)/python" \
+         <project>_with_installarea&WIN32 "<path>\$(<project>_installarea_prefix)\$(tag)\python" ; \
+    path_remove  PYTHONPATH $(<project>_install_pyd_module) ; \ 
+    path_prepend PYTHONPATH $(<project>_install_pyd_module) ; 
+
+
+action CompilePython "python -m compileall $(CMTINSTALLAREA)/python $(CMTINSTALLAREA)/scripts" \
+	    WIN32        "python -m compileall $(CMTINSTALLAREA)\python $(CMTINSTALLAREA)\scripts"
+	    
+macro_remove cmt_actions_constituents "CompilePython "
+macro_remove cmt_actions_constituentsclean "CompilePythonclean "
 
 #--------------------------------------------
 # Patterns for specifically declaring and installing script files in the
@@ -246,14 +280,14 @@ make_fragment install_scripts -header=install_scripts_header
 #
 # Some data files are specified using a directory.
 #
-macro install_command 'python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x*~ -x*.stamp --log=./install.history '
+macro install_command 'python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x.svn -x*~ -x*.stamp --log=./install.history '
 macro uninstall_command 'python $(GaudiPolicy_root)/cmt/fragments/install.py -u --log=./install.history '
 
 macro remove_command "$(cmt_uninstallarea_command)"
 
-macro library_install_command "python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x*~ -x*.stamp -s --log=./install.history " \
+macro library_install_command "python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x.svn -x*~ -x*.stamp -s --log=./install.history " \
       VisualC                 "copy "
-macro cmt_installarea_command "python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x*~ -x*.stamp -s --log=./install.history " \
+macro cmt_installarea_command "python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x.svn -x*~ -x*.stamp -s --log=./install.history " \
       WIN32                   "xcopy /S /E /Y "
 
 pattern declare_runtime \
@@ -492,6 +526,7 @@ macro  cpp           "g++" \
        slc4&gcc323   "gcc32" \
        Darwin        "c++"
 
+# use of the "distcc" utility
 
 macro_prepend cpp "" \
 	distcc	"distcc "
@@ -501,6 +536,27 @@ macro_prepend cc "" \
 
 macro_prepend for "" \
 	distcc	"distcc "
+
+
+# use of the "ccache" utility with or without "distcc"
+
+set CCACHE_PREFIX "" ccache&distcc "distcc"
+
+macro_remove cpp "" \
+	ccache&distcc	"distcc "
+macro_prepend cpp "" \
+	ccache	"ccache "
+
+macro_remove cc "" \
+	ccache&distcc	"distcc "
+macro_prepend cc "" \
+	ccache	"ccache "
+
+macro_remove for "" \
+	ccache&distcc	"distcc "
+macro_prepend for "" \
+	ccache	"ccache "
+
 
 
 # Setup overrides for 32-bit mode on a 64-bit machine
@@ -561,10 +617,16 @@ macro linkdebugflags   "" \
       debug            "$(linkdebugflags_s)"
 macro linkdebugflags_s "" \
       WIN32            "/debug /verbose:lib "
-macro linkcoverage_s   "-L/usr/lib/gcc-lib/i386-redhat-linux/3.2.3 -lgcc" \
-      WIN32            "" 
+
+
+macro linkcoverage_s   "-lgcov" \
+      WIN32            ""
+
 macro_append linkdebugflags "" \
       coverage        " $(linkcoverage_s)"
+
+macro_append use_linkopts "" \
+	coverage            " $(linkcoverage_s) " 
 
 
 
@@ -575,8 +637,12 @@ macro cppflags  " -fmessage-length=0 -Df2cFortran -fPIC -shared -D_GNU_SOURCE -D
 # macro_append cppflags " -msse2 -mfpmath=sse" \
 #             WIN32    " /arch:SSE2"
 
-macro_append cppflags  ""\
+macro_append cppflags  "" \
              slc4-ia32 " -m32"
+
+# FIXME: (MCl) Temporaty work-around until gccxml understands unordered_map
+macro_append cppflags "" \
+              gcc43 " -Wno-deprecated"
 
 # ppcmd=-I can be used on Windows as on Linux
 macro ppcmd "-I"
@@ -753,7 +819,7 @@ cmtpath_pattern \
 make_fragment genconfig -header=genconfig_header
 
 macro merge_genconfDb_cmd ${GaudiPolicy_root}/cmt/fragments/merge_files.py
-make_fragment merge_genconfDb -header=merge_genconfDb_header -dependencies
+make_fragment merge_genconfDb -header=merge_genconfDb_header
 
 ## genconf configuration defaults
 macro genconfig_configurableModuleName "GaudiKernel.Proxy"
@@ -768,7 +834,7 @@ macro genconfig_configurableService "ConfigurableService"
 macro genconfig_preload ""
 
 pattern genconfig_add_preload \
-   macro_append genconfig_preload "--load-library=<library>" ;
+   macro_append genconfig_preload "--load-library=<library> " ;
 
 # this pattern creates the helper library 
 
@@ -777,14 +843,18 @@ pattern genconf_helper_lib \
    macro <package>_genconfig_preload_lib "$(<package>_root)/$(tag)/$(library_prefix)<package>GenConfHelperLib.$(shlibsuffix)" \
               WIN32             "$(<package>_root)\$(tag)\$(library_prefix)<package>GenConfHelperLib.$(shlibsuffix)" ; \
    macro <package>GenConfHelperLib_shlibflags "$(<package>GenConfHelperLib_use_linkopts)" ; \
+   apply_pattern linker_library library=<package>GenConfHelperLib ; \
+   macro_remove <package>_linkopts " -l<package>GenConfHelperLib" \
+              WIN32                " <package>GenConfHelperLib.lib" ; \
    macro_append <package>Conf_dependencies " <package>GenConfHelperLib "
 
 # this pattern uses the helper library. the "pkg" argument is the package
 # containing the helper lib
 
 pattern use_genconf_helper_lib \
-   apply_pattern genconfig_add_preload library=$(<pkg>_genconfig_preload_lib)
-
+   private ; \
+   apply_pattern genconfig_add_preload library=$(<pkg>_genconfig_preload_lib) ; \
+   end_private
 
 
 # this use statement is here only to get the building order right
@@ -911,9 +981,10 @@ pattern QMTest \
 pattern QMTestSummarize \
   apply_pattern QMTestCommon ; \
   private ; \
-    action qmtest_summarize "cmt -tag_add=QMTest run python $(GaudiPolicy_root)/cmt/fragments/qmtest_summarize.py $(cmt_args)" ; \
+    macro qmtest_summarize_script "$(GaudiPolicy_root)/cmt/fragments/qmtest_summarize.py" ; \
+    action qmtest_summarize "cmt -tag_add=QMTest run python $(qmtest_summarize_script) $(cmt_args)" ; \
     action TestProject "cmt br cmt TestPackage ; cmt qmtest_summarize" \
-                 WIN32 "cmt br cmt TestPackage" ; \
+                 WIN32 "cmt br cmt TestPackage & cmt qmtest_summarize" ; \
   end_private
 
 # Add the Gaudi specialized test extension to the QMTest path
@@ -958,8 +1029,8 @@ pattern disable_package_on \
 #-------------------------------------------------------------------
 pattern GaudiApp \
     use Gaudi v* ; \
-    set GAUDIAPPNAME "$(package)" ; \
-    set GAUDIAPPVERSION "$(version)"
+    set GAUDIAPPNAME "<package>" ; \
+    set GAUDIAPPVERSION "<version>"
 
 
 #-------------------------------------------------------------------
@@ -969,7 +1040,7 @@ pattern GaudiApp \
 # 
 #   macro MyCommandTarget_output  "output.file"
 #   macro MyCommandTarget_deps    "input.file"
-#   macro MyCommandTarget_command "python do_something.py -o $(MyCommandTarget_output) $(MyScriptTarget_dependencies)"
+#   macro MyCommandTarget_command "python do_something.py -o $(MyCommandTarget_output) $(MyCommandTarget_deps)"
 #
 #   apply_pattern CallCommand target=MyCommandTarget
 #
@@ -978,3 +1049,102 @@ pattern GaudiApp \
 make_fragment call_command -header=call_command_header
 pattern CallCommand \
    document call_command <target> -group=<group> name="<target>"
+   
+#-------------------------------------------------------------------
+# Pattern to create a <package>Version.h header file in the InstallArea/include.
+# Usage:
+#
+#   apply_pattern ProjectVersionHeader proj=Gaudi
+#
+# (Marco Clemencic)
+#-------------------------------------------------------------------
+pattern ProjectVersionHeader \
+	private ; \
+	macro ProjectVersionHeader_output "$(CMTINSTALLAREA)/include/<project>_VERSION.h" ; \
+	macro ProjectVersionHeader_deps "../cmt/requirements" ; \
+	macro ProjectVersionHeader_command "python $(GaudiPolicy_root)/cmt/fragments/createProjVersHeader.py <project> <version> $(ProjectVersionHeader_output)" \
+	     <project>_without_installarea "" ; \
+	apply_pattern CallCommand target=ProjectVersionHeader ; \
+	end_private ; \
+	set <project>VERS "<version>"
+
+#-------------------------------------------------------------------
+# Generic cmt template processing
+# take "fichier.tmpl" as input and outputs "fichier" with all 
+# cmt macros expanded. E.g:
+#
+#  document template DoxyTemplate -s=../doc *.tmpl
+#
+#-------------------------------------------------------------------
+
+make_fragment template -header=template_header -dependencies
+
+#-------------------------------------------------------------------
+# Path cleaner
+#-------------------------------------------------------------------
+
+macro strip_script "$(GAUDIPOLICYROOT)/scripts/StripPath" WIN32 "$(GAUDIPOLICYROOT)\scripts\StripPath" 
+
+cmtpath_pattern \
+    setup_script $(strip_script) ;
+
+#-------------------------------------------------------------------
+# genconfuser (Marco Clemencic)
+# Create a confDb.py file for ConfigurableUser specializations
+# 
+#-------------------------------------------------------------------
+macro GenConfUser_script "genconfuser.py" \
+                   WIN32 "genconfuser.bat"
+pattern real_genconfuser \
+	private ; \
+	macro <package>GenConfUser_output "$(<package>_root)$(genconfDir)<package>/<package>_user_confDb.py" \
+	                            WIN32 "$(<package>_root)$(genconfDir)<package>\<package>_user_confDb.py" ; \
+	macro <package>GenConfUser_python "$(<package>_root)/python" \
+                                    WIN32 "$(<package>_root)\python" ; \
+	macro <package>GenConfUser_command "$(GenConfUser_script) -r $(<package>GenConfUser_python) -o $(<package>GenConfUser_output) <package> $(<package>ConfUserModules)" ; \
+	apply_pattern CallCommand target=<package>GenConfUser ; \
+	document merge_genconfDb <package>ConfUserDbMerge -group=<group> \
+		inDir=$(<package>_root)$(genconfDir)<package> \
+		library=<package>_user \
+		merge_genconfDb_switch="--do-merge" ; \
+	macro_append <package>_python_init_dependencies " <package>GenConfUser " ; \
+	macro_append <package>ConfUserDbMerge_dependencies " <package>GenConfUser <package>_python " ; \
+	end_private
+
+pattern fake_genconfuser
+
+pattern genconfuser \
+	private ; \
+	macro do_genconfuser "real_genconfuser" \
+	    skip_genconfuser "fake_genconfuser" ; \
+	apply_pattern $(do_genconfuser) ; \
+	end_private
+
+#-------------------------------------------------------------------
+# Doxygen business
+#-------------------------------------------------------------------
+
+make_fragment doxygen -header=doxygen_header -dependencies
+
+pattern doxy_vers_set \
+	set <external>VERS "$(<external>_config_version)"
+
+apply_pattern doxy_vers_set external=POOL
+apply_pattern doxy_vers_set external=COOL
+apply_pattern doxy_vers_set external=CORAL
+apply_pattern doxy_vers_set external=ROOT
+apply_pattern doxy_vers_set external=Boost
+apply_pattern doxy_vers_set external=uuid
+apply_pattern doxy_vers_set external=PCRE
+apply_pattern doxy_vers_set external=GCCXML
+apply_pattern doxy_vers_set external=AIDA
+apply_pattern doxy_vers_set external=XercesC
+apply_pattern doxy_vers_set external=GSL
+apply_pattern doxy_vers_set external=Python
+apply_pattern doxy_vers_set external=HepMC
+apply_pattern doxy_vers_set external=QMtest
+# This one is special
+set LCGCMTVERS "$(LCG_config_version)"
+
+# Base directory of doxygen documentation
+set GAUDI_DOXY_HOME $(GAUDI_home)/GaudiRelease/doc

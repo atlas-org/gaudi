@@ -1,4 +1,4 @@
-// $Id: MessageSvc.cpp,v 1.24 2008/02/20 19:19:54 hmd Exp $
+// $Id: MessageSvc.cpp,v 1.27 2008/10/21 16:25:55 marcocle Exp $
 
 #include "GaudiKernel/Kernel.h"
 #include "GaudiKernel/StatusCode.h"
@@ -139,7 +139,7 @@ StatusCode MessageSvc::initialize() {
 
 /// Reinitialize Service
 StatusCode MessageSvc::reinitialize() {
-  m_state = OFFLINE;
+  m_state = Gaudi::StateMachine::OFFLINE;
   return initialize();
 }
 
@@ -395,8 +395,8 @@ std::string MessageSvc::colTrans(std::string col, int offset) {
 // ---------------------------------------------------------------------------
 //
 
-void MessageSvc::reportMessage( const Message& msg )    {
-  boost::mutex::scoped_lock lock(m_reportMutex);
+void MessageSvc::reportMessage( const Message& msg, int outputLevel )    {
+  boost::recursive_mutex::scoped_lock lock(m_reportMutex);
 
   int key = msg.getType();
   int nmsg;
@@ -458,7 +458,7 @@ void MessageSvc::reportMessage( const Message& msg )    {
       first++;
     }
   }
-  else if ( key >= outputLevel(msg.getSource()) )   {
+  else if ( key >= outputLevel )   {
     msg.setFormat(m_defaultFormat);
     msg.setTimeFormat(m_defaultTimeFormat);
     if (!m_color) {
@@ -471,6 +471,16 @@ void MessageSvc::reportMessage( const Message& msg )    {
 
   if (cmsg != &msg) { delete cmsg; }
 
+}
+
+//#############################################################################
+// ---------------------------------------------------------------------------
+// Routine: reportMessage
+// Purpose: dispatches a message to the relevant streams.
+// ---------------------------------------------------------------------------
+//
+void MessageSvc::reportMessage( const Message& msg )    {
+  reportMessage(msg, outputLevel(msg.getSource()));
 }
 
 //#############################################################################
@@ -509,7 +519,7 @@ void MessageSvc::reportMessage (const std::string& source,
 void MessageSvc::reportMessage (const StatusCode& key,
                                 const std::string& source)
 {
-  boost::mutex::scoped_lock lock(m_messageMapMutex);
+  boost::recursive_mutex::scoped_lock lock(m_messageMapMutex);
 
   MessageMap::const_iterator first = m_messageMap.lower_bound( key );
   if ( first != m_messageMap.end() ) {
@@ -634,7 +644,7 @@ void MessageSvc::eraseStream( std::ostream* stream )    {
 
 void MessageSvc::insertMessage( const StatusCode& key, const Message& msg )
 {
-  boost::mutex::scoped_lock lock(m_messageMapMutex);
+  boost::recursive_mutex::scoped_lock lock(m_messageMapMutex);
 
   typedef MessageMap::value_type value_type;
   m_messageMap.insert( value_type( key, msg ) );
@@ -649,7 +659,7 @@ void MessageSvc::insertMessage( const StatusCode& key, const Message& msg )
 
 void MessageSvc::eraseMessage()
 {
-  boost::mutex::scoped_lock lock(m_messageMapMutex);
+  boost::recursive_mutex::scoped_lock lock(m_messageMapMutex);
 
   m_messageMap.erase( m_messageMap.begin(), m_messageMap.end() );
 }
@@ -663,7 +673,7 @@ void MessageSvc::eraseMessage()
 
 void MessageSvc::eraseMessage( const StatusCode& key )
 {
-  boost::mutex::scoped_lock lock(m_messageMapMutex);
+  boost::recursive_mutex::scoped_lock lock(m_messageMapMutex);
 
   m_messageMap.erase( key );
 }
@@ -677,7 +687,7 @@ void MessageSvc::eraseMessage( const StatusCode& key )
 
 void MessageSvc::eraseMessage( const StatusCode& key, const Message& msg )
 {
-  boost::mutex::scoped_lock lock(m_messageMapMutex);
+  boost::recursive_mutex::scoped_lock lock(m_messageMapMutex);
 
   bool changed = true;
   while( changed ) {
@@ -716,7 +726,7 @@ int MessageSvc::outputLevel()   const {
 // ---------------------------------------------------------------------------
 int MessageSvc::outputLevel( const std::string& source )   const {
 // ---------------------------------------------------------------------------
-  boost::mutex::scoped_lock lock(m_thresholdMapMutex);
+  boost::recursive_mutex::scoped_lock lock(m_thresholdMapMutex);
 
   ThresholdMap::const_iterator it;
 
@@ -738,7 +748,7 @@ void MessageSvc::setOutputLevel(int new_level)    {
 // ---------------------------------------------------------------------------
 void MessageSvc::setOutputLevel(const std::string& source, int level)    {
 // ---------------------------------------------------------------------------
-  boost::mutex::scoped_lock lock(m_thresholdMapMutex);
+  boost::recursive_mutex::scoped_lock lock(m_thresholdMapMutex);
 
   /*
   std::pair<ThresholdMap::iterator, bool> p;

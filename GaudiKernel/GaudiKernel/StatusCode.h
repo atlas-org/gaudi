@@ -1,8 +1,10 @@
-// $Id: StatusCode.h,v 1.9 2007/01/17 17:18:27 hmd Exp $
+// $Id: StatusCode.h,v 1.12 2008/10/28 17:21:58 marcocle Exp $
 #ifndef GAUDIKERNEL_STATUSCODE_H
 #define GAUDIKERNEL_STATUSCODE_H
 
 #include <ostream>
+
+#include "GaudiKernel/IssueSeverity.h"
 
 /**
  * @class StatusCode StatusCode.h GaudiKernel/StatusCode.h
@@ -16,7 +18,6 @@
 
 class IMessageSvc;
 class IStatusCodeSvc;
-class IssueSeverity;
 
 class IgnoreError {};
 
@@ -98,13 +99,13 @@ protected:
   static IssueSeverity* cloneSeverity(const IssueSeverity*);
 };
 
-inline StatusCode::StatusCode(): 
+inline StatusCode::StatusCode():
   d_code(SUCCESS), m_checked(false), m_severity(0) {}
 
-inline StatusCode::StatusCode( unsigned long code, bool checked ) : 
+inline StatusCode::StatusCode( unsigned long code, bool checked ) :
   d_code(code),m_checked(checked), m_severity(0) {}
 
-inline StatusCode::StatusCode( unsigned long code, const IssueSeverity& sev ) : 
+inline StatusCode::StatusCode( unsigned long code, const IssueSeverity& sev ) :
   d_code(code),m_checked(false), m_severity(cloneSeverity(&sev)) {
 }
 
@@ -116,9 +117,11 @@ inline StatusCode::StatusCode( const StatusCode &rhs ) {
 }
 
 inline StatusCode& StatusCode::operator=(const StatusCode& rhs) {
+  if (this == &rhs) return *this; // Protection against self-assignment
   d_code = rhs.d_code;
   m_checked = rhs.m_checked;
   rhs.m_checked = true;
+  if (m_severity) delete m_severity;
   m_severity = rhs.m_severity ? cloneSeverity(rhs.m_severity): 0;
   return *this;
 }

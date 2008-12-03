@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/IHistogramSvc.h,v 1.12 2006/11/15 15:53:21 hmd Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/IHistogramSvc.h,v 1.13 2008/10/09 09:59:14 marcocle Exp $
 #ifndef GAUDIKERNEL_IHISTOGRAMSVC_H
 #define GAUDIKERNEL_IHISTOGRAMSVC_H
 
@@ -39,7 +39,7 @@ using AIDA::IAxis;
 using AIDA::IAnnotation;
 
 // Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IHistogramSvc(60, 3 , 0); 
+static const InterfaceID IID_IHistogramSvc(60, 4 , 0); 
 
 
 /** @class IHistogramSvc IHistogramSvc.h GaudiKernel/IHistogramSvc.h
@@ -101,26 +101,80 @@ public:
   // Book 1D profile histogram with fixed binning
   // ==========================================================================
 
-  virtual AIDA::IProfile1D* bookProf( const std::string& fullPath,
-                            const std::string& title,
-                            int binsX, double lowX, double highX )          = 0;
-  virtual AIDA::IProfile1D* bookProf( const std::string& dirPath,
-                            const std::string& relPath,
-                            const std::string& title,
-                            int binsX, double lowX, double highX )          = 0;
-  virtual AIDA::IProfile1D* bookProf( const std::string& dirPath,
-                            int hID,
-                            const std::string& title,
-                            int binsX, double lowX, double highX )          = 0;
-  virtual AIDA::IProfile1D* bookProf( DataObject* pParent,
-                            const std::string& relPath,
-                            const std::string& title,
-                            int binsX, double lowX, double highX )          = 0;
-  virtual AIDA::IProfile1D* bookProf( DataObject* pParent,
-                            int hID,
-                            const std::string& title,
-                            int binsX, double lowX, double highX )          = 0;
+  virtual AIDA::IProfile1D* bookProf
+  ( const std::string& fullPath,
+    const std::string& title,
+    int binsX, double lowX, double highX , 
+    const std::string& opt = "" )          = 0;
+  virtual AIDA::IProfile1D* bookProf
+  ( const std::string& dirPath,
+    const std::string& relPath,
+    const std::string& title,
+    int binsX, double lowX, double highX ,
+    const std::string& opt = "" )          = 0;
+  virtual AIDA::IProfile1D* bookProf
+  ( const std::string& dirPath,
+    int hID,
+    const std::string& title,
+    int binsX, double lowX, double highX ,
+    const std::string& opt = "" )          = 0;
+  virtual AIDA::IProfile1D* bookProf
+  ( DataObject* pParent,
+    const std::string& relPath,
+    const std::string& title,
+    int binsX, double lowX, double highX ,
+    const std::string& opt = "" )          = 0;
+  virtual AIDA::IProfile1D* bookProf
+  ( DataObject* pParent,
+    int hID,
+    const std::string& title,
+    int binsX, double lowX, double highX ,
+    const std::string& opt = "" )          = 0;
+  
+  // ==========================================================================
+  // Book 1D profile histogram with fixed binning & Y-limits 
+  // ==========================================================================
 
+  virtual AIDA::IProfile1D* bookProf
+  ( const std::string& fullPath ,
+    const std::string& title    ,
+    int                binsX    ,
+    double lowX , double highX  ,
+    double lowY , double highY  ,
+    const std::string& opt = "s" )          = 0;
+  virtual AIDA::IProfile1D* bookProf
+  ( const std::string& dirPath  ,
+    const std::string& relPath  ,
+    const std::string& title    ,
+    int binsX                   , 
+    double lowX , double highX  , 
+    double lowY , double highY  ,
+    const std::string& opt = "s" )          = 0;
+  virtual AIDA::IProfile1D* bookProf
+  ( const std::string& dirPath  ,
+    int hID                     ,
+    const std::string& title    ,
+    int binsX                   , 
+    double lowX , double highX  ,
+    double lowY , double highY  ,
+    const std::string& opt = "s" )          = 0;
+  virtual AIDA::IProfile1D* bookProf
+  ( DataObject*        pParent  ,
+    const std::string& relPath  ,
+    const std::string& title    ,
+    int binsX                   ,
+    double lowX , double highX  ,
+    double lowY , double highY  ,
+    const std::string& opt = "s" )          = 0;
+  virtual AIDA::IProfile1D* bookProf
+  ( DataObject*         pParent ,
+    int                 hID     ,
+    const std::string&  title   ,
+    int binsX                   , 
+    double lowX , double highX  , 
+    double lowY , double highY  ,
+    const std::string& opt = "s" )          = 0;
+  
   // ==========================================================================
   // Book 1D histogram with variable binning
   // ==========================================================================

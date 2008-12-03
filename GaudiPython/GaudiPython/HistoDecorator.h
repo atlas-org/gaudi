@@ -1,4 +1,4 @@
-// $Id: HistoDecorator.h,v 1.3 2007/08/07 12:24:38 marcocle Exp $
+// $Id: HistoDecorator.h,v 1.4 2008/10/09 09:59:14 marcocle Exp $
 // ============================================================================
 #ifndef GAUDIPYTHON_HISTODECORATOR_H 
 #define GAUDIPYTHON_HISTODECORATOR_H 1
@@ -436,6 +436,9 @@ namespace GaudiPython
       const double             lowX         ,
       const double             highX        ,
       const unsigned long      binsX  = 100 ,
+      const std::string&       opt    = ""  ,
+      const double             lowY   = -std::numeric_limits<double>::max() , 
+      const double             highY  =  std::numeric_limits<double>::max() ,
       const double             weight = 1.0 ) ;
     // ========================================================================      
     // 1D-profiles: by generic ID 
@@ -449,6 +452,9 @@ namespace GaudiPython
       const double             lowX         ,
       const double             highX        ,
       const unsigned long      binsX  = 100 ,
+      const std::string&       opt    = ""  ,
+      const double             lowY   = -std::numeric_limits<double>::max() , 
+      const double             highY  =  std::numeric_limits<double>::max() ,
       const double             weight = 1.0 ) ;
     // ========================================================================      
     // 1D-profiles: by numeric ID 
@@ -462,6 +468,9 @@ namespace GaudiPython
       const double             lowX         ,
       const double             highX        ,
       const unsigned long      binsX  = 100 ,
+      const std::string&       opt    = ""  ,
+      const double             lowY   = -std::numeric_limits<double>::max() , 
+      const double             highY  =  std::numeric_limits<double>::max() ,
       const double             weight = 1.0 ) ;
     // ========================================================================      
     // 1D-profiles: by string ID 
@@ -475,6 +484,9 @@ namespace GaudiPython
       const double             lowX         ,
       const double             highX        ,
       const unsigned long      binsX  = 100 ,
+      const std::string&       opt    = ""  ,
+      const double             lowY   = -std::numeric_limits<double>::max() , 
+      const double             highY  =  std::numeric_limits<double>::max() ,
       const double             weight = 1.0 ) ;
     // ========================================================================  
     // 2D-profiles: by title 

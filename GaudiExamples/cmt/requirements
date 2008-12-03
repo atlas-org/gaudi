@@ -1,8 +1,9 @@
 package GaudiExamples
-version v19r9
+version v20r3
 
 use ROOT         v* LCG_Interfaces
 use Reflex       v* LCG_Interfaces -no_auto_imports
+use AIDA         v* LCG_Interfaces
 
 use Gaudi        v*
 
@@ -13,7 +14,7 @@ macro hbookcnv_use 	 "HbookCnv v*" \
 	slc4-amd64&gcc41 ""
 use $(hbookcnv_use)
 use GaudiPoolDb  v* -no_auto_imports
-use GaudiPython  v*
+use GaudiPython  v* -no_auto_imports
 use GaudiGSL     v*
 use RootHistCnv  v*
 
@@ -54,6 +55,9 @@ library GaudiExamples     AbortEvent/*.cpp \
                           IncidentSvc/*.cpp \
                           bug_34121/*.cpp \
                           Auditors/*.cpp \
+                          Timing/*.cpp \
+                          Selections/*.cpp \
+                          SvcInitLoop/*.cpp \
                           Dll/GaudiExamples*.cpp
 
 

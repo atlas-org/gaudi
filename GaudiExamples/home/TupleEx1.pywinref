@@ -6,10 +6,10 @@
 *                                                                             *
 *******************************************************************************
 
-ApplicationMgr    SUCCESS 
+ApplicationMgr    SUCCESS
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr $Revision: 1.4 $
-                                          running on MCLVIRT01 on Tue Sep 25 15:45:22 2007
+                                                   Welcome to ApplicationMgr $Revision: 1.6 $
+                                          running on MCLVIRT01 on Tue Jun 03 11:55:38 2008
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 ApplicationMgr       INFO Successfully loaded modules : GaudiAlg, RootHistCnv
@@ -17,11 +17,11 @@ NTupleSvc            INFO Added stream file:TupleEx1.root as MYLUN
 HistogramPersis...   INFO  'CnvServices':[ 'HbookHistSvc' , 'RootHistSvc' ]
 RootHistSvc          INFO Writing ROOT histograms to: UndefinedROOTOutputFileName
 HistogramPersis...   INFO Added successfully Conversion service:RootHistSvc
-TupleEx1             INFO The N-Tuple   path is set to be 'MYLUN/TupleEx1'
 DetectorDataSvc      INFO Detector description not requested to be loaded
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
+EventLoopMgr      WARNING Unable to locate service "EventSelector"
 EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
+ApplicationMgr       INFO Application Manager Started successfully
 RndmGenSvc.Engine    INFO Generator engine type:CLHEP::RanluxEngine
 RndmGenSvc.Engine    INFO Current Seed:1234567 Luxury:3
 RndmGenSvc           INFO Using Random engine:HepRndm::Engine<CLHEP::RanluxEngine>
@@ -36,19 +36,19 @@ RRWNTupleCnv         INFO ID 1: added branch: poisb / poisb/I
 RRWNTupleCnv         INFO Booked TTree with ID:1 "Trivial Row-Wise Tuple"
 RCWNTupleCnv         INFO Booked TTree with ID: 2 "Trivial Column-Wise Tuple" in directory TupleEx1.root:/TupleEx1
 RCWNTupleCnv         INFO Booked TTree with ID: 3 "Fixed-size arrays/vectors" in directory TupleEx1.root:/TupleEx1
+ApplicationMgr       INFO Application Manager Stopped successfully
 TupleEx1          SUCCESS Booked 3 N-Tuples and 0 Event Tag Collections
 TupleEx1          SUCCESS List of booked N-Tuples in directory "MYLUN/TupleEx1"
 TupleEx1          SUCCESS  ID=1             Title="Trivial Row-Wise Tuple"                  #items=7  {gauss,flat,expo,breit,poiss,binom,poisb}
 TupleEx1          SUCCESS  ID=2             Title="Trivial Column-Wise Tuple"               #items=7  {gauss,flat,expo,breit,poiss,binom,poisb}
 TupleEx1          SUCCESS  ID=3             Title="Fixed-size arrays/vectors"               #items=4  {arflat[1],arexpo[1],argau[1],argau2[1]}
-TupleEx1          SUCCESS No histograms are booked
 RootHistSvc       WARNING no ROOT output file name, Histograms cannot be persistified
 EventLoopMgr         INFO Histograms converted successfully according to request.
 RFileCnv             INFO dumping contents of /NTUPLES/MYLUN
 TFile: name=TupleEx1.root, title=Gaudi Trees, option=CREATE
 ******************************************************************************
 *Tree    :1         : Trivial Row-Wise Tuple                                 *
-*Entries :       20 : Total =            5207 bytes  File  Size =       1233 *
+*Entries :       20 : Total =            5207 bytes  File  Size =       1234 *
 *        :          : Tree compression factor =   1.00                       *
 ******************************************************************************
 *Br    0 :gauss     : gauss/F                                                *
@@ -81,7 +81,7 @@ TFile: name=TupleEx1.root, title=Gaudi Trees, option=CREATE
 *............................................................................*
 ******************************************************************************
 *Tree    :2         : Trivial Column-Wise Tuple                              *
-*Entries :       20 : Total =            5213 bytes  File  Size =       1241 *
+*Entries :       20 : Total =            5213 bytes  File  Size =       1242 *
 *        :          : Tree compression factor =   1.00                       *
 ******************************************************************************
 *Br    0 :gauss     : gauss/F                                                *
@@ -114,7 +114,7 @@ TFile: name=TupleEx1.root, title=Gaudi Trees, option=CREATE
 *............................................................................*
 ******************************************************************************
 *Tree    :3         : Fixed-size arrays/vectors                              *
-*Entries :       20 : Total =           18537 bytes  File  Size =      15517 *
+*Entries :       20 : Total =           18537 bytes  File  Size =      15520 *
 *        :          : Tree compression factor =   1.00                       *
 ******************************************************************************
 *Br    0 :arflat    : arflat[50]/F                                           *

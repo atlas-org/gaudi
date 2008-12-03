@@ -1,9 +1,9 @@
-//$Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiExamples/src/POOLIO/ReadAlg.h,v 1.1 2004/05/24 14:05:04 mato Exp $	//
+//$Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiExamples/src/POOLIO/ReadAlg.h,v 1.2 2008/11/04 22:49:24 marcocle Exp $	//
 #ifndef GAUDIEXAMPLES_READALG_H
 #define GAUDIEXAMPLES_READALG_H
 
 // Framework include files
-#include "GaudiKernel/Algorithm.h"  // Required for inheritance
+#include "GaudiAlg/GaudiAlgorithm.h"  // Required for inheritance
 
 /** @class ReadAlg ReadAlg.h
 
@@ -12,11 +12,11 @@
     @author Markus Frank
 */
 
-class ReadAlg : public Algorithm {
+class ReadAlg : public GaudiAlgorithm {
 public:
 	/// Constructor: A constructor of this form must be provided.
 	ReadAlg(const std::string& name, ISvcLocator* pSvcLocator)  
-    : Algorithm(name, pSvcLocator) { }
+    : GaudiAlgorithm(name, pSvcLocator) { }
   /// Standard Destructor
   virtual ~ReadAlg() { }
   /// Initialize

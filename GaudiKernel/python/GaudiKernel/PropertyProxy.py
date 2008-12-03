@@ -6,8 +6,9 @@
 __all__ = [ 'PropertyProxy', 'GaudiHandlePropertyProxy', 'GaudiHandleArrayPropertyProxy' ]
 
 import os,glob
-#-->PM#from GaudiKernel.GaudiHandles import *
-from GaudiKernel.Logging import logging
+from GaudiKernel.GaudiHandles import *
+
+import logging
 log = logging.getLogger( 'PropertyProxy' ) 
 
 # dictionary with configurable class : python module entries
@@ -34,6 +35,13 @@ def _isCompatible( tp, value ):
    if ( tp is str ):
        if ( type(value) is str ) or derives_from(value, 'Configurable'):
            # we can set string properties only from strings or configurables
+           return value
+       else:
+           raise ValueError( errmsg )
+   elif ( tp in [ list, tuple, dict ] ):
+       if ( type(value) is tp ):
+           # We need to check that the types match for lists, tuples and
+           # dictionaries (bug #34769).
            return value
        else:
            raise ValueError( errmsg )
@@ -96,13 +104,16 @@ class PropertyProxy( object ):
          allowcompat = True
 
     # check if type known; allow special initializer for typed instances
-      if proptype and proptype != type(None):
+      # Do not perform the check for PropertyReference, should be delayed until
+      # binding (if ever done)
+      if proptype and proptype != type(None) and \
+                      not derives_from(value, 'PropertyReference'):
          try:
           # check value itself
             value = _isCompatible( proptype, value )
 
-          # check element in case of list
-            if proptype == tuple or proptype == list:
+          # check element in case of list 
+            if proptype == list:
                try:
                   oldvec = self.descr.__get__( obj, type )
                   if oldvec:
@@ -114,8 +125,6 @@ class PropertyProxy( object ):
                   pass
          except ValueError, e:
             if allowcompat:
-               from Logging import logging
-               log = logging.getLogger( 'PropertyProxy' )
                log.error( 'inconsistent value types for %s.%s (%s)' %\
                           (obj.getName(),self.descr.__name__,str(e)) )
             else:
@@ -181,7 +190,7 @@ class GaudiHandlePropertyProxyBase(PropertyProxy):
          value = self.convertValueToBeSet( obj, value )
          # assign the value
          self.descr.__set__( obj, value )
-         log.verbose( "Setting %s = %r", self.fullPropertyName( obj ), value )
+         log.debug( "Setting %s = %r", self.fullPropertyName( obj ), value )
          self.history.setdefault( obj, [] ).append( value )
 
 
@@ -331,10 +340,10 @@ class GaudiHandleArrayPropertyProxy(GaudiHandlePropertyProxyBase):
 
 def PropertyProxyFactory( descr, doc, default ):
 #   print "PropertyProxyFactory( %s, %r )" % (descr.__name__,default)
-#-->PM#   if isinstance(default,GaudiHandleArray):
-#-->PM#      return GaudiHandleArrayPropertyProxy( descr, doc, default )
+   if isinstance(default,GaudiHandleArray):
+      return GaudiHandleArrayPropertyProxy( descr, doc, default )
 
-#-->PM#   if isinstance(default,GaudiHandle):
-#-->PM#      return GaudiHandlePropertyProxy( descr, doc, default )
+   if isinstance(default,GaudiHandle):
+      return GaudiHandlePropertyProxy( descr, doc, default )
 
    return PropertyProxy( descr, doc, default )

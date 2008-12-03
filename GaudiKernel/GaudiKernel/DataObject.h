@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/DataObject.h,v 1.8 2005/01/19 18:31:15 mato Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/DataObject.h,v 1.10 2008/11/12 23:39:47 marcocle Exp $
 #ifndef GAUDIKERNEL_DATAOBJECT_H
 #define GAUDIKERNEL_DATAOBJECT_H
 
@@ -17,7 +17,7 @@ class LinkManager;
 class IRegistry;
 
 
-// Definition of the CLID for this class  
+// Definition of the CLID for this class
 static const CLID CLID_DataObject = 1;
 
 /** @class DataObject DataObject.h GaudiKernel/DataObject.h
@@ -76,7 +76,7 @@ public:
     return m_pLinkMgr;
   }
   /// Retrieve version number of this object representation
-  const unsigned char version()    const  {
+  unsigned char version()    const  {
     return m_version;
   }
   /// Set version number of this object representation
@@ -84,8 +84,8 @@ public:
     m_version = vsn;
   }
   /// Return the refcount
-  unsigned long refCount() const { 
-    return m_refCount; 
+  unsigned long refCount() const {
+    return m_refCount;
   }
   /// Fill the output stream (ASCII)
   virtual std::ostream& fillStream( std::ostream& s ) const {
@@ -97,4 +97,15 @@ public:
     return obj.fillStream(s);
   }
 };
+
+// Additional functions to support the Serialialization of objects in the transient store 
+
+namespace Gaudi 
+{  
+  void pushCurrentDataObject(DataObject** pobjAddr);
+  void popCurrentDataObject();
+  DataObject* getCurrentDataObject();
+}
+
+
 #endif // GAUDIKERNEL_DATAOBJECT_H

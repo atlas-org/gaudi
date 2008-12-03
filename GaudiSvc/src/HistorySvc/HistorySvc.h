@@ -1,4 +1,4 @@
-// $Id: HistorySvc.h,v 1.7.2.1 2008/06/19 21:27:23 leggett Exp $
+// $Id: HistorySvc.h,v 1.8 2008/06/04 12:35:15 marcocle Exp $
 
 #ifndef GAUDISVC_FASTHISTORYSVC_H
 #define GAUDISVC_FASTHISTORYSVC_H

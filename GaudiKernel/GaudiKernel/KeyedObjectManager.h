@@ -19,7 +19,7 @@ class ContainedObject;
 namespace Containers   {
 
   /// Object manipulator type definition
-  typedef long (*MANIPULATOR)(void*); 
+  typedef long (*MANIPULATOR)(void*);
   /// Parametrisation class for hashmap-like implementation.
   struct hashmap;
   /// Parametrisation class for map-like implementation.
@@ -88,7 +88,7 @@ namespace Containers   {
     /// Setup of the Map and the parent object
     void setup(void* seq, void** rndm);
     /// Access CLID for this type of container.
-    static const CLID classID();
+    static CLID classID();
   };
 
   /// Forward declaration of specialized std::map-like object manager

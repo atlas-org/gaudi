@@ -81,7 +81,7 @@ public:
     return (m_params != 0) ? m_params->type() : IID_IRndmFlat;
   }
   /// Random number generator ID
-  virtual const long ID() const    {
+  virtual long ID() const    {
     return long(this);
   }
   /// Access to random number generator parameters
@@ -91,7 +91,7 @@ public:
   /// Single shot returning single random number according to specified distribution
   virtual double shoot() const;
   /** Multiple shots returning vector with random number according to specified distribution.
-      @param  array    Array containing random numbers 
+      @param  array    Array containing random numbers
       @param  howmany  fill 'howmany' random numbers into array
       @param  start    ... starting at position start
   */

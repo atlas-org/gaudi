@@ -1,4 +1,4 @@
-// $Id: GaudiSequencer.cpp,v 1.16 2008/04/04 16:51:34 marcocle Exp $
+// $Id: GaudiSequencer.cpp,v 1.18 2008/10/10 13:50:35 marcocle Exp $
 // Include files
 
 // from Gaudi
@@ -73,7 +73,6 @@ StatusCode GaudiSequencer::initialize() {
   }
   if ( m_measureTime ) m_timerTool->decreaseIndent();
 
-  setInitialized();
   return StatusCode::SUCCESS;
 };
 
@@ -131,7 +130,7 @@ StatusCode GaudiSequencer::execute() {
     }
     
   }
-  if (!m_entries.empty()) setFilterPassed( seqPass );
+  if ( !m_ignoreFilter && !m_entries.empty() ) setFilterPassed( seqPass );
   setExecuted( true );
 
   if ( m_measureTime ) m_timerTool->stop( m_timer );

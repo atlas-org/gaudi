@@ -4,10 +4,9 @@ __all__ = [
            "PublicToolHandle", "PrivateToolHandle",
            "ServiceHandle",
            "GaudiHandleArray",
-           "ServiceHandleArray",
            "PublicToolHandleArray", "PrivateToolHandleArray",
            ]
-__version__ = "$Revision: 1.4.2.1 $"
+__version__ = "$Revision: 1.6 $"
 __doc__ = """The python module holding python bindings to XyzHandles"""
 
 from os import linesep
@@ -18,6 +17,9 @@ class GaudiHandle(object):
 
     def __init__(self,typeAndName):
         object.__init__(self)
+        if hasattr(typeAndName,"toStringProperty"):
+            # this is a GaudiHandle or equivalent
+            typeAndName = typeAndName.toStringProperty()
         if type(typeAndName) != str:
             raise TypeError("Argument to %s must be a string. Got a %s instead" % \
                             ( self.__class__.__name__, type(typeAndName).__name__) )
@@ -62,6 +64,9 @@ class GaudiHandle(object):
     def getGaudiHandle(self):
         return self
 
+    def getFullName(self):
+        return self.toStringProperty()
+
 class PublicToolHandle(GaudiHandle):
     __slots__ = ()
     componentType = "AlgTool"
@@ -77,7 +82,7 @@ class PrivateToolHandle(GaudiHandle):
     isPublic = False
     
     def __init__(self, toolTypeAndName=''):
-        GaudiHandle.__init__( self, toolTypeAndName, )
+        GaudiHandle.__init__( self, toolTypeAndName )
 
 
 class ServiceHandle(GaudiHandle):
@@ -199,13 +204,6 @@ class GaudiHandleArray(list):
     def __setstate__ ( self, dict ):
         self.typesAndNames = dict[ 'typesAndNames' ]
 
-
-class ServiceHandleArray(GaudiHandleArray):
-    __slots__ = ()
-    handleType = ServiceHandle
-    
-    def __init__(self, serviceTypesAndNames=None):
-        GaudiHandleArray.__init__( self, serviceTypesAndNames )
 
 class PublicToolHandleArray(GaudiHandleArray):
     __slots__ = ()

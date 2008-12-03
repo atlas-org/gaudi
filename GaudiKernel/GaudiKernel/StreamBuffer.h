@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/StreamBuffer.h,v 1.8 2003/11/26 08:33:59 mato Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/StreamBuffer.h,v 1.9 2008/10/27 16:41:33 marcocle Exp $
 #ifndef GAUDIKERNEL_STREAMBUFFER_H
 #define GAUDIKERNEL_STREAMBUFFER_H 1
 
@@ -7,6 +7,9 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <cstring>
+#include <cstdlib>
+
 #include "GaudiKernel/Kernel.h"
 #include "GaudiKernel/swab.h"
 

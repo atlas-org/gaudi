@@ -1,4 +1,4 @@
-// $Id: AlgTool.h,v 1.22 2008/04/03 17:27:01 marcocle Exp $
+// $Id: AlgTool.h,v 1.23 2008/06/02 14:20:38 marcocle Exp $
 // ============================================================================
 #ifndef GAUDIKERNEL_ALGTOOL_H
 #define GAUDIKERNEL_ALGTOOL_H
@@ -13,6 +13,7 @@
 #include "GaudiKernel/PropertyMgr.h"
 #include "GaudiKernel/IAuditorSvc.h"
 #include "GaudiKernel/IMonitorSvc.h"
+#include "GaudiKernel/IStateful.h"
 
 #include <vector>
 #include <list>
@@ -32,7 +33,8 @@
  *  @author Pere Mato
  */
 class AlgTool : public virtual IAlgTool,
-                public virtual IProperty {
+                public virtual IProperty,
+                public virtual IStateful {
   friend class ToolSvc;
 public:
 
@@ -54,14 +56,36 @@ public:
   /// Retrieve parent of the sub-algtool.
   virtual const IInterface*  parent() const;
 
-  /// Initialize AlgTool
+  // State machine implementation
+  virtual StatusCode configure() { return StatusCode::SUCCESS; }
   virtual StatusCode initialize();
+  virtual StatusCode start();
+  virtual StatusCode stop();
+  virtual StatusCode finalize();
+  virtual StatusCode terminate() { return StatusCode::SUCCESS; }
+  virtual StatusCode reinitialize();
+  virtual StatusCode restart();
+  virtual Gaudi::StateMachine::State FSMState() const { return m_state; }
+  virtual Gaudi::StateMachine::State targetFSMState() const { return m_targetState; }
+  
+  /// Initialize AlgTool
   virtual StatusCode sysInitialize();
+  
+  /// Start AlgTool
+  virtual StatusCode sysStart();
+  
+  /// Stop AlgTool
+  virtual StatusCode sysStop();
 
   /// Finalize AlgTool
-  virtual StatusCode finalize();
   virtual StatusCode sysFinalize();
-
+  
+  /// Initialize AlgTool
+  virtual StatusCode sysReinitialize();
+  
+  /// Start AlgTool
+  virtual StatusCode sysRestart();
+  
   /// Default implementations for IProperty interface.
   virtual StatusCode setProperty( const Property&    p );
   virtual StatusCode setProperty( const std::string& s );
@@ -329,7 +353,14 @@ private:
 
   BooleanProperty m_auditInit;
   bool         m_auditorInitialize;///< flag for auditors in "initialize()"
+  bool         m_auditorStart;     ///< flag for auditors in "start()"
+  bool         m_auditorStop;      ///< flag for auditors in "stop()"
   bool         m_auditorFinalize;  ///< flag for auditors in "finalize()"
+  bool         m_auditorReinitialize;///< flag for auditors in "reinitialize()"
+  bool         m_auditorRestart;     ///< flag for auditors in "restart()"
+  
+  Gaudi::StateMachine::State m_state;            ///< state of the Tool
+  Gaudi::StateMachine::State m_targetState;      ///< state of the Tool
 };
 
 #endif // GAUDIKERNEL_ALGTOOL_H

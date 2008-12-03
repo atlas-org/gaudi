@@ -1,6 +1,21 @@
  Package: GaudiPoolDb
  Package Manager: Markus Frank
 
+================ GaudiPoolDb v4r1 ====================================
+! 2008-11-13 - Pere Mato
+ - Moved the functions pushCurrentDataObject and popCurrentDataObject to
+   GaudiKernel.
+
+! 2008-10-27 - Marco Clemencic
+ - Fixed compilation errors and some warnings on gcc 4.3.
+
+================ GaudiPoolDb v4r0 ====================================
+! 2008-05-05 - Markus Frank
+ - Patch #1794.
+   - Adapt GaudiPoolDb to seal free implementation of POOL.
+     Install Gaudi specific message reporter and attach it to POOL.
+   - Bug #34176: Remove link dependencies on POOL component libraries.
+
 ================ GaudiPoolDb v3r1 ====================================
 ! 2008-02-21 - Markus Frank
  - patch #1700. Fix the filter mechanism to reduce the number of messages 

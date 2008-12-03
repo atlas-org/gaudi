@@ -12,13 +12,13 @@ namespace Gaudi {
 
   /** @class MultiFileCatalog
     *
-    *  This class constitutes the core of the 
+    *  This class constitutes the core of the
     *  XML based FileCatalog API for using POOL within Gaudi.
     *  This class manages multiple file catalogs.
     *
     */
-  class MultiFileCatalog 
-    : public Service, 
+  class MultiFileCatalog
+    : public Service,
       virtual public IFileCatalog,
       virtual public IFileCatalogMgr
   {
@@ -31,7 +31,7 @@ namespace Gaudi {
       for(Catalogs::const_iterator i=m_catalogs.begin(); i != m_catalogs.end(); ++i)
         ((*i)->*pmf)();
     }
-    template <class A1,class F> std::string _find(A1& arg1,F pmf)  const { 
+    template <class A1,class F> std::string _find(A1& arg1,F pmf)  const {
       std::string result;
       for(Catalogs::const_iterator i=m_catalogs.begin(); i != m_catalogs.end(); ++i)
         if ( !(result= ((*i)->*pmf)(arg1)).empty() ) break;
@@ -54,16 +54,16 @@ namespace Gaudi {
   public:
     /// Create a catalog file, initialization of XercesC.
     MultiFileCatalog(const std::string& nam, ISvcLocator* svc);
-    /// Destructor, 
+    /// Destructor,
     virtual ~MultiFileCatalog();
 
     /** IInterface implementation                                             */
     virtual StatusCode queryInterface(const InterfaceID& id, void** ppv);
 
     /** IService implementation                                               */
-    /// Finalize service object 
+    /// Finalize service object
     virtual StatusCode initialize();
-    /// Finalize service object 
+    /// Finalize service object
     virtual StatusCode finalize();
 
     /** Catalog interface                                                     */
@@ -72,15 +72,15 @@ namespace Gaudi {
     /// Access to connect string
     virtual CSTR connectInfo() const;
     /// Parse the DOM tree of the XML catalog
-    virtual void start()                        
-    {  _exec(&IFileCatalog::start); m_started=true;                           }
+    virtual void init()
+    {  _exec(&IFileCatalog::init); m_started=true;                           }
     /// Save DOM catalog to file
     virtual void commit()                   { _exec(&IFileCatalog::commit);   }
     /// Save DOM catalog to file
     virtual void rollback()                 { _exec(&IFileCatalog::rollback); }
     /// Check if the catalog is read-only
     virtual bool readOnly() const;
-    /// Check if the catalog should be updated 
+    /// Check if the catalog should be updated
     virtual bool dirty() const;
     /// Return the status of physical file name
     virtual bool existsPFN(CSTR pfn)  const
@@ -89,13 +89,13 @@ namespace Gaudi {
     virtual std::string lookupPFN(CSTR pfn) const
     {  return _find(pfn,&IFileCatalog::lookupPFN);                            }
     /// Return the status of a logical file name
-    virtual bool existsLFN(CSTR lfn)  const 
+    virtual bool existsLFN(CSTR lfn)  const
     { return !lookupLFN(lfn).empty();                                         }
     /// Lookup file identifier by logical file name
     virtual std::string lookupLFN(CSTR lfn) const
     {  return _find(lfn,&IFileCatalog::lookupLFN);                            }
     /// Return the status of a FileID
-    virtual bool existsFID(CSTR fid)  const     
+    virtual bool existsFID(CSTR fid)  const
     {  return 0 != getCatalog(fid,false,false,false);                          }
     /// Dump all physical file names of the catalog and their attributes associate to the FileID
     virtual void getPFN(CSTR fid, Files& files) const
@@ -107,12 +107,12 @@ namespace Gaudi {
     /// Dump all file Identifiers
     virtual void getFID(Strings& fids)  const
     {  _collect(fids,&IFileCatalog::getFID);                                  }
-    /// Delete FileID from the catalog 
+    /// Delete FileID from the catalog
     virtual void deleteFID(CSTR fid)  const
     {  writeCatalog(fid)->deleteFID(fid);                                     }
-    /// Create a FileID and DOM Node of the PFN with all the attributes 
+    /// Create a FileID and DOM Node of the PFN with all the attributes
     virtual void registerPFN(CSTR fid, CSTR pfn, CSTR ftype) const;
-    /// Create a FileID and DOM Node of the LFN with all the attributes 
+    /// Create a FileID and DOM Node of the LFN with all the attributes
     virtual void registerLFN(CSTR fid, CSTR lfn) const;
     /// Create a FileID and DOM Node
     virtual void registerFID(CSTR fid) const
@@ -121,7 +121,7 @@ namespace Gaudi {
     virtual void getMetaData(CSTR fid, Attributes& attr) const
     {  _collect(fid,attr,&IFileCatalog::getMetaData);                         }
     /// Access metadata item
-    virtual std::string getMetaDataItem(CSTR fid, CSTR name) const; 
+    virtual std::string getMetaDataItem(CSTR fid, CSTR name) const;
     /// Insert/update metadata item
     virtual void setMetaData(CSTR fid, CSTR attr, CSTR val) const
     {  writeCatalog(fid)->setMetaData(fid,attr,val);                          }
@@ -152,7 +152,7 @@ namespace Gaudi {
     {  return getCatalog(fid,true,true,false);                                }
     /// Define the writable catalog identified by reference
     virtual void setWriteCatalog(IFileCatalog* cat);
-    /// Define the writable catalog identified by name 
+    /// Define the writable catalog identified by name
     virtual void setWriteCatalog(CSTR connect);
 
   private:
@@ -160,7 +160,11 @@ namespace Gaudi {
     IFileCatalog* getCatalog(CSTR fid, bool throw_if_not, bool writable=true, bool prt=true) const;
     /// Find catalog by connect string
     Catalogs::iterator i_findCatalog(CSTR connect, bool must_be_writable);
-    
+
+    /// simple property handle to allow interactive modification of
+    /// list of the file catalogs
+    void propHandler(Property& /* p */);
+
     void printError(CSTR msg, bool throw_exc=true) const;
     std::string lookupFID(CSTR lfn) const;
 
@@ -170,6 +174,8 @@ namespace Gaudi {
     CatalogNames    m_catalogNames;
     /// Flag to indicate if catalog is started
     bool            m_started;
+    /// BACKUP:: Container with catalog names
+    CatalogNames    m_oldNames;
   };
 }         /* End namespace Gaudi                 */
 #endif    /* GAUDIUTILS_MULTIFILECATALOG_H */

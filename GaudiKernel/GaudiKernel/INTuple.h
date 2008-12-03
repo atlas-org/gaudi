@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/INTuple.h,v 1.6 2007/01/23 14:36:05 hmd Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/INTuple.h,v 1.7 2008/10/27 19:22:20 marcocle Exp $
 #ifndef GAUDIKERNEL_INTUPLE_H
 #define GAUDIKERNEL_INTUPLE_H
 
@@ -19,7 +19,7 @@ class ISelectStatement;
 
     NTuple interface class definition
 
-    Definition of the interface to an Ntuple class beeing 
+    Definition of the interface to an Ntuple class beeing
     a sequence(=Item) of data entries.
 
     @author M.Frank
@@ -37,7 +37,7 @@ public:
   /// Compiler type ID
   virtual const std::type_info& typeID()      const         = 0;
   /// Proper type name of the object
-  virtual const std::string   typeName()      const         = 0;
+  virtual std::string         typeName()      const         = 0;
   /// Access data buffer (CONST)
   virtual const void*         buffer()        const         = 0;
   /// Is the tuple have an index item?
@@ -47,9 +47,9 @@ public:
   /// Access _Item name
   virtual const std::string&  name()          const         = 0;
   /// Type information of the item
-  virtual const long          type()          const         = 0;
+  virtual long                type()          const         = 0;
   /// Access the buffer length
-  virtual const long          length()        const         = 0;
+  virtual long                length()        const         = 0;
   /// Reset column
   virtual void                reset()                       = 0;
   /// Dimension
@@ -72,7 +72,7 @@ public:
 
     NTuple interface class definition
 
-    Definition of the interface to an Ntuple class beeing 
+    Definition of the interface to an Ntuple class beeing
     a sequence(=Item) of data entries.
 
     @author M.Frank
@@ -122,6 +122,6 @@ public:
   virtual StatusCode            readRecord() = 0;
   /// Save the NTuple
   virtual StatusCode            save() = 0;
-  virtual ~INTuple() {}  
+  virtual ~INTuple() {}
 };
 #endif

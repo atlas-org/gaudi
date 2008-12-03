@@ -3,5 +3,4 @@
 <argument name="args"><set><text>../options/Properties.opts</text></set></argument>
   <argument name="workdir"><text>../../home</text></argument>
   <argument name="reference"><text>Properties.ref</text></argument>
-  <argument name="exit_code"><integer>1</integer></argument>
 </extension>

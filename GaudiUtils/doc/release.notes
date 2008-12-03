@@ -1,6 +1,30 @@
 Package: GaudiUtils
 Package manager : Hubert Degaudenzi
 
+================ GaudiUtils v2r1 ====================================
+! 2008-10-10 - Vanya Belyaev
+ - Patch #2073: SharedObjectsContainer and 'blind' access to TYPE::Container &
+                TYPE::Selection
+    * GaudiUtils/Range.h
+    * GaudiUtils/NamedRange.h
+    * src/Lib/Range.cpp
+   The light representation of containers through the par of iterators.
+   The files are copied (and renamed) from LoKi project. 
+
+! 2008-10-03 - Vanya Belyaev
+ - Patch #1943. Added update handler to MultiFileCatalog.Catalogs
+
+================ GaudiUtils v2r0 ====================================
+! 2008-06-04 - Chris Jones
+ - Patch #1861. Prevent division-by-zero results in skewness and kurtosis.
+   Protection against NaN/Inf in Gaudi::Utils::HistoStats::skewness and
+   Gaudi::Utils::HistoStats::kurtosis (return 0 instead).
+
+! 2008-06-02 - Marco Clemencic
+ - Task #5809. Extension to Gaudi Application state machine.
+   - Renamed the method IFileCatalog::start to IFileCatalog::init, to avoid
+     clashes with IService::start.
+
 ================ GaudiUtils v1r6 ====================================
 ! 2008-04-03 - Vanya BELYAEV 
  - Patch #1749. Improve some printout of the histogram.

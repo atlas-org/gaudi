@@ -261,7 +261,7 @@ void XMLFileCatalog::printError(CSTR msg, bool rethrow)  const  {
   }
 }
 // ----------------------------------------------------------------------------
-void XMLFileCatalog::start()   {  
+void XMLFileCatalog::init()   {  
   string xmlFile = getfile(false);
   try{
     if ( m_parser ) delete m_parser;

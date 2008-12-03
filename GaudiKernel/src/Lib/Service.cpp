@@ -1,4 +1,4 @@
-// $Id: Service.cpp,v 1.32 2008/04/04 15:19:35 marcocle Exp $
+// $Id: Service.cpp,v 1.35 2008/10/23 15:57:37 marcocle Exp $
 
 // Include Files
 #include "GaudiKernel/Service.h"
@@ -9,7 +9,7 @@
 #include "GaudiKernel/ISvcManager.h"
 #include "GaudiKernel/IAuditorSvc.h"
 #include "GaudiKernel/IJobOptionsSvc.h"
-#include "GaudiKernel/GaudiException.h" 
+#include "GaudiKernel/GaudiException.h"
 #include "GaudiKernel/ServiceLocatorHelper.h"
 #include "GaudiKernel/ThreadGaudi.h"
 #include "GaudiKernel/Guards.h"
@@ -36,21 +36,23 @@ unsigned long Service::release()   {
 
 //--- IInterface::queryInterface
 StatusCode Service::queryInterface
-( const InterfaceID& riid, 
-  void**             ppvi )  
+( const InterfaceID& riid,
+  void**             ppvi )
 {
-  if ( 0 == ppvi ) { return StatusCode::FAILURE ; } // RETURN 
+  if ( 0 == ppvi ) { return StatusCode::FAILURE ; } // RETURN
   //
-  if      ( IService        ::interfaceID() . versionMatch ( riid ) )  
+  if      ( IService        ::interfaceID() . versionMatch ( riid ) )
   { *ppvi = static_cast<IService*>        ( this ) ; }
-  else if ( IProperty       ::interfaceID() . versionMatch ( riid ) )  
+  else if ( IProperty       ::interfaceID() . versionMatch ( riid ) )
   { *ppvi = static_cast<IProperty*>       ( this ) ; }
-  else if ( INamedInterface ::interfaceID() . versionMatch ( riid ) )   
+  else if ( IStateful       ::interfaceID() . versionMatch ( riid ) )
+  { *ppvi = static_cast<IStateful*>       ( this ) ; }
+  else if ( INamedInterface ::interfaceID() . versionMatch ( riid ) )
   { *ppvi = static_cast<INamedInterface*> ( this ) ; }
-  else if ( IInterface      ::interfaceID() . versionMatch ( riid ) )   
+  else if ( IInterface      ::interfaceID() . versionMatch ( riid ) )
   { *ppvi = static_cast<IInterface*>      ( this ) ; }
-  else { *ppvi = 0 ; return NO_INTERFACE ; } // RETURN 
-  // increment reference counter 
+  else { *ppvi = 0 ; return NO_INTERFACE ; } // RETURN
+  // increment reference counter
   addRef();
   //
   return SUCCESS;
@@ -61,34 +63,35 @@ StatusCode Service::sysInitialize() {
   StatusCode sc;
 
   try {
+    m_targetState = Gaudi::StateMachine::INITIALIZED;
     Gaudi::Guards::AuditorGuard guard(this,
                                       // check if we want to audit the initialize
                                       (m_auditorInitialize) ? auditorSvc() : 0,
                                       IAuditor::Initialize);
-    sc = initialize();
+    sc = initialize(); // This should change the state to Gaudi::StateMachine::CONFIGURED
     if (sc.isSuccess())
-      m_state = INITIALIZED;
+      m_state = m_targetState;
     return sc;
   }
   catch ( const GaudiException& Exception )  {
-    MsgStream log ( msgSvc() , name() + ".sysInitialize()" );
-    log << MSG::FATAL << " Exception with tag=" << Exception.tag()
-        << " is caught " << endreq;
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "in sysInitialize(): exception with tag=" << Exception.tag()
+        << " is caught" << endreq;
     log << MSG::ERROR << Exception  << endreq;
     //	  Stat stat( chronoSvc() , Exception.tag() );
   }
   catch( const std::exception& Exception ) {
-    MsgStream log ( msgSvc() , name() + ".sysInitialize()" );
-    log << MSG::FATAL << " Standard std::exception is caught " << endreq;
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "in sysInitialize(): standard std::exception is caught" << endreq;
     log << MSG::ERROR << Exception.what()  << endreq;
     //	  Stat stat( chronoSvc() , "*std::exception*" );
   }
   catch(...) {
-    MsgStream log ( msgSvc() , name() + ".sysInitialize()" );
-    log << MSG::FATAL << "UNKNOWN Exception is caught " << endreq;
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "in sysInitialize(): UNKNOWN Exception is caught" << endreq;
     //	  Stat stat( chronoSvc() , "*UNKNOWN Exception*" ) ;
   }
-  
+
   return StatusCode::FAILURE;
 }
 
@@ -96,31 +99,116 @@ StatusCode Service::sysInitialize() {
 //--- IService::initialize
 StatusCode Service::initialize() {
   MsgStream log(msgSvc(),name());
-  // Initialize it only if was not done
-  if( m_state != OFFLINE ) {
-    log << MSG::WARNING <<  "Service already initialized" << endmsg;
-    return StatusCode::FAILURE;
-  }
 
   // Set the Algorithm's properties
   StatusCode sc = setProperties();
-  m_state = CONFIGURED;
-  
+
   log << MSG::DEBUG <<  "Service base class initialized successfully" << endmsg;
+  m_state = Gaudi::StateMachine::ChangeState(Gaudi::StateMachine::CONFIGURE,m_state);
   return sc ;
+}
+
+// IService::sysStart
+StatusCode Service::sysStart() {
+  StatusCode sc;
+
+  try {
+    m_targetState = Gaudi::StateMachine::ChangeState(Gaudi::StateMachine::START,m_state);
+    Gaudi::Guards::AuditorGuard guard(this,
+                                      // check if we want to audit the initialize
+                                      (m_auditorStart) ? auditorSvc() : 0,
+                                      IAuditor::Start);
+    sc = start();
+    if (sc.isSuccess())
+      m_state = m_targetState;
+    return sc;
+  }
+  catch ( const GaudiException& Exception )  {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "in sysStart(): exception with tag=" << Exception.tag()
+        << " is caught" << endreq;
+    log << MSG::ERROR << Exception  << endreq;
+    //    Stat stat( chronoSvc() , Exception.tag() );
+  }
+  catch( const std::exception& Exception ) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "in sysStart(): standard std::exception is caught" << endreq;
+    log << MSG::ERROR << Exception.what()  << endreq;
+    //    Stat stat( chronoSvc() , "*std::exception*" );
+  }
+  catch(...) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "in sysStart(): UNKNOWN Exception is caught" << endreq;
+    //    Stat stat( chronoSvc() , "*UNKNOWN Exception*" ) ;
+  }
+
+  return StatusCode::FAILURE;
+}
+
+// IService::sysStop
+StatusCode Service::sysStop() {
+  StatusCode sc;
+
+  try {
+    m_targetState = Gaudi::StateMachine::ChangeState(Gaudi::StateMachine::STOP,m_state);
+    Gaudi::Guards::AuditorGuard guard(this,
+                                      // check if we want to audit the initialize
+                                      (m_auditorStop) ? auditorSvc() : 0,
+                                      IAuditor::Stop);
+    sc = stop();
+    if (sc.isSuccess())
+      m_state = m_targetState;
+    return sc;
+  }
+  catch ( const GaudiException& Exception )  {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "in sysStop(): exception with tag=" << Exception.tag()
+        << " is caught" << endreq;
+    log << MSG::ERROR << Exception  << endreq;
+    //    Stat stat( chronoSvc() , Exception.tag() );
+  }
+  catch( const std::exception& Exception ) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "in sysStop(): standard std::exception is caught" << endreq;
+    log << MSG::ERROR << Exception.what()  << endreq;
+    //    Stat stat( chronoSvc() , "*std::exception*" );
+  }
+  catch(...) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "in sysStop(): UNKNOWN Exception is caught" << endreq;
+    //    Stat stat( chronoSvc() , "*UNKNOWN Exception*" ) ;
+  }
+
+  return StatusCode::FAILURE;
+}
+
+
+//--- IService::stop
+StatusCode Service::stop() {
+  // stub implementation
+  return StatusCode::SUCCESS;
+}
+
+//--- IService::start
+StatusCode Service::start() {
+  // stub implementation
+  return StatusCode::SUCCESS;
 }
 
 //--- IService::sysFinalize
 StatusCode Service::sysFinalize() {
-  
+
   StatusCode sc(StatusCode::FAILURE);
 
   try {
+    m_targetState = Gaudi::StateMachine::OFFLINE;
     Gaudi::Guards::AuditorGuard guard(this,
                                       // check if we want to audit the initialize
                                       (m_auditorFinalize) ? auditorSvc() : 0,
                                       IAuditor::Finalize);
     sc = finalize();
+    if (sc.isSuccess())
+      m_state = m_targetState;
   }
   catch( const GaudiException& Exception ) {
     MsgStream log ( msgSvc() , name() + ".sysFinalize()" );
@@ -149,32 +237,37 @@ StatusCode Service::sysFinalize() {
     m_pAuditorSvc->release();
     m_pAuditorSvc = 0;
   }
-  
+
   return sc ;
-  
+
 }
 
 //--- IService::finalize
 StatusCode Service::finalize() {
-  MsgStream log(msgSvc(),name());
-  if( m_state != INITIALIZED ) {
-    log << MSG::WARNING << "Service already offline" << endmsg;
-    return StatusCode::FAILURE;
-  }
-  m_state = OFFLINE;
+  //MsgStream log(msgSvc(),name());
+  //m_state = Gaudi::StateMachine::ChangeState(Gaudi::StateMachine::TERMINATE,m_state);
   return StatusCode::SUCCESS;
 }
 
 //--- IService::sysReinitialize
 StatusCode Service::sysReinitialize() {
-  
+
   StatusCode sc;
+
+  // Check that the current status is the correct one.
+  if ( Gaudi::StateMachine::INITIALIZED != FSMState() ) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::ERROR
+        << "sysReinitialize(): cannot reinitialize service not initialized"
+        << endreq;
+    return StatusCode::FAILURE;
+  }
 
   try {
 
     Gaudi::Guards::AuditorGuard guard(this,
                                       // check if we want to audit the initialize
-                                      (m_auditorInitialize) ? auditorSvc() : 0,
+                                      (m_auditorReinitialize) ? auditorSvc() : 0,
                                       IAuditor::ReInitialize);
     sc = reinitialize();
     return sc;
@@ -198,11 +291,93 @@ StatusCode Service::sysReinitialize() {
     //    Stat stat( chronoSvc() , "*UNKNOWN Exception*" ) ;
   }
   return StatusCode::FAILURE ;
-  
+
 }
 
-//--- IService::reinitialize 
+//--- IService::sysRestart
+StatusCode Service::sysRestart() {
+
+  StatusCode sc;
+
+  // Check that the current status is the correct one.
+  if ( Gaudi::StateMachine::RUNNING != FSMState() ) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::ERROR
+        << "sysRestart(): cannot restart service in state " << FSMState()
+        << " -- must be RUNNING "
+        << endreq;
+    return StatusCode::FAILURE;
+  }
+
+  try {
+
+    Gaudi::Guards::AuditorGuard guard(this,
+                                      // check if we want to audit the initialize
+                                      (m_auditorRestart) ? auditorSvc() : 0,
+                                      IAuditor::ReStart);
+    sc = restart();
+    return sc;
+  }
+  catch( const GaudiException& Exception ) {
+    MsgStream log ( msgSvc() , name() + ".sysRestart()" );
+    log << MSG::FATAL << " Exception with tag=" << Exception.tag()
+        << " is caught " << endreq;
+    log << MSG::ERROR << Exception  << endreq;
+    //    Stat stat( chronoSvc() , Exception.tag() ) ;
+  }
+  catch( const std::exception& Exception ) {
+    MsgStream log ( msgSvc() , name() + ".sysRestart()" );
+    log << MSG::FATAL << " Standard std::exception is caught " << endreq;
+    log << MSG::ERROR << Exception.what()  << endreq;
+    //    Stat stat( chronoSvc() , "*std::exception*" ) ;
+  }
+  catch( ... ) {
+    MsgStream log ( msgSvc() , name() + ".sysRestart()" );
+    log << MSG::FATAL << "UNKNOWN Exception is caught " << endreq;
+    //    Stat stat( chronoSvc() , "*UNKNOWN Exception*" ) ;
+  }
+  return StatusCode::FAILURE ;
+
+}
+
+//--- IService::reinitialize
 StatusCode Service::reinitialize() {
+  /* @TODO
+   * MCl 2008-10-23: the implementation of reinitialize as finalize+initialize
+   *                 is causing too many problems
+   *
+  // Default implementation is finalize+initialize
+  StatusCode sc = finalize();
+  if (sc.isFailure()) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::ERROR << "reinitialize(): cannot be finalized" << endreq;
+    return sc;
+  }
+  sc = initialize();
+  if (sc.isFailure()) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::ERROR << "reinitialize(): cannot be initialized" << endreq;
+    return sc;
+  }
+  */
+  return StatusCode::SUCCESS;
+}
+
+//--- IService::restart
+StatusCode Service::restart() {
+  // Default implementation is stop+start
+  StatusCode sc = stop();
+  if (sc.isFailure()) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::ERROR << "restart(): cannot be stopped" << endreq;
+    return sc;
+  }
+  sc = start();
+  if (sc.isFailure()) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::ERROR << "restart(): cannot be started" << endreq;
+    return sc;
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -224,7 +399,7 @@ ISvcLocator* Service::serviceLocator() const {
 //--- Retrieve pointer to message service
 IMessageSvc* Service::msgSvc()    {
   if ( 0 == m_messageSvc ) {
-    StatusCode sc = serviceLocator()->service( "MessageSvc", m_messageSvc, true ); 
+    StatusCode sc = serviceLocator()->service( "MessageSvc", m_messageSvc, true );
     if( sc.isFailure() ) {
       throw GaudiException("Service [MessageSvc] not found", name(), sc);
     }
@@ -290,7 +465,7 @@ StatusCode Service::setProperties() {
   // set first generic Properties
   sc = jos->setMyProperties( getGaudiThreadGenericName(name()), this );
   if( sc.isFailure() ) return StatusCode::FAILURE;
- 
+
   // set specific Properties
   if (isGaudiThreaded(name())) {
     if (jos->setMyProperties( name(), this ).isFailure()) {
@@ -310,7 +485,8 @@ Service::Service( const std::string& name, ISvcLocator* svcloc) {
   m_svcLocator = svcloc;
   m_svcManager = 0;
   m_messageSvc = 0;
-  m_state      = OFFLINE;
+  m_state      = Gaudi::StateMachine::OFFLINE;
+  m_targetState = Gaudi::StateMachine::OFFLINE;
   m_propertyMgr = new PropertyMgr();
   m_pAuditorSvc = 0;
   m_outputLevel = MSG::NIL;
@@ -337,8 +513,12 @@ Service::Service( const std::string& name, ISvcLocator* svcloc) {
     }
   }
 
-  declareProperty( "AuditInitialize" , m_auditorInitialize = audit );
-  declareProperty( "AuditFinalize"   , m_auditorFinalize   = audit );
+  declareProperty( "AuditInitialize"   , m_auditorInitialize   = audit );
+  declareProperty( "AuditStart"        , m_auditorStart        = audit );
+  declareProperty( "AuditStop"         , m_auditorStop         = audit );
+  declareProperty( "AuditFinalize"     , m_auditorFinalize     = audit );
+  declareProperty( "AuditReInitialize" , m_auditorReinitialize = audit );
+  declareProperty( "AuditReStart"      , m_auditorRestart      = audit );
 
 }
 
@@ -355,15 +535,15 @@ Service::~Service() {
 }
 
 
-StatusCode 
-Service::service_i(const std::string& svcName, bool createIf, 
+StatusCode
+Service::service_i(const std::string& svcName, bool createIf,
 		   const InterfaceID& iid, void** ppSvc) const {
   MsgStream log(msgSvc(), name());
   ServiceLocatorHelper helper(*serviceLocator(), log, name());
   return helper.getService(svcName, createIf, iid, ppSvc);
 }
 
-StatusCode 
+StatusCode
 Service::service_i(const std::string& svcType,
 		   const std::string& svcName,
 		   const InterfaceID& iid,

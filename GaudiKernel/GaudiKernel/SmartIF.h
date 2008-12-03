@@ -1,4 +1,4 @@
-// $Id: SmartIF.h,v 1.9 2007/12/12 16:02:31 marcocle Exp $
+// $Id: SmartIF.h,v 1.10 2008/10/27 19:22:20 marcocle Exp $
 #ifndef GAUDI_SMARTIF_H
 #define GAUDI_SMARTIF_H 1
 
@@ -78,7 +78,7 @@ public:
     return (void**) &m_interface;
   }
   /// Get reference to interface pointer
-  const TYPE* const get() {
+  const TYPE* get() {
     return m_interface;
   }
   /// Get reference to interface pointer
@@ -89,11 +89,11 @@ public:
   const TYPE* const & pRef() const  {
     return this->m_interface;
   }
-  /// check the validity of the interface 
+  /// check the validity of the interface
   bool operator!() const { return !(this->isValid()) ; }
 private:
-  // disable copy 
-  SmartIFBase( const SmartIFBase& copy ); ///< disable copy 
+  // disable copy
+  SmartIFBase( const SmartIFBase& copy ); ///< disable copy
   // disable assignement
   SmartIFBase& operator=( const SmartIFBase& right ) ; ///< disable assignement
 };
@@ -152,11 +152,11 @@ public:
     return *this;
   }
   /// Copy assignment operator with conversion to requested interface type
-  template <class T> 
-  SmartIF<TYPE>& operator = ( const SmartIF<T>& iface )   
+  template <class T>
+  SmartIF<TYPE>& operator = ( const SmartIF<T>& iface )
   {
     T* ptr = iface.m_interface ;
-    if ( (void*)ptr != (void*)this->m_interface )   
+    if ( (void*)ptr != (void*)this->m_interface )
     {
       TYPE* newIF = 0;
       if ( ptr != 0 )   {
@@ -167,16 +167,16 @@ public:
     }
     return *this;
   }
-  /// Copy assignment operator 
-  SmartIF<TYPE>& operator = ( const SmartIF<TYPE>& iface)   
+  /// Copy assignment operator
+  SmartIF<TYPE>& operator = ( const SmartIF<TYPE>& iface)
   {
     TYPE* newIF = iface.m_interface ;
     return (*this)=newIF ;
   }
   /// Assignment operator with conversion to requested interface type
-  SmartIF& operator = (IInterface* iface)   
+  SmartIF& operator = (IInterface* iface)
   {
-    if ( iface != this->m_interface )   
+    if ( iface != this->m_interface )
     {
       TYPE* newIF = 0;
       if ( iface != 0 )   {
@@ -188,7 +188,7 @@ public:
     return *this;
   }
   /// Simple assignment operator
-  SmartIF<TYPE>& operator = (TYPE* iface)   
+  SmartIF<TYPE>& operator = (TYPE* iface)
   {
     if ( iface != this->m_interface )   {
       if ( iface != 0 )   {
@@ -199,16 +199,16 @@ public:
     }
     return *this;
   }
-  /// check the validity of the interface 
+  /// check the validity of the interface
   bool operator!() const { return !(this->isValid()) ; }
 };
 
 /** Smart pointer to handle IInterface interfaces
 
     Description:
-    The smart pointer to IInterface is a little bit special, 
+    The smart pointer to IInterface is a little bit special,
     mainly because the IInterface is contained in any other interface.
-    Hence, the exported methodes are only a subset of the 
+    Hence, the exported methodes are only a subset of the
     generic template.
 
     Base Class:
@@ -229,20 +229,20 @@ template <> class SmartIF<IInterface> : public SmartIFBase<IInterface>  {
 public:
   typedef IInterface TYPE;
   /// Copy constructor
-  SmartIF( const SmartIF<IInterface>& copy) 
+  SmartIF( const SmartIF<IInterface>& copy)
     : SmartIFBase<IInterface>(copy.m_iid)
   {
     SmartIF<TYPE>::operator=(copy.m_interface);
   }
   /// Standard constructor with initialisation
-  SmartIF(IInterface* iface = 0) 
-  : SmartIFBase<IInterface>(IID_IInterface)    
+  SmartIF(IInterface* iface = 0)
+  : SmartIFBase<IInterface>(IID_IInterface)
   {
     SmartIF<TYPE>::operator=(iface);
   }
   /// Constructor from other SmartIF
   template <class T>
-  SmartIF( const SmartIF<T>& right ) 
+  SmartIF( const SmartIF<T>& right )
     : SmartIFBase<IInterface>(IID_IInterface)
   {
     SmartIF<TYPE>::operator=(right.m_interface);
@@ -251,8 +251,8 @@ public:
   virtual ~SmartIF()    {
   }
   /// Copy assignment operator with conversion to requested interface type
-  template <class T> 
-  SmartIF<TYPE>& operator = ( const SmartIF<T>& iface)  
+  template <class T>
+  SmartIF<TYPE>& operator = ( const SmartIF<T>& iface)
   {
     T* ptr = iface.m_interface ;
     if ( (void*)ptr != (void*)this->m_interface )   {
@@ -270,7 +270,7 @@ public:
     TYPE* newIF = iface.m_interface ;
     return (*this)=newIF ;
   }
-  /// Assignment operator 
+  /// Assignment operator
   SmartIF<TYPE>& operator = (TYPE* iface)   {
     if ( iface != m_interface )   {
       if ( iface != 0 )   {
@@ -281,7 +281,7 @@ public:
     }
     return *this;
   }
-  /// check the validity of the interface 
+  /// check the validity of the interface
   bool operator!() const { return !(this->isValid()) ; }
 };
 

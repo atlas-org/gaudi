@@ -1,7 +1,7 @@
-// $Id: GaudiCommon.icpp,v 1.18 2008/04/03 22:13:13 marcocle Exp $
+// $Id: GaudiCommon.icpp,v 1.22 2008/10/10 15:18:56 marcocle Exp $
 
 // ============================================================================
-// CVS tag $Name:  $ version $Revision: 1.18 $
+// CVS tag $Name:  $ version $Revision: 1.22 $
 // ============================================================================
 // ============================================================================
 // include files
@@ -85,11 +85,11 @@ GaudiCommon<PBASE>::initGaudiCommonConstructor( const IInterface * parent )
   // printout of counters:
   
   // the header row for counters printout 
-  m_header  = " |    Counter     |     #     |    sum     | mean/eff^* | rms/err^*  |     min     |     max     |" ;
+  m_header  = " |    Counter                                      |     #     |    sum     | mean/eff^* | rms/err^*  |     min     |     max     |" ;
   // format for regular statistical printout rows
-  m_format1 = " | %|-15.15s|%|17t||%|10d| |%|11.7g| |%|#11.5g| |%|#11.5g| |%|#12.5g| |%|#12.5g| |" ;
+  m_format1 = " | %|-48.48s|%|50t||%|10d| |%|11.7g| |%|#11.5g| |%|#11.5g| |%|#12.5g| |%|#12.5g| |" ;
   // format for "efficiency" statistical printout rows
-  m_format2 = " |*%|-15.15s|%|17t||%|10d| |%|11.5g| |(%|#9.6g| +- %|-#9.6g|)%%|   -------   |   -------   |" ;
+  m_format2 = " |*%|-48.48s|%|50t||%|10d| |%|11.5g| |(%|#9.6g| +- %|-#9.6g|)%%|   -------   |   -------   |" ;
   // flag to use the special "efficiency" format 
   m_useEffFormat = true ; ///< flag to use the special "efficiency" format 
   
@@ -200,7 +200,7 @@ StatusCode GaudiCommon<PBASE>::initialize()
   // some debug printout
   if ( msgLevel(MSG::DEBUG) )
   {
-    debug() << "Initialize base class GaudiCommon<PBASE>" << endreq;
+    debug() << "Initialize base class GaudiCommon<" << System::typeinfoName(typeid(PBASE)) << ">" << endreq;
     if ( !context().empty() )
       debug() << "Created with context = '" << context() << "'" << endreq;
   }
@@ -211,12 +211,12 @@ StatusCode GaudiCommon<PBASE>::initialize()
   {
     m_rootInTES = m_rootOnTES;
     Warning( "RootOnTES option is OBSOLETE -> Use RootInTES instead. RootInTES has been updated to " 
-             + m_rootInTES, StatusCode::SUCCESS );
+             + m_rootInTES, StatusCode::SUCCESS ).ignore();
   }
   else if ( !m_rootInTES.empty() && !m_rootOnTES.empty() )
   {
     Warning( "Options RootOnTES AND RootInTES are defined ! Use RootInTES. RootOnTES is ignored", 
-             StatusCode::SUCCESS );
+             StatusCode::SUCCESS ).ignore();
   }
 
   // Check rootInTES ends with a /
@@ -237,6 +237,7 @@ StatusCode GaudiCommon<PBASE>::initialize()
 template < class PBASE >
 StatusCode GaudiCommon<PBASE>::finalize()
 {
+  StatusCode sc = StatusCode::SUCCESS;
 
   // print the general information about statistical counters
   if ( msgLevel(MSG::DEBUG) || (statPrint() && !counters().empty()) )
@@ -256,7 +257,9 @@ StatusCode GaudiCommon<PBASE>::finalize()
     }
     debug() << endreq;
   }
-  while ( !m_tools.empty() ) { release( m_tools.back() ) ; }
+  while ( !m_tools.empty() ) { sc = sc && release( m_tools.back() ) ; }
+
+  // release all located services
   if ( msgLevel(MSG::DEBUG) )
   {
     debug() << "Services to release :";
@@ -267,7 +270,7 @@ StatusCode GaudiCommon<PBASE>::finalize()
     }
     debug() << endreq;
   }
-  while ( !m_services.empty() ) { release( m_services.back ().first ).ignore(); }
+  while ( !m_services.empty() ) { sc = sc && release( m_services.back().first ); }
 
   // format printout
   if ( !m_errors.empty() || !m_warnings.empty() || !m_exceptions.empty() )
@@ -289,7 +292,7 @@ StatusCode GaudiCommon<PBASE>::finalize()
   m_errors     .clear() ;
 
   // finalize base class
-  return PBASE::finalize();
+  return sc && PBASE::finalize();
 }
 //=============================================================================
 
@@ -336,16 +339,10 @@ StatusCode GaudiCommon<PBASE>::releaseTool ( const IAlgTool* algTool ) const
   // remove the tool from the lists
   m_tools.erase( --it.base() ) ;
   // release tool
-  const StatusCode sc = this->toolSvc() ->releaseTool( t ) ;
-  // Check for more tools of the same name
-  while ( (it = std::find(m_tools.rbegin(),m_tools.rend(),algTool)) != m_tools.rend() )
-  {
-    Warning( "Removing additional reference(s) to '"+name+"' in active tool list",
-             StatusCode::SUCCESS, 1 );
-    m_tools.erase( --it.base() ) ;
-  }
+  const StatusCode sc = this->toolSvc()->releaseTool( t ) ;
   if ( sc.isFailure() )
-  { Warning ( "releaseTool(IAlgTool):: error from IToolSvc whilst releasing "+name , sc ) ; }
+  { return Warning ( "releaseTool(IAlgTool):: error from IToolSvc whilst releasing "+name , sc ) ; }
+  // return final status code
   return sc ;
 }
 // ============================================================================
@@ -362,7 +359,7 @@ StatusCode GaudiCommon<PBASE>::releaseSvc ( const IInterface* Svc  ) const
   Services::reverse_iterator iS = m_services.rbegin();
   for ( ; iS != m_services.rend(); ++iS ) { if ( (*iS).first == Svc ) break; }
   if ( m_services.rend() == iS )
-  { return Warning( "releaseSvc(IInterface):: IInterface* is not active"  ) ; }
+  { return Warning( "releaseSvc(IInterface):: IInterface* is not active" ) ; }
   // get the service
   IInterface * s = (*iS).first ;
   if ( msgLevel(MSG::DEBUG) )
@@ -382,13 +379,6 @@ StatusCode GaudiCommon<PBASE>::releaseSvc ( const IInterface* Svc  ) const
 template < class PBASE >
 void GaudiCommon<PBASE>::addToToolList( IAlgTool * tool ) const
 {
-  AlgTools::const_iterator iTool = std::find( m_tools.begin(),
-                                              m_tools.end(),
-                                              tool );
-  if ( iTool != m_tools.end() )
-  {
-    Warning( "Tool '" + tool->name() + "' already in list of active tools" );
-  }
   m_tools.push_back( tool ) ;
 }
 // ============================================================================
@@ -401,13 +391,6 @@ void GaudiCommon<PBASE>::addToServiceList( IInterface * svc,
                                            const std::string & name ) const
 {
   const ServiceEntry sEntry( svc , name );
-  Services::const_iterator iSvc = std::find( m_services.begin(),
-                                             m_services.end(),
-                                             sEntry );
-  if ( iSvc != m_services.end() )
-  {
-    Warning( "Service '" + name + "' already in list of active services" );
-  }
   m_services.push_back( sEntry ) ;
 }
 // ============================================================================
@@ -675,7 +658,7 @@ void GaudiCommon<PBASE>::msgLevelHandler ( Property & theProp )
 // put results into Gaudi Event Transient Store
 // ============================================================================
 template < class PBASE >
-void GaudiCommon<PBASE>::put ( IDataProviderSvc*  svc     ,
+DataObject* GaudiCommon<PBASE>::put ( IDataProviderSvc*  svc     ,
                                DataObject*        object  ,
                                const std::string& location ,
                                const bool useRootInTES ) const
@@ -683,7 +666,7 @@ void GaudiCommon<PBASE>::put ( IDataProviderSvc*  svc     ,
   // check arguments
   Assert ( 0 != svc              , "put():: Invalid 'service'!"       ) ;
   Assert ( 0 != object           , "put():: Invalid 'Object'!"        ) ;
-  Assert ( !location.empty()     , "put():: Invalid 'address' = '' " ) ;
+  Assert ( !location.empty()     , "put():: Invalid 'address' = '' "  ) ;
   // final data location
   const std::string & fullLocation = fullTESLocation( location, useRootInTES );
   // register the object!
@@ -700,5 +683,6 @@ void GaudiCommon<PBASE>::put ( IDataProviderSvc*  svc     ,
            System::typeinfoName( typeid( *object ) ) +
            "' is registered in TS at address '"
            + fullLocation + "'" , status , MSG::DEBUG ) ; }
+  return object;
 }
 // ============================================================================

@@ -34,6 +34,11 @@ else:
     # otherwise add the default
     qmtest_results = os.path.normpath(os.path.expandvars(os.environ["QMTESTRESULTS"]))
     qmtest_args = ["-o",qmtest_results] + qmtest_args
+    # create the destination directory if necessary
+    results_dest_dir = os.path.realpath(os.path.join(qmtest_dir, os.path.dirname(qmtest_results)))
+    if not os.path.exists(results_dest_dir):
+        print "==========> Creating '%s'" % results_dest_dir
+        os.makedirs(results_dest_dir, 0755)
 
 cmd = "qmtest run %s"%(" ".join(qmtest_args))
 

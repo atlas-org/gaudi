@@ -1,4 +1,4 @@
-// $Id: GaudiCommon.h,v 1.15 2008/01/17 20:58:46 marcocle Exp $
+// $Id: GaudiCommon.h,v 1.18 2008/10/27 19:22:20 marcocle Exp $
 // ============================================================================
 #ifndef GAUDIALG_GAUDICOMMON_H
 #define GAUDIALG_GAUDICOMMON_H 1
@@ -28,10 +28,11 @@
 #include "GaudiKernel/IUpdateManagerSvc.h"
 #include "GaudiKernel/TransientFastContainer.h"
 // ============================================================================
-// forward declarations 
+// forward declarations
 // ============================================================================
 class Algorithm ; // GaudiKernel
 class AlgTool   ; // GaudiKernel
+namespace Gaudi { namespace Utils { template <class TYPE> struct GetData ; } }
 // ============================================================================
 /*  @file GaudiCommon.h
  *
@@ -55,7 +56,7 @@ template < class PBASE >
 class GaudiCommon : public PBASE
 {
 protected: // definitions
-  /** Simple definition to be used with the new useRootInTES argument get<TYPE> 
+  /** Simple definition to be used with the new useRootInTES argument get<TYPE>
    *  and put methods. If used with cause the RootInTES option to be IGNORED.
    *
    *  Useful to aid with code readablity. e.g.
@@ -65,7 +66,7 @@ protected: // definitions
    *  @endcode
    */
   static const bool IgnoreRootInTES = false;
-  /** Simple definition to be used with the new useRootInTES argument get<TYPE> 
+  /** Simple definition to be used with the new useRootInTES argument get<TYPE>
    *  and put methods. If used with cause the RootInTES option to be USED
    *
    *  Useful to aid with code readablity. e.g.
@@ -104,9 +105,9 @@ public:
    *
    *  @attention The method respects the setting of the job option
    *             RootInTES by prepending the value of this to the
-   *             data location that is passed. 
+   *             data location that is passed.
    *             The default setting for RootInTES is "" so has no effect.
-   *             This behaviour can be suppressed by passing the arguement 
+   *             This behaviour can be suppressed by passing the arguement
    *             useRootInTES = false
    *
    *  @see IDataProviderSvc
@@ -123,9 +124,10 @@ public:
    *  @return pointer to the data object
    */
   template < class TYPE >
-  TYPE* get ( IDataProviderSvc*  svc        ,
-              const std::string& location   ,
-              const bool useRootInTES = true ) const ;
+  typename Gaudi::Utils::GetData<TYPE>::return_type
+  get ( IDataProviderSvc*  svc         ,
+        const std::string& location    ,
+        const bool useRootInTES = true ) const ;
   /** @brief Check the existence of a data object or container
    *         in the Gaudi Transient Event Store
    *
@@ -138,9 +140,9 @@ public:
    *
    *  @attention The method respects the setting of the job option
    *             RootInTES by prepending the value of this to the
-   *             data location that is passed. 
+   *             data location that is passed.
    *             The default setting for RootInTES is "" so has no effect.
-   *             This behaviour can be suppressed by passing the arguement 
+   *             This behaviour can be suppressed by passing the arguement
    *             useRootInTES = false
    *
    *  @param  svc      Pointer to data provider service
@@ -168,9 +170,9 @@ public:
    *
    *  @attention The method respects the setting of the job option
    *             RootInTES by prepending the value of this to the
-   *             data location that is passed. 
+   *             data location that is passed.
    *             The default setting for RootInTES is "" so has no effect.
-   *             This behaviour can be suppressed by passing the arguement 
+   *             This behaviour can be suppressed by passing the arguement
    *             useRootInTES = false
    *
    *  @exception GaudiException for Invalid Data Provider Service
@@ -193,9 +195,9 @@ public:
    *
    *  @attention The method respects the setting of the job option
    *             RootInTES by prepending the value of this to the
-   *             data location that is passed. 
+   *             data location that is passed.
    *             The default setting for RootInTES is "" so has no effect.
-   *             This behaviour can be suppressed by passing the arguement 
+   *             This behaviour can be suppressed by passing the arguement
    *             useRootInTES = false
    *
    *  @param svc        Pointer to data provider service
@@ -212,7 +214,7 @@ public:
    *  @retval StatusCode::SUCCESS Data was successfully placed in the TES.
    *  @retval StatusCode::FAILURE Failed to store data in the TES.
    */
-  void put ( IDataProviderSvc*  svc ,
+  DataObject* put ( IDataProviderSvc*  svc ,
              DataObject*        object   ,
              const std::string& location  ,
              const bool useRootInTES = true ) const ;
@@ -697,7 +699,7 @@ public:
    */
   inline const std::string & rootInTES() const { return m_rootInTES; }
   /// Returns the "globalTimeOffset" double.
-  inline const double globalTimeOffset() const { return m_globalTimeOffset; }
+  inline double globalTimeOffset() const { return m_globalTimeOffset; }
 private:
   /// Add the given tool to the list of acquired tools
   void addToToolList    ( IAlgTool * tool ) const;
@@ -760,8 +762,8 @@ private:
   std::string    m_format1 ; ///< format for regular statistical printout rows
   // format for "efficiency" statistical printout rows
   std::string    m_format2 ; ///< format for "efficiency" statistical printout rows
-  // flag to use the special "efficiency" format 
-  bool           m_useEffFormat ; ///< flag to use the special "efficiency" format  
+  // flag to use the special "efficiency" format
+  bool           m_useEffFormat ; ///< flag to use the special "efficiency" format
 } ;
 // ============================================================================
 #include "GaudiAlg/GaudiCommonImp.h"

@@ -1,12 +1,13 @@
-// $Id: ParticlePropertySvc.cpp,v 1.14 2007/05/24 14:41:22 hmd Exp $
+// $Id: ParticlePropertySvc.cpp,v 1.17 2008/10/27 16:41:33 marcocle Exp $
 // ============================================================================
-// CVS tag $Name:  $ , version $Revision: 1.14 $
+// CVS tag $Name:  $ , version $Revision: 1.17 $
 // ============================================================================
 //Include files
 // ============================================================================
 // STD&STL 
 // ============================================================================
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 // ============================================================================
 // GaudiKernel
@@ -16,6 +17,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ParticleProperty.h"
 #include "GaudiKernel/PhysicalConstants.h"
+#include "GaudiKernel/IFileAccess.h"
 // ============================================================================
 //#include "GaudiKernel/ToStream.h"
 // ============================================================================
@@ -58,6 +60,7 @@ ParticlePropertySvc::ParticlePropertySvc
   //
   , m_owned ()
   , m_replaced () 
+  , m_fileAccess (0)
 {
   // Redefine the default name: 
   if( NULL != getenv("PARAMFILESROOT") ) 
@@ -97,6 +100,14 @@ StatusCode ParticlePropertySvc::initialize()
   if ( sc.isFailure() ) 
   {
     log << MSG::ERROR << " Could not set the properties " << endreq ;
+    return sc ;
+  }
+  
+  
+  sc = service("VFSSvc",m_fileAccess);
+  if ( sc.isFailure() ) 
+  {
+    log << MSG::ERROR << " Cannot retrieve the VFS service " << endreq ;
     return sc ;
   }
   
@@ -164,6 +175,12 @@ StatusCode ParticlePropertySvc::finalize()
         << Gaudi::Utils::toString( m_replaced ) 
         << endreq ;
   }
+
+  if (m_fileAccess) {
+    m_fileAccess->release();
+    m_fileAccess = 0;
+  }
+  
   /// finalize the base class 
   return Service::finalize () ; 
 }
@@ -344,15 +361,17 @@ StatusCode ParticlePropertySvc::parse( const std::string& file )
   MsgStream log( msgSvc(), name() );
   char line[ 255 ];
   
-  std::ifstream infile( file.c_str() );
+  std::auto_ptr<std::istream> infileptr;
+  if (m_fileAccess) infileptr = m_fileAccess->open(file);
   
-  if ( !infile )
+  if ( infileptr.get() == 0 )
   {
-  	log << MSG::ERROR << "Unable to open properties file : " << file
+    log << MSG::ERROR << "Unable to open properties file : " << file
         << endreq;
     return StatusCode::FAILURE ;
   }
   
+  std::istream &infile = *infileptr;
   sc = StatusCode::SUCCESS;
   log << MSG::INFO 
       << "Opened particle properties file : " << file << endreq;
@@ -404,7 +423,7 @@ StatusCode ParticlePropertySvc::parse( const std::string& file )
     
   }
   
-  infile.close();
+  //infile.close();
   
   return StatusCode::SUCCESS ;
 }

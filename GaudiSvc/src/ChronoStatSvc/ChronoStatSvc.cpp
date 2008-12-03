@@ -1,6 +1,6 @@
-// $Id: ChronoStatSvc.cpp,v 1.17 2008/01/15 17:01:07 marcocle Exp $ 
+// $Id: ChronoStatSvc.cpp,v 1.18 2008/05/13 12:37:19 marcocle Exp $ 
 // ============================================================================
-// CVS tag $Name:  $, version $Revision: 1.17 $ 
+// CVS tag $Name:  $, version $Revision: 1.18 $ 
 // ============================================================================
 #ifdef _WIN32
 #pragma warning( disable : 4786 )
@@ -43,6 +43,7 @@ DECLARE_SERVICE_FACTORY(ChronoStatSvc)
  *   @date:    December 1, 1999
  */
 // ============================================================================
+// ============================================================================
 //  comparison functor 
 // ============================================================================
 class ComparePairOfChronoEntityAndChronoTag 
@@ -81,7 +82,7 @@ public:
     const StatEntity* se1 = p1.first;
     const StatEntity* se2 = p2.first;
     return ( 0 == se1 || 0 == se2 ) ? true : (*se1)<(*se2) ;
-  };
+  }
 };
 // ============================================================================
 // Constructor 
@@ -391,20 +392,24 @@ ChronoStatSvc::queryInterface
 // ============================================================================
 // Implementation of IChronoStatSvc::chronoStart
 // ============================================================================
-void    
+ChronoEntity*
 ChronoStatSvc::chronoStart
 ( const ChronoTag& chronoTag )
 {
-  m_chronoEntities[ chronoTag ].start(); 
+  ChronoEntity& entity = m_chronoEntities [ chronoTag ] ;
+  entity.start() ;
+  return &entity ;
 }
 // ============================================================================
 // Implementation of IChronoStatSvc::chronoStop
 // ============================================================================
-void    
+const ChronoEntity*
 ChronoStatSvc::chronoStop 
 ( const IChronoStatSvc::ChronoTag& chronoTag )
-{ 
-  m_chronoEntities[ chronoTag ].stop(); 
+{
+  ChronoEntity& entity = m_chronoEntities [ chronoTag ] ;
+  entity.stop() ;
+  return &entity ;
 }
 // ============================================================================
 // Implementation of IChronoStatSvc::chronoDelta

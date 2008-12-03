@@ -1,4 +1,4 @@
-// $Id: GaudiCommonImp.h,v 1.10 2008/01/18 15:11:17 marcocle Exp $
+// $Id: GaudiCommonImp.h,v 1.11 2008/10/10 08:06:33 marcocle Exp $
 // ============================================================================
 #ifndef GAUDIALG_GAUDICOMMONIMP_H
 #define GAUDIALG_GAUDICOMMONIMP_H 1
@@ -7,9 +7,8 @@
 // ============================================================================
 // GaudiAlg
 // ============================================================================
+#include "GaudiAlg/GetData.h"
 #include "GaudiAlg/GaudiCommon.h"
-// ============================================================================
-
 // ============================================================================
 /** @file
  *  The implementation of inline/templated methods for class GaudiCommon
@@ -18,8 +17,6 @@
  *  @author Chris Jones   Christopher.Rob.Jones@cern.ch
  *  @date   2004-01-19
  */
-// ============================================================================
-
 // ============================================================================
 // Returns the full correct event location given the rootInTes settings
 // ============================================================================
@@ -39,44 +36,33 @@ GaudiCommon<PBASE>::fullTESLocation( const std::string & location,
   //  "/Event/MyObj" -> R.I.T. + "MyObj" ("rit/MyObj")
   //  "MyObj"        -> R.I.T. + "MyObj" ("rit/MyObj")
   return ( !useRootInTES || rootInTES().empty() ?
-             location
+           location
+         :
+           location.empty() || ( location == "/Event" ) ?
+             rootInTES().substr(0,rootInTES().size()-1)
            :
-             location.empty() || ( location == "/Event" ) ?
-               rootInTES().substr(0,rootInTES().size()-1)
-             :
-               0 == location.find("/Event/") ?
-                 rootInTES() + location.substr(7)
-               : 
-                 rootInTES() + location );
+             0 == location.find("/Event/") ?
+               rootInTES() + location.substr(7)
+             : 
+               rootInTES() + location );
 }
-// ============================================================================
-
 // ============================================================================
 // Templated access to the data in Gaudi Transient Store
 // ============================================================================
 template < class PBASE >
 template < class TYPE  >
-inline TYPE* GaudiCommon<PBASE>::get( IDataProviderSvc*  service ,
-                                      const std::string& location,
-                                      const bool useRootInTES ) const
+inline typename Gaudi::Utils::GetData<TYPE>::return_type
+GaudiCommon<PBASE>::get( IDataProviderSvc*  service ,
+                         const std::string& location,
+                         const bool useRootInTES ) const
 {
   // check the environment
   Assert( 0 != service ,    "get():: IDataProvider* points to NULL!"      ) ;
-  const std::string & fullLoc = fullTESLocation( location, useRootInTES );
-  SmartDataPtr<TYPE> obj( service , fullLoc ) ;
-  //if ( !obj ) { Exception ( "get():: No valid data at '" + fullLoc + "'" ) ; }
-  TYPE* aux = obj ;
-  if ( !aux ) { Exception ( "get():: No valid data at '" + fullLoc + "'" ) ; }
-  if ( msgLevel( MSG::DEBUG ) )
-  { this-> debug() << "The object of type '"
-                   << System::typeinfoName(typeid(*aux))
-                   << "' has been retrieved from TS at address '"
-                   << fullLoc << "'" << endreq ; }
-  // return located *VALID* data
-  return aux ;
+  // get the helper object:
+  Gaudi::Utils::GetData<TYPE> helper ;
+  return helper ( *this , service , 
+                  fullTESLocation ( location , useRootInTES ) ) ;
 }
-// ============================================================================
-
 // ============================================================================
 // check the existence of objects in Gaudi Transient Store
 // ============================================================================

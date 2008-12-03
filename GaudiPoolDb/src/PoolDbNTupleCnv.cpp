@@ -1,4 +1,4 @@
-// $Id: PoolDbNTupleCnv.cpp,v 1.15 2008/01/17 13:20:52 marcocle Exp $
+// $Id: PoolDbNTupleCnv.cpp,v 1.16 2008/10/27 16:41:33 marcocle Exp $
 //------------------------------------------------------------------------------
 //
 // Implementation of class :  PoolDbNTupleCnv
@@ -6,6 +6,9 @@
 // Author :                   Markus Frank
 //
 //------------------------------------------------------------------------------
+
+// FIXME: missing in CORAL
+#include <algorithm>
 
 #define ALLOW_ALL_TYPES
 // Include files
@@ -37,6 +40,8 @@
 #define S_OK   StatusCode::SUCCESS
 #define S_FAIL StatusCode::FAILURE
 #include "Reflex/Builder/ReflexBuilder.h"
+
+#include <memory>
 
 namespace pool  {
   const std::string typeName(const std::type_info& typ);
@@ -93,7 +98,7 @@ template <class T> static inline int load(pool::DbBlob& s, void* buff)  {
 }
 
 // Helper to read specialized for strings
-template <> static inline int load<std::string>(pool::DbBlob& s, void* ptr)   {
+template <> inline int load<std::string>(pool::DbBlob& s, void* ptr)   {
   std::string* str = (std::string*)ptr;
   s >> (*str);
   return 0;

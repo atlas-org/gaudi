@@ -1,4 +1,4 @@
-// $Id: NTupleItems.h,v 1.6 2006/12/10 20:29:17 leggett Exp $
+// $Id: NTupleItems.h,v 1.7 2008/10/27 19:22:20 marcocle Exp $
 #ifndef GAUDI_NTUPLESVC_NTUPLEITEMS_H
 #define GAUDI_NTUPLESVC_NTUPLEITEMS_H 1
 
@@ -16,7 +16,7 @@
  *
  * NTupleItems namespace parts definition
  * This header file is not intended to be included by the public!
- * It's only used for the ntuple service 
+ * It's only used for the ntuple service
  *
  * @author M.Frank
  * @author Sebastien Ponce
@@ -66,7 +66,7 @@ namespace NTuple    {
     typedef Range<TYP>  ItemRange;
     /// Standard Constructor
     _DataImp(INTuple* tup,const std::string& name,const std::type_info& info,const std::string& index,long len,TYP low,TYP high,TYP def)
-    : m_length(len), m_tuple(tup), m_name(name), m_index(index), 
+    : m_length(len), m_tuple(tup), m_name(name), m_index(index),
       m_def(def), m_range(low, high), m_info(info)
     {
       m_indexItem = 0;
@@ -79,11 +79,11 @@ namespace NTuple    {
       if ( 0 != this->m_buffer ) delete [] this->m_buffer;
     }
     /// Get proper type name
-    virtual const std::string typeName()   const   {
+    virtual std::string typeName()   const   {
       return System::typeinfoName( this->typeID() );
     }
     /// Reset to default
-    virtual void reset()                      {  
+    virtual void reset()                      {
       TYP* buff = this->m_buffer;
       for ( size_t i = 0; i < static_cast<size_t>(m_length); i++ )    {
         *buff++ = m_def;
@@ -108,7 +108,7 @@ namespace NTuple    {
       return len;
     }
     /// Pointer to index column (if present, 0 else)
-    virtual INTupleItem* indexItem()                  { 
+    virtual INTupleItem* indexItem()                  {
       if ( 0 == m_indexItem )   {
         m_indexItem = m_tuple->find(m_index);
       }
@@ -134,7 +134,7 @@ namespace NTuple    {
     /// Access _Column name
     virtual const std::string&  name() const { return m_name; }
     /// TYP information of the item
-    virtual const long type() const { return m_type; }
+    virtual long type() const { return m_type; }
     /// Set the properties of the _Column
     virtual void setType (long t) { m_type=DataTypeInfo::Type(t); }
     /// Set default value
@@ -142,7 +142,7 @@ namespace NTuple    {
     /// Access the range if specified
     virtual const ItemRange& range() const { return m_range; }
     /// Access the buffer length
-    virtual const long length() const { return m_length; }
+    virtual long length() const { return m_length; }
     /// Access data buffer (CONST)
     virtual const void* buffer() const { return this->m_buffer; }
     /// Access data buffer
@@ -194,7 +194,7 @@ namespace NTuple    {
     //virtual const std::type_info& typeID() const             { return typeid(NTuple::_Array<TYP>); }
     /// Set default value
     virtual void setDefault(const TYP val)   { this->m_def = val;                  }
-    /// Access the range if specified 
+    /// Access the range if specified
     virtual const ItemRange& range() const   { return this->m_range;               }
     /// Size of entire object
     virtual long size()   const              { return this->m_length*sizeof(TYP);  }
@@ -232,7 +232,7 @@ namespace NTuple    {
     /// Dimension
     virtual long ndim() const                { return 2;                           }
     /// Access individual dimensions
-    virtual long dim(long i) const           { 
+    virtual long dim(long i) const           {
       return (this->hasIndex()) ?
         ((i==0) ?
          this->m_rows : this->m_length/this->m_rows) : ((i==1) ? this->m_length/this->m_rows : this->m_rows);

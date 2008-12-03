@@ -1,6 +1,73 @@
 Package: GaudiAlg
 Package manager : Pere Mato
 
+================ GaudiAlg v11r2 ====================================
+! 2008-11-04 - Marco Cattaneo
+ - Patch #2601. Introduce support for file summary records.
+   - Two new options for the GaudiAlgorithm base class:
+     - "VetoObjects" is a list of TES locations. If one or more of these TES
+       objects exists, the algorithm skips the event (execute is not called)
+     - "RequireObjects" is a list of TES locations. If set, execute is only
+       called if one or more of these TES objects exists.
+
+! 2008-10-27 - Marco Clemencic
+ - Fixed warnings reported by gcc 4.3:
+   - type qualifiers ignored on function return type
+
+! 2008-10-10 - Chris Jones
+ - Patch #2509. Suppress messages in GaudiAlg when tools are loaded multiple times
+   Suppress the warnings when a component loads a tool with the same name
+   more than once as this makes sometimes sense (tools with multiple 
+   interfaces for instance).
+
+! 2008-10-10 - Gerhard Raven
+ - Patch #2506. GaudiSequencer: bug in setFilterPassed logic in case
+                ModeOR=true, IgnoreFilterPassed=true
+   When IgnoreFilter is set to True, and ModeOR is also set to True, the
+   filterpassed status was set to False, when it shouldn't be set at all.
+ - Patch #2483. Return pointer to 'put' object in GaudiCommon::put
+   (includes minor improvement of the debug output)
+
+! 2008-10-10 - Marco Clemencic
+ - Changed the default value of the property HistoPrint of GaudiHistos base
+   class.
+
+! 2008-10-10 - Vanya Belyaev
+ - Patch #2073: SharedObjectsContainer and 'blind' access to TYPE::Container &
+                TYPE::Selection
+   - GaudiCommon<TYPE>::get methods are rewritten in terms of
+     Gaudi::Utils::GetData to allow "blind" access to the vector-like
+     containers.
+   - Utility Gaudi::Utils::GetData which "gets" the data from TES.
+
+! 2008-10-09 - Vanya Belyaev
+ - Patch #2058. Extensions for AIDA::TProfile1D
+    * GaudiAlg/GaudiHistos.h
+    * GaudiAlg/GaudiHistos.icpp
+   add more default arguments to the methods GaudiHistos::profile1D and
+   GaudiHistos::bookProfile1D to allow definition of Y-range and options.
+ 
+================ GaudiAlg v11r1 ====================================
+! 2008-07-17 - Marco Clemencic
+ - Added the interface IGenericTool (from LHCb).
+
+================ GaudiAlg v11r0 ====================================
+! 2008-06-05 - Chris Jones
+ - Fixed bug #36021. Unchecked StatusCodes in GaudiCommon<T>::releaseTool.
+
+! 2008-06-04 - Chris Jones
+ - Patch #1862. Extend space for 'counter' name in GaudiAlg summary.
+   - Changed the default format of the counters report table in GaudiAlg to
+     give more space for counter names. 
+
+! 2008-06-02 - Marco Clemencic
+ - Task #5809. Extension to Gaudi Application state machine.
+   - Removed the usage of setInitialized from sequencers. It is not needed since
+     the state is set in sysInitialize.
+
+! 2008-05-14 - Patrick Koppenburg
+ - Patch #1807. Reduced default print-out of GaudiHistos and GaudiTuples.  
+
 ================ GaudiAlg v10r5 ====================================
 ! 2008-04-04 - Marco Clemencic
  - Bug #35199: GaudiSequencer segfaults if an algorithm cannot be loaded.

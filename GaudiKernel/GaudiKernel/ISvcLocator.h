@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/ISvcLocator.h,v 1.15.4.1 2008/08/18 16:42:25 leggett Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/ISvcLocator.h,v 1.15 2006/12/14 12:55:44 hmd Exp $
 #ifndef GAUDIKERNEL_ISVCLOCATOR_H
 #define GAUDIKERNEL_ISVCLOCATOR_H 1
 
@@ -83,8 +83,6 @@ public:
     //even if the above fails we may still find the service, so keep going
     return service(name, svc, createIf);
   }
-
-  virtual void setCaller( std::string& caller ) = 0;
 };
 
 

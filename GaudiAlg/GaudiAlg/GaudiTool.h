@@ -1,4 +1,4 @@
-// $Id: GaudiTool.h,v 1.11 2007/09/25 16:12:41 marcocle Exp $
+// $Id: GaudiTool.h,v 1.13 2008/10/10 13:38:28 marcocle Exp $
 // ============================================================================
 #ifndef GAUDIALG_GAUDITOOL_H
 #define GAUDIALG_GAUDITOOL_H 1
@@ -193,12 +193,12 @@ public:
    *  @retval StatusCode::SUCCESS Data was successfully placed in the TES.
    *  @retval StatusCode::FAILURE Failed to store data in the TES.
    */
-  inline void put ( IDataProviderSvc*  svc     ,
+  inline DataObject* put ( IDataProviderSvc*  svc     ,
                     DataObject*        object  ,
                     const std::string& address ,
                     const bool useRootInTES = true ) const
   {
-    GaudiCommon<AlgTool>::put ( svc , object , address , useRootInTES ) ;
+    return GaudiCommon<AlgTool>::put ( svc , object , address , useRootInTES ) ;
   }
 
   /** @brief Register a data object or container into Gaudi Event Transient Store
@@ -207,8 +207,7 @@ public:
    *
    *  @code
    *
-   *  MCHits * hits = new MCHits();
-   *  put( hits, "/Event/MC/Hits" );
+   *  MCHits * hits = put( new MCHits(), "/Event/MC/Hits" );
    *
    *  @endcode
    *
@@ -230,11 +229,11 @@ public:
    *  @retval StatusCode::SUCCESS Data was successfully placed in the TES.
    *  @retval StatusCode::FAILURE Failed to store data in the TES.
    */
-  inline void put ( DataObject*        object   ,
+  inline DataObject* put ( DataObject*        object   ,
                     const std::string& address  ,
                     const bool useRootInTES = true ) const
   {
-    GaudiCommon<AlgTool>::put ( evtSvc() , object , address , useRootInTES ) ;
+    return GaudiCommon<AlgTool>::put ( evtSvc() , object , address , useRootInTES ) ;
   }
 
   /** @brief Templated access to the data in Gaudi Transient Store
@@ -269,9 +268,10 @@ public:
    *  @return pointer to the data object
    */
   template < class TYPE  >
-  inline TYPE* get  (  IDataProviderSvc*  svc       ,
-                       const std::string& location  ,
-                       const bool useRootInTES = true ) const
+  inline typename Gaudi::Utils::GetData<TYPE>::return_type
+  get  (  IDataProviderSvc*  svc       ,
+          const std::string& location  ,
+          const bool useRootInTES = true ) const
   {
     return GaudiCommon<AlgTool>::get<TYPE> ( svc , location , useRootInTES ) ;
   }
@@ -302,8 +302,9 @@ public:
    *  @return         Pointer to the data object
    */
   template < class TYPE  >
-  inline TYPE* get  ( const std::string& location  ,
-                      const bool useRootInTES = true ) const
+  inline typename Gaudi::Utils::GetData<TYPE>::return_type
+  get  ( const std::string& location  ,
+         const bool useRootInTES = true ) const
   {
     return GaudiCommon<AlgTool>::get<TYPE> ( evtSvc() , location , useRootInTES ) ;
   }

@@ -1,4 +1,4 @@
-// $Id: PoolDbDataConnection.cpp,v 1.4 2008/02/21 18:01:54 hmd Exp $
+// $Id: PoolDbDataConnection.cpp,v 1.5 2008/10/27 16:41:33 marcocle Exp $
 //====================================================================
 //	PoolDbDataConnection implementation
 //--------------------------------------------------------------------
@@ -8,7 +8,11 @@
 //	Author     : M.Frank
 //
 //====================================================================
-// $Id: PoolDbDataConnection.cpp,v 1.4 2008/02/21 18:01:54 hmd Exp $
+// $Id: PoolDbDataConnection.cpp,v 1.5 2008/10/27 16:41:33 marcocle Exp $
+
+// FIXME: missing in CORAL
+#include <algorithm>
+
 // Framework include files
 #include "GaudiPoolDb/PoolDbDataConnection.h"
 #include "GaudiUtils/IIODataManager.h"

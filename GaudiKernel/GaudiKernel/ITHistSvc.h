@@ -60,7 +60,7 @@ inline
 const InterfaceID&
 ITHistSvc::interfaceID() {
 
-  static const InterfaceID m_IID("THistSvc", 1, 0);
+  static const InterfaceID m_IID("THistSvc", 1, 1);
 
   return m_IID;
 }

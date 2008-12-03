@@ -1,16 +1,15 @@
-// $Id: POOLIOWrite.opts,v 1.9 2008/01/30 17:06:49 marcocle Exp $ 
-// ============================================================================
-// CVS tag $Name:  $, verison $Revision: 1.9 $
+// $Id: POOLIOWrite.opts,v 1.10 2008/11/04 22:49:25 marcocle Exp $ 
 // ============================================================================
 ////////////////////////////////////////////////////////////////
-// Example options file.
+// Write a DST and a miniDST, including File Summary Records
 ////////////////////////////////////////////////////////////////
-ApplicationMgr.OutStream  += { "RootDst"};
-ApplicationMgr.OutStream  += { "RootMini" };
+ApplicationMgr.OutStream  += { "OutputFSRStream/RootDst"};
+ApplicationMgr.OutStream  += { "OutputFSRStream/RootMini" };
 ApplicationMgr.TopAlg      = { "WriteAlg", "ReadAlg" };
 
 // Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
 MessageSvc.OutputLevel     =  1;
+IncidentSvc.OutputLevel    =  2;
 
 //--------------------------------------------------------------
 // Event related parameters
@@ -33,8 +32,10 @@ RootDst.ItemList = { "/Event#1"
                      ,"/Event/MyTracks#1"
 };
 RootDst.ItemList   = { "/Event#999" } ;
+RootDst.FSRItemList= { "/Event/FSR#999" };
 RootDst.Output     = "DATAFILE='PFN:POOLIO.dst'  TYP='POOL_ROOTTREE' OPT='RECREATE'";
 RootMini.ItemList  = { "/Event#1"   } ;
+RootMini.FSRItemList={ "/Event/FSR#999" };
 RootMini.Output    = "DATAFILE='PFN:POOLIO.mdst' TYP='POOL_ROOTTREE' OPT='RECREATE'";
 
 FileCatalog.Catalogs = { "xmlcatalog_file:POOLIO.xml" } ;

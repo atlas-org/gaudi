@@ -8,8 +8,8 @@
 
 ApplicationMgr    SUCCESS
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr $Revision: 1.5 $
-                                          running on WOD01-001 on Fri Jan 18 02:14:13 2008
+                                                   Welcome to ApplicationMgr $Revision: 1.7 $
+                                          running on MCLVIRT01 on Tue Jun 03 11:59:18 2008
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 ApplicationMgr       INFO Successfully loaded modules : GaudiAlg, RootHistCnv
@@ -17,20 +17,20 @@ NTupleSvc            INFO Added stream file:TupleEx.root as MYLUN
 HistogramPersis...   INFO  'CnvServices':[ 'HbookHistSvc' , 'RootHistSvc' ]
 RootHistSvc          INFO Writing ROOT histograms to: UndefinedROOTOutputFileName
 HistogramPersis...   INFO Added successfully Conversion service:RootHistSvc
-TupleEx              INFO The N-Tuple   path is set to be 'MYLUN/TupleEx'
 DetectorDataSvc      INFO Detector description not requested to be loaded
 EventLoopMgr      WARNING Unable to locate service "EventSelector"
 EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
+ApplicationMgr       INFO Application Manager Started successfully
 RndmGenSvc.Engine    INFO Generator engine type:CLHEP::RanluxEngine
 RndmGenSvc.Engine    INFO Current Seed:1234567 Luxury:3
 RndmGenSvc           INFO Using Random engine:HepRndm::Engine<CLHEP::RanluxEngine>
 RFileCnv             INFO opening Root file "TupleEx.root" for writing
 RCWNTupleCnv         INFO Booked TTree with ID: My trivial N-tuple "My trivial N-tuple" in directory TupleEx.root:/TupleEx
+ApplicationMgr       INFO Application Manager Stopped successfully
 TupleEx           SUCCESS Booked 1 N-Tuples and 0 Event Tag Collections
 TupleEx           SUCCESS List of booked N-Tuples in directory "MYLUN/TupleEx"
 TupleEx           SUCCESS  ID=My trivial N-tupleTitle="My trivial N-tuple"                      #items=4  {a,b,c,g}
-TupleEx           SUCCESS No histograms are booked
 RootHistSvc       WARNING no ROOT output file name, Histograms cannot be persistified
 EventLoopMgr         INFO Histograms converted successfully according to request.
 RFileCnv             INFO dumping contents of /NTUPLES/MYLUN

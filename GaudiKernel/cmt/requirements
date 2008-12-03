@@ -1,8 +1,14 @@
 package GaudiKernel
-version v25r1
+version v26r0
 author "LHCb Gaudi Team"
 
 branches GaudiKernel cmt doc src
+
+private
+# genconfuser.py cannot be used in GaudiKernel
+# Note: the tag must be set before including GaudiPolicy
+apply_tag skip_genconfuser
+end_private
 
 use GaudiPolicy  v*
 use Reflex       v*   LCG_Interfaces
@@ -23,11 +29,13 @@ apply_pattern reflex_dictionary dictionary=GaudiKernel \
                                 headerfiles=$(GAUDIKERNELROOT)/dict/dictionary.h \
                                 selectionfile=$(GAUDIKERNELROOT)/dict/dictionary.xml
 macro GaudiKernelDict_use_linkopts $(use_linkopts)
+# MCl: ensure that the headers are installed before the build of the dictionary (should not be needed)
+macro_append GaudiKernelGen_dependencies "install_more_includes"
 
 #-----Generate Configurables 
 macro genconfig_cmd           $(GAUDIKERNELROOT)/$(tag)/genconf.exe \
-     GAUDI_with_installarea  $(GaudiKernel_cmtpath)/$(GAUDI_installarea_prefix)/$(tag)/bin/genconf.exe \
-     GAUDIATLAS_with_installarea  $(GaudiKernel_cmtpath)/$(GAUDIATLAS_installarea_prefix)/$(tag)/bin/genconf.exe
+     GAUDI_with_installarea  genconf.exe \
+     GAUDIATLAS_with_installarea  genconf.exe
 
 private
 

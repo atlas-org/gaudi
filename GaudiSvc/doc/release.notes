@@ -1,5 +1,177 @@
 Package: GaudiSvc
-Package manager : Pere Mato
+Package manager : Marco Clemencic
+
+================ GaudiSvc v17r2 ====================================
+! 2008-11-10 - Frank Winklmeier
+ - Patch #2608. Thread-safe IncidentSvc
+   Made the IncidentSvc (trivially) thread safe with few locks.
+
+! 2008-11-10 - Marco Clemencic
+ - Added an option to ApplicationMgr to enable/disable the initialization loop
+   check.
+
+! 2008-11-04 - Marco Cattaneo
+ - Patch #2601. Introduce support for file summary records.
+   A new output stream, OutputFSRStream, which clears and reinitialises the TES
+   after the last event (in the stop transition). Any objects written to the TES
+   by any algorithm during finalize can be written to the output file as a last
+   record. The content of this record is controlled by the options "FSRItemList"
+   and "FSROptItemList".
+
+! 2008-10-30 - Marco Clemencic
+ - Clean the the DataStreamTool memory during initialize of EventSelector to be
+   sure that we start from an empty list during a re-initialize. 
+
+! 2008-10-28 - Marco Clemencic
+ - Fixed bug #38572, THistSvc initialize/finalize cycles
+   Clear internal structures during finalize.
+
+! 2008-10-28 - Charles Leggett
+ - Fixed bug #42509: allow THistSvc to write multiple streams to the same file
+   Added a check to avoid double delete if a TFile is shared between different
+   streams.
+
+! 2008-10-27 - Marco Clemencic
+ - Fixed warnings reported by gcc 4.3:
+   - type qualifiers ignored on function return type
+
+! 2008-10-27 - Marco Clemencic
+ - Fixed compilation errors and some warnings on gcc 4.3.
+
+! 2008-10-22 - Marco Clemencic
+ - Fixed bug #41136. ToolSvc keeps tools even if initialize fails
+   Added a small smart pointer (ToolCreateGuard) to take care of the deletion of
+   the not initialized tool and its removal from the list of known tools.
+
+! 2008-10-21 - Marco Clemencic, Frank Winklmeier
+ - Fixed bug #37049. Use recursive mutexes in MessageSvc
+   - Replaced boost::mutex to boost::recursive_mutex.   
+
+! 2008-10-20 - Marco Clemencic
+ - Fixed bug #41058. Better warning messages when a factory can't be loaded
+   - Call System::getLastErrorString() after setting errno to 0xAFFEDEAD
+     (value used internally to Gaudi to identify errors occurred loading a
+     library).
+
+! 2008-10-17 - Marco Clemencic
+ - Fixed bug #36917. Listen to all incidents
+   Fixed a problem with listeners registered for "ALL" incidents: they were
+   never triggered. The current behavior is to call the specific listeners, then
+   loop over the list of generic ones. 
+
+! 2008-10-09 - Pere Mato
+ - Patch #2261. Introducing name alias for Algorithms and Services 
+   Added the new macros DECLARE_NAMED_ALGORITHM_FACTORY(type,name) to be used
+   instead of the current DECLARE_ALGORITHM_FACTORY(type) for algorithms with
+   templates. Similarly for Services.
+
+! 2008-10-09 - Markus Frank
+ - Patch #2400. Allow to suppress warnings in the EventLoopMgr
+   Add properties to suppress WARNING messages from HistogramPersistencySvc
+   and EventLoopMgr. Fix bug in EventLoopMgr, which created MsgStream before
+   calling the initialization.
+
+! 2008-10-09 - Vanya Belyaev
+ - Patch #2058. Extensions for AIDA::TProfile1D
+    * src/HistogramSvc/HistogramSvc.h
+    * src/HistogramSvc/HistogramSvc.cpp
+    * src/HistogramSvc/GaudiPI.h
+    * src/HistogramSvc/P1D.h
+    * src/HistogramSvc/P1D.cpp
+   Update a little bit the implementations of few methods to propagate the
+   options to the TProfile constructor.
+
+! 2008-10-03 - Charles Leggett
+ - Patch #1963. Add getGraphs() method to THistSvc.
+
+! 2008-10-01 - Marco Clemencic, Frank Winklmeier
+ - Reimplemented IssueLogger::getTraceBack() in terms of the version of 
+   System::backTrace() introduced with patch #1797.
+
+! 2008-10-01 - Frank Winklmeier
+ - Patch #1796: Performance improvement for message reporting
+
+! 2008-10-01 - Vanya Belyaev
+ - Patch #1750. Improved printout of Data-On-Demand Service. 
+
+================ GaudiSvc v17r1 ====================================
+! 2008-06-30 - Marco Clemencic
+ - Cleaned up Boost link options plus a fix for Boost 1.35.
+
+================ GaudiSvc v17r0 ====================================
+! 2008-06-12 - Marco Clemencic
+ - Modified the way the protocols knows by implementation of IFileAccess is
+   defined: the implementation must report what it is able to handle.
+
+! 2008-06-06 - Marco Clemencic
+ - Modified the way the EndEvent incident is fired by the EventLoopMgr. Instead
+   of after the top algorithms, it is now fired before BeginEvent (if
+   appropriate) and at the beginning of EventLoopMgr::stop. The reason of the
+   change is to avoid that the control is passed to an interactive session after
+   the EndEvent.
+ - Modified ServiceManager::stop to call the stop of services in order reversed
+   with respect to the start.
+
+! 2008-06-05 - Marco Clemencic
+ - Fixed bug #26327. JobOptionsSvc::finalize is never invoked.
+   Finalize the JobOptionsSvc just after the MessageSvc.
+
+! 2008-06-04 - Charles Leggett
+ - Patch #1865. Better printouts for HistorySvc.
+   - Prints out more information about the various History objects to the output
+     file.
+
+! 2008-06-03 - Charles Leggett
+ - Patch #1819. Fix printout in THistSvc
+   Made the hist->Print() only appear when the log level is DEBUG and below.
+
+! 2008-06-03 - Marco Clemencic
+ - Fixed compilation warning in THistSvc.cpp (unused variable).
+ - Fixed a problem introduced with the merge of the patch for Task #5809 and a
+   previous change (the MessageSvc got finalized twice).
+
+! 2008-06-02 - Marco Clemencic
+ - Task #5809. Extension to Gaudi Application state machine.
+   - Adapted all the services to the changes in GaudiKernel.
+   - Updated the reference file of the test.
+
+! 2008-05-23 - Marco Clemencic
+ - Fixed the misplacement of the release of the MessageSvc. Now is located in the 
+   terminate() method of the ApplicationMgr (the symmetric of the creation location).  
+
+! 2008-05-14 - Patrick Koppenburg
+ - Patch #1806. Reduced default print-out of DataOnDemandSvc.  
+
+! 2008-05-14 - Vanya Belyaev
+ - Patch #1801. Allow exclusion in HistogramPersistencySvc
+   In some cases, it is useful to have temporary histograms that should not be
+   stored. The patch add the properties ConvertHistos and ExcludeHistos.
+   If ConvertHistos is empty (default) the conversion is done for all the
+   histograms, otherwise only the histograms matched by the strings in it will
+   be converted.
+   ExcludeHistos is used to disable the conversion of histograms overriding what
+   ConvertHistos suggested.
+
+! 2008-05-13 - Marco Clemencic
+ - Fixed reference files after Patch #1761.
+
+! 2008-05-13 - Vanya Belyaev
+ - Patch #1761. Fixed print-out in ToolSvc
+   - Some ToolSvc methods were passing a wrong name (name + extra string) to the
+     message service, making problematic the control of output level.
+ - Patch #1756. Improvements for Chrono/ChronoStat&IChronoSvc
+   - src/Lib/ChronoStatSvc.h,.cpp
+     update for change in chronoStart/chronoStop return values 
+     "(const) StatEntity*" instead of "void"
+
+! 2008-05-09 - Marco Clemencic
+ - Added small service (VFSSvc, Virtual File System Service) implementing the
+   interface IFileAccess, to dispatch the call to tools implementing the actual
+   protocols.
+ - Added a tool to provide the basic implementation of IFileAccess to access
+   files on the filesystem.
+ - Modified the ParticlePropertySvc to use VFSSvc to open the file containing
+   particle properties.
 
 ================ GaudiSvc v16r5 ====================================
 ! 2008-04-11 - Yushu Yao

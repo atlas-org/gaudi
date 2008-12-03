@@ -1,4 +1,4 @@
-JobOptionsSvc        INFO 
+JobOptionsSvc        INFO
 //GP:================================================================================
 //GP: include "../options/EvtColsEx_Read.opts"                                (0,0)
 //GP: include "/Users/marcocle/GAUDI/GaudiPoolDb/options/GaudiPoolDbRoot.opts" (21,10)
@@ -15,7 +15,7 @@ PoolDbCacheSvc.DomainOpts =  [ "Domain[ROOT_All].TREE_MAX_SIZE=500000000000 TYP=
 //GP: end  "/Users/marcocle/GAUDI/GaudiPoolDb/options/GaudiPoolDbRoot.opts"   (22,1)
 ApplicationMgr.ExtSvc +=  [ "TagCollectionSvc/EvtTupleSvc" ] ;          //GP: (21,10)
 PoolDbCacheSvc.DLLs +=  [ "GaudiExamplesDict" ] ;                       //GP: (21,10)
-PoolDbCacheSvc.Catalog +=  [ "xmlcatalog_file:EvtColsEx.xml" ] ;        //GP: (21,10)
+FileCatalog.Catalogs +=  [ "xmlcatalog_file:EvtColsEx.xml" ] ;          //GP: (21,10)
 EventSelector.Input =  [ "COLLECTION='Fill/COL1' SEL='runNum<10  && runNum>8' DATAFILE='PFN:EvtColsEx.tags' TYP='POOL_ROOT' OPT='READ'" ] ;//GP: (21,10)
 EventSelector.Input +=  [ "COLLECTION='Fill/COL1' SEL='runNum<100 && flat>9.9' DATAFILE='PFN:EvtColsEx.tags' TYP='POOL_ROOT' OPT='READ'" ] ;//GP: (21,10)
 EventSelector.Input +=  [ "COLLECTION='Fill/COL1' SEL='binom==7 || poisson==9' DATAFILE='PFN:EvtColsEx.tags' TYP='POOL_ROOT' OPT='READ'" ] ;//GP: (21,10)
@@ -25,24 +25,25 @@ ApplicationMgr.EvtMax = -1;                                             //GP: (2
 //GP:================================================================================
 
 JobOptionsSvc        INFO Job options successfully read in from ../options/EvtColsEx_Read.opts
-ApplicationMgr    SUCCESS 
+ApplicationMgr    SUCCESS
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr $Revision: 1.2 $
-                                          running on macphsft02.cern.ch on Thu Jan 17 10:10:26 2008
+                                                   Welcome to ApplicationMgr $Revision: 1.4 $
+                                          running on macphsft06.cern.ch on Thu Jun  5 12:16:35 2008
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 EventPersistenc...   INFO  'CnvServices':[ 'PoolRootEvtCnvSvc' , 'PoolRootTreeEvtCnvSvc' , 'PoolRootKeyEvtCnvSvc' ]
 EvtTupleSvc          INFO Added stream file:PFN:EvtColsEx.tags as EventSelector.DataStreamTool_1
 PoolDbDatabaseCnv    INFO Connect to existing Database file:PFN:EvtColsEx.tags as /EventSelector.DataStreamTool_1 for READ
-EvtColsEx.tags                   SUCCESS      Root file version:51709
+EvtColsEx.tags    SUCCESS Root file version:51800
 EventSelector        INFO Stream:EventSelector.DataStreamTool_1 Def:COLLECTION='Fill/COL1' SEL='runNum<10  && runNum>8' DATAFILE='PFN:EvtColsEx.tags' TYP='POOL_ROOT' OPT='READ'
 HistogramPersis...   INFO  'CnvServices':[ 'HbookHistSvc' , 'RootHistSvc' ]
 HistogramPersis...WARNING Histograms saving not required.
 ApplicationMgr       INFO Application Manager Initialized successfully
+ApplicationMgr       INFO Application Manager Started successfully
 EventSelector     SUCCESS Reading Event record 1. Record number within stream 1: 1
 EventPersistenc...   INFO Added successfully Conversion service:PoolRootEvtCnvSvc
 EventPersistenc...   INFO Added successfully Conversion service:PoolRootTreeEvtCnvSvc
-EvtColsEx.dst                    SUCCESS      Root file version:51709
+EvtColsEx.dst     SUCCESS Root file version:51800
 EventSelector     SUCCESS Reading Event record 2. Record number within stream 1: 2
 EventSelector     SUCCESS Reading Event record 3. Record number within stream 1: 3
 EventSelector     SUCCESS Reading Event record 4. Record number within stream 1: 4
@@ -156,11 +157,12 @@ EventSelector     SUCCESS Reading Event record 105. Record number within stream 
 EventSelector     SUCCESS Reading Event record 106. Record number within stream 3: 32
 EventSelector     SUCCESS Reading Event record 107. Record number within stream 3: 33
 EventSelector     SUCCESS Reading Event record 108. Record number within stream 3: 34
-EventLoopMgr         INFO No more events in event selection 
+EventLoopMgr         INFO No more events in event selection
+ApplicationMgr       INFO Application Manager Stopped successfully
 EventLoopMgr         INFO Histograms converted successfully according to request.
-ToolSvc.finalize()   INFO Removing all tools created by ToolSvc
-EvtTupleSvc.Eve...   INFO Disconnected data IO:FID:706CAF27-DBC4-DC11-AA11-0017F2069004
-PoolRootTreeEvt...   INFO Disconnected data IO:FID:0E2AFBDE-68C4-DC11-AEB3-0017F2069004
+ToolSvc              INFO Removing all tools created by ToolSvc
+EvtTupleSvc.Eve...   INFO Disconnected data IO:36E6B619-6132-DD11-AA13-0017F201FD68[EvtColsEx.tags]
+PoolRootTreeEvt...   INFO Disconnected data IO:A89A31FB-6032-DD11-BD79-0017F201FD68[EvtColsEx.dst]
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
 Number of MyVertex instances:0

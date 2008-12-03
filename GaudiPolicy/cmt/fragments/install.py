@@ -17,7 +17,7 @@ Command line:
 # Needed to for the local copy of the function os.walk, introduced in Python 2.3
 # It must be removed when the support for Python 2.2 is dropped
 from __future__ import generators # should be at the first line to please Python 2.5
-_version = "$Id: install.py,v 1.13 2007/12/21 16:57:09 hmd Exp $"
+_version = "$Id: install.py,v 1.15 2008/10/28 17:24:39 marcocle Exp $"
 
 def main():
     try:
@@ -252,11 +252,17 @@ def expand_source_dir(source, destination, exclusions = [],
 
 def remove(file, logdir):
     from os import remove
-    from os.path import normpath
+    from os.path import normpath, splitext, exists
     file = normpath(join(logdir, file))
     try:
         print "Remove '%s'"%file
         remove(file)
+        # For python files, remove the compiled versions too 
+        if splitext(file)[-1] == ".py":
+            for c in ['c', 'o']:
+                if exists(file + c):
+                    print "Remove '%s'" % (file+c)
+                    remove(file+c)
         file_path = split(file)[0]
         while file_path and (len(listdir(file_path)) == 0):
             print "Remove empty dir '%s'"%file_path

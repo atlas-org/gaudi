@@ -1,4 +1,4 @@
-// $Id: IAlgManager.h,v 1.6 2006/11/30 20:51:35 mato Exp $
+// $Id: IAlgManager.h,v 1.7 2008/06/02 14:20:38 marcocle Exp $
 #ifndef GAUDIKERNEL_IALGMANAGER_H
 #define GAUDIKERNEL_IALGMANAGER_H
 
@@ -13,7 +13,7 @@ class IAlgorithm;
 class ISvcLocator;
 
 // Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IAlgManager(14, 4 , 0);
+static const InterfaceID IID_IAlgManager(14, 4 , 1);
 
 /** @class IAlgManager IAlgManager.h GaudiKernel/IAlgManager.h
 
@@ -57,8 +57,20 @@ public:
   /// Initializes the list of "managed" algorithms
   virtual StatusCode initializeAlgorithms() = 0;
 
+  /// Starts the list of "managed" algorithms
+  virtual StatusCode startAlgorithms() = 0;
+
+  /// Stops the list of "managed" algorithms
+  virtual StatusCode stopAlgorithms() = 0;
+
   /// Finalizes the list of "managed" algorithms
   virtual StatusCode finalizeAlgorithms() = 0;
+  
+  /// Initializes the list of "managed" algorithms
+  virtual StatusCode reinitializeAlgorithms() = 0;
+
+  /// Starts the list of "managed" algorithms
+  virtual StatusCode restartAlgorithms() = 0;
 
 };
 

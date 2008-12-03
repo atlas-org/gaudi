@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiAlg/GaudiAlg/Sequencer.h,v 1.3 2007/05/23 09:48:51 marcocle Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiAlg/GaudiAlg/Sequencer.h,v 1.4 2008/06/02 14:22:04 marcocle Exp $
 #ifndef ALGORITHM_SEQUENCER_H
 #define ALGORITHM_SEQUENCER_H
 
@@ -54,16 +54,26 @@ class Sequencer : public Algorithm {
     virtual StatusCode reinitialize( );
 
     /**
+     ** Sequencer finalization.
+     **/
+    virtual StatusCode start( );
+
+    /**
      ** The actions to be performed by the sequencer on an event. This method
      ** is invoked once per event.
      **/
     virtual StatusCode execute( );
+    
+    /**
+     ** Sequencer finalization.
+     **/
+    virtual StatusCode stop( );
 
     /**
      ** Sequencer finalization.
      **/
     virtual StatusCode finalize( );
-
+    
     /**
      ** Sequencer beginRun.
      **/

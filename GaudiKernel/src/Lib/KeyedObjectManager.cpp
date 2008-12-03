@@ -70,19 +70,19 @@ void Containers::cannotAssignObjectKey()   {
                        0);
 }
 void Containers::cannotInsertToContainer()   {
-  throw GaudiException("Cannot insert element to Keyed Container!", 
+  throw GaudiException("Cannot insert element to Keyed Container!",
                        "KeyedContainer",
                        0);
 }
 
 void Containers::containerIsInconsistent()   {
-  throw GaudiException("Keyed Container structures are inconsistent - severe problem!", 
+  throw GaudiException("Keyed Container structures are inconsistent - severe problem!",
                        "KeyedContainer",
                        0);
 }
 
 void Containers::invalidContainerOperation()   {
-  throw GaudiException("Keyed Container cannot satisfy request - severe problem!", 
+  throw GaudiException("Keyed Container cannot satisfy request - severe problem!",
                        "KeyedContainer",
                        0);
 }
@@ -92,7 +92,7 @@ Containers::KeyedObjectManager<T>::KeyedObjectManager()
 : m_direct(0)
 {
   if ( sizeof(typename T::map_type) > sizeof(m_setup.buffer) )    {
-    throw GaudiException("Basic STL contaier sizes are incompatible", 
+    throw GaudiException("Basic STL contaier sizes are incompatible",
                          "KeyedContainer",
                          0);
   }
@@ -125,9 +125,9 @@ void Containers::KeyedObjectManager<T>::onDirty()   const  {
 
 template <class T>
 long Containers::KeyedObjectManager<T>::insert(
-                                ObjectContainerBase* pBase, 
-                                ContainedObject* pObject, 
-                                void* obj, 
+                                ObjectContainerBase* pBase,
+                                ContainedObject* pObject,
+                                void* obj,
                                 long* key)
 {
   *key = ++m_keyCtxt;
@@ -136,9 +136,9 @@ long Containers::KeyedObjectManager<T>::insert(
 
 template <class T>
 long Containers::KeyedObjectManager<T>::insert(
-                                ObjectContainerBase* pBase, 
-                                ContainedObject* pObject, 
-                                void* obj, 
+                                ObjectContainerBase* pBase,
+                                ContainedObject* pObject,
+                                void* obj,
                                 long key)
 {
   /// Keep major key value
@@ -174,9 +174,9 @@ long Containers::KeyedObjectManager<T>::insert(
 
 template <class T>
 long Containers::KeyedObjectManager<T>::insertDirect(
-                                ObjectContainerBase* pBase, 
-                                ContainedObject* pObject, 
-                                void* obj, 
+                                ObjectContainerBase* pBase,
+                                ContainedObject* pObject,
+                                void* obj,
                                 long key)
 {
   /// Keep major key value
@@ -210,7 +210,7 @@ long Containers::KeyedObjectManager<T>::insertDirect(
 
 // Remove object from container
 template <class T>
-void* Containers::KeyedObjectManager<T>::erase(long  key, 
+void* Containers::KeyedObjectManager<T>::erase(long  key,
                                                const void* obj) {
   typedef typename T::map_type MTYP;
   typedef find<MTYP> FND;
@@ -262,14 +262,14 @@ void Containers::KeyedObjectManager<T>::reserve(long len)
 }
 
 template <class T>
-void Containers::KeyedObjectManager<T>::clear()   
+void Containers::KeyedObjectManager<T>::clear()
 {
   clearDirect();
   m_seq->clear();
 }
 
 template <class T>
-void Containers::KeyedObjectManager<T>::clearDirect()   
+void Containers::KeyedObjectManager<T>::clearDirect()
 {
   typedef typename T::map_type MTYP;
   switch( m_direct )   {
@@ -288,7 +288,7 @@ void Containers::KeyedObjectManager<T>::clearDirect()
 
 // Remove object by sequential iterators
 template <class T>
-long Containers::KeyedObjectManager<T>::erase(seq_type::iterator beg, 
+long Containers::KeyedObjectManager<T>::erase(seq_type::iterator beg,
                                               seq_type::iterator end)
 {
   typedef typename T::map_type MTYP;
@@ -317,15 +317,15 @@ long Containers::KeyedObjectManager<T>::erase(seq_type::iterator beg,
 
 namespace Containers {
 
-  /*  First specialize static methods and then instantiate templated class to appear as symbols in the library 
-      This order in needed for gcc 4.0 (MacOSX) */ 
+  /*  First specialize static methods and then instantiate templated class to appear as symbols in the library
+      This order in needed for gcc 4.0 (MacOSX) */
 
   template<>
-  const CLID KeyedObjectManager< Containers::map >::classID()   {
+  CLID KeyedObjectManager< Containers::map >::classID()   {
     return CLID_ObjectVector+0x00030000;
   }
   template<>
-  const CLID KeyedObjectManager< Containers::hashmap >::classID()   {
+  CLID KeyedObjectManager< Containers::hashmap >::classID()   {
     return CLID_ObjectVector+0x00040000;
   }
 
@@ -344,8 +344,8 @@ typedef Containers::array __A;
 namespace Containers {
 
 //__forceinline
-template<> void* 
-KeyedObjectManager< __A >::object(long value) const  
+template<> void*
+KeyedObjectManager< __A >::object(long value) const
 {
 #ifdef CHECK_KEYED_CONTAINER
   unsigned long siz = m_setup.s->m_idx.size();
@@ -375,10 +375,10 @@ void KeyedObjectManager< __A >::onDirty()  const {
 
 // Insert new object into container
 template<>
-long KeyedObjectManager< __A >::insert(ObjectContainerBase* b, 
+long KeyedObjectManager< __A >::insert(ObjectContainerBase* b,
                                                    ContainedObject* c,
-                                                   void* o, 
-                                                   long* k) 
+                                                   void* o,
+                                                   long* k)
 {
   // auto key creation only possible for direct access!
   if ( 0 == m_direct )    {
@@ -394,10 +394,10 @@ long KeyedObjectManager< __A >::insert(ObjectContainerBase* b,
 
 // Insert new object into container
 template<>
-long KeyedObjectManager< __A >::insert(ObjectContainerBase* b, 
+long KeyedObjectManager< __A >::insert(ObjectContainerBase* b,
                                                    ContainedObject* c,
-                                                   void* o, 
-                                                   long k) 
+                                                   void* o,
+                                                   long k)
 {
   if ( 0 == m_direct )    {
     if ( k == m_keyCtxt+1 ) {
@@ -425,11 +425,11 @@ long KeyedObjectManager< __A >::insert(ObjectContainerBase* b,
 }
 
 // Insert new object into container
-template<> long 
-KeyedObjectManager< __A >::insertDirect(ObjectContainerBase* b, 
+template<> long
+KeyedObjectManager< __A >::insertDirect(ObjectContainerBase* b,
 						    ContainedObject* c,
-						    void* o, 
-						    long k) 
+						    void* o,
+						    long k)
 {
   if ( 0 == m_direct )    {
     if ( k == m_keyCtxt+1 ) {
@@ -460,7 +460,7 @@ KeyedObjectManager< __A >::insertDirect(ObjectContainerBase* b,
 
 // Clear content of the vector
 template<>
-void KeyedObjectManager< __A >::clearDirect() { 
+void KeyedObjectManager< __A >::clearDirect() {
   m_setup.s->v.clear();
   m_setup.s->m_idx.clear();
   m_direct = 0;
@@ -469,7 +469,7 @@ void KeyedObjectManager< __A >::clearDirect() {
 
 // Remove object from container (very inefficient if key is invalid)
 template<>
-void* KeyedObjectManager< __A >::erase(long key, 
+void* KeyedObjectManager< __A >::erase(long key,
                                                    const void* obj)
 {
   typedef std::vector<long> id_type;
@@ -489,8 +489,8 @@ void* KeyedObjectManager< __A >::erase(long key,
         void* o = *j;
         m_seq->erase(k);
         m_setup.s->v.erase(j);
-        std::for_each(m_setup.s->m_idx.begin(), 
-                      m_setup.s->m_idx.end(), 
+        std::for_each(m_setup.s->m_idx.begin(),
+                      m_setup.s->m_idx.end(),
                       array::decrement(*i));
         *i = -1;
         return o;
@@ -511,8 +511,8 @@ void* KeyedObjectManager< __A >::erase(long key,
       }
       m_seq->erase(j);
       m_setup.s->v.erase(i);
-      std::for_each(m_setup.s->m_idx.begin(), 
-                    m_setup.s->m_idx.end(), 
+      std::for_each(m_setup.s->m_idx.begin(),
+                    m_setup.s->m_idx.end(),
                     array::decrement(*idx));
       *idx = -1;
       return o;
@@ -524,7 +524,7 @@ void* KeyedObjectManager< __A >::erase(long key,
 
 // Remove object by sequential iterators
 template<>
-long KeyedObjectManager< __A >::erase(seq_type::iterator beg, 
+long KeyedObjectManager< __A >::erase(seq_type::iterator beg,
                                                   seq_type::iterator end)
 {
   typedef std::vector<long> id_type;
@@ -545,8 +545,8 @@ long KeyedObjectManager< __A >::erase(seq_type::iterator beg,
       seq_type::iterator k = std::find(beg,end,*j);
       if ( k != end )   {
         m_setup.s->v.erase(j);
-        std::for_each(m_setup.s->m_idx.begin(), 
-                      m_setup.s->m_idx.end(), 
+        std::for_each(m_setup.s->m_idx.begin(),
+                      m_setup.s->m_idx.end(),
                       array::decrement(*i));
         *i = -1;
         cnt++;
@@ -564,7 +564,7 @@ long KeyedObjectManager< __A >::erase(seq_type::iterator beg,
 }
 
 template<>
-const CLID KeyedObjectManager< __A >::classID()   {
+CLID KeyedObjectManager< __A >::classID()   {
   return CLID_ObjectVector+0x00050000;
 }
 }
@@ -582,7 +582,7 @@ namespace Containers {
 // Access single entry by long(integer) key
 template<>
 void* KeyedObjectManager< __V >::object(long /* value */) const
-{  
+{
   invalidContainerOperation();
   return 0;
 }
@@ -594,10 +594,10 @@ void KeyedObjectManager<__V>::onDirty()   const  {
 
 // Insert new object into container
 template<>
-long KeyedObjectManager< __V >::insert(ObjectContainerBase* b, 
-                                                   ContainedObject* c, 
-                                                   void* o, 
-                                                   long* k)  
+long KeyedObjectManager< __V >::insert(ObjectContainerBase* b,
+                                                   ContainedObject* c,
+                                                   void* o,
+                                                   long* k)
 {
   m_seq->push_back(o);
   m_setup.s->v.push_back(o);
@@ -608,9 +608,9 @@ long KeyedObjectManager< __V >::insert(ObjectContainerBase* b,
 
 // Insert new object into container
 template<>
-long KeyedObjectManager< __V >::insert(ObjectContainerBase* b, 
-                                                   ContainedObject* c, 
-                                                   void* o, 
+long KeyedObjectManager< __V >::insert(ObjectContainerBase* b,
+                                                   ContainedObject* c,
+                                                   void* o,
                                                    long k)
 {
   if ( k == long(m_setup.s->v.size()) ) {
@@ -621,10 +621,10 @@ long KeyedObjectManager< __V >::insert(ObjectContainerBase* b,
 }
 
 // Insert new object into container
-template<> long 
-KeyedObjectManager< __V >::insertDirect(ObjectContainerBase* b, 
-						    ContainedObject* c, 
-						    void* o, 
+template<> long
+KeyedObjectManager< __V >::insertDirect(ObjectContainerBase* b,
+						    ContainedObject* c,
+						    void* o,
 						    long k)
 {
   if ( k == long(m_setup.s->v.size()) ) {
@@ -638,7 +638,7 @@ KeyedObjectManager< __V >::insertDirect(ObjectContainerBase* b,
 
 // Clear content of the vector
 template<>
-void KeyedObjectManager< __V >::clearDirect()  { 
+void KeyedObjectManager< __V >::clearDirect()  {
   m_setup.s->v.clear();
   m_direct = 0;
   m_keyCtxt = -1;
@@ -655,7 +655,7 @@ KeyedObjectManager< __V >::erase(long /* key */,
 
 // Remove object by sequential iterators
 template<>
-long KeyedObjectManager< __V >::erase(seq_type::iterator beg, 
+long KeyedObjectManager< __V >::erase(seq_type::iterator beg,
                                                   seq_type::iterator end)
 {
   if ( beg == m_seq->begin() && end == m_seq->end() )   {
@@ -667,7 +667,7 @@ long KeyedObjectManager< __V >::erase(seq_type::iterator beg,
 }
 
 template<>
-const CLID KeyedObjectManager< __V >::classID()   {
+CLID KeyedObjectManager< __V >::classID()   {
   return CLID_ObjectVector+0x00060000;
 }
 

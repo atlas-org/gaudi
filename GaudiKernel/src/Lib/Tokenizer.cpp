@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/src/Lib/Tokenizer.cpp,v 1.3 2004/05/17 12:26:07 mato Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/src/Lib/Tokenizer.cpp,v 1.4 2008/10/27 16:41:33 marcocle Exp $
 //==============================================================================
 // Tokenizer.h
 //------------------------------------------------------------------------------
@@ -14,6 +14,8 @@
 #define KERNEL_TOKENIZER_CPP
 #include "GaudiKernel/Tokenizer.h"
 #include "GaudiKernel/Environment.h"
+
+#include <cstring>
 
 // Assignment operator
 Tokenizer::Token& Tokenizer::Token::operator=(const Token& copy)     {

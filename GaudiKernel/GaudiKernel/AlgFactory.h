@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/AlgFactory.h,v 1.9 2007/01/23 09:13:06 mato Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/AlgFactory.h,v 1.10 2008/10/09 21:00:37 marcocle Exp $
 #ifndef GAUDIKERNEL_ALGFACTORY_H
 #define GAUDIKERNEL_ALGFACTORY_H
 
@@ -39,7 +39,9 @@ namespace ROOT {
 #endif
 
 // Macros to declare component factories
-#define DECLARE_ALGORITHM_FACTORY(x)              PLUGINSVC_FACTORY(x,IAlgorithm*(std::string, ISvcLocator*))
+#define DECLARE_ALGORITHM_FACTORY(x)          PLUGINSVC_FACTORY(x,IAlgorithm*(std::string, ISvcLocator*))
+#define DECLARE_NAMED_ALGORITHM_FACTORY(x,n)  PLUGINSVC_FACTORY_WITH_ID(x,std::string(#n), IAlgorithm*(std::string, ISvcLocator*))
+  
 #define DECLARE_NAMESPACE_ALGORITHM_FACTORY(n,x)  using n::x; PLUGINSVC_FACTORY(x,IAlgorithm*(std::string, ISvcLocator*))
 #define DECLARE_ALGORITHM(x)  /*dummy*/
 #define DECLARE_NAMESPACE_ALGORITHM(n,x) /*dummy*/

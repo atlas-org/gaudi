@@ -1,7 +1,7 @@
 ApplicationMgr    SUCCESS
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr $Revision: 1.5 $
-                                          running on WOD01-001 on Fri Jan 18 02:12:38 2008
+                                                   Welcome to ApplicationMgr $Revision: 1.7 $
+                                          running on MCLVIRT01 on Fri May 30 10:18:29 2008
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 EventLoopMgr      WARNING Unable to locate service "EventSelector"
@@ -35,39 +35,31 @@ ARGS: ('FixMatrices', 'N-tuple: FixMatrices')
 RCWNTupleCnv         INFO Booked TTree with ID: FixMatrices "N-tuple: FixMatrices" in directory TupleEx4_3.root:/another/path
 ARGS: ('FixSymMatrices', 'N-tuple: FixSymMatrices')
 RCWNTupleCnv         INFO Booked TTree with ID: FixSymMatrices "N-tuple: FixSymMatrices" in directory TupleEx4_2.root:/another/path
- E:\users\clemenci\GAUDI\InstallArea\python\GaudiPython\TupleUtils.py/GaudiPython.TupleUtils: release all pending ITupleTools: 8
+ E:\Workspace\GAUDI\InstallArea\python\GaudiPython\TupleUtils.pyc/GaudiPython.TupleUtils: release all pending ITupleTools: 8
 ToolSvc.TupleMY...SUCCESS Booked 1 N-Tuples and 0 Event Tag Collections
 ToolSvc.TupleMY...SUCCESS List of booked N-Tuples in directory "MYLUN2/another/path"
 ToolSvc.TupleMY...SUCCESS  ID=FixSymMatricesTitle="N-tuple: FixSymMatrices"                 #items=6  {m2[2],m3[2],m4[2],m5[2],m6[2],m7[2]}
-ToolSvc.TupleMY...SUCCESS No histograms are booked
 ToolSvc.TupleMY...SUCCESS Booked 1 N-Tuples and 0 Event Tag Collections
 ToolSvc.TupleMY...SUCCESS List of booked N-Tuples in directory "MYLUN3/another/path"
 ToolSvc.TupleMY...SUCCESS  ID=FixMatrices   Title="N-tuple: FixMatrices"                    #items=6  {m2[2],m3[2],m4[2],m5[2],m6[2],m7[2]}
-ToolSvc.TupleMY...SUCCESS No histograms are booked
 ToolSvc.TupleMY...SUCCESS Booked 1 N-Tuples and 0 Event Tag Collections
 ToolSvc.TupleMY...SUCCESS List of booked N-Tuples in directory "MYLUN2/another/path"
 ToolSvc.TupleMY...SUCCESS  ID=xTuple        Title="N-tuple: FixArrays"                      #items=8  {v1[1],v2[1],v3[1],v4[1],v5[1],v6[1],v7[1],v8[1]}
-ToolSvc.TupleMY...SUCCESS No histograms are booked
 ToolSvc.TupleMY...SUCCESS Booked 1 N-Tuples and 0 Event Tag Collections
 ToolSvc.TupleMY...SUCCESS List of booked N-Tuples in directory "MYLUN1/another/path"
 ToolSvc.TupleMY...SUCCESS  ID=415           Title="N-tuple: VarArrays"                      #items=4  {len1,vct1[1]/V,len2,vct2[1]/V}
-ToolSvc.TupleMY...SUCCESS No histograms are booked
 ToolSvc.TupleMY...SUCCESS Booked 1 N-Tuples and 0 Event Tag Collections
 ToolSvc.TupleMY...SUCCESS List of booked N-Tuples in directory "MYLUN3/another/path"
 ToolSvc.TupleMY...SUCCESS  ID=MyTuple3DP    Title="N-tuple: 3D-Points"                      #items=12 {p1X,p1Y,p1Z,p2X,p2Y,p2Z,p3X,p3Y,p3Z,p4X,p4Y,p4Z}
-ToolSvc.TupleMY...SUCCESS No histograms are booked
 ToolSvc.TupleMY...SUCCESS Booked 1 N-Tuples and 0 Event Tag Collections
 ToolSvc.TupleMY...SUCCESS List of booked N-Tuples in directory "MYLUN2/another/path"
 ToolSvc.TupleMY...SUCCESS  ID=MyTuple3DV    Title="N-tuple: 3D-Vectors "                    #items=12 {v1X,v1Y,v1Z,v2X,v2Y,v2Z,v3X,v3Y,v3Z,v4X,v4Y,v4Z}
-ToolSvc.TupleMY...SUCCESS No histograms are booked
 ToolSvc.TupleMY...SUCCESS Booked 1 N-Tuples and 0 Event Tag Collections
 ToolSvc.TupleMY...SUCCESS List of booked N-Tuples in directory "MYLUN1/another/path"
 ToolSvc.TupleMY...SUCCESS  ID=MyTupleLV     Title="N-tuple: Lorentz Vectors "               #items=8  {lv1E,lv1X,lv1Y,lv1Z,lv2E,lv2X,lv2Y,lv2Z}
-ToolSvc.TupleMY...SUCCESS No histograms are booked
 ToolSvc.TupleMY...SUCCESS Booked 1 N-Tuples and 0 Event Tag Collections
 ToolSvc.TupleMY...SUCCESS List of booked N-Tuples in directory "MYLUN1/path"
 ToolSvc.TupleMY...SUCCESS  ID=It is a title for my n-tupleTitle="It is a title for my n-tuple"            #items=4  {i,g1,g2,b1}
-ToolSvc.TupleMY...SUCCESS No histograms are booked
 RootHistSvc       WARNING no ROOT output file name, Histograms cannot be persistified
 EventLoopMgr         INFO Histograms converted successfully according to request.
 RFileCnv             INFO dumping contents of /NTUPLES/MYLUN1
@@ -245,7 +237,7 @@ TFile: name=TupleEx4_2.root, title=Gaudi Trees, option=CREATE
 *............................................................................*
 ******************************************************************************
 *Tree    :FixSymMatrices: N-tuple: FixSymMatrices                                *
-*Entries :      100 : Total =          157783 bytes  File  Size =       4376 *
+*Entries :      100 : Total =          157783 bytes  File  Size =       4059 *
 *        :          : Tree compression factor =   1.00                       *
 ******************************************************************************
 *Br    0 :m2        : m2[8][8]/F                                             *
@@ -357,6 +349,6 @@ TFile: name=TupleEx4_3.root, title=Gaudi Trees, option=CREATE
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
 NTupleSvc            INFO NTuples saved successfully
-ToolSvc.finalize()   INFO Removing all tools created by ToolSvc
+ToolSvc              INFO Removing all tools created by ToolSvc
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully

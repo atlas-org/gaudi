@@ -6,9 +6,13 @@ class MyAlgType(ConfigurableUser):
                   "Tool2": "None",
                   "File" : "None"
                 }
+    def getGaudiType(self):
+        return "Test" # To avoid skipping of ConfigurableUser
 
 class MyToolType(ConfigurableUser):
     __slots__ = { "Cut": 0.0 }
+    def getGaudiType(self):
+        return "Test" # To avoid skipping of ConfigurableUser
 
 tool = MyToolType()
 alg = MyAlgType("MyAlg")

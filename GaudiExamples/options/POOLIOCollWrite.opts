@@ -1,13 +1,12 @@
-// $Id: POOLIOCollWrite.opts,v 1.8 2008/01/30 17:06:50 marcocle Exp $ 
-// ============================================================================
-// CVS tag $Name:  $, version $Revision: 1.8 $
+// $Id: POOLIOCollWrite.opts,v 1.9 2008/11/04 22:49:25 marcocle Exp $ 
 // ============================================================================
 // Define the other standard DLLs and services
-ApplicationMgr.TopAlg      = { "ReadAlg", "EvtCollectionWrite/Writer" };
-ApplicationMgr.TopAlg      = { "EvtCollectionWrite/Writer" };
+ApplicationMgr.TopAlg = { "GaudiSequencer/EventAlgs" };
+EventAlgs.Members =  { "EvtCollectionWrite/Writer" };
+EventAlgs.VetoObjects = {"FSR"};
 
 // Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
-MessageSvc.OutputLevel      = 1 ;
+ToolSvc.SequencerTimerTool.OutputLevel = 4 ;
 EventSelector.PrintFreq    = 100;
 
 //--------------------------------------------------------------

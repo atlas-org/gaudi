@@ -3,7 +3,7 @@
 # Maintainer : Andres Felipe OSORIO OLIVEROS
 #============================================================================
 package           GaudiGridSvc
-version           v1r5
+version           v1r7
 
 #============================================================================
 # Structure, i.e. directories to process. 
@@ -52,6 +52,9 @@ macro_append cppflags "" \
 # FIXME: It should use tags derived from CMTCONFIG only
 apply_pattern disable_package_on platform=WIN32
 apply_pattern disable_package_on platform=osx104
+apply_pattern disable_package_on platform=osx105
+
+apply_pattern disable_package_on platform=gcc43
 
 # Explicitly requested by ATLAS (patch #1611)
 apply_pattern disable_package_on platform=ATLAS

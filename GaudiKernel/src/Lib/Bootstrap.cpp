@@ -1,4 +1,4 @@
-//$Id: Bootstrap.cpp,v 1.14.2.1 2008/08/18 16:34:35 leggett Exp $
+//$Id: Bootstrap.cpp,v 1.14 2007/12/12 16:02:32 marcocle Exp $
 
 #include <iostream>
 
@@ -62,17 +62,6 @@ namespace Gaudi
 
 static ISvcLocator* s_svclocInstance = 0;
 static IAppMgrUI*   s_appmgrInstance = 0;
-
-//------------------------------------------------------------------------------
-bool Gaudi::hasApplicationMgr()
-//------------------------------------------------------------------------------
-{
-  //Return true if the applicationmgr has already been created
-  if ( 0 == s_appmgrInstance ) {
-    return false;
-  }
-  return true;
-}
 
 //------------------------------------------------------------------------------
 IAppMgrUI* Gaudi::createApplicationMgr(const std::string& dllname,

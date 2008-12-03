@@ -1,4 +1,4 @@
-// $Id: DetDataSvc.cpp,v 1.23 2007/12/12 16:03:18 marcocle Exp $
+// $Id: DetDataSvc.cpp,v 1.24 2008/10/27 19:22:21 marcocle Exp $
 #define  DETECTORDATASVC_DETDATASVC_CPP
 
 // Include files
@@ -42,8 +42,8 @@ StatusCode DetDataSvc::initialize()   {
   // Get address creator fron the DetectorPersistencySvc
   sc = cnv_svc->queryInterface(IID_IAddressCreator, pp_cast<void>(&m_addrCreator));
   if (sc.isFailure()) {
-    log << MSG::ERROR << "Unable to get AddressCreator." << endreq; 
-    return StatusCode::FAILURE; 
+    log << MSG::ERROR << "Unable to get AddressCreator." << endreq;
+    return StatusCode::FAILURE;
   }
 
   return setupDetectorDescription();
@@ -56,11 +56,11 @@ StatusCode DetDataSvc::setupDetectorDescription() {
   // Initialize the detector data transient store
   log << MSG::DEBUG << "Storage type used is: " << m_detStorageType << endreq;
   log << MSG::DEBUG << "Setting DetectorDataSvc root node... " << endreq;
-  
+
   if( m_usePersistency ) {
 
     IOpaqueAddress* rootAddr;
-    if( m_detDbLocation.empty() || "empty" == m_detDbLocation ) { 
+    if( m_detDbLocation.empty() || "empty" == m_detDbLocation ) {
 
       // if the name of DBlocation is not given - construct it!
 	    // by retrieving the value of XMLDDBROOT
@@ -70,7 +70,7 @@ StatusCode DetDataSvc::setupDetectorDescription() {
         m_detDbLocation += "/DDDB/lhcb.xml";
       }
     }
-    if( m_detDbLocation.empty() || "empty" == m_detDbLocation ) { 
+    if( m_detDbLocation.empty() || "empty" == m_detDbLocation ) {
       log << MSG::ERROR
           << "Detector data location name not set. Detector data will "
           << "not be found." << endreq;
@@ -81,8 +81,8 @@ StatusCode DetDataSvc::setupDetectorDescription() {
       unsigned long iargs[]={0,0};
       const std::string args[] = {m_detDbLocation, m_detDbRootName};
       StatusCode sc = m_addrCreator->createAddress (m_detStorageType,
-                                                    CLID_Catalog, 
-                                                    args, 
+                                                    CLID_Catalog,
+                                                    args,
                                                     iargs,
                                                     rootAddr);
       if( sc.isSuccess() ) {
@@ -115,15 +115,15 @@ StatusCode DetDataSvc::reinitialize()   {
   MsgStream log(msgSvc(), name());
 
   // The DetectorDataSvc does not need to be re-initialized. If it is done
-  // all the Algorithms having references to DetectorElements will become 
+  // all the Algorithms having references to DetectorElements will become
   // invalid and crash the program.  (Pere Mato)
-   
+
   // Call base class reinitialization
   //StatusCode sc  = DataSvc::reinitialize();
   //if( sc.isFailure() ) return sc;
-  
+
   // Delete the associated event time
-  //if( 0 != m_eventTime ) delete m_eventTime; 
+  //if( 0 != m_eventTime ) delete m_eventTime;
   //m_eventTimeDefined = false;
 
   //return setupDetectorDescription();
@@ -136,7 +136,7 @@ StatusCode DetDataSvc::finalize()
   MsgStream log(msgSvc(), name());
   log << MSG::DEBUG << "Finalizing" << endreq;
 
-  // clears the store  
+  // clears the store
   m_usePersistency = false; // avoid creation of an empty store when clearing
   clearStore().ignore();
 
@@ -153,7 +153,7 @@ StatusCode DetDataSvc::finalize()
 }
 
 /// Query interface
-StatusCode DetDataSvc::queryInterface(const InterfaceID& riid, 
+StatusCode DetDataSvc::queryInterface(const InterfaceID& riid,
 				      void** ppvInterface)
 {
   // With the highest priority return the specific interfaces
@@ -173,7 +173,7 @@ StatusCode DetDataSvc::queryInterface(const InterfaceID& riid,
 StatusCode DetDataSvc::clearStore()   {
 
   MsgStream log(msgSvc(), name());
-  
+
   DataSvc::clearStore().ignore();
 
   if( m_usePersistency ) {
@@ -182,8 +182,8 @@ StatusCode DetDataSvc::clearStore()   {
     const std::string args[] = {m_detDbLocation, m_detDbRootName};
     IOpaqueAddress*   rootAddr;
     StatusCode sc = m_addrCreator->createAddress (m_detStorageType,
-                                                  CLID_Catalog, 
-                                                  args, 
+                                                  CLID_Catalog,
+                                                  args,
                                                   iargs,
                                                   rootAddr);
     // Set detector data store root
@@ -191,7 +191,7 @@ StatusCode DetDataSvc::clearStore()   {
       std::string dbrName = "/" + m_detDbRootName;
       sc = i_setRoot( dbrName, rootAddr );
       if( sc.isFailure() ) {
-        log << MSG::ERROR 
+        log << MSG::ERROR
 	    << "Unable to set detector data store root" << endreq;
       }
     } else {
@@ -221,7 +221,7 @@ DetDataSvc::DetDataSvc(const std::string& name,ISvcLocator* svc) :
 DetDataSvc::~DetDataSvc()  {
 }
 
-/// Set the new event time 
+/// Set the new event time
 void DetDataSvc::setEventTime ( const Gaudi::Time& time ) {
   // m_eventTime = TimePoint( time );
   m_eventTime = time;
@@ -232,22 +232,22 @@ void DetDataSvc::setEventTime ( const Gaudi::Time& time ) {
 }
 
 /// Check if the event time has been set
-const bool DetDataSvc::validEventTime ( ) const { 
-  return true; 
+bool DetDataSvc::validEventTime ( ) const {
+  return true;
 }
 
-/// Get the event time  
-const Gaudi::Time& DetDataSvc::eventTime ( ) const { 
-  return m_eventTime; 
+/// Get the event time
+const Gaudi::Time& DetDataSvc::eventTime ( ) const {
+  return m_eventTime;
 }
 
 /// Inform that a new incident has occured
-void DetDataSvc::handle ( const Incident& inc ) { 
+void DetDataSvc::handle ( const Incident& inc ) {
   MsgStream log( msgSvc(), name() );
   log << MSG::DEBUG << "New incident received" << endreq;
   log << MSG::DEBUG << "Incident source: " << inc.source() << endreq;
   log << MSG::DEBUG << "Incident type: " << inc.type() << endreq;
-  return; 
+  return;
 }
 
 /// Update object
@@ -258,10 +258,10 @@ StatusCode DetDataSvc::updateObject( DataObject* toUpdate ) {
   log << MSG::DEBUG << "Method updateObject starting" << endreq;
 
   // Check that object to update exists
-  if ( 0 == toUpdate ) { 
+  if ( 0 == toUpdate ) {
     log << MSG::ERROR
 	<< "There is no DataObject to update" << endreq;
-    return INVALID_OBJECT; 
+    return INVALID_OBJECT;
   }
 
   // Retrieve IValidity interface of object to update
@@ -277,33 +277,33 @@ StatusCode DetDataSvc::updateObject( DataObject* toUpdate ) {
   if ( !validEventTime() ) {
     log << MSG::WARNING
 	<< "Cannot update DataObject: event time undefined"
-	<< endreq; 
+	<< endreq;
     return StatusCode::SUCCESS;
   }
 
   // No need to update if condition is valid
   if ( condition->isValid( eventTime() ) ) {
-    log << MSG::DEBUG 
+    log << MSG::DEBUG
 	<< "DataObject is valid: no need to update" << endreq;
     return StatusCode::SUCCESS;
   } else {
-    log << MSG::DEBUG 
+    log << MSG::DEBUG
 	<< "DataObject is invalid: update it" << endreq;
   }
 
   // TODO: before loading updated object, update HERE its parent in data store
 
   // Now delegate update to the conversion service by calling the base class
-  log << MSG::DEBUG 
+  log << MSG::DEBUG
       << "Delegate update to relevant conversion service" << endreq;
   StatusCode status = DataSvc::updateObject(toUpdate);
   if ( !status.isSuccess() ) {
-    log << MSG::ERROR 
-	<< "Could not update DataObject" << endreq; 
+    log << MSG::ERROR
+	<< "Could not update DataObject" << endreq;
     if ( status == NO_DATA_LOADER )
-      log << MSG::ERROR << "There is no data loader" << endreq; 
+      log << MSG::ERROR << "There is no data loader" << endreq;
     return status;
-  } 
+  }
 
   // Now cross-check that the new condition is valid
   condition = dynamic_cast<IValidity*>(toUpdate);
@@ -318,7 +318,7 @@ StatusCode DetDataSvc::updateObject( DataObject* toUpdate ) {
     log << MSG::ERROR
 	<< "Are you sure the conversion service has updated it?" << endreq;
     return StatusCode::FAILURE;
-  } 
+  }
 
   // DataObject was successfully updated
   log << MSG::DEBUG << "Method updateObject exiting successfully" << endreq;

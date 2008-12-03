@@ -1,9 +1,10 @@
-// $Id: MsgStream.h,v 1.42 2007/05/22 09:20:48 hmd Exp $
+// $Id: MsgStream.h,v 1.43 2008/10/30 23:38:46 marcocle Exp $
 #ifndef GAUDIKERNEL_MSGSTREAM_H
 #define GAUDIKERNEL_MSGSTREAM_H
 
 // Include files
 #include "GaudiKernel/IMessageSvc.h"
+#include "GaudiKernel/SerializeSTL.h"
 // Standard C++ classes
 #include <cstdio>
 #include <string>
@@ -301,23 +302,8 @@ MsgStream& operator << (MsgStream& s, const std::smanip<_Tm>& manip)  {
 /// General templated stream operator
 template <typename T>
 MsgStream& operator<< (MsgStream& lhs, const T& arg)  {
+  using namespace GaudiUtils;
   if(lhs.isActive()) lhs.stream() << arg;
-  return lhs;
-}
-/// Specialization stream operator for std::vector<T>
-template <typename T>
-MsgStream& operator<< (MsgStream& lhs, const std::vector<T>& v ) {
-  if(lhs.isActive())
-    for ( typename std::vector<T>::const_iterator i = v.begin();
-          i != v.end(); ++i ) { lhs.stream() << *i << " "; }
-  return lhs;
-}
-/// Specialization stream operator for std::vector<T,A>
-template <typename T, typename A>
-MsgStream& operator<< (MsgStream& lhs, const std::vector<T,A>& v ) {
-  if(lhs.isActive())
-    for ( typename std::vector<T,A>::const_iterator i = v.begin();
-          i != v.end(); ++i ) { lhs.stream() << *i << " "; }
   return lhs;
 }
 

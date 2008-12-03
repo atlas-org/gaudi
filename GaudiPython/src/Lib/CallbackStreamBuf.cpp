@@ -20,12 +20,13 @@ using namespace std;
 /// call a python method with a string as an argument
 // ============================================================================
 int GaudiPython::call_python_method
-( PyObject* self, char* method, char* buf )
+( PyObject* self, const char* method, char* buf )
 {
   if ( 0 == self || 0 == method ) { return 1 ; }
-  PyObject* r = PyObject_CallMethod ( self , method , "s", buf ) ;
+  PyObject* r = PyObject_CallMethod(self, const_cast<char*>(method),
+                                          const_cast<char*>("s"), buf);
   if ( 0 == r ) {
-    string err("Unsuccsesful call to bound Python method");
+    string err("Unsuccessful call to bound Python method");
     err += method;
     PyErr_SetString( PyExc_TypeError , err.c_str() ) ;
     PyErr_Print() ;

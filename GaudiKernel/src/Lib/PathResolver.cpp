@@ -1,8 +1,9 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/src/Lib/PathResolver.cpp,v 1.6 2007/02/27 13:44:11 hmd Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/src/Lib/PathResolver.cpp,v 1.7 2008/10/27 16:41:33 marcocle Exp $
 #include "GaudiKernel/PathResolver.h"
 
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 
 #include <iostream>
 #include <vector>

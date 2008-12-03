@@ -1,4 +1,4 @@
-// $Id: DetDataSvc.h,v 1.13 2007/02/26 18:18:05 hmd Exp $
+// $Id: DetDataSvc.h,v 1.14 2008/10/27 19:22:21 marcocle Exp $
 #ifndef DETECTORDATASVC_DETDATASVC_H
 #define DETECTORDATASVC_DETDATASVC_H
 
@@ -23,11 +23,11 @@ class IAddressCreator;
 
 class DetDataSvc  : public DataSvc,
 		    virtual public IDetDataSvc,
-		    virtual public IIncidentListener 
-{    
+		    virtual public IIncidentListener
+{
 
   friend class SvcFactory<DetDataSvc>;
-  
+
   // unhides DataSvc updateObject methods
   using DataSvc::updateObject;
 
@@ -40,19 +40,19 @@ class DetDataSvc  : public DataSvc,
 
   /// Initialize the service
   virtual StatusCode reinitialize();
-  
+
   /// Finalize the service
   virtual StatusCode finalize();
-  
+
   /// Remove all data objects in the data store.
   virtual StatusCode clearStore();
-  
+
   /// Update object
   virtual StatusCode updateObject( DataObject* toUpdate );
-  
+
   /// Standard Constructor
   DetDataSvc(const std::string& name, ISvcLocator* svc);
-  
+
   /// Standard Destructor
   virtual ~DetDataSvc();
 
@@ -61,12 +61,12 @@ class DetDataSvc  : public DataSvc,
   StatusCode setupDetectorDescription();
 
  public:
-  
+
   // Reimplemented from IInterface
 
   /// Query the interface of the service
-  virtual StatusCode queryInterface( const InterfaceID& riid, 
-				     void** ppvInterface );  
+  virtual StatusCode queryInterface( const InterfaceID& riid,
+				     void** ppvInterface );
 
  public:
 
@@ -74,16 +74,16 @@ class DetDataSvc  : public DataSvc,
 
   /// Check if the event time has been set.
   /// Kept for backward compatibility, returns always true.
-  virtual const bool validEventTime() const ;
+  virtual bool validEventTime() const ;
 
-  /// Get the event time  
+  /// Get the event time
   virtual const Gaudi::Time& eventTime() const ;
 
-  /// Set the new event time  
+  /// Set the new event time
   virtual void setEventTime( const Gaudi::Time& time );
 
  public:
-  
+
   // Implementation of the IIncidentListener interface
 
   /// Inform that a new incident has occured

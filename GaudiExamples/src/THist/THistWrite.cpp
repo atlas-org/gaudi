@@ -1,4 +1,4 @@
-// $Id: THistWrite.cpp,v 1.2 2006/11/27 09:53:07 hmd Exp $
+// $Id: THistWrite.cpp,v 1.3 2008/05/13 10:05:47 marcocle Exp $
 
 
 // Include files 
@@ -13,6 +13,7 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TH3F.h"
+#include "TProfile.h"
 #include "TTree.h"
 #include "TKey.h"
 #include "TDirectory.h"

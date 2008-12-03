@@ -1,4 +1,4 @@
-// $Id: PropertyAlg.cpp,v 1.22 2006/11/30 10:35:27 mato Exp $
+// $Id: PropertyAlg.cpp,v 1.24 2008/10/30 23:40:17 marcocle Exp $
 
 // Include files
 #include "GaudiKernel/MsgStream.h"
@@ -8,6 +8,9 @@
 #include "GaudiKernel/IChronoStatSvc.h"
 #include "GaudiKernel/IJobOptionsSvc.h"
 #include "GaudiKernel/SmartIF.h"
+
+#include "GaudiKernel/SerializeSTL.h"
+
 #include "PropertyAlg.h"
 
 
@@ -17,7 +20,7 @@ DECLARE_ALGORITHM_FACTORY(PropertyAlg);
 
 // Read Handler
 //------------------------------------------------------------------------------
-void PropertyAlg::readHandler(Property& p) 
+void PropertyAlg::readHandler(Property& p)
 {
   MsgStream log(msgSvc(),name());
   log << MSG::INFO << "Read handler called for property: " << p << endmsg ;
@@ -48,6 +51,9 @@ PropertyAlg::PropertyAlg(const std::string& name, ISvcLocator* ploc)
   declareProperty( "StringArray", m_stringarray);
   declareProperty( "BoolArray",   m_boolarray);
   declareProperty( "EmptyArray",  m_emptyarray);
+
+  declareProperty( "IntPairArray", u_intpairarray);
+  declareProperty( "DoublePairArray", u_doublepairarray);
 
   // Declare the rest of the Algorithm properties
 
@@ -83,6 +89,8 @@ PropertyAlg::PropertyAlg(const std::string& name, ISvcLocator* ploc)
   log << MSG::INFO << "StringArray = " << m_stringarray << endmsg;
   log << MSG::INFO << "BoolArray   = " << m_boolarray << endmsg;
   log << MSG::INFO << "EmptyArray  = " << m_emptyarray << endmsg;
+  log << MSG::INFO << "IntPairArray  = " << u_intpairarray << endmsg;
+  log << MSG::INFO << "DoublePairArray  = " << u_doublepairarray << endmsg;
 
   log << MSG::INFO << "PInt    = " << p_int << endmsg;
   log << MSG::INFO << "PDouble = " << p_double << endmsg;
@@ -99,14 +107,14 @@ PropertyAlg::PropertyAlg(const std::string& name, ISvcLocator* ploc)
 StatusCode PropertyAlg::initialize() {
 //------------------------------------------------------------------------------
   MsgStream log(msgSvc(), name());
-  
+
   //
   // Checking the JobOptions interface. Be able to set the properties
   //
-  log << MSG::INFO 
-      << "After Initialization having read the JobOptions file..." 
+  log << MSG::INFO
+      << "After Initialization having read the JobOptions file..."
       << endmsg;
- 
+
   log << MSG::INFO << "Int    = " << m_int << endmsg;
   log << MSG::INFO << "Double = " << m_double << endmsg;
   log << MSG::INFO << "String = " << m_string << endmsg;
@@ -116,6 +124,8 @@ StatusCode PropertyAlg::initialize() {
   log << MSG::INFO << "StringArray = " << m_stringarray << endmsg;
   log << MSG::INFO << "BoolArray   = " << m_boolarray << endmsg;
   log << MSG::INFO << "EmptyArray  = " << m_emptyarray << endmsg;
+  log << MSG::INFO << "IntPairArray  = " << u_intpairarray << endmsg;
+  log << MSG::INFO << "DoublePairArray  = " << u_doublepairarray << endmsg;
 
   log << MSG::INFO << "PInt    = " << p_int << endmsg;
   log << MSG::INFO << "PDouble = " << p_double << endmsg;
@@ -130,7 +140,7 @@ StatusCode PropertyAlg::initialize() {
   //
   for (unsigned int i = 0; i < u_doublearrayunits.size(); i++ ) {
     if( u_doublearrayunits[i] != u_doublearray[i] ) {
-      log << MSG::ERROR 
+      log << MSG::ERROR
           << format
         ("DoubleArrayWithUnits[%d] = %g and should be %g",
          i, u_doublearrayunits[i], u_doublearray[i] ) << endmsg;
@@ -144,35 +154,35 @@ StatusCode PropertyAlg::initialize() {
   //
   // Checking the Property Verifier
   //
-  log << MSG::INFO 
+  log << MSG::INFO
       << "===============Checking Property Verifier ===============" << endmsg;
 
   log << MSG::INFO << "Playing with PropertyVerifiers..." << endmsg;
 
   p_int.verifier().setBounds( 0, 200);
   p_int = 155;
-  //log << MSG::INFO << "PInt= " << p_int << " [should be 155, bounds are " << 
+  //log << MSG::INFO << "PInt= " << p_int << " [should be 155, bounds are " <<
   //                     p_int.verifier().lower() << ", " <<
   //                     p_int.verifier().upper() << " ]" << endmsg;
-  log << MSG::INFO 
+  log << MSG::INFO
       << format
     ("PInt= %d [should be 155, bounds are %d, %d]",
-     (int)p_int, (int)p_int.verifier().lower(), 
+     (int)p_int, (int)p_int.verifier().lower(),
      (int)p_int.verifier().upper() ) << endmsg;
   try {
     p_int = 255;
   } catch (...) {
-    log << MSG::INFO 
+    log << MSG::INFO
         << "Got an exception when setting a value outside bounds" << endmsg;
   }
   log << MSG::INFO << "PInt= " << p_int << " [should be 155]" << endmsg;
-  
-  // 
+
+  //
   //  Checking the Property CallBacks
   //
-  log << MSG::INFO 
+  log << MSG::INFO
       << "===============Checking Property CallBaks ===============" << endmsg;
-  
+
   double d;
   log << MSG::INFO << "Accessing PDouble ... " << endmsg;
   d = p_double;
@@ -182,10 +192,10 @@ StatusCode PropertyAlg::initialize() {
   log << MSG::INFO << "Updating PDouble ... "<< endmsg;
   p_double = 999.;
 
-  // 
+  //
   //  Checking Accessing Properties by string
   //
-  
+
   log << MSG::INFO << "==========Checking Accesing Properties by string=========" << endmsg;
 
   SmartIF<IProperty> appmgr(IID_IProperty, serviceLocator());
@@ -210,7 +220,7 @@ StatusCode PropertyAlg::initialize() {
 
   }
   // Testing setting bool
-  char* scases[] = {"true", "false", "True", "False", "TRUE", "FALSE", "T", "F", "10" };
+  const char* scases[] = {"true", "false", "True", "False", "TRUE", "FALSE", "T", "F", "10" };
   bool  bcases[] = { true,   false,   true,   false,   true,   false,  true, true, true};
   for (unsigned int i = 0; i < sizeof(scases)/sizeof(char*); i++ ) {
     setProperty( "PBool", scases[i] ).ignore();
@@ -218,7 +228,7 @@ StatusCode PropertyAlg::initialize() {
     setProperty( "Bool", scases[i] ).ignore();
     if( m_bool  != bcases[i] ) log << MSG::ERROR << "Bool can not be set to "<< scases[i] << endmsg;
   }
-  
+
   // Testing the control of the output level directly from MessageSvc
   MsgStream newlog(msgSvc(),"MsgTest" );
   newlog << MSG::VERBOSE << "This should be printed if threshold is VERBOSE" << endmsg;
@@ -251,7 +261,7 @@ StatusCode PropertyAlg::initialize() {
     log << MSG::INFO << "=================================================" << endmsg;
 
     // Change an option of my own....
-    jopts->addPropertyToCatalogue( name(), StringProperty("PInt", "155") ).ignore(); 
+    jopts->addPropertyToCatalogue( name(), StringProperty("PInt", "155") ).ignore();
     std::vector<std::string> values;
     values.push_back("12.12");
     values.push_back("13.13");
@@ -270,7 +280,7 @@ StatusCode PropertyAlg::initialize() {
   else {
     log << MSG::ERROR << " Unable to access the JobOptionsSvc" << endmsg;
   }
-    
+
   return StatusCode::SUCCESS;
 }
 

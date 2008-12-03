@@ -1,4 +1,4 @@
-// $Id: Grammars.h,v 1.9 2007/09/26 16:13:41 marcocle Exp $
+// $Id: Grammars.h,v 1.10 2008/10/27 16:41:33 marcocle Exp $
 // ============================================================================
 #ifndef GAUDIKERNEL_GRAMMARS_H 
 #define GAUDIKERNEL_GRAMMARS_H 1
@@ -134,7 +134,7 @@ namespace Gaudi
             = int_parser<RT>()[self.val=arg1]
             | ('\'' 
                >> ( str_p("\\'")[self.val='\''] 
-                    | anychar_p[self.val=arg1]-'\'' )>>'\'');
+                    | (anychar_p[self.val=arg1]-'\'') )>>'\'');
         }
         rule<ScannerT> const& start() const 
         { return char_literal; }
@@ -257,14 +257,14 @@ namespace Gaudi
               [ 
                ('"' >> (*( str_p("\\\"") 
                            | 
-                           anychar_p-'"' ))
+                           (anychar_p-'"') ))
                 [self.val = construct_<std::string>
                  (arg1,arg2)] >>
                 '"') 
                | 
                ('\'' >> (*( str_p("\\'") 
                             | 
-                            anychar_p-'\'' ))
+                            (anychar_p-'\'') ))
                 [self.val = construct_<std::string>
                  (arg1,arg2)]>>
                 '\'')])[boost::bind(&StringGrammar::matchString,&self)];

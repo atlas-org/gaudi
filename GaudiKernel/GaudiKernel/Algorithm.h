@@ -1,4 +1,4 @@
-// $Id: Algorithm.h,v 1.33 2008/04/03 17:27:01 marcocle Exp $
+// $Id: Algorithm.h,v 1.34 2008/06/02 14:20:38 marcocle Exp $
 // ============================================================================
 #ifndef GAUDIKERNEL_ALGORITHM_H
 #define GAUDIKERNEL_ALGORITHM_H
@@ -11,6 +11,7 @@
 #include "GaudiKernel/PropertyMgr.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IMessageSvc.h"
+#include "GaudiKernel/IStateful.h"
 
 #include <string>
 #include <vector>
@@ -58,7 +59,8 @@
  *  @date   1998
  */
 class Algorithm : virtual public IAlgorithm,
-                  virtual public IProperty {
+                  virtual public IProperty,
+                  virtual public IStateful {
 public:
 
   /** Constructor
@@ -75,7 +77,7 @@ public:
    *  It will in turn invoke the reinitialize() method of the derived algorithm,
    * and of any sub-algorithms which it creates.
    */
-  virtual StatusCode sysReinitialize();
+  virtual StatusCode sysStart();
 
   /** Initialization method invoked by the framework. This method is responsible
    *  for any bookkeeping of initialization required by the framework itself.
@@ -83,6 +85,20 @@ public:
    * and of any sub-algorithms which it creates.
    */
   virtual StatusCode sysInitialize();
+
+
+  /** Reinitialization method invoked by the framework. This method is responsible
+   *  for any reinitialization required by the framework itself.
+   *  It will in turn invoke the reinitialize() method of the derived algorithm,
+   * and of any sub-algorithms which it creates.
+   */
+  virtual StatusCode sysReinitialize();
+
+  /** Restart method invoked by the framework.
+      It will in turn invoke the restart() method of the derived algorithm,
+      and of any sub-algorithms which it creates.
+  */
+  virtual StatusCode sysRestart();
 
   /** The actions to be performed by the algorithm on an event. This method is
    * invoked once per event for top level algorithms by the application
@@ -92,6 +108,11 @@ public:
    *  must be EXPLICITLY invoked by  the parent algorithm.
    */
   virtual StatusCode sysExecute();
+
+  /** System stop. This method invokes the stop() method of a concrete
+      algorithm and the stop() methods of all of that algorithm's sub algorithms.
+  */
+  virtual StatusCode sysStop();
 
   /** System finalization. This method invokes the finalize() method of a
    *  concrete algorithm and the finalize() methods of all of that algorithm's
@@ -124,13 +145,25 @@ public:
 
   virtual const std::string& version() const;
 
-  /// the default (empty) implementation of IAlgorithm::initialize() methoda
+  /// Dummy implementation of IStateful::configure() method
+  virtual StatusCode configure () { return StatusCode::SUCCESS ; }
+  /// Dummy implementation of IStateful::terminate() method
+  virtual StatusCode terminate () { return StatusCode::SUCCESS ; }
+  
+  /// the default (empty) implementation of IStateful::initialize() method
   virtual StatusCode initialize () { return StatusCode::SUCCESS ; }
-  /// the default (empty) implementation of IAlgorithm::reinitialize() methoda
-  virtual StatusCode reinitialize ();
-  /// the default (empty) implementation of IAlgorithm::finalize() methoda
+  /// the default (empty) implementation of IStateful::start() method
+  virtual StatusCode start () { return StatusCode::SUCCESS ; }
+  /// the default (empty) implementation of IStateful::stop() method
+  virtual StatusCode stop () { return StatusCode::SUCCESS ; }
+  /// the default (empty) implementation of IStateful::finalize() method
   virtual StatusCode finalize   () { return StatusCode::SUCCESS ; }
 
+  /// the default (empty) implementation of IStateful::reinitialize() method
+  virtual StatusCode reinitialize ();
+  /// the default (empty) implementation of IStateful::restart() method
+  virtual StatusCode restart ();
+  
   /// Has this algorithm been executed since the last reset?
   virtual bool isExecuted( ) const;
 
@@ -149,6 +182,12 @@ public:
 
   /// Algorithm end run. This method is called at the end of the event loop
   virtual StatusCode endRun();
+  
+  /// returns the current state of the algorithm
+  virtual Gaudi::StateMachine::State FSMState() const { return m_state; }
+  
+  /// returns the state the algorithm will be in after the ongoing transition
+  virtual Gaudi::StateMachine::State targetFSMState() const { return m_targetState; }
 
   /// Is this algorithm enabled or disabled?
   virtual bool isEnabled( ) const;
@@ -468,17 +507,11 @@ public:
 protected:
 
   /// Has the Algorithm already been initialized?
-  bool isInitialized( ) const;
-
-  /// Set the Algorithm initialized state
-  void setInitialized( );
+  bool isInitialized( ) const { return Gaudi::StateMachine::INITIALIZED == m_state; }
 
   /// Has the Algorithm already been finalized?
-  bool isFinalized( ) const;
-
-  /// Set the Algorithm finalized state
-  void setFinalized( );
-
+  bool isFinalized( ) const { return Gaudi::StateMachine::CONFIGURED == m_state; }
+  
   /// retrieve the Algorithm output level
   int  outputLevel() const { return (int)m_outputLevel ; }
 
@@ -519,14 +552,18 @@ private:
   BooleanProperty m_auditInit;     ///< global flag for auditors
   bool         m_auditorInitialize;///< flag for auditors in "initialize()"
   bool         m_auditorReinitialize;///< flag for auditors in "Reinitialize()"
+  bool         m_auditorRestart;   ///< flag for auditors in "Restart()"
   bool         m_auditorExecute;   ///< flag for auditors in "execute()"
   bool         m_auditorFinalize;  ///< flag for auditors in "finalize()"
   bool         m_auditorBeginRun;  ///< flag for auditors in "beginRun()"
   bool         m_auditorEndRun;    ///< flag for auditors in "endRun()"
+  bool         m_auditorStart;///< flag for auditors in "initialize()"
+  bool         m_auditorStop;///< flag for auditors in "Reinitialize()"
   bool         m_filterPassed;     ///< Filter passed flag
   bool         m_isEnabled;        ///< Algorithm is enabled flag
   bool         m_isExecuted;       ///< Algorithm is executed flag
-  bool         m_isInitialized;    ///< Algorithm has been initialized flag
+  Gaudi::StateMachine::State m_state;            ///< Algorithm has been initialized flag
+  Gaudi::StateMachine::State m_targetState;      ///< Algorithm has been initialized flag
   bool         m_isFinalized;      ///< Algorithm has been finalized flag
 
   /// implementation of service method

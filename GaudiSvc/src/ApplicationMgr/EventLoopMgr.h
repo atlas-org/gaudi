@@ -1,4 +1,4 @@
-// $Id: EventLoopMgr.h,v 1.7 2007/11/16 18:32:49 marcocle Exp $
+// $Id: EventLoopMgr.h,v 1.9 2008/10/09 13:40:18 marcocle Exp $
 #ifndef GAUDISVC_EVENTLOOPMGR_H
 #define GAUDISVC_EVENTLOOPMGR_H 1
 
@@ -55,7 +55,11 @@ protected:
   std::string       m_histPersName;
   /// Property interface of ApplicationMgr
   IProperty*        m_appMgrProperty;
-
+  /// Flag to avoid to fire the EnvEvent incident twice in a row
+  /// (and also not before the first event)
+  bool              m_endEventFired;
+  /// Flag to disable warning messages when using external input
+  bool              m_warnings;
 
 public:
   /// Standard Constructor
@@ -69,6 +73,8 @@ public:
   virtual StatusCode initialize();
   /// implementation of IService::reinitalize
   virtual StatusCode reinitialize();
+  /// implementation of IService::stop
+  virtual StatusCode stop();
   /// implementation of IService::finalize
   virtual StatusCode finalize();
   /// implementation of IService::nextEvent

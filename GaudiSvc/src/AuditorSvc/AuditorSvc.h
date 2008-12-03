@@ -1,4 +1,4 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiSvc/src/AuditorSvc/AuditorSvc.h,v 1.8 2008/04/03 14:41:15 marcocle Exp $
+// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiSvc/src/AuditorSvc/AuditorSvc.h,v 1.10 2008/10/27 19:22:21 marcocle Exp $
 #ifndef AuditorSvc_AuditorSvc_H
 #define AuditorSvc_AuditorSvc_H
 
@@ -13,16 +13,16 @@ class INamedInterface;
 //------------------------------------------------------------------
 //
 // ClassName:   AuditorSvc
-//  
-// Description: This service manages Auditors. 
-//              Auditors can be inserted in the system to audit the Algorithms is 
+//
+// Description: This service manages Auditors.
+//              Auditors can be inserted in the system to audit the Algorithms is
 //              in their functions.
 //------------------------------------------------------------------
 class AuditorSvc : public Service, virtual public IAuditorSvc {
 
-public: 
-  
-// Typedefs 
+public:
+
+// Typedefs
   typedef std::list<IAuditor*>     ListAudits;
   typedef std::vector<std::string> VectorName;
 
@@ -30,19 +30,19 @@ public:
 //
   // Initialise the service.
   virtual StatusCode initialize();
-  
+
   // Finalise the service.
   virtual StatusCode finalize();
-  
+
   // Query the interfaces.
   //   Input: riid, Requested interface ID
   //          ppvInterface, Pointer to requested interface
   //   Return: StatusCode indicating SUCCESS or FAILURE.
   // N.B. Don't forget to release the interface after use!!!
   virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface );
-    
+
 // IAuditorSvc interfaces overwrite
-// 
+//
   /// The following methods are meant to be implemented by the child class...
 
   virtual void before(StandardEventType, INamedInterface*);
@@ -87,19 +87,19 @@ public:
   // inform Auditors that the finalize() has been called
   virtual void afterFinalize(INamedInterface* ini);
 
-  virtual const bool isEnabled() const ;
-  
+  virtual bool isEnabled() const ;
+
   virtual StatusCode sysInitialize();
   virtual StatusCode sysFinalize();
 
   // management functionality: retrieve an Auditor
   virtual IAuditor* getAuditor( const std::string& name );
-  
+
   // Standard Constructor.
   //   Input:  name   String with service name
   //   Input:  svc    Pointer to service locator interface
   AuditorSvc( const std::string& name, ISvcLocator* svc );
-  
+
   // Destructor.
   virtual ~AuditorSvc();
 
@@ -115,9 +115,6 @@ private:
   // Manager list of Auditors
   ListAudits   m_pAudList;
 
-  // Local (base unrelated) state
-  Service::State m_state;
-  
   // To disable alltogether the auditors
   bool m_isEnabled;
 };

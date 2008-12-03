@@ -1,4 +1,4 @@
-// $Id: ServiceManager.cpp,v 1.23.2.3 2008/08/21 00:09:07 leggett Exp $
+// $Id: ServiceManager.cpp,v 1.27 2008/11/10 15:29:09 marcocle Exp $
 
 // Include files
 #include "ServiceManager.h"
@@ -12,15 +12,16 @@
 #include <iostream>
 #include <cassert>
 
-static std::string defaultCaller = "unknown";
-
 using ROOT::Reflex::PluginService;
 // constructor
-ServiceManager::ServiceManager(IInterface* iface): 
-  m_refcount(1), m_pOuter(iface), m_msgsvc(0), 
-  m_loopCheck(true), m_caller(defaultCaller), m_savelog(true), m_init(false) {
+ServiceManager::ServiceManager(IInterface* iface):
+  m_statemgr(iface),
+  m_loopCheck(true)
+{
+  m_refcount   = 1;
+  m_pOuter = iface;
   m_svclocator = (ISvcLocator*)this;
-
+  m_msgsvc     = 0;
 }
 
 // destructor
@@ -30,7 +31,6 @@ ServiceManager::~ServiceManager() {
   for (ListSvc::const_iterator it = m_listsvc.begin(); it != m_listsvc.end(); it++ ) {
     (*it)->setServiceManager(0);
   }
-
 }
 
 // addRef
@@ -52,21 +52,21 @@ unsigned long ServiceManager::release() {
 StatusCode ServiceManager::queryInterface(const InterfaceID& iid, void** pinterface)
 //------------------------------------------------------------------------------
 {
-  if( iid == IID_IInterface ) {  
+  if( iid == IID_IInterface ) {
     *pinterface = (IInterface*)this;
     addRef();
     return StatusCode::SUCCESS;
-  } 
+  }
   else if ( iid == IID_ISvcLocator ) {
     *pinterface = (ISvcLocator*)this;
     addRef();
     return StatusCode::SUCCESS;
-  } 
+  }
   else if ( iid == IID_ISvcManager ) {
     *pinterface = (ISvcManager*)this;
     addRef();
     return StatusCode::SUCCESS;
-  } 
+  }
   else {
     return m_pOuter->queryInterface(iid, pinterface);
   }
@@ -91,7 +91,6 @@ StatusCode ServiceManager::getService( const std::string& name, const InterfaceI
   }
   return status;
 }
-
 //------------------------------------------------------------------------------
 StatusCode ServiceManager::makeService( const std::string& nam,
                                         IService*& svc )
@@ -115,13 +114,15 @@ StatusCode ServiceManager::makeService( const std::string& nam,
   }
   StatusCode sc = createService( type, name, svc );
   if( sc.isSuccess() ) {
-    // initialize the service IF AppMgr already inited (i.e. not during configure)
-    IService* pAppMgr(dynamic_cast<IService*>(m_pOuter));
-    assert( 0 != pAppMgr );
-    sc =( ( pAppMgr->state() == IService::CONFIGURED || 
-            pAppMgr->state() == IService::INITIALIZED ) ?
-          svc->sysInitialize() : 
-          StatusCode::SUCCESS );
+    // Bring the created service to the same state in which the ApplicationMgr
+    // will be.
+    if (m_statemgr->targetFSMState() >= Gaudi::StateMachine::INITIALIZED) {
+      sc = svc->sysInitialize();
+      if (sc.isSuccess() && m_statemgr->targetFSMState() >= Gaudi::StateMachine::RUNNING) {
+        sc = svc->sysStart();
+      }
+    }
+
     if( sc.isSuccess() ) {
       sc = addService( svc, 10);
     } else {
@@ -148,58 +149,26 @@ StatusCode ServiceManager::getService( const std::string& nam, IService*& svc,
   StatusCode sc(StatusCode::FAILURE);
   ListSvc::iterator it(m_listsvc.begin());
   for (; it != m_listsvc.end(); ++it ) {
-    if( (*it)->name() == name ) { 
+    if( (*it)->name() == name ) {
       svc = *it;
       break;
-    }  
+    }
   }
-  
+
   if (it !=  m_listsvc.end()) {
-    if (createIf && (*it)->state() == IService::CONFIGURED && m_loopCheck) {
-
+    if (m_loopCheck &&
+        (createIf && (*it)->FSMState() == Gaudi::StateMachine::CONFIGURED)) {
       MsgStream log(msgSvc(), "ServiceManager");
-      std::ostringstream ost;
-      ost << "Initialization loop detected when creating service \"" << name
-	  << "\"" << std::endl;
-
-
-      const size_t depth(99);
-      void* addresses[depth];
-      std::string lib,rlib,fnc;
-      void* addr(0);
-      
-      ost << "Printing stack trace:" << std::endl;
-      if ( addresses && System::backTrace(addresses, depth)) {      
-	int i=1;
-	while (System::getStackLevel(addresses[i], addr, fnc, lib)) {
-	  if ( (lib.find("libGaudiSvc.so") == std::string::npos &&
-		lib.find("libGaudiKernel.so") == std::string::npos &&
-		fnc.find("::service<IService>(") == std::string::npos &&
-		fnc.find("__") != 0) || log.level() <= MSG::DEBUG )
-	    {
-	      int i1 = lib.rfind("/",lib.length());
-	      rlib = lib.substr(i1+1,lib.length()-i1-1);
-	      ost << "  " << fnc << "  [" << rlib << "]" << std::endl;	    
-	    }
-	  ++i;
-	}
-      }
-
-
-      if ( find(m_loopIgnore.begin(), m_loopIgnore.end(), name) == m_loopIgnore.end() ) {
-	log << MSG::ERROR << ost.str() << endreq;
-
-	sc = StatusCode::FAILURE;
-      } else {
-	log << MSG::DEBUG << ost.str() << endreq;
-
-	sc = StatusCode::SUCCESS;
-      }
-    } else {      
+      log << MSG::ERROR
+	  << "Initialization loop detected when creating service \"" << name
+	  << "\""
+          << endreq;
+      sc = StatusCode::FAILURE;
+    } else {
       sc = StatusCode::SUCCESS;
     }
   } else {
-    // Service not found. The user may be interested in one of the interfaces 
+    // Service not found. The user may be interested in one of the interfaces
     // of the application manager itself
     if( name == "ApplicationMgr" ||
         name == "APPMGR" ||
@@ -219,8 +188,6 @@ StatusCode ServiceManager::getService( const std::string& nam, IService*& svc,
     }
   }
 
-  if (m_savelog) logGet(nam);
-
   return sc;
 }
 
@@ -236,7 +203,7 @@ std::list<IService*> ServiceManager::getActiveServices( ) const
 //------------------------------------------------------------------------------
 {
   std::list<IService*> asvcs;
-  for (PListSvc::const_iterator itr = m_activesvc.begin(); 
+  for (PListSvc::const_iterator itr = m_activesvc.begin();
        itr != m_activesvc.end(); ++itr) {
     asvcs.push_back( itr->first );
   }
@@ -273,7 +240,7 @@ StatusCode ServiceManager::addService( IService* svc, int prio )
 }
 
 //------------------------------------------------------------------------------
-StatusCode ServiceManager::addService( const std::string& type, 
+StatusCode ServiceManager::addService( const std::string& type,
                                        const std::string& name, int prio )
 //------------------------------------------------------------------------------
 {
@@ -293,6 +260,14 @@ StatusCode ServiceManager::addService( const std::string& type,
     } else {
       sc = createService( type, name, svc );
     }
+
+    if (sc.isSuccess() && m_statemgr->targetFSMState() >= Gaudi::StateMachine::INITIALIZED) {
+      sc = svc->sysInitialize();
+      if (sc.isSuccess() && m_statemgr->targetFSMState() >= Gaudi::StateMachine::RUNNING) {
+        sc = svc->sysStart();
+      }
+    }
+
   }
   if( sc.isSuccess() ) {
     return addService( svc, prio );
@@ -310,7 +285,7 @@ StatusCode ServiceManager::removeService( IService* svc)
   removeActiveService(svc).ignore();
   removeListService(svc).ignore();
 
-  return StatusCode::SUCCESS;
+  return StatusCode(StatusCode::SUCCESS,true);
 }
 
 //------------------------------------------------------------------------------
@@ -373,7 +348,7 @@ StatusCode ServiceManager::declareSvcFactory( const ISvcFactory& factory,
 }
 
 //------------------------------------------------------------------------------
-StatusCode ServiceManager::declareSvcType( const std::string& svcname, 
+StatusCode ServiceManager::declareSvcType( const std::string& svcname,
                                            const std::string& svctype )
 //------------------------------------------------------------------------------
 {
@@ -391,22 +366,94 @@ StatusCode ServiceManager::initializeServices()
 //------------------------------------------------------------------------------
 {
   StatusCode sc;
+  MsgStream log(msgSvc(), "ServiceManager");
 
   // call initialize() for all services
   for (PListSvc::iterator it = m_activesvc.begin(); it != m_activesvc.end(); it++ ) {
     std::string name = (*it).first->name();
-    if( IService::INITIALIZED != (*it).first->state() ) {
-      MsgStream log(msgSvc(), "ServiceManager");
+    switch ((*it).first->FSMState()) {
+    case Gaudi::StateMachine::INITIALIZED:
+      log << MSG::DEBUG << "Service " << name
+          << " already initialized" << endreq;
+      break;
+    case Gaudi::StateMachine::OFFLINE:
       log << MSG::DEBUG << "Initializing service " << name << endreq;
       sc = (*it).first->sysInitialize();
       if( !sc.isSuccess() ) {
         log << MSG::ERROR << "Unable to initialize Service: " << (*it).first->name() << endreq;
         return sc;
-      } 
-    } else {
-      MsgStream log(msgSvc(), "ServiceManager");
-      log << MSG::DEBUG << "Service " << name 
-          << " already initialized" << endreq;
+      } break;
+    default:
+      log << MSG::ERROR << "Service " << name
+          << " not in the correct state to be initialized ("
+          << (*it).first->FSMState() << ")" << endreq;
+      return StatusCode::FAILURE;
+    }
+  }
+  return StatusCode::SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+StatusCode ServiceManager::startServices()
+//------------------------------------------------------------------------------
+{
+  StatusCode sc = StatusCode(StatusCode::FAILURE,true);
+  MsgStream log(msgSvc(), "ServiceManager");
+
+  // call initialize() for all services
+  for (PListSvc::iterator it = m_activesvc.begin(); it != m_activesvc.end(); it++ ) {
+    std::string name = (*it).first->name();
+    switch ((*it).first->FSMState()) {
+    case Gaudi::StateMachine::RUNNING:
+      log << MSG::DEBUG << "Service " << name
+          << " already started" << endreq;
+      break;
+    case Gaudi::StateMachine::INITIALIZED:
+      log << MSG::DEBUG << "Starting service " << name << endreq;
+      sc = (*it).first->sysStart();
+      if( !sc.isSuccess() ) {
+        log << MSG::ERROR << "Unable to start Service: " << (*it).first->name() << endreq;
+        return sc;
+      } break;
+    default:
+      log << MSG::ERROR << "Service " << name
+          << " not in the correct state to be started ("
+          << (*it).first->FSMState() << ")" << endreq;
+      return StatusCode::FAILURE;
+    }
+  }
+  return StatusCode::SUCCESS;
+}
+
+
+//------------------------------------------------------------------------------
+StatusCode ServiceManager::stopServices()
+//------------------------------------------------------------------------------
+{
+  StatusCode sc;
+  MsgStream log(msgSvc(), "ServiceManager");
+
+  PListSvc::reverse_iterator it;
+  // call stop() for all services
+  for ( it = m_activesvc.rbegin(); it != m_activesvc.rend(); it++ ) {
+    std::string name = (*it).first->name();
+    switch ((*it).first->FSMState()) {
+    case Gaudi::StateMachine::INITIALIZED:
+      log << MSG::DEBUG << "Service " << name
+          << " already stopped" << endreq;
+      break;
+    case Gaudi::StateMachine::RUNNING:
+      log << MSG::DEBUG << "Stopping service " << name << endreq;
+      sc = (*it).first->sysStop();
+      if( !sc.isSuccess() ) {
+        log << MSG::ERROR << "Unable to stop Service: " << (*it).first->name() << endreq;
+        return sc;
+      } break;
+    default:
+      log << MSG::ERROR << "Service " << name
+          << " not in the correct state to be stopped ("
+          << (*it).first->FSMState() << ")" << endreq;
+      return StatusCode::FAILURE;
     }
   }
   return StatusCode::SUCCESS;
@@ -419,25 +466,31 @@ StatusCode ServiceManager::reinitializeServices()
   StatusCode sc;
 
   PListSvc::iterator it;
-
-  // Initialize all new services....(the ones that are not yet initialized)
+  // Re-Initialize all services
   for ( it = m_activesvc.begin(); it != m_activesvc.end(); it++ ) {
-    if( IService::INITIALIZED != (*it).first->state() ) {
-      sc = (*it).first->sysInitialize();
-      if( !sc.isSuccess() ) {
-        MsgStream log(msgSvc(), "ServiceManager");
-        log << MSG::ERROR << "Unable to initialize Service: " << (*it).first->name() << endreq;
-        return StatusCode::FAILURE;
-      }
-    }
-  }
-
-  // Re-Initialize all services....(the new and old ones)
-  for ( it = m_activesvc.begin(); it != m_activesvc.end(); it++ ) {
-    sc = (*it).first->reinitialize();
+    sc = (*it).first->sysReinitialize();
     if( !sc.isSuccess() ) {
       MsgStream log(msgSvc(), "ServiceManager");
       log << MSG::ERROR << "Unable to re-initialize Service: " << (*it).first->name() << endreq;
+      return StatusCode::FAILURE;
+    }
+  }
+  return StatusCode::SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+StatusCode ServiceManager::restartServices()
+//------------------------------------------------------------------------------
+{
+  StatusCode sc;
+
+  PListSvc::iterator it;
+  // Re-Start all services
+  for ( it = m_activesvc.begin(); it != m_activesvc.end(); it++ ) {
+    sc = (*it).first->sysRestart();
+    if( !sc.isSuccess() ) {
+      MsgStream log(msgSvc(), "ServiceManager");
+      log << MSG::ERROR << "Unable to re-start Service: " << (*it).first->name() << endreq;
       return StatusCode::FAILURE;
     }
   }
@@ -471,10 +524,12 @@ StatusCode ServiceManager::finalizeServices()
 
   // call finalize() for all services in reverse order
   for ( its = m_activesvc.rbegin(); its != m_activesvc.rend(); its++ ) {
+    // ignore the current state for the moment
+    // if( Gaudi::StateMachine::INITIALIZED == (*it).first->state() ) {
     log << MSG::DEBUG << "Finalizing service " << (*its).first->name() << endreq;
     if ( !((*its).first->sysFinalize()).isSuccess() ) {
-      log << MSG::WARNING << "Finalization of service " << (*its).first->name() 
-          << " failed" << endreq;
+      log << MSG::WARNING << "Finalization of service " << (*its).first->name()
+      << " failed" << endreq;
       sc = StatusCode::FAILURE;
     }
   }
@@ -483,7 +538,7 @@ StatusCode ServiceManager::finalizeServices()
   while (m_activesvc.size() != 0) {
     PListSvc::iterator its = m_activesvc.end();
     its --;
-    
+
     //// release for all services
     //   for ( its = m_activesvc.rbegin(); its != m_activesvc.rend(); its++ ) {
     // erase from m_listsvc before releasing
@@ -495,7 +550,7 @@ StatusCode ServiceManager::finalizeServices()
     }
 
     // this may destroy the service
-    while ((*its).first->release()) {}
+    (*its).first->release();
   }
 
   // clear the list of active services
@@ -506,7 +561,7 @@ StatusCode ServiceManager::finalizeServices()
 
 
 //------------------------------------------------------------------------------
-StatusCode ServiceManager::createService( const std::string& svctype, 
+StatusCode ServiceManager::createService( const std::string& svctype,
                                           const std::string& svcname,
                                           IService*& service )
 //------------------------------------------------------------------------------
@@ -523,7 +578,10 @@ StatusCode ServiceManager::createService( const std::string& svctype,
   MsgStream log(msgSvc(), "ServiceManager");
 
   service = PluginService::Create<IService*>(svctype, svcname, m_svclocator);
-  if (m_savelog) logCreation(svctype, svcname);
+  if ( !service ) {
+    service = PluginService::CreateWithId<IService*>(svctype, svcname, m_svclocator);
+  }
+
   if ( service ) {
     m_listsvc.push_back( service );
     // Check the compatibility of the version of the interface obtained
@@ -539,7 +597,7 @@ StatusCode ServiceManager::createService( const std::string& svctype,
 }
 
 /// Access to factory by name
-StatusCode 
+StatusCode
 ServiceManager::getFactory(const std::string& svctype,const ISvcFactory*& factory) const
 {
   MapFactory::const_iterator itf = m_mapfactory.find( svctype );
@@ -554,13 +612,13 @@ IMessageSvc* ServiceManager::msgSvc()
   if( m_msgsvc == 0 ) {
     IService* iSvc(0);
     if ( (getService( "MessageSvc", iSvc, false)).isSuccess() )
-      m_msgsvc = dynamic_cast<IMessageSvc*>(iSvc);    
+      m_msgsvc = dynamic_cast<IMessageSvc*>(iSvc);
   }
   return m_msgsvc;
 }
 
 //------------------------------------------------------------------------------
-int 
+int
 ServiceManager::getPriority(const std::string& name) const {
 //------------------------------------------------------------------------------
 
@@ -576,11 +634,11 @@ ServiceManager::getPriority(const std::string& name) const {
 }
 
 //------------------------------------------------------------------------------
-StatusCode 
+StatusCode
 ServiceManager::setPriority(const std::string& name, int prio) {
 //------------------------------------------------------------------------------
 
-  PListSvc::const_iterator it;  
+  PListSvc::const_iterator it;
   for (it = m_activesvc.begin(); it != m_activesvc.end(); it++ ) {
     if ((*it).first->name() == name) {
       IService *svc = (*it).first;
@@ -588,77 +646,20 @@ ServiceManager::setPriority(const std::string& name, int prio) {
       return addService(svc,prio);
     }
   }
-  
+
   return StatusCode::FAILURE;
 
-} 
-
-
-//------------------------------------------------------------------------------
-void
-ServiceManager::loopCheckHandler(Property& prop) {
-//------------------------------------------------------------------------------
-
-  if (prop.name() == "InitializationLoopCheck") {
-    BooleanProperty *b = dynamic_cast<BooleanProperty*>(&prop);
-    if (b != 0) m_loopCheck = b->value();
-  } else if (prop.name() == "LoopCheckIgnore") {
-    StringArrayProperty *sa = dynamic_cast<StringArrayProperty*>(&prop);
-    if (sa != 0) m_loopIgnore = sa->value();
-  } else if (prop.name() == "ServiceLogFile") {
-    m_init = false;
-    StringProperty *s = dynamic_cast<StringProperty*>(&prop);    
-    if (s != 0) { 
-      if (m_ofs.is_open()) {
-	m_ofs.close();
-      }
-
-      std::string m_outputfile = s->value();
-      if (m_outputfile != "") {
-	m_savelog = true;
-	m_ofs.open(m_outputfile.c_str(), std::ios_base::app);
-	if (! m_ofs.is_open()) {
-	  std::cerr << "ServiceManager: Unable to open output file \""
-		    << m_outputfile << "\" for writing" << std::endl;
-	}
-	m_ofs << m_tmpLog.str();
-      } else {
-	m_savelog = false;
-      } 
-    }
-  }
-
 }
 
 //------------------------------------------------------------------------------
-void
-ServiceManager::logCreation(const std::string& svctype, 
-			    const std::string& svcname ) 
+// Get the value of the initialization loop check flag.
 //------------------------------------------------------------------------------
-{
-
-  if (m_ofs.is_open()) {
-    m_ofs << "\"" << svctype << "/" << svcname << "\" created by " 
-	  << m_caller << std::endl;
-  } else if (m_init) {
-    m_tmpLog << "\"" << svctype << "/" << svcname << "\" created by " 
-	     << m_caller << std::endl;
-  }
-  
+bool ServiceManager::loopCheckEnabled() const {
+  return m_loopCheck;
 }
-
 //------------------------------------------------------------------------------
-void
-ServiceManager::logGet(const std::string& svcname ) 
+// Set the value of the initialization loop check flag.
 //------------------------------------------------------------------------------
-{
-  
-  if (m_ofs.is_open()) {
-    m_ofs << "\"" << svcname << "\" retrieved by " << m_caller
-	  << std::endl;
-  } else if (m_init) {
-    m_tmpLog << "\"" << svcname << "\" retrieved by " << m_caller
-	     << std::endl;
-  }
-
+void ServiceManager::setLoopCheckEnabled(bool en) {
+  m_loopCheck = en;
 }

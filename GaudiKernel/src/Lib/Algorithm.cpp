@@ -1,4 +1,4 @@
-//$Id: Algorithm.cpp,v 1.40.2.1 2008/08/18 16:31:10 leggett Exp $
+//$Id: Algorithm.cpp,v 1.42 2008/10/23 15:57:37 marcocle Exp $
 #include "GaudiKernel/Kernel.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IMessageSvc.h"
@@ -23,7 +23,6 @@
 #include "GaudiKernel/ServiceLocatorHelper.h"
 #include "GaudiKernel/ThreadGaudi.h"
 #include "GaudiKernel/Guards.h"
-
 
 // Constructor
 Algorithm::Algorithm( const std::string& name, ISvcLocator *pSvcLocator,
@@ -50,8 +49,8 @@ Algorithm::Algorithm( const std::string& name, ISvcLocator *pSvcLocator,
     m_filterPassed(true),
     m_isEnabled(true),
     m_isExecuted(false),
-    m_isInitialized(false),
-    m_isFinalized(false)
+    m_state(Gaudi::StateMachine::CONFIGURED),
+    m_targetState(Gaudi::StateMachine::CONFIGURED)
 {
   m_propertyMgr = new PropertyMgr();
   m_subAlgms = new std::vector<Algorithm *>();
@@ -79,16 +78,19 @@ Algorithm::Algorithm( const std::string& name, ISvcLocator *pSvcLocator,
 
   declareProperty( "AuditInitialize"  , m_auditorInitialize   = audit ) ;
   declareProperty( "AuditReinitialize", m_auditorReinitialize = audit ) ;
+  declareProperty( "AuditRestart"     , m_auditorRestart      = audit ) ;
   declareProperty( "AuditExecute"     , m_auditorExecute      = audit ) ;
   declareProperty( "AuditFinalize"    , m_auditorFinalize     = audit ) ;
-  declareProperty( "AuditBeginRun"    , m_auditorBeginRun       = audit ) ;
+  declareProperty( "AuditBeginRun"    , m_auditorBeginRun     = audit ) ;
   declareProperty( "AuditEndRun"      , m_auditorEndRun       = audit ) ;
+  declareProperty( "AuditStart"       , m_auditorStart        = audit ) ;
+  declareProperty( "AuditStop"        , m_auditorStop         = audit ) ;
 
   declareProperty( "MonitorService"   , m_monitorSvcName      = "MonitorSvc" );
-  
+
   // update handlers.
   m_outputLevel.declareUpdateHandler(&Algorithm::initOutputLevel, this);
- 
+
 }
 
 // Default Destructor
@@ -114,7 +116,7 @@ StatusCode Algorithm::sysInitialize() {
 
   // Bypass the initialization if the algorithm
   // has already been initialized.
-  if ( m_isInitialized ) return StatusCode::SUCCESS;
+  if ( Gaudi::StateMachine::INITIALIZED <= FSMState() ) return StatusCode::SUCCESS;
 
   // Set the Algorithm's properties
   StatusCode sc = setProperties();
@@ -124,13 +126,16 @@ StatusCode Algorithm::sysInitialize() {
   // Need to do this after setProperties.
   if ( !isEnabled( ) ) return StatusCode::SUCCESS;
 
+  m_targetState = Gaudi::StateMachine::ChangeState(Gaudi::StateMachine::INITIALIZE,m_state);
+
   // Check current outputLevel to evetually inform the MessagsSvc
   //if( m_outputLevel != MSG::NIL ) {
   setOutputLevel( m_outputLevel );
   //}
 
+  // TODO: (MCl) where shoud we do this? initialize or start?
   // Reset Error count
-  m_errorCount = 0;
+  //m_errorCount = 0;
 
   // Invoke initialize() method of the derived class inside a try/catch clause
   try {
@@ -157,9 +162,8 @@ StatusCode Algorithm::sysInitialize() {
           << endreq;
       return result;
     }
-    // Indicate that this Algorithm has been initialized to prevent duplicate
-    // attempts.
-    setInitialized( );
+    // Update the state.
+    m_state = m_targetState;
     return StatusCode::SUCCESS;
   }
   catch ( const GaudiException& Exception )  {
@@ -185,15 +189,84 @@ StatusCode Algorithm::sysInitialize() {
 }
 
 // IAlgorithm implementation
+StatusCode Algorithm::sysStart() {
+
+  // Bypass the startup if already running or disabled.
+  if ( Gaudi::StateMachine::RUNNING == FSMState() ||
+       !isEnabled() ) return StatusCode::SUCCESS;
+
+  m_targetState = Gaudi::StateMachine::ChangeState(Gaudi::StateMachine::START,m_state);
+
+  // TODO: (MCl) where shoud we do this? initialize or start?
+  // Reset Error count
+  m_errorCount = 0;
+
+  StatusCode sc;
+  // Invoke start() method of the derived class inside a try/catch clause
+  try {
+    { // limit the scope of the guard
+      Gaudi::Guards::AuditorGuard guard(this,
+                                        // check if we want to audit the initialize
+                                        (m_auditorStart) ? auditorSvc() : 0,
+                                        IAuditor::Start);
+      // Invoke the start() method of the derived class
+      sc = start();
+    }
+    if( sc.isFailure() ) return StatusCode::FAILURE;
+
+    // Now start any sub-algorithms
+    std::vector<Algorithm *>::iterator it;
+    StatusCode result = StatusCode::SUCCESS;
+    for (it = m_subAlgms->begin(); it != m_subAlgms->end(); it++) {
+      sc = (*it)->sysStart();
+      if( sc.isFailure() ) result = sc;
+    }
+    if( result.isFailure() ) {
+      MsgStream log ( msgSvc() , name() + ".sysInitialize()" );
+      log << MSG::ERROR << " Error initializing one or several sub-algorithms"
+          << endreq;
+      return result;
+    }
+    // Update the state.
+    m_state = m_targetState;
+    return StatusCode::SUCCESS;
+  }
+  catch ( const GaudiException& Exception )  {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "in sysStart(): exception with tag=" << Exception.tag()
+        << " is caught" << endreq;
+    log << MSG::ERROR << Exception << endreq;
+    Stat stat( chronoSvc() , Exception.tag() );
+  }
+  catch( const std::exception& Exception ) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "in sysStart(): standard std::exception is caught" << endreq;
+    log << MSG::ERROR << Exception.what()  << endreq;
+    Stat stat( chronoSvc() , "*std::exception*" );
+  }
+  catch(...) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "in sysStart(): UNKNOWN Exception is caught" << endreq;
+    Stat stat( chronoSvc() , "*UNKNOWN Exception*" ) ;
+  }
+
+  return StatusCode::FAILURE;
+}
+
+// IAlgorithm implementation
 StatusCode Algorithm::sysReinitialize() {
 
   // Bypass the initialization if the algorithm is disabled.
   if ( !isEnabled( ) ) return StatusCode::SUCCESS;
 
-  // Set the Algorithm's properties
-  StatusCode sc;
-  sc = setProperties();
-  if( sc.isFailure() ) return StatusCode::FAILURE;
+  // Check that the current status is the correct one.
+  if ( Gaudi::StateMachine::INITIALIZED != FSMState() ) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::ERROR
+        << "sysReinitialize(): cannot reinitialize algorithm not initialized"
+        << endreq;
+    return StatusCode::FAILURE;
+  }
 
   // Check current outputLevel to evetually inform the MessagsSvc
   //if( m_outputLevel != MSG::NIL ) {
@@ -201,8 +274,9 @@ StatusCode Algorithm::sysReinitialize() {
   //}
 
   // Reset Error count
-  m_errorCount = 0;
-  
+  // m_errorCount = 0; // done during start
+
+  StatusCode sc(StatusCode::SUCCESS,true);
   // Invoke reinitialize() method of the derived class inside a try/catch clause
   try {
     { // limit the scope of the guard
@@ -223,40 +297,108 @@ StatusCode Algorithm::sysReinitialize() {
       if( sc.isFailure() ) result = sc;
     }
     if( result.isFailure() ) {
-      MsgStream log ( msgSvc() , name() + ".sysReinitialize()" );
-      log << MSG::ERROR << " Error initializing one or several sub-algorithms"
+      MsgStream log ( msgSvc() , name() );
+      log << MSG::ERROR
+          << "sysReinitialize(): Error reinitializing one or several sub-algorithms"
           << endreq;
       return result;
     }
-    // Indicate that this Algorithm has been initialized to prevent duplicate
-    // attempts.
-    setInitialized( );
     return StatusCode::SUCCESS;
   }
   catch ( const GaudiException& Exception )  {
-    MsgStream log ( msgSvc() , name() + ".sysReinitialize()" );
-    log << MSG::FATAL << " Exception with tag=" << Exception.tag()
-        << " is caught " << endreq;
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "sysReinitialize(): Exception with tag=" << Exception.tag()
+        << " is caught" << endreq;
     log << MSG::ERROR << Exception  << endreq;
     Stat stat( chronoSvc() , Exception.tag() );
   }
   catch( const std::exception& Exception ) {
-    MsgStream log ( msgSvc() , name() + ".sysReinitialize()" );
-    log << MSG::FATAL << " Standard std::exception is caught " << endreq;
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "sysReinitialize(): Standard std::exception is caught" << endreq;
     log << MSG::ERROR << Exception.what()  << endreq;
     Stat stat( chronoSvc() , "*std::exception*" );
   }
   catch(...) {
-    MsgStream log ( msgSvc() , name() + ".sysReinitialize()" );
-    log << MSG::FATAL << "UNKNOWN Exception is caught " << endreq;
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "sysReinitialize(): UNKNOWN Exception is caught" << endreq;
     Stat stat( chronoSvc() , "*UNKNOWN Exception*" ) ;
   }
 
   return StatusCode::FAILURE;
 }
 
-StatusCode Algorithm::reinitialize() {
-  return StatusCode::SUCCESS;
+// IAlgorithm implementation
+StatusCode Algorithm::sysRestart() {
+
+  // Bypass the initialization if the algorithm is disabled.
+  if ( !isEnabled( ) ) return StatusCode::SUCCESS;
+
+  // Check that the current status is the correct one.
+  if ( Gaudi::StateMachine::RUNNING != FSMState() ) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::ERROR
+        << "sysRestart(): cannot restart algorithm not started"
+        << endreq;
+    return StatusCode::FAILURE;
+  }
+
+  // Check current outputLevel to evetually inform the MessagsSvc
+  //if( m_outputLevel != MSG::NIL ) {
+  setOutputLevel( m_outputLevel );
+  //}
+
+  // Reset Error count
+  m_errorCount = 0;
+
+  StatusCode sc(StatusCode::SUCCESS,true);
+  // Invoke reinitialize() method of the derived class inside a try/catch clause
+  try {
+    { // limit the scope of the guard
+      Gaudi::Guards::AuditorGuard guard(this,
+                                        // check if we want to audit the initialize
+                                        (m_auditorRestart) ? auditorSvc() : 0,
+                                        IAuditor::ReStart);
+      // Invoke the reinitialize() method of the derived class
+      sc = restart();
+    }
+    if( sc.isFailure() ) return StatusCode::FAILURE;
+
+    // Now initialize care of any sub-algorithms
+    std::vector<Algorithm *>::iterator it;
+    StatusCode result = StatusCode::SUCCESS;
+    for (it = m_subAlgms->begin(); it != m_subAlgms->end(); it++) {
+      sc = (*it)->sysRestart();
+      if( sc.isFailure() ) result = sc;
+    }
+    if( result.isFailure() ) {
+      MsgStream log ( msgSvc() , name() );
+      log << MSG::ERROR
+          << "sysRestart(): Error restarting one or several sub-algorithms"
+          << endreq;
+      return result;
+    }
+    return StatusCode::SUCCESS;
+  }
+  catch ( const GaudiException& Exception )  {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "sysRestart(): Exception with tag=" << Exception.tag()
+        << " is caught" << endreq;
+    log << MSG::ERROR << Exception  << endreq;
+    Stat stat( chronoSvc() , Exception.tag() );
+  }
+  catch( const std::exception& Exception ) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "sysRestart(): Standard std::exception is caught" << endreq;
+    log << MSG::ERROR << Exception.what()  << endreq;
+    Stat stat( chronoSvc() , "*std::exception*" );
+  }
+  catch(...) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "sysRestart(): UNKNOWN Exception is caught" << endreq;
+    Stat stat( chronoSvc() , "*UNKNOWN Exception*" ) ;
+  }
+
+  return StatusCode::FAILURE;
 }
 
 // IAlgorithm implementation
@@ -473,11 +615,67 @@ StatusCode Algorithm::sysExecute() {
   return status;
 }
 
+// IAlgorithm implementation
+StatusCode Algorithm::sysStop() {
+
+  // Bypass the startup if already running or disabled.
+  if ( Gaudi::StateMachine::INITIALIZED == FSMState() ||
+       !isEnabled() ) return StatusCode::SUCCESS;
+
+  m_targetState = Gaudi::StateMachine::ChangeState(Gaudi::StateMachine::STOP,m_state);
+
+  StatusCode sc;
+  // Invoke stop() method of the derived class inside a try/catch clause
+  try {
+    // Stop first any sub-algorithms (in reverse order)
+    std::vector<Algorithm *>::reverse_iterator it;
+    for (it = m_subAlgms->rbegin(); it != m_subAlgms->rend(); it++) {
+      (*it)->sysStop().ignore();
+    }
+    { // limit the scope of the guard
+      Gaudi::Guards::AuditorGuard guard(this,
+                                        // check if we want to audit the initialize
+                                        (m_auditorStop) ? auditorSvc() : 0,
+                                        IAuditor::Stop);
+
+      // Invoke the stop() method of the derived class
+      sc = stop();
+    }
+    if( sc.isFailure() ) return StatusCode::FAILURE;
+
+    // Update the state.
+    m_state = m_targetState;
+    return StatusCode::SUCCESS;
+  }
+  catch ( const GaudiException& Exception )  {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "in sysStop(): exception with tag=" << Exception.tag()
+        << " is caught" << endreq;
+    log << MSG::ERROR << Exception << endreq;
+    Stat stat( chronoSvc() , Exception.tag() );
+  }
+  catch( const std::exception& Exception ) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "in sysStop(): standard std::exception is caught" << endreq;
+    log << MSG::ERROR << Exception.what()  << endreq;
+    Stat stat( chronoSvc() , "*std::exception*" );
+  }
+  catch(...) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::FATAL << "in sysStop(): UNKNOWN Exception is caught" << endreq;
+    Stat stat( chronoSvc() , "*UNKNOWN Exception*" ) ;
+  }
+
+  return StatusCode::FAILURE;
+}
+
 StatusCode Algorithm::sysFinalize() {
 
-  // Bypass the finalialization if the algorithm hasn't been initialized or
-  // has already been finalialized.
-  if ( !isInitialized( ) || isFinalized( ) ) return StatusCode::SUCCESS;
+  // Bypass the finalialization if the algorithm hasn't been initilized.
+  if ( Gaudi::StateMachine::CONFIGURED == FSMState() ||
+       !isEnabled() ) return StatusCode::SUCCESS;
+
+  m_targetState = Gaudi::StateMachine::ChangeState(Gaudi::StateMachine::FINALIZE,m_state);
 
   // Invoke finalize() method of the derived class inside a try/catch clause
   StatusCode sc = StatusCode::SUCCESS;
@@ -504,7 +702,7 @@ StatusCode Algorithm::sysFinalize() {
       (*it)->release();
     }
     // Indicate that this Algorithm has been finalized to prevent duplicate attempts
-    setFinalized( );
+    m_state = m_targetState;
     return sc;
   }
   catch( const GaudiException& Exception ) {
@@ -526,6 +724,45 @@ StatusCode Algorithm::sysFinalize() {
     Stat stat( chronoSvc() , "*UNKNOWN Exception*" ) ;
   }
   return StatusCode::FAILURE ;
+}
+
+StatusCode Algorithm::reinitialize() {
+  /* @TODO
+   * MCl 2008-10-23: the implementation of reinitialize as finalize+initialize
+   *                 is causing too many problems
+   *
+  // Default implementation is finalize+initialize
+  StatusCode sc = finalize();
+  if (sc.isFailure()) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::ERROR << "reinitialize(): cannot be finalized" << endreq;
+    return sc;
+  }
+  sc = initialize();
+  if (sc.isFailure()) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::ERROR << "reinitialize(): cannot be initialized" << endreq;
+    return sc;
+  }
+  */
+  return StatusCode::SUCCESS;
+}
+
+StatusCode Algorithm::restart() {
+  // Default implementation is stop+start
+  StatusCode sc = stop();
+  if (sc.isFailure()) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::ERROR << "restart(): cannot be stopped" << endreq;
+    return sc;
+  }
+  sc = start();
+  if (sc.isFailure()) {
+    MsgStream log ( msgSvc() , name() );
+    log << MSG::ERROR << "restart(): cannot be started" << endreq;
+    return sc;
+  }
+  return StatusCode::SUCCESS;
 }
 
 const std::string& Algorithm::name() const {
@@ -745,7 +982,6 @@ IToolSvc* Algorithm::toolSvc() const {
 }
 
 ISvcLocator * Algorithm::serviceLocator() const {
-  m_pSvcLocator->setCaller( const_cast<std::string&>(name()) );
   return m_pSvcLocator;
 }
 
@@ -773,6 +1009,8 @@ StatusCode Algorithm::queryInterface
   { *ppISvc = static_cast<IAlgorithm*>      ( this ) ; }
   else if ( IProperty  ::interfaceID()      . versionMatch ( iid ) )
   { *ppISvc = static_cast<IProperty*>       ( this ) ; }
+  else if ( IStateful  ::interfaceID()      . versionMatch ( iid ) )
+  { *ppISvc = static_cast<IStateful*>       ( this ) ; }
   else if ( INamedInterface ::interfaceID() . versionMatch ( iid ) )
   { *ppISvc = static_cast<INamedInterface*> ( this ) ; }
   else if ( IInterface ::interfaceID()      . versionMatch ( iid ) )
@@ -862,36 +1100,11 @@ const std::vector<Property*>& Algorithm::getProperties( ) const {
 /**
  ** Protected Member Functions
  **/
-
-bool Algorithm::isInitialized( ) const {
-  return m_isInitialized;
-}
-
-void Algorithm::setInitialized( ) {
-  m_isInitialized = true;
-}
-
-bool
-Algorithm::isFinalized( ) const
-{
-  return m_isFinalized;
-}
-
 void
-Algorithm::setFinalized( )
-{
-  m_isFinalized = true;
-}
-
-
-void 
-Algorithm::initOutputLevel(Property& /*prop*/) 
+Algorithm::initOutputLevel(Property& /*prop*/)
 {
   // do nothing... yet ?
 }
-
-
-
 
 StatusCode
 Algorithm::service_i(const std::string& svcName,

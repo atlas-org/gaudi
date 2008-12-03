@@ -1,4 +1,4 @@
-// $Id: ToolSvc.h,v 1.11 2008/02/27 20:24:42 marcocle Exp $
+// $Id: ToolSvc.h,v 1.12 2008/06/02 14:21:35 marcocle Exp $
 #ifndef GAUDISVC_TOOLSVC_H
 #define GAUDISVC_TOOLSVC_H
 
@@ -105,9 +105,6 @@ private: // data
   IHistorySvc* m_pHistorySvc;
 
   std::vector<IToolSvc::Observer*> m_observers;
-
-  /// Bool to know if we are in finalize
-  bool m_isInFinalize;
 };
 
 #endif
