@@ -4,6 +4,7 @@
 
 #include "Reflex/PluginService.h"
 #include "GaudiKernel/ClassID.h"
+#include "RVersion.h"
 
 
 // The following is needed to be backward compatible with the old factories of Gaudi. Otherwise the components
@@ -13,16 +14,24 @@ class IConverter;
 class ISvcLocator;
 
 template <typename T> class CnvFactory {
-	public: static IConverter* create(ISvcLocator *svcloc) { 
-    return new T(svcloc ); 
+public:
+  static IConverter* create(ISvcLocator *svcloc) {
+    return new T(svcloc );
   }
 };
 
 namespace {
   template < typename P > class Factory<P, IConverter*(ISvcLocator*)> {
-    public: static void* Func( void*, const std::vector<void*>& arg, void*) {
+  public:
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,21,6)
+    static void* Func( void*, const std::vector<void*>& arg, void*) {
       return CnvFactory<P>::create((ISvcLocator*)(arg[0]));
     }
+#else
+    static void Func( void *retaddr, void*, const std::vector<void*>& arg, void*) {
+      *(IConverter**) retaddr = CnvFactory<P>::create((ISvcLocator*)(arg[0]));
+    }
+#endif
   };
 }
 
@@ -36,7 +45,7 @@ class ConverterID {
   private:
    friend std::ostream& operator << ( std::ostream&, const ConverterID&);
    long m_stype;
-   CLID m_clid;    
+   CLID m_clid;
 };
 
 inline std::ostream& operator << ( std::ostream& s, const ConverterID& id) {

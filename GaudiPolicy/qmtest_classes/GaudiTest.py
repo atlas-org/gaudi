@@ -401,12 +401,14 @@ normalizeExamples = LineSkipper(["//GP:",
                                  "[INFO]","[WARNING]",
                                  "DEBUG No writable file catalog found which contains FID:",
                                  "0 local", # hack for ErrorLogExample
-                                 "ROOT::Reflex::NewDelFunctionsT<StatusCode>::delete_T(void*)",
+                                 # These two are because of unchecked StatusCodes in the dictionaries
+                                 "ROOT::Reflex::NewDelFunctionsT<StatusCode>::delete_T(void*)", # ROOT 5.18
+                                 "| local                          | libGaudiKernelDict.so",    # ROOT 5.21
                                  # This comes from ROOT, when using GaudiPython 
                                  'Note: (file "(tmpfile)", line 2) File "set" already loaded',
                                  ],regexps = [
                                  r"^#", # Ignore python comments
-                                 r"(Always|SUCCESS)\s*Root file version:", # skip the message reporting the version of the root file
+                                 r"(Always|SUCCESS)\s*(Root f|[^ ]* F)ile version:", # skip the message reporting the version of the root file
                                  r"0x[0-9a-fA-F#]+ *Algorithm::sysInitialize\(\) *\[", # hack for ErrorLogExample
                                  r"0x[0-9a-fA-F#]* *__gxx_personality_v0 *\[", # hack for ErrorLogExample
                                  r"File '.*.xml' does not exist",

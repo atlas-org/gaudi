@@ -6,6 +6,7 @@
 #include "GaudiAlg/GaudiAlgorithm.h"
 #include "GaudiKernel/Property.h"
 #include "GaudiKernel/MsgStream.h"
+#include "GaudiKernel/ToolHandle.h"
 
 // Forward references
 class IMyTool;
@@ -34,6 +35,9 @@ private:
   IMyTool*   m_privateToolWithName;
 
   IMyOtherTool* m_privateOtherInterface;
+
+  ToolHandle<IMyTool> m_myPrivToolHandle;
+  ToolHandle<IMyTool> m_myPubToolHandle;
 
 };
 

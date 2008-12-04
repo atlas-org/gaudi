@@ -3,6 +3,7 @@
 #define GAUDI_KERNEL_TOOLFACTORY_H
 
 #include "Reflex/PluginService.h"
+#include "RVersion.h"
 
 // The following is needed to be backward compatible with the old factories of Gaudi. Otherwise the components
 // having the constructor/destructor protected will not be working
@@ -11,33 +12,26 @@ class IAlgTool;
 class IInterface;
 
 template <typename T> class ToolFactory {
-	public: static IAlgTool* create(const std::string& type, const std::string& name,  IInterface *parent) { 
-    return new T(type, name, parent ); 
+  public:
+  static IAlgTool* create(const std::string& type, const std::string& name,  IInterface *parent) {
+    return new T(type, name, parent );
   }
 };
 
 namespace {
   template < typename P > class Factory<P, IAlgTool*(std::string, std::string, const IInterface*)> {
-    public: static void* Func( void*, const std::vector<void*>& arg, void*) {
+  public:
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,21,6)
+    static void* Func( void*, const std::vector<void*>& arg, void*) {
       return ToolFactory<P>::create(*(std::string*)(arg[0]), *(std::string*)(arg[1]), (IInterface*)(arg[2]));
     }
+#else
+    static void Func( void *retaddr, void*, const std::vector<void*>& arg, void*) {
+      *(IAlgTool**) retaddr = ToolFactory<P>::create(*(std::string*)(arg[0]), *(std::string*)(arg[1]), (IInterface*)(arg[2]));
+    }
+#endif
   };
 }
-
-//---Specialization needed to overcome a problem with Reflex.....
-#ifndef TYPEDISTILLER_STRING_SPECIALIZATION
-#define TYPEDISTILLER_STRING_SPECIALIZATION
-namespace ROOT {
-   namespace Reflex {
-      template<> class TypeDistiller<std::string> {
-      public:
-         static Type Get() {
-            return TypeBuilder("std::basic_string<char>");
-         }
-      };
-   }
-}
-#endif
 
 // Macros to declare components
 #define DECLARE_ALGTOOL(x)             /*dummy*/

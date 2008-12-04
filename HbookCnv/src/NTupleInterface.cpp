@@ -1,6 +1,7 @@
 #include "GaudiKernel/NTuple.h"
 #include "HbookDef.h"
 #include "NTupleInfo.h"
+#include <climits>
 
 #ifdef _WIN32
 extern"C" {

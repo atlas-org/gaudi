@@ -298,7 +298,7 @@ public:
    */
   template < class SERVICE >
   SERVICE* svc ( const std::string& name           ,
-                 const bool         create = false ) const ;
+                 const bool         create = true ) const ;
   /// Short-cut to locate the Update Manager Service.
   inline IUpdateManagerSvc * updMgrSvc() const;
   /// Short-cut to locate the Fast Containers Service.

@@ -6,6 +6,7 @@
 
 // Compiler include files
 #include <cstdio>
+#include <climits>
 
 // Include files
 #include "GaudiKernel/xtoa.h"

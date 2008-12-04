@@ -18,6 +18,7 @@ def command(cmd, *args, **kwargs):
 
 cmt = lambda *args, **kwargs: apply(command, ("cmt",) + args, kwargs)
 cvs = lambda *args, **kwargs: apply(command, ("cvs",) + args, kwargs)
+svn = lambda *args, **kwargs: apply(command, ("svn",) + args, kwargs)
 
 def broadcast_packages():
     """
@@ -59,12 +60,27 @@ def expand_dirs(files, basepath = ""):
             newlist.append(f)
     return newlist
 
+def revision_diff_cmd(cwd):
+    if os.path.isdir(os.path.join(cwd, "CVS")):
+        return cvs("diff", "-upN", cwd = cwd)
+    else:
+        # special treatment to show new files in a way compatible with CVS
+        out, err = svn("status", cwd = cwd)
+        
+        newfiles = [ l
+                     for l in out.splitlines()
+                     if l.startswith("? ") ]
+        out, err = svn("diff", cwd = cwd)
+        if newfiles:
+            out = "\n".join(newfiles) + "\n" + out        
+        return out, err
+
 def diff_pkg(name, cmtdir, exclusions = []):
     """
     Return the patch data for a package.
     """
     rootdir = os.path.dirname(cmtdir)
-    out, err = cvs("diff", "-upN", cwd = rootdir)
+    out, err = revision_diff_cmd(cwd = rootdir)
     # extract new files
     new_files = [ l.split()[1]
                   for l in out.splitlines()
@@ -76,7 +92,11 @@ def diff_pkg(name, cmtdir, exclusions = []):
     # make diff segments for added files
     for f in new_files:
         logging.info("Added file %r", f)
-        out += "diff -u -p -N %s\n" % os.path.basename(f)
+        #out += "diff -u -p -N %s\n" % os.path.basename(f)
+        #out += command("diff", "-upN", "/dev/null", f,
+        #               cwd = rootdir)[0]
+        out += "Index: %s\n" % f
+        out += "===================================================================\n"
         out += command("diff", "-upN", "/dev/null", f,
                        cwd = rootdir)[0]
     # extract removed files

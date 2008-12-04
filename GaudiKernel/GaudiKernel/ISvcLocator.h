@@ -11,8 +11,8 @@
 // Forward class declaration
 class IService;
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_ISvcLocator(11, 2 , 1); 
+// Declaration of the interface ID ( interface id, major version, minor version)
+static const InterfaceID IID_ISvcLocator(11, 2 , 1);
 
 /** @class ISvcLocator ISvcLocator.h GaudiKernel/ISvcLocator.h
     The ISvcLocator is the interface implemented by the Service Factory in the
@@ -32,7 +32,7 @@ public:
       @param name Service name
       @param svc Returned service pointer
   */
-  virtual StatusCode getService( const std::string& name, 
+  virtual StatusCode getService( const std::string& name,
                                  IService*&  svc ) = 0;
   /** Get a specific interface pointer given a service name and interface id
       @param name Service name
@@ -74,8 +74,8 @@ public:
 
   /// Templated method to access a service by type and name.
   template <class T>
-  StatusCode service( const std::string& type, const std::string& name, 
-		      T*& svc, bool createIf = false ) {
+  StatusCode service( const std::string& type, const std::string& name,
+		      T*& svc, bool createIf = true ) {
     try {
       ISvcManager& theManager = dynamic_cast<ISvcManager&>(*this);
       theManager.declareSvcType(name, type).ignore();

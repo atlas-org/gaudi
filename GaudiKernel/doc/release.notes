@@ -1,6 +1,17 @@
 Package : GaudiKernel
 Package manager : Marco Clemencic
 
+! 2008-12-01 - Marco Clemencic
+ - Fixed bug #44504. Inconsistent default for createIf flag for services.
+   Set the default of the flag to "true" in both IServiceLocator::service
+   signatures.
+ - Fixed bug #44279. Ambiguous signature in setProperty functions
+   Removed the redundant declarations.
+ - Fixed problems with ToolHandles.
+
+! 2008-11-27 - Marco Clemencic
+ - Fixed compilation problems with ROOT 5.21/06.
+
 ================ GaudiKernel v26r0 ====================================
 ! 2008-11-13 - Pere Mato
  - Added the functions pushCurrentDataObject and popCurrentDataObject, taken

@@ -28,20 +28,6 @@ using namespace xercesc;
 using namespace Gaudi;
 using namespace std;
 
-template <typename T> class FCFactory {
-public: static IInterface* create(const string& name, IMessageSvc *msg) { 
-    return new T(name, msg); 
-  }
-};
-
-namespace {
-  template < typename P > class Factory<P, IInterface*(std::string, IMessageSvc*)> {
-    public: static void* Func( void*, const std::vector<void*>& arg, void*) {
-      return FCFactory<P>::create(*(std::string*)(arg[0]), (IMessageSvc*)(arg[1]));
-    }
-  };
-}
-
 PLUGINSVC_FACTORY(XMLFileCatalog,IInterface*(std::string, IMessageSvc*))
 
 namespace {
@@ -53,14 +39,14 @@ namespace {
     return tmp;
   }
   struct __Init  {
-    __Init() { 
+    __Init() {
       try { XMLPlatformUtils::Initialize();      }
       catch (const XMLException& e)   {
         cout << "Xerces-c error in initialization:" << _toString(e.getMessage()) << endl;
       }
     }
     ~__Init() {
-      XMLPlatformUtils::Terminate(); 
+      XMLPlatformUtils::Terminate();
     }
   };
   __Init __In__;
@@ -196,8 +182,8 @@ std::string Gaudi::createGuidAsString()  {
     unsigned char  Data4[8];
   } *g = (Guid*)&uuid;
   ::sprintf(text, "%08X-%04hX-%04hX-%02hhX%02hhX-%02hhX%02hhX%02hhX%02hhX%02hhX%02hhX",
-            g->Data1, g->Data2, g->Data3, 
-            g->Data4[0], g->Data4[1], g->Data4[2], g->Data4[3], 
+            g->Data1, g->Data2, g->Data3,
+            g->Data4[0], g->Data4[1], g->Data4[2], g->Data4[3],
             g->Data4[4], g->Data4[5], g->Data4[6], g->Data4[7]);
   return text;
 }
@@ -208,9 +194,9 @@ XMLFileCatalog::XMLFileCatalog(CSTR uri, IMessageSvc* m)
 {
 }
 // ----------------------------------------------------------------------------
-XMLFileCatalog::~XMLFileCatalog()   {  
+XMLFileCatalog::~XMLFileCatalog()   {
   if (m_parser) delete m_parser;
-  m_parser = 0; 
+  m_parser = 0;
   if (m_errHdlr) delete m_errHdlr;
   m_errHdlr = 0;
   m_doc = 0;
@@ -261,13 +247,13 @@ void XMLFileCatalog::printError(CSTR msg, bool rethrow)  const  {
   }
 }
 // ----------------------------------------------------------------------------
-void XMLFileCatalog::init()   {  
+void XMLFileCatalog::init()   {
   string xmlFile = getfile(false);
   try{
     if ( m_parser ) delete m_parser;
-    m_parser = new XercesDOMParser;     
+    m_parser = new XercesDOMParser;
     m_parser->setValidationScheme(XercesDOMParser::Val_Auto);
-    m_parser->setDoNamespaces(false);      
+    m_parser->setDoNamespaces(false);
     DTDRedirect dtdinmem;
     m_parser->setEntityResolver(&dtdinmem);
     if ( ! m_errHdlr ) m_errHdlr = new ErrHandler(m_msgSvc);
@@ -318,7 +304,7 @@ void XMLFileCatalog::getFID(Strings& fids) const {
 void XMLFileCatalog::getPFN(CSTR fid, Files& files)  const {
   files.clear();
   for(XMLCollection c(child(child(element(fid,false),PFNCOLL),PFNNODE), false); c; ++c)
-    files.push_back(make_pair(c.attr(Attr_name),c.attr(Attr_ftype)));   
+    files.push_back(make_pair(c.attr(Attr_name),c.attr(Attr_ftype)));
 }
 // ----------------------------------------------------------------------------
 void XMLFileCatalog::getLFN(CSTR fid, Files& files) const  {
@@ -327,7 +313,7 @@ void XMLFileCatalog::getLFN(CSTR fid, Files& files) const  {
     files.push_back(make_pair(c.attr(Attr_name),fid));
 }
 // ----------------------------------------------------------------------------
-void XMLFileCatalog::getMetaData(CSTR fid, Attributes& attr)  const  {  
+void XMLFileCatalog::getMetaData(CSTR fid, Attributes& attr)  const  {
   attr.clear();
   for(XMLCollection c(child(element(fid),MetaNode), false); c; ++c)
     attr.push_back(make_pair(c.attr(Attr_metaName),c.attr(Attr_metaValue)));
@@ -361,7 +347,7 @@ void XMLFileCatalog::setMetaData(CSTR fid, CSTR attr, CSTR val)  const  {
   printError("Cannot update readonly catalog!");
 }
 // ----------------------------------------------------------------------------
-string XMLFileCatalog::getMetaDataItem(CSTR fid,CSTR attr) const  {  
+string XMLFileCatalog::getMetaDataItem(CSTR fid,CSTR attr) const  {
   XMLCollection c(child(getDoc(true)->getElementById(XMLStr(fid)),MetaNode,Attr_metaName,attr));
   return c ? c.attr(attr) : string("");
 }
@@ -372,7 +358,7 @@ void XMLFileCatalog::dropMetaData(CSTR fid,CSTR attr) const  {
   for(XMLCollection c(child(fn,MetaNode)); c; ++c)
     if ( attr[0]=='*' || !c.attr(attr).empty() ) gbc.push_back(c);
   for(vector<DOMNode*>::iterator i=gbc.begin(); i != gbc.end(); i++)
-    fn->removeChild(*i);    
+    fn->removeChild(*i);
 }
 // ----------------------------------------------------------------------------
 DOMNode* XMLFileCatalog::element(CSTR element_name,bool print_err) const {
@@ -400,7 +386,7 @@ void XMLFileCatalog::registerFID(CSTR fid) const {
 // ----------------------------------------------------------------------------
 std::pair<DOMElement*,DOMElement*> XMLFileCatalog::i_registerFID(CSTR fid) const {
   if ( !readOnly() )  {
-    /// It creates a new node File with name = fid in the XML file catalog 
+    /// It creates a new node File with name = fid in the XML file catalog
     DOMElement *file = (DOMElement*)element(fid,false), *phyelem = 0, *logelem = 0;
     DOMDocument* doc = getDoc(true);
     if ( !file )  {
@@ -491,7 +477,7 @@ void XMLFileCatalog::registerLFN(CSTR fid, CSTR lfn) const {
   throw runtime_error("XMLFileCatalog> Cannot register LFN for invalid FID:"+fid);
 }
 // ----------------------------------------------------------------------------
-void XMLFileCatalog::commit()    {  
+void XMLFileCatalog::commit()    {
   try {
     if ( dirty() && !readOnly() )  {
       string xmlfile = getfile(true);
@@ -513,7 +499,7 @@ void XMLFileCatalog::commit()    {
   }
 }
 // ----------------------------------------------------------------------------
-string XMLFileCatalog::getfile(bool create)   {  
+string XMLFileCatalog::getfile(bool create)   {
   string protocol, path;
   XMLURL xerurl;
   try{
@@ -543,8 +529,8 @@ string XMLFileCatalog::getfile(bool create)   {
       }
       else     {
         printError("Problem creating file "+path);
-      }    
-      out.close();	
+      }
+      out.close();
     }
     else if ( exist )  {
       return path;

@@ -39,6 +39,8 @@
 #include "Reflex/Reflex.h"
 #include "Reflex/SharedLibrary.h"
 
+#include "RVersion.h"
+
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -404,6 +406,20 @@ inline std::string getId(const Member & m) {
              m.Properties().PropertyAsString("name") ;
 }
 
+template <class T>
+IProperty *makeInstance(const Member &member, const vector<void*> &args)
+{
+  Object dummy;
+  T* obj;
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,21,6)
+  obj = static_cast<T*>(member.Invoke(dummy,args).Address());
+#else
+  member.Invoke(dummy,obj,args);
+#endif
+  return dynamic_cast<IProperty*>(obj);
+}
+
+
 //-----------------------------------------------------------------------------
 int configGenerator::genConfig( const Strings_t& libs )
 //-----------------------------------------------------------------------------
@@ -537,7 +553,6 @@ int configGenerator::genConfig( const Strings_t& libs )
       }
       
       string cname = "DefaultName";
-      Object dummy;
       vector<void*>  args; 
       args.reserve( 3 );
       if ( type == "AlgTool" ) {
@@ -554,28 +569,23 @@ int configGenerator::genConfig( const Strings_t& libs )
       IProperty* prop = 0;
       try {
         if ( type == "Algorithm" ) {
-          IAlgorithm* obj = static_cast<IAlgorithm*>(it->Invoke(dummy,args).Address());
-          prop = dynamic_cast<IProperty*>(obj);
+          prop = makeInstance<IAlgorithm>(*it,args);
         }
         else if ( type == "Service") {
-          IService* obj = static_cast<IService*>(it->Invoke(dummy,args).Address());
-          prop = dynamic_cast<IProperty*>(obj);
+          prop = makeInstance<IService>(*it,args);
         }
         else if ( type == "AlgTool") {
-          IAlgTool* obj = static_cast<IAlgTool*>(it->Invoke(dummy,args).Address());
-          prop = dynamic_cast<IProperty*>(obj);
+          prop = makeInstance<IAlgTool>(*it,args);
         }
         else if ( type == "Auditor") {
-          IAuditor* obj = static_cast<IAuditor*>(it->Invoke(dummy,args).Address());
-          prop = dynamic_cast<IProperty*>(obj);
+          prop = makeInstance<IAuditor>(*it,args);
         }
         else if ( type == "ApplicationMgr") {
           //svcLoc->queryInterface(IProperty::interfaceID(), pp_cast<void>(&prop));
-	  svcLoc->queryInterface(IProperty::interfaceID(), (void**)(&prop));
+          svcLoc->queryInterface(IProperty::interfaceID(), (void**)(&prop));
         }
         else {
-          IInterface* obj = static_cast<IInterface*>(it->Invoke(dummy,args).Address());
-          prop = dynamic_cast<IProperty*>(obj);
+          prop = makeInstance<IInterface>(*it,args);
         }
       }
       catch ( exception& e ) {

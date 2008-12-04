@@ -229,6 +229,10 @@
   
   <enum name="Gaudi::StateMachine::State"/>
   <enum name="Gaudi::StateMachine::Transition"/>
+
+  <!-- Temporary work-around for ROOT bug #44916 -->
+  <class name="std::string"/>
+  
   </selection>
   
   <exclusion>

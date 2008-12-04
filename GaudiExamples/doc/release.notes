@@ -1,6 +1,9 @@
 Package GaudiExamples
 Package manager : Pere Mato
 
+! 2008-12-01 - Marco Clemencic
+ - Added an example with private and public tool handles in AlgTools.py.
+
 ================ GaudiExamples v20r3 ====================================
 ! 2008-11-10 - Charles Leggett, Marco Clemencic
  - Patch #1964. GaudiExample to demonstrate Service initialization loops

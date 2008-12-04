@@ -7,6 +7,7 @@ __all__ = [ 'PropertyProxy', 'GaudiHandlePropertyProxy', 'GaudiHandleArrayProper
 
 import os,glob
 from GaudiKernel.GaudiHandles import *
+from GaudiKernel import ConfigurableDb
 
 import logging
 log = logging.getLogger( 'PropertyProxy' ) 
@@ -288,7 +289,10 @@ class GaudiHandlePropertyProxyBase(PropertyProxy):
             return value
          else:
           # make a copy of the configurable
-            return obj.copyChildAndSetParent( value, obj.getJobOptName() )
+            value = obj.copyChildAndSetParent( value, obj.getJobOptName() )
+            # ensure that the new object is in allConfigurables
+            obj.allConfigurables[value.name()] = value
+            return value
       else:
          raise TypeError( "Property %s value %r is not a %s nor a %s nor a string" % \
                           (self.fullPropertyName(obj),value,self._confTypeName,self._handleType.__name__) )

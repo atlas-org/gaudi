@@ -860,7 +860,6 @@ class Configurable( object ):
                             strDef = repr(default.toStringProperty())
                         else:
                             strDef = repr(default)
-                        strDef = repr(default.toStringProperty())
                         if strDef == repr(vv.toStringProperty()):
                             strDef = None
                     else:
@@ -1029,10 +1028,10 @@ class ConfigurableAlgTool( Configurable ):
         for c in self.getAllChildren():
             if isinstance(c,ConfigurableAlgTool): c.setParent( parentName )
 
-        # FIXME: (MCl) This should replace the parent, not add one!
         # update my own parent
-        self._jobOptName = parentName + '.' + self._jobOptName
-
+        name = self.getName()
+        name = name[name.rfind('.')+1:] # Name of the instance
+        self._jobOptName = self._name = parentName + '.' + name
 
     def getParent( self ):
         dot = self._jobOptName.rfind('.')

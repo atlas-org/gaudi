@@ -1,6 +1,13 @@
 package GaudiPolicy
 package manager: Pere Mato
 
+! 2008-12-03 - Marco Clemencic
+ - Adapted the test class to absorb a change in the standard output with the
+   latest version of POOL.
+
+! 2008-12-01 - Charles Leggett
+ - Patch #2664. Proper handling of shared libraries on Mac OSX platform.
+
 ================ GaudiPolicy v8r6 ====================================
 ! 2008-11-07 - Marco Clemencic
  - Added automatic registration of ConfigurableUser specializations to the

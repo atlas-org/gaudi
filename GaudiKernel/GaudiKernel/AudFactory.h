@@ -4,21 +4,6 @@
 
 #include "Reflex/PluginService.h"
 
-//---Specialization needed to overcome a problem with Reflex.....
-#ifndef TYPEDISTILLER_STRING_SPECIALIZATION
-#define TYPEDISTILLER_STRING_SPECIALIZATION
-namespace ROOT {
-   namespace Reflex {
-      template<> class TypeDistiller<std::string> {
-      public:
-         static Type Get() {
-            return TypeBuilder("std::basic_string<char>");
-         }
-      };
-   }
-}
-#endif
-
 #define DECLARE_AUDITOR(x)  /*dummy*/
 #define DECLARE_NAMESPACE_AUDITOR(n,x)  /*dummy*/
 #define DECLARE_AUDITOR_FACTORY(x) PLUGINSVC_FACTORY(x,IAuditor*(std::string, ISvcLocator*))

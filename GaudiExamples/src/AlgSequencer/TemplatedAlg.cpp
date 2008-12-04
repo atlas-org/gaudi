@@ -23,7 +23,7 @@ DECLARE_NAMED_ALGORITHM_FACTORY(t2,TAlgDB);
 
 template <typename T, typename R> 
 TemplatedAlg<T,R>::TemplatedAlg(const std::string& name, ISvcLocator* ploc) 
-          : GaudiAlgorithm(name, ploc) {
+          : GaudiAlgorithm(name, ploc), m_t(), m_r() {
 //------------------------------------------------------------------------------
   declareProperty("TProperty", m_t);
   declareProperty("RProperty", m_r);
