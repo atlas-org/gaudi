@@ -31,6 +31,9 @@ pattern install_more_includes \
 
 make_fragment install_more_includes -header=install_more_includes_header
 
+cmtpath_pattern \
+  macro <project>_home "<path>" 
+
 cmtpath_pattern_reverse \
    macro <project>_install_include "" \
          <project>_without_installarea "" \
