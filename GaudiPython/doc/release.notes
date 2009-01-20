@@ -1,6 +1,13 @@
 Package: GaudiPython
 Package manager : Marco Clemencic
 
+================ GaudiPython v9r4 ====================================
+! 2008-12-16 - Marco Clemencic
+ - Fixed bug #45392: gaudrun.py returns status code 0 even if the application
+                     manager fails
+   Made GaudiPython.AppMgr correctly return the status after calls to run, exit,
+   etc.
+
 ================ GaudiPython v9r3 ====================================
 ! 2008-11-13 - Pere Mato
  - Fixed the dependency for the serialization functions.

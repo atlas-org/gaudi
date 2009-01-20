@@ -1,6 +1,11 @@
 Package: GaudiAud
 Package manager : David Quarrie
 
+================ GaudiAud v8r8 ====================================
+! 2008-12-16 - Frank Winklmeier
+ - Patch #2710: NameAuditor support of new FSM
+   Fully support new FSM to allow auditing of start/stop.
+
 ================ GaudiAud v8r7 ====================================
 ! 2008-11-10 - Charles Leggett
  - Patch #2183. Link to Atlas error policy in AlgErrorAuditor

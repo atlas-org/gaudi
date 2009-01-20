@@ -112,7 +112,7 @@ def main():
     data = { "vers": versions["Gaudi"], "date": time.strftime("%Y-%m-%d") }
     print '<h2><a name="%(vers)s">Gaudi %(vers)s</a> (%(date)s)</h2>' % data
     data = { "vers": LCGCMTVers }
-    print '<h3>Externals version: <a href="https://twiki.cern.ch/twiki/bin/view/SPI/LcgConfiguration%(vers)s">LCGCMT_%(vers)s</a></h3>' % data
+    print '<h3>Externals version: <a href="http://lcgsoft.cern.ch/index.py?page=cfg_overview&cfg=%(vers)s">LCGCMT_%(vers)s</a></h3>' % data
     print "<h3>Packages Changes</h3>"
     print "<ul>"
     for pkg in release_notes:

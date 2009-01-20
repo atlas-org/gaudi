@@ -40,8 +40,9 @@ PoolDbAddress::~PoolDbAddress()
   s_count->decrement();
   unsigned int cnt = m_token->release();
   if ( cnt != 0 ) {
-    if ( !(m_token->contID() == "/Event" ||
-           clID() == CLID_RowWiseTuple   ||
+    if ( !(m_token->contID() == "/Event"      ||
+	   m_token->contID() == "/RunRecords" ||
+           clID() == CLID_RowWiseTuple        ||
            clID() == CLID_ColumnWiseTuple ) )  {
       std::cout << "PoolDbAddress::~PoolDbAddress> Token: " << cnt 
                 << "  " << m_token->dbID() << " :: " 

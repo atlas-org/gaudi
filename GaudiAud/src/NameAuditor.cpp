@@ -8,87 +8,41 @@
 #include "GaudiKernel/INamedInterface.h"
 #include "GaudiKernel/AudFactory.h"
 
+#include <sstream>
+
 DECLARE_AUDITOR_FACTORY(NameAuditor);
 
 NameAuditor::NameAuditor(const std::string& name, ISvcLocator* pSvcLocator) :
   Auditor(name, pSvcLocator) 
 {
 
-  declareProperty("CustomEventTypes",m_types);
+  declareProperty("CustomEventTypes", m_types,
+                  "List of custom event types to audit ([]=all, ['none']=none");
 
 }
 
 NameAuditor::~NameAuditor(){
 }
 
-void NameAuditor::beforeInitialize(INamedInterface* alg) {
-  MsgStream log(msgSvc(), name()); 
-  log << MSG::INFO << " About to Enter " << alg->name() << 
-  " Initialization Method" << endreq;
-}
-void NameAuditor:: afterInitialize(INamedInterface* alg){
-  MsgStream log(msgSvc(), name()); 
-  log << MSG::INFO << "Just Exited " << alg->name() << 
-  " Initialization Method" << endreq;
+
+void NameAuditor::before(StandardEventType evt, const std::string& caller)
+{
+  std::ostringstream oss;
+  oss << evt;
+  before(oss.str(), caller);
 }
 
-void NameAuditor::beforeReinitialize(INamedInterface *alg) {
-  MsgStream log(msgSvc(), name());
-  log << MSG::INFO << " About to Enter " << alg->name() <<
-  " Reinitialization Method" << endreq;
-}
-void NameAuditor:: afterReinitialize(INamedInterface *alg){
-  MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "Just Exited " << alg->name() <<
-  " Reinitialization Method" << endreq;
-}
 
-void NameAuditor:: beforeExecute(INamedInterface* alg){
-  MsgStream log(msgSvc(), name()); 
-  log <<  MSG::INFO << "About to Enter " << alg->name() <<
-  " Execute Method" << endreq;
+void NameAuditor::after(StandardEventType evt, const std::string& caller, const StatusCode& sc)
+{
+  std::ostringstream oss;
+  oss << evt;
+  after(oss.str(), caller, sc);
 }
-void NameAuditor:: afterExecute(INamedInterface* alg, const StatusCode& ) {
-  MsgStream log(msgSvc(), name()); 
-  log <<  MSG::INFO << "Just Exited " << alg->name() << 
-  " Execute Method" << endreq;
-}
-
-void NameAuditor::beforeBeginRun(INamedInterface *alg) {
-  MsgStream log(msgSvc(), name());
-  log << MSG::INFO << " About to Enter " << alg->name() <<
-  " BeginRun Method" << endreq;
-}
-void NameAuditor:: afterBeginRun(INamedInterface *alg){
-  MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "Just Exited " << alg->name() <<
-  " BeginRun Method" << endreq;
-}
-void NameAuditor::beforeEndRun(INamedInterface *alg) {
-  MsgStream log(msgSvc(), name());
-  log << MSG::INFO << " About to Enter " << alg->name() <<
-  " EndRun Method" << endreq;
-}
-void NameAuditor:: afterEndRun(INamedInterface *alg){
-  MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "Just Exited " << alg->name() <<
-  " EndRun Method" << endreq;
-}
-
-void NameAuditor:: beforeFinalize(INamedInterface* alg) {
-  MsgStream log(msgSvc(), name()); 
-  log <<  MSG::INFO << "About to Enter " << alg->name() <<
-  " Finalize Method" << endreq;
-}
-void NameAuditor:: afterFinalize(INamedInterface* alg){
-  MsgStream log(msgSvc(), name()); 
-  log << MSG::INFO << "Just Exited " << alg->name() << 
-  " Finalize Method" << endreq;
-}
-
+  
 void
-NameAuditor::before(CustomEventTypeRef evt, const std::string& caller) {
-
+NameAuditor::i_doAudit(const std::string& evt, const std::string& caller, Action action)
+{
   if (m_types.value().size() != 0) {
     if ( (m_types.value())[0] == "none") {
       return;
@@ -101,27 +55,12 @@ NameAuditor::before(CustomEventTypeRef evt, const std::string& caller) {
   }
   
   MsgStream log( msgSvc(), name() );
-  log << MSG::INFO << "About to Enter " << caller << " with auditor trigger "
-      << evt << endreq;
-
-}
-
-void
-NameAuditor::after(CustomEventTypeRef evt, const std::string& caller, const StatusCode&) {
-
-  if (m_types.value().size() != 0) {
-    if ( (m_types.value())[0] == "none") {
-      return;
-    }
-    
-    if ( find(m_types.value().begin(), m_types.value().end(), evt) == 
-	 m_types.value().end() ) {
-      return;
-    }
+  if ( action==BEFORE ) {    
+    log << MSG::INFO << "About to Enter " << caller << " with auditor trigger "
+        << evt << endreq;
   }
-  
-  MsgStream log( msgSvc(), name() );
-  log << MSG::INFO << "Just Exited " << caller << " with auditor trigger "
-      << evt << endreq;
-
+  else {
+    log << MSG::INFO << "Just Exited " << caller << " with auditor trigger "
+        << evt << endreq;
+  }
 }

@@ -1,6 +1,6 @@
 // $Id: ExceptionSvc.h,v 1.4 2007/05/24 14:41:22 hmd Exp $ 
 // ============================================================================
-// CvS tag $Name:  $, version $Revision: 1.4 $
+// CvS tag $Name: GAUDI_v20r2 $, version $Revision: 1.4 $
 // ============================================================================
 #ifndef GAUDISVC_EXCEPTIONSVC_H
 #define GAUDISVC_EXCEPTIONSVC_H
@@ -12,6 +12,7 @@
 #include "GaudiKernel/IExceptionSvc.h"
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/SvcFactory.h"
+#include "GaudiKernel/MsgStream.h"
 // ============================================================================
 /** @class ExceptionSvc 
  *  Simple implementationof IExceptionSvc abstract interface 
@@ -72,14 +73,14 @@ private:
   ExceptionSvc& operator=( const ExceptionSvc& ) ; ///< no assignement
 private:
 
-  enum ExceptState { ALL, NONE, LIST };
-  enum ReturnState { DEFAULT, SUCCESS, FAILURE, RECOVERABLE, RETHROW };
+  enum Policy { ALL, NONE };
+  enum ReturnState { SUCCESS, FAILURE, RECOVERABLE, RETHROW, DEFAULT };
 
-  std::string m_mode_s;
-  ExceptState m_mode;
-  StringArrayProperty m_algs_v;
-  std::set<std::string> m_algs;
-  std::map<std::string,ReturnState> m_retCodes;
+  Policy m_mode_exc, m_mode_err;
+  StringProperty m_mode_exc_s, m_mode_err_s;
+  std::map<std::string,ReturnState> m_retCodesExc, m_retCodesErr;
+
+  mutable MsgStream m_log;
 
 };
 

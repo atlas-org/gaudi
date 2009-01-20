@@ -43,6 +43,7 @@ THistSvc::THistSvc( const std::string& name, ISvcLocator* svc )
   declareProperty ("Input", m_inputfile );
   declareProperty ("AutoSave", m_autoSave=0 );
   declareProperty ("PrintAll", m_print=false);
+  declareProperty ("CompressionLevel", m_compressionLevel=1 );
 
   m_inputfile.declareUpdateHandler ( &THistSvc::setupInputFile,  this );
   m_outputfile.declareUpdateHandler( &THistSvc::setupOutputFile, this );
@@ -276,6 +277,8 @@ THistSvc::finalize() {
       }
 
       MergeRootFile(outputfile, inputfile);
+
+      outputfile->SetCompressionLevel( m_compressionLevel );
 
       outputfile->Write();
       outputfile->Close();
@@ -1124,6 +1127,7 @@ THistSvc::connect(const std::string& ident) {
           << "\" for writing: file already exists" << endreq;
       return StatusCode::FAILURE;
     }
+    f->SetCompressionLevel( m_compressionLevel );
 
   } else if (newMode == THistSvc::APPEND) {
     // update file
@@ -1146,44 +1150,46 @@ THistSvc::connect(const std::string& ident) {
           << "\" for appending" << endreq;
       return StatusCode::FAILURE;
     }
+    f->SetCompressionLevel( m_compressionLevel );
 
   } else if (newMode == THistSvc::SHARE) {
     // SHARE file type
     //For SHARE files, all data will be stored in a temp file and will be merged into the target file
     //in write() when finalize(), this help to solve some confliction. e.g. with storegate
-
-  static int ishared = 0;
-  stringstream out;
-  string realfilename=filename;
-  out << ishared;
-  filename = string("tmp_THistSvc_")+out.str()+string(".root");
-
-  log << MSG::DEBUG << "Creating temp file \"" << filename
-      << "\" and realfilename="<<realfilename << endreq;
-  m_sharedFiles[stream]=realfilename;
-
-  try {
-  f = TFile::Open(filename.c_str(),"NEW");
-  } catch (const std::exception& Exception) {
-    log << MSG::ERROR << "exception caught while trying to open root"
-	<< " file for appending: " << Exception.what() << std::endl
-	<< "  -> file probably corrupt." << endreq;
-  return StatusCode::FAILURE;
-  } catch (...) {
-    log << MSG::ERROR << "Problems opening output file  \"" << filename
-	<< "\" for append: probably corrupt" << endreq;
-  return StatusCode::FAILURE;
-  }
-
-  if (!f->IsOpen()) {
-    log << MSG::ERROR << "Unable to open output file \"" << filename
-	<< "\" for appending" << endreq;
-  return StatusCode::FAILURE;
-  }
-
-} else if (newMode == THistSvc::UPDATE) {
+    
+    static int ishared = 0;
+    stringstream out;
+    string realfilename=filename;
+    out << ishared;
+    filename = string("tmp_THistSvc_")+out.str()+string(".root");
+    
+    log << MSG::DEBUG << "Creating temp file \"" << filename
+	<< "\" and realfilename="<<realfilename << endreq;
+    m_sharedFiles[stream]=realfilename;
+    
+    try {
+      f = TFile::Open(filename.c_str(),"NEW");
+    } catch (const std::exception& Exception) {
+      log << MSG::ERROR << "exception caught while trying to open root"
+	  << " file for appending: " << Exception.what() << std::endl
+	  << "  -> file probably corrupt." << endreq;
+      return StatusCode::FAILURE;
+    } catch (...) {
+      log << MSG::ERROR << "Problems opening output file  \"" << filename
+	  << "\" for append: probably corrupt" << endreq;
+      return StatusCode::FAILURE;
+    }
+    
+    if (!f->IsOpen()) {
+      log << MSG::ERROR << "Unable to open output file \"" << filename
+	  << "\" for appending" << endreq;
+      return StatusCode::FAILURE;
+    }
+    f->SetCompressionLevel( m_compressionLevel );
+    
+  } else if (newMode == THistSvc::UPDATE) {
     // update file
-
+    
     try {
       f =  TFile::Open(filename.c_str(),"RECREATE");
     } catch (const std::exception& Exception) {
@@ -1202,6 +1208,7 @@ THistSvc::connect(const std::string& ident) {
           << "\" for updating" << endreq;
       return StatusCode::FAILURE;
     }
+    f->SetCompressionLevel( m_compressionLevel );
 
   }
 

@@ -1,6 +1,7 @@
 Package: GaudiUtils
 Package manager : Hubert Degaudenzi
 
+================ GaudiUtils v2r2 ====================================
 ! 2008-11-27 - Marco Clemencic
  - Fixed compilation problems with ROOT 5.21/06.
 

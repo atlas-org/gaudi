@@ -3,8 +3,8 @@
 ////////////////////////////////////////////////////////////////
 // Write a DST and a miniDST, including File Summary Records
 ////////////////////////////////////////////////////////////////
-ApplicationMgr.OutStream  += { "OutputFSRStream/RootDst"};
-ApplicationMgr.OutStream  += { "OutputFSRStream/RootMini" };
+ApplicationMgr.OutStream  += { "OutputStream/RootDst"};
+ApplicationMgr.OutStream  += { "OutputStream/RootMini" };
 ApplicationMgr.TopAlg      = { "WriteAlg", "ReadAlg" };
 
 // Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
@@ -24,7 +24,7 @@ ApplicationMgr.HistogramPersistency = "NONE";
 //
 //  Setup for ROOT I/O System
 //
-#include "GaudiPoolDbRoot.opts"
+#include "$GAUDIPOOLDBROOT/options/GaudiPoolDbRoot.opts"
 //
 RootDst.ItemList = { "/Event#1"
                      ,"/Event/Collision_0#999"
@@ -32,13 +32,17 @@ RootDst.ItemList = { "/Event#1"
                      ,"/Event/MyTracks#1"
 };
 RootDst.ItemList   = { "/Event#999" } ;
-RootDst.FSRItemList= { "/Event/FSR#999" };
 RootDst.Output     = "DATAFILE='PFN:POOLIO.dst'  TYP='POOL_ROOTTREE' OPT='RECREATE'";
 RootMini.ItemList  = { "/Event#1"   } ;
-RootMini.FSRItemList={ "/Event/FSR#999" };
 RootMini.Output    = "DATAFILE='PFN:POOLIO.mdst' TYP='POOL_ROOTTREE' OPT='RECREATE'";
 
 FileCatalog.Catalogs = { "xmlcatalog_file:POOLIO.xml" } ;
+
+ApplicationMgr.OutStream            += { "RunRecordStream/RunRecords" };
+RunRecords.ItemList                  = { "/RunRecords#999" } ;
+RunRecords.Output                    = @RootDst.Output;
+RunRecords.EvtDataSvc                = "RunRecordDataSvc";
+RunRecords.EvtConversionSvc          = "RunRecordPersistencySvc";
 
 // ============================================================================
 // The END 

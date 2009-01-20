@@ -9,10 +9,11 @@ class LogFormatter(logging.Formatter):
         self.prefix = prefix
     def format(self, record):
         fmsg = logging.Formatter.format(self, record)
+        prefix = self.prefix
         if record.levelno >= logging.WARNING:
-            s = "%s%s: %s" % ( self.prefix, record.levelname, fmsg )
-        else:
-            s = "%s%s" % ( self.prefix, fmsg )
+            prefix += record.levelname + ": "
+        s = "\n".join([ prefix + line
+                        for line in fmsg.splitlines() ])
         return s
 
 class LogFilter(logging.Filter):

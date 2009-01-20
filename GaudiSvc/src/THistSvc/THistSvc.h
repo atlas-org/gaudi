@@ -150,9 +150,8 @@ private:
 
   StringArrayProperty m_inputfile, m_outputfile;
   std::vector<std::string> m_Rstream, m_Wstream;
-  IntegerProperty m_autoSave;
+  IntegerProperty m_autoSave, m_compressionLevel;
   BooleanProperty m_print;
-
 
   /// list of already connected files. This is to keep track of files 
   /// registered by the setupInputFile callback method

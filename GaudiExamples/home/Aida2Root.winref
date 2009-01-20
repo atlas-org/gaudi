@@ -30,8 +30,8 @@ ApplicationMgr.TopAlg +=  [ "Aida2Root" ] ;                             //GP: (1
 JobOptionsSvc        INFO Job options successfully read in from ..\options\Aida2Root.opts
 ApplicationMgr    SUCCESS
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr $Revision: 1.14 $
-                                          running on MCLVIRT01 on Thu Jun 05 15:06:10 2008
+                                                   Welcome to ApplicationMgr $Revision: 1.77 $
+                                          running on WOD01-001 on Mon Dec 15 21:54:18 2008
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 SimpleHistos        DEBUG Property update for OutputLevel : new value = 2
@@ -272,14 +272,14 @@ SimpleHistos      SUCCESS List of booked 3D histograms in directory         "Sim
  ID=3D plot AutoID             "3D plot AutoID"                                 Ents/All=50000/50000<X>/sX=-0.0096715/1.0012,<Y>/sY=0.97036/0.90558,<Z>/sZ=0.0071234/1.1942
  ID=3d                         "3D plot ForcedID"                               Ents/All=50000/50000<X>/sX=-0.0096715/1.0012,<Y>/sY=0.97036/0.90558,<Z>/sZ=0.0071234/1.1942
 SimpleHistos      SUCCESS List of booked 1D profile histograms in directory "SimpleHistos" :-
- ID=Gauss V Flat 1DProf        "Gauss V Flat 1DProf"                            Ents/All=50000/50000<X>/sX=-0.013795/5.7724
- ID=Expo V Gauss 1DProf s      "Expo V Gauss 1DProf s"                          Ents/All=50000/50000<X>/sX=-0.009832/1.0001
- ID=Gauss V Flat 1DProf, with limits-II "Gauss V Flat 1DProf, with limits-II"   Ents/All=25193/25193<X>/sX=-0.053822/5.7881
- ID=Gauss V Flat 1DProf, with limits-I "Gauss V Flat 1DProf, with limits-I"     Ents/All=24807/24807<X>/sX=0.026854/5.7561
- ID=Gauss V Flat 1DProf, with limits-II s "Gauss V Flat 1DProf, with limits-II s"  Ents/All=25193/25193<X>/sX=-0.053822/5.7881
  ID=Expo V Gauss 1DProf        "Expo V Gauss 1DProf"                            Ents/All=50000/50000<X>/sX=-0.009832/1.0001
- ID=Gauss V Flat 1DProf, with limits-I  s "Gauss V Flat 1DProf, with limits-I  s"  Ents/All=24807/24807<X>/sX=0.026854/5.7561
+ ID=Expo V Gauss 1DProf s      "Expo V Gauss 1DProf s"                          Ents/All=50000/50000<X>/sX=-0.009832/1.0001
+ ID=Gauss V Flat 1DProf        "Gauss V Flat 1DProf"                            Ents/All=50000/50000<X>/sX=-0.013795/5.7724
  ID=Gauss V Flat 1DProf S      "Gauss V Flat 1DProf S"                          Ents/All=50000/50000<X>/sX=-0.013795/5.7724
+ ID=Gauss V Flat 1DProf, with limits-I "Gauss V Flat 1DProf, with limits-I"     Ents/All=24807/24807<X>/sX=0.026854/5.7561
+ ID=Gauss V Flat 1DProf, with limits-I  s "Gauss V Flat 1DProf, with limits-I  s"  Ents/All=24807/24807<X>/sX=0.026854/5.7561
+ ID=Gauss V Flat 1DProf, with limits-II "Gauss V Flat 1DProf, with limits-II"   Ents/All=25193/25193<X>/sX=-0.053822/5.7881
+ ID=Gauss V Flat 1DProf, with limits-II s "Gauss V Flat 1DProf, with limits-II s"  Ents/All=25193/25193<X>/sX=-0.053822/5.7881
 SimpleHistos      SUCCESS List of booked 2D profile histograms in directory "SimpleHistos" :-
  ID=321                        "2D profile2"                                    Ents/All=50000/50000<X>/sX=-0.0098803/0.9999,<Y>/sY=0.96914/0.90535
  ID=2dprof                     "2D profile1"                                    Ents/All=50000/50000<X>/sX=-0.0098803/0.9999,<Y>/sY=0.96914/0.90535
@@ -298,7 +298,7 @@ Aida2Root         SUCCESS Get the native ROOT representation of histograms!
 Aida2Root            INFO The native ROOT printout for 1D-histogram 'SimpleHistos/Gaussian mean=0, sigma=1':
 TH1.Print Name  = Gaussian mean=0, sigma=1, Entries= 50000, Total sum= 50000
 Aida2Root            INFO  |  Compare       | AIDA/HistoStats |     ROOT/TH1    |      Delta      |
-Aida2Root            INFO  | 'mean'         |   -0.0098319667 | -0.0098319667   |         0       |
+Aida2Root            INFO  | 'mean'         |   -0.0098319665 | -0.0098319665   |         0       |
 Aida2Root            INFO  | 'meanErr'      |    0.0044725853 |  0.0044725853   |         0       |
 Aida2Root            INFO  | 'rms'          |       1.0001005 |  1.0001005      |         0       |
 Aida2Root            INFO  | 'rmsErr'       |    0.0031550521 |  0.0031625954   |  -7.543258e-006 |
@@ -405,11 +405,11 @@ EventLoopMgr         INFO Histograms converted successfully according to request
 *****Chrono*****     INFO ****************************************************************************************************
 *****Chrono*****     INFO  The Final CPU consumption ( Chrono ) Table (ordered)
 *****Chrono*****     INFO ****************************************************************************************************
-1DOldStyle           INFO Time User   : Tot=  391 [ms] Ave/Min/Max= 7.81(+-  349)/    0/1.56e+004 [us] #=49999
-1DAutoID             INFO Time User   : Tot=  344 [ms] Ave/Min/Max= 6.88(+-  328)/    0/1.56e+004 [us] #=49999
-1DForcedNumericID    INFO Time User   : Tot=  391 [ms] Ave/Min/Max= 7.81(+-  349)/    0/1.56e+004 [us] #=49999
-1DForcedAlphaID      INFO Time User   : Tot=0.516  [s] Ave/Min/Max= 10.3(+-  401)/    0/1.56e+004 [us] #=49999
-ChronoStatSvc        INFO Time User   : Tot= 15.3  [s]                                             #=  1
+1DOldStyle           INFO Time User   : Tot=0.571  [s] Ave/Min/Max= 11.4(+-  338)/    0/1e+004 [us] #=49999
+1DAutoID             INFO Time User   : Tot=0.621  [s] Ave/Min/Max= 12.4(+-  352)/    0/1e+004 [us] #=49999
+1DForcedNumericID    INFO Time User   : Tot=0.571  [s] Ave/Min/Max= 11.4(+-  338)/    0/1e+004 [us] #=49999
+1DForcedAlphaID      INFO Time User   : Tot=0.751  [s] Ave/Min/Max=   15(+-  388)/    0/1e+004 [us] #=49999
+ChronoStatSvc        INFO Time User   : Tot= 18.2  [s]                                             #=  1
 *****Chrono*****     INFO ****************************************************************************************************
 ChronoStatSvc.f...   INFO  Service finalized succesfully
 HistogramDataSvc    DEBUG  Substituted histograms #1 :

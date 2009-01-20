@@ -5,60 +5,60 @@
 
 #ifdef _WIN32
 extern"C" {
- long HBOOK_CALL_TYPE RWNTBOOK( const long& id, 
-                                const long& dim, 
+ long HBOOK_CALL_TYPE RWNTBOOK( const long& id,
+                                const long& dim,
                                 const char tag[512][64], long,
-                                const char* rzdir, long, 
+                                const char* rzdir, long,
                                 const char* title, long);
- long HBOOK_CALL_TYPE RWNTINFO( const long& id, 
-                                long& dim, 
-                                long& ents, 
+ long HBOOK_CALL_TYPE RWNTINFO( const long& id,
+                                long& dim,
+                                long& ents,
                                 char tags[512][64], long,
-                                double range[512][2], 
+                                double range[512][2],
                                 char title[], long);
- long HBOOK_CALL_TYPE CWNTBOOK( const long& id, 
+ long HBOOK_CALL_TYPE CWNTBOOK( const long& id,
                                 const char title[], long,
                                 const char opt[], long);
- long HBOOK_CALL_TYPE CWNTINFO( const long& id, 
+ long HBOOK_CALL_TYPE CWNTINFO( const long& id,
                                 char name[512][64], long,
-                                long dim[], 
+                                long dim[],
                                 long theDim[512][5],
-                                long hasIndex[], 
+                                long hasIndex[],
                                 char index[512][64], long,
-                                char type[], long, 
-                                long size[], 
+                                char type[], long,
+                                long size[],
                                 long hasRange[],
-                                long irange[512][2], 
-                                double frange[512][2], 
-                                char title[], long, 
-                                long& numVar, 
-                                long& numEnt, 
+                                long irange[512][2],
+                                double frange[512][2],
+                                char title[], long,
+                                long& numVar,
+                                long& numEnt,
 				char block[512][12], long);
-  void HBOOK_CALL_TYPE HBNAME  (const long& id, 
-        const char* title, int, 
-        const void* opt, 
+  void HBOOK_CALL_TYPE HBNAME  (const long& id,
+        const char* title, int,
+        const void* opt,
         const char* form, int);
 
-  void HBOOK_CALL_TYPE HROPEN  (const long& lun, 
-        const char*, int, 
-        const char*, int, 
-        const char*, int, 
+  void HBOOK_CALL_TYPE HROPEN  (const long& lun,
+        const char*, int,
+        const char*, int,
+        const char*, int,
         long&, long&);
-  void HBOOK_CALL_TYPE HLNEXT  (long& id, 
-        char*, int, 
-        char*, int, 
+  void HBOOK_CALL_TYPE HLNEXT  (long& id,
+        char*, int,
+        char*, int,
         const char*, int);
-  void HBOOK_CALL_TYPE HLDIR   (const char*, int, 
+  void HBOOK_CALL_TYPE HLDIR   (const char*, int,
         const char*, int);
   void HBOOK_CALL_TYPE HCDIR(const char*, int, const char*, int);
   void HBOOK_CALL_TYPE HMDIR(const char*, int, const char*, int);
 }
 
 long RWNT_BOOK ( const NTUPLEINFO& i )  {
-  return ::RWNTBOOK(i.id, 
-        i.numVar, 
-        i.name, sizeof(i.name[0]), 
-        i.rzdir, strlen(i.rzdir), 
+  return ::RWNTBOOK(i.id,
+        i.numVar,
+        i.name, sizeof(i.name[0]),
+        i.rzdir, strlen(i.rzdir),
         i.title, strlen(i.title));
 }
 
@@ -84,7 +84,7 @@ long CWNT_INFO ( NTUPLEINFO& i ) {
                     i.dim,
                     i.theDim,
                     i.hasIndex,
-                    i.index, sizeof(i.index[0]), 
+                    i.index, sizeof(i.index[0]),
                     i.type, 1,
                     i.size,
                     i.hasRange,
@@ -142,34 +142,34 @@ void HROPEN(const long& lun, const std::string& a, const std::string& b, const s
 
 #else
 extern"C" {
- long HBOOK_CALL_TYPE rwntbook_(const long& id, 
-                                const long& dim, 
+ long HBOOK_CALL_TYPE rwntbook_(const long& id,
+                                const long& dim,
                                 const char tag[512][64],
-                                const char* rzdir, 
+                                const char* rzdir,
                                 const char* title, long, long, long);
- long HBOOK_CALL_TYPE rwntinfo_(const long& id, 
-                                long& dim, 
-                                long& ents, 
+ long HBOOK_CALL_TYPE rwntinfo_(const long& id,
+                                long& dim,
+                                long& ents,
                                 char tags[512][64],
-                                double range[512][2], 
+                                double range[512][2],
                                 char title[], long, long);
- long HBOOK_CALL_TYPE cwntbook_(const long& id, 
+ long HBOOK_CALL_TYPE cwntbook_(const long& id,
                                 const char title[],
                                 const char opt[], long, long);
- long HBOOK_CALL_TYPE cwntinfo_(const long& id, 
+ long HBOOK_CALL_TYPE cwntinfo_(const long& id,
                                 char name[512][64],
-                                long dim[], 
+                                long dim[],
                                 long theDim[512][5],
-                                long hasIndex[], 
+                                long hasIndex[],
                                 char index[512][64],
-                                char type[], 
-                                long size[], 
+                                char type[],
+                                long size[],
                                 long hasRange[],
-                                long irange[512][2], 
-                                double frange[512][2], 
-                                char title[], 
-                                long& numVar, 
-                                long& numEnt, 
+                                long irange[512][2],
+                                double frange[512][2],
+                                char title[],
+                                long& numVar,
+                                long& numEnt,
 				char block[512][12],
 				long, long, long, long, long, long);
   void HBOOK_CALL_TYPE hlnext_(long& id, char*, char*, const char*, int, int, int);
@@ -181,21 +181,21 @@ extern"C" {
 }
 
 long RWNT_BOOK(const NTUPLEINFO& i)  {
-  return rwntbook_(i.id, 
-       i.numVar, 
-       i.name, 
-       i.rzdir, 
-       i.title, 
+  return rwntbook_(i.id,
+       i.numVar,
+       i.name,
+       i.rzdir,
+       i.title,
        sizeof(i.name[0]), strlen(i.rzdir), strlen(i.title));
 }
 
 long RWNT_INFO(NTUPLEINFO& i) {
   long r = rwntinfo_(i.id,
-         i.numVar, 
-         i.numEnt, 
-         i.name, 
-         i.frange, 
-         i.title, 
+         i.numVar,
+         i.numEnt,
+         i.name,
+         i.frange,
+         i.title,
          sizeof(i.name[0]), sizeof(i.title));
   for ( long j = 0; j < i.numVar; j++ )   {
     i.size[j] = sizeof(float)*CHAR_BIT;
@@ -228,7 +228,7 @@ long CWNT_INFO(NTUPLEINFO& i) {
 		     i.numEnt,
 		     i.block,
 		     sizeof(i.name[0]), sizeof(i.index[0]), 1,
-		     sizeof(i.title)-1, 
+		     sizeof(i.title)-1,
 		     sizeof(i.block[0]),sizeof(i.index[0])
 		     );
 
@@ -242,7 +242,7 @@ long CWNT_INFO(NTUPLEINFO& i) {
     }
     strcpy(i.block[iv],blk.c_str());
   }
-    
+
   cleanForString(i.title, sizeof(i.title)-1);
   return r;
 }

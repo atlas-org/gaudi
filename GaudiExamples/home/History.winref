@@ -1,12 +1,12 @@
 JobOptionsSvc        INFO
 //GP:================================================================================
 //GP: include "..\options\History.opts"                                       (0,0)
-//GP: include "E:\Workspace\GAUDI\GaudiExamples\options\Common.opts"          (5,10)
-//GP: include "E:\Workspace\GAUDI\GaudiExamples\options\Services.opts"        (7,10)
+//GP: include "F:\users\clemenci\cmtuser\GAUDI\GaudiExamples\options\Common.opts" (5,10)
+//GP: include "F:\users\clemenci\cmtuser\GAUDI\GaudiExamples\options\Services.opts" (7,10)
 AuditorSvc.Auditors =  [ "ChronoAuditor" ] ;                            //GP: (1,1)
-//GP: end  "E:\Workspace\GAUDI\GaudiExamples\options\Services.opts"           (24,1)
+//GP: end  "F:\users\clemenci\cmtuser\GAUDI\GaudiExamples\options\Services.opts" (24,1)
 ApplicationMgr.StatusCodeCheck = 1;                                     //GP: (7,10)
-//GP: end  "E:\Workspace\GAUDI\GaudiExamples\options\Common.opts"             (16,1)
+//GP: end  "F:\users\clemenci\cmtuser\GAUDI\GaudiExamples\options\Common.opts" (16,1)
 ApplicationMgr.TopAlg =  [ "History" ] ;                                //GP: (5,10)
 ApplicationMgr.ActivateHistory = 1;                                     //GP: (5,10)
 MessageSvc.OutputLevel = 1;                                             //GP: (5,10)
@@ -28,8 +28,8 @@ JobOptionsSvc        INFO Job options successfully read in from ..\options\Histo
 ApplicationMgr      DEBUG Getting my own properties
 ApplicationMgr    SUCCESS
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr $Revision: 1.7 $
-                                          running on MCLVIRT01 on Thu Jun 05 15:42:04 2008
+                                                   Welcome to ApplicationMgr $Revision: 1.77 $
+                                          running on WOD01-001 on Mon Dec 15 21:59:55 2008
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 ServiceManager      DEBUG Initializing service StatusCodeSvc
@@ -80,6 +80,8 @@ ServiceManager      DEBUG Starting service ToolSvc
 ServiceManager      DEBUG Starting service EventLoopMgr
 ServiceManager      DEBUG Starting service HistorySvc
 ApplicationMgr       INFO Application Manager Started successfully
+IncidentSvc       VERBOSE Calling 'AlgContextSvc' for incident [BeginEvent]
+IncidentSvc       VERBOSE Calling 'HistorySvc' for incident [BeginEvent]
 HistorySvc        VERBOSE ServiceLocatorHelper::createService: found service JobOptionsSvc
 HistorySvc          DEBUG Registering algorithm: History
 HistorySvc           INFO Registered 1 Algorithms
@@ -98,17 +100,20 @@ HistorySvc          DEBUG Registering Service: HistogramPersistencySvc
 HistorySvc          DEBUG Registering Service: AlgContextSvc
 HistorySvc          DEBUG Registering Service: ToolSvc
 HistorySvc           INFO Registered 13 Services
-ServiceManager      DEBUG Stopping service StatusCodeSvc
-ServiceManager      DEBUG Stopping service AppMgrRunable
-ServiceManager      DEBUG Stopping service IncidentSvc
-ServiceManager      DEBUG Stopping service EventPersistencySvc
-ServiceManager      DEBUG Stopping service EventDataSvc
-ServiceManager      DEBUG Stopping service HistogramPersistencySvc
-ServiceManager      DEBUG Stopping service HistogramDataSvc
-ServiceManager      DEBUG Stopping service AlgContextSvc
-ServiceManager      DEBUG Stopping service ToolSvc
-ServiceManager      DEBUG Stopping service EventLoopMgr
+IncidentSvc       VERBOSE Calling 'AlgContextSvc' for incident [EndEvent]
+IncidentSvc       VERBOSE Calling 'AlgContextSvc' for incident [BeginEvent]
 ServiceManager      DEBUG Stopping service HistorySvc
+ServiceManager      DEBUG Stopping service EventLoopMgr
+IncidentSvc       VERBOSE Calling 'AlgContextSvc' for incident [EndEvent]
+ServiceManager      DEBUG Stopping service ToolSvc
+ServiceManager      DEBUG Stopping service AlgContextSvc
+ServiceManager      DEBUG Stopping service HistogramDataSvc
+ServiceManager      DEBUG Stopping service HistogramPersistencySvc
+ServiceManager      DEBUG Stopping service EventDataSvc
+ServiceManager      DEBUG Stopping service EventPersistencySvc
+ServiceManager      DEBUG Stopping service IncidentSvc
+ServiceManager      DEBUG Stopping service AppMgrRunable
+ServiceManager      DEBUG Stopping service StatusCodeSvc
 ApplicationMgr       INFO Application Manager Stopped successfully
 ServiceManager      DEBUG Finalizing service HistorySvc
 HistorySvc           INFO Service finalised successfully

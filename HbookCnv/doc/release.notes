@@ -1,8 +1,16 @@
 Package: HbookCnv
 Package manager : N.N.
 
+================ HbookCnv v14r14 ====================================
+! 2008-12-09 - Marco Clemencic
+ - Disable the build of the package on SLC5 (both i686 and x86_64).
+
+! 2008-12-05 - Marco Clemencic, Charles Leggett
+ - Fixed bug #44992: CHAR_BIT not defined in HbookCnv with gcc4.3
+ - Disable the build of the package on gcc-43.
+
 ================ HbookCnv v14r13 ====================================
-! 2000-01-16 - Marco Clemencic
+! 2008-01-16 - Marco Clemencic
  - Disable the build of the package on AMD64 because it doesn't work on that
    platform.
 

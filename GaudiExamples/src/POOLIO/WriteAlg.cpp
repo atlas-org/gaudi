@@ -1,12 +1,12 @@
-//	====================================================================
+//      ====================================================================
 //  WriteAlg.cpp
-//	--------------------------------------------------------------------
+//      --------------------------------------------------------------------
 //
-//	Package   : GaudiExamples/Example3
+//      Package   : GaudiExamples/Example3
 //
-//	Author    : Markus Frank
+//      Author    : Markus Frank
 //
-//	====================================================================
+//      ====================================================================
 // Framework include files
 #include "GaudiKernel/AlgFactory.h"
 #include "GaudiKernel/SmartDataPtr.h"
@@ -23,15 +23,48 @@
 // Event Model related classes
 #include "Event.h"
 #include "MyTrack.h"
+#include "Counter.h"
 
 using namespace Gaudi::Examples ;
 
 DECLARE_ALGORITHM_FACTORY(WriteAlg);
 
 //--------------------------------------------------------------------
+// Register data leaf
+//--------------------------------------------------------------------
+StatusCode WriteAlg::put(IDataProviderSvc* s, const std::string& path, DataObject* pObj) {
+  StatusCode sc = s->registerObject(path,pObj);
+  if( sc.isFailure() ) {
+    MsgStream log(msgSvc(), name());
+    log << MSG::ERROR << "Unable to register object " << path << endreq;
+  }
+  return sc;
+}
+
+//--------------------------------------------------------------------
 // Initialize
 //--------------------------------------------------------------------
 StatusCode WriteAlg::initialize() {
+  MsgStream log(msgSvc(), name());
+  StatusCode sc = service("RunRecordDataSvc",m_runRecordSvc,true);
+  if( sc.isFailure() ) {
+    log << MSG::ERROR << "Unable to retrieve run records service" << endreq;
+    return sc;
+  }
+  return put(m_runRecordSvc,"/RunRecords/SOR/EvtCount",m_evtCount=new Counter());
+}
+
+//--------------------------------------------------------------------
+// Finalize
+//--------------------------------------------------------------------
+StatusCode WriteAlg::finalize() {
+  MsgStream log(msgSvc(), name());
+  Counter* pObj = new Counter();
+  pObj->increment();
+  put(m_runRecordSvc,"/RunRecords/EOR",pObj);
+  if ( m_runRecordSvc ) m_runRecordSvc->release();
+  m_runRecordSvc = 0;
+  m_evtCount = 0;
   return StatusCode::SUCCESS;
 }
 
@@ -43,10 +76,12 @@ StatusCode WriteAlg::execute() {
 
   static int evtnum = 0;
   static int runnum = 999;
-  
+
   MsgStream log(msgSvc(), name());
   Rndm::Numbers rndmflat(randSvc(), Rndm::Flat(0.,1.));
   Rndm::Numbers rndmgauss(randSvc(), Rndm::Gauss(10.,1.));
+
+  m_evtCount->increment();
 
   // Create the Event header and set it as "root" of the event store
   Event* evt = new Event();
@@ -69,17 +104,10 @@ StatusCode WriteAlg::execute() {
     log << MSG::ERROR << "Unable to register Collision 0" << endreq;
     return sc;
   }
-  sc = eventSvc()->registerObject("/Event","Collision_1",coll1);
-  if( sc.isFailure() ) {
-    log << MSG::ERROR << "Unable to register Collision 1" << endreq;
-    return sc;
-  }
-  sc = eventSvc()->registerObject("/Event","Collision_2",coll2);
-  if( sc.isFailure() ) {
-    log << MSG::ERROR << "Unable to register Collision 2" << endreq;
-    return sc;
-  }
-
+  sc = put(eventSvc(),"/Event/Collision_1",coll1);
+  if( sc.isFailure() ) return sc;
+  sc = put(eventSvc(),"/Event/Collision_2",coll2);
+  if( sc.isFailure() ) return sc;
 
   evt->addCollision(coll0);
   evt->addCollision(coll1);
@@ -98,11 +126,11 @@ StatusCode WriteAlg::execute() {
     // the order of evaluation of the rndgauss() call is unspecified
     // in the C++ standard. Don't do that.
     // MyTrack* track = new MyTrack(rndmgauss(),rndmgauss(),rndmgauss());
-    
+
     // set Link to event object
     track->setEvent(evt);
     // And add the stuff to the container
-    myTracks->insert ( track ); 
+    myTracks->insert ( track );
   }
 
   // Create vertex container
@@ -146,31 +174,10 @@ StatusCode WriteAlg::execute() {
     }
   }
 
-  sc = eventSvc()->registerObject("/Event","MyTracks",myTracks);
-  if( sc.isFailure() ) {
-    log << MSG::ERROR << "Unable to register MyTracks" << endreq;
-    return sc;
-  }
-
-  sc = eventSvc()->registerObject("/Event","Collision_0/MyVertices",myVertices);
-  if( sc.isFailure() ) {
-    log << MSG::ERROR << "Unable to register MyVertices" << endreq;
-    return sc;
-  }
+  sc = put(eventSvc(),"/Event/MyTracks",myTracks);
+  if( sc.isFailure() ) return sc;
+  sc = put(eventSvc(),"/Event/Collision_0/MyVertices",myVertices);
+  if( sc.isFailure() ) return sc;
   // All done
-  return StatusCode::SUCCESS;
-}
-
-//--------------------------------------------------------------------
-// Finalize
-//--------------------------------------------------------------------
-StatusCode WriteAlg::finalize() {
-  
-  MsgStream log(msgSvc(), name());
-  DataObject* p_FSR = new DataObject();
-  StatusCode sc = eventSvc()->registerObject("/Event","FSR",p_FSR);
-  if( sc.isFailure() ) {
-    log << MSG::ERROR << "Unable to register FSR" << endreq;
-  }
   return StatusCode::SUCCESS;
 }

@@ -19,7 +19,7 @@ using boost::char_separator;
 //structors
 DirSearchPath::DirSearchPath(const std::string& stringifiedPath, const char* separator) {
   addCWD(); //FIXME is this a good idea?
-  
+
   typedef  tokenizer<char_separator<char> > Tokenizer;
 
   Tokenizer tok(stringifiedPath, char_separator<char>(separator));
@@ -30,11 +30,11 @@ DirSearchPath::DirSearchPath(const std::string& stringifiedPath, const char* sep
   Tokenizer::iterator it = tok.begin();
   while(it != tok.end()) {
     try {
-      //path p( *(it++), boost::filesystem::native);  
+      //path p( *(it++), boost::filesystem::native);
       // For some reason native() does not work with boost 1.31. Changed to no_check and cross the fingers....
       path p( *(it++), boost::filesystem::no_check);
       add(p);
-    } 
+    }
     catch (boost::filesystem::filesystem_error /*err*/) {
     }
   }
@@ -43,11 +43,11 @@ DirSearchPath::DirSearchPath(const std::string& stringifiedPath, const char* sep
 //modifiers
 // bool DirSearchPath::add(const std::string& dirName) {
 //   bool rc(false);
-//   try { 
+//   try {
 //     rc=add(path(dirName));
 //   } catch (const filesystem_error& err) {
 // #ifndef NDEBUG
-//     cerr << "DirSearchPath::DirSearchPath: ERROR adding dir " 
+//     cerr << "DirSearchPath::DirSearchPath: ERROR adding dir "
 // 	 << err.what() << endl;
 //     throw err;
 // #endif
@@ -73,7 +73,7 @@ bool DirSearchPath::find(const string& fileName, string& fullFileName) const {
   bool rc(false);
   try {
     path fileFound;
-    if (rc = find(path(fileName), fileFound))       
+    if ( (rc = find(path(fileName), fileFound)) )
       fullFileName = fileFound.native_directory_string();
   } catch (...) {}
   return rc;
@@ -88,7 +88,7 @@ bool DirSearchPath::find(const path& file, path& fileFound) const {
       fileFound = full;
       rc = true;
       break;
-    }  
+    }
   }
   return rc;
 }
@@ -109,7 +109,7 @@ DirSearchPath::find_all(const path& file) const {
 //helpers
 bool DirSearchPath::existsDir(const std::string& dirName) {
   bool rc(false);
-  try { 
+  try {
     rc=is_directory(path(dirName));
   } catch(...) {}
   return rc;

@@ -118,4 +118,4 @@ if __name__ == "__main__":
     if opts.output:
         c.writeconfig(opts.output, opts.all_opts)
     if not opts.dry_run:
-        c.run()
+        sys.exit(c.run())

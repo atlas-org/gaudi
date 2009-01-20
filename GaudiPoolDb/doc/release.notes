@@ -1,6 +1,12 @@
  Package: GaudiPoolDb
  Package Manager: Markus Frank
 
+================ GaudiPoolDb v4r2 ====================================
+! 2008-12-10 - Markus Frank
+ - Patch #2699: First version of run records service
+   Add incident mechanism to allow clients listening when new files get
+   opened for data access.
+
 ================ GaudiPoolDb v4r1 ====================================
 ! 2008-11-13 - Pere Mato
  - Moved the functions pushCurrentDataObject and popCurrentDataObject to

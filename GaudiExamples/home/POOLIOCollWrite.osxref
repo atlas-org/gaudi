@@ -39,7 +39,8 @@ EventAlgs            INFO Member list: EvtCollectionWrite/Writer
 RndmGenSvc.Engine    INFO Generator engine type:CLHEP::RanluxEngine
 RndmGenSvc.Engine    INFO Current Seed:1234567 Luxury:3
 RndmGenSvc           INFO Using Random engine:HepRndm::Engine<CLHEP::RanluxEngine>
-POOLIO.tags       SUCCESS Root file version:51800
+IODataManager        INFO Referring to dataset POOLIO.tags by its file ID:103CB8BA-E0C6-DD11-8BE7-001320A397BC
+RootDBase.open    SUCCESS POOLIO.tags File version:51800
 PoolDbDatabaseCnv    INFO Recreate Database file:PFN:POOLIO.tags as /EvtColl
 EventPersistenc...   INFO  'CnvServices':[ 'PoolRootEvtCnvSvc' , 'PoolRootTreeEvtCnvSvc' , 'PoolRootKeyEvtCnvSvc' ]
 EventPersistenc...   INFO Added successfully Conversion service:PoolRootEvtCnvSvc
@@ -48,7 +49,8 @@ HistogramPersis...   INFO  'CnvServices':[ 'HbookHistSvc' , 'RootHistSvc' ]
 HistogramPersis...WARNING Histograms saving not required.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr       INFO Application Manager Started successfully
-POOLIO.dst        SUCCESS Root file version:51800
+RootDBase.open    SUCCESS POOLIO.dst File version:51800
+PoolRootEvtCnvSvc    INFO RunRecords token:[DB=A0FF4D49-CDC6-DD11-AECC-001320A397BC][CNT=/RunRecords][CLID=00000001-0000-0000-0000-000000000000][TECH=00000202][OID=0000000A-00000000]
 EventSelector     SUCCESS Reading Event record 1. Record number within stream 1: 1
 EventPersistenc...   INFO Added successfully Conversion service:PoolRootTreeEvtCnvSvc
 Writer               INFO ================ EVENT:1 RUN:999 ====== N(Track)=39 FAILED selection (<50) ============
@@ -71,9 +73,10 @@ EventSelector     SUCCESS Reading Event record 701. Record number within stream 
 EventSelector     SUCCESS Reading Event record 801. Record number within stream 1: 801
 EventSelector     SUCCESS Reading Event record 901. Record number within stream 1: 901
 Writer               INFO ================ EVENT:1000 RUN:999 ====== N(Track)=55 PASSED selection (>=50) ============
-EventSelector     SUCCESS Reading Event record 1001. Record number within stream 1: 1001
 EventSelector        INFO Stream:EventSelector.DataStreamTool_2 Def:DATAFILE='PFN:POOLIO.mdst'  TYP='POOL_ROOT' OPT='READ'
-POOLIO.mdst       SUCCESS Root file version:51800
+RootDBase.open    SUCCESS POOLIO.mdst File version:51800
+PoolRootEvtCnvSvc    INFO No RunRecords present in:2A41D249-CDC6-DD11-AECC-001320A397BC
+EventSelector     SUCCESS Reading Event record 1001. Record number within stream 2: 1
 Writer               INFO ================ EVENT:1 RUN:999 ====== N(Track)=39 FAILED selection (<50) ============
 Writer               INFO ================ EVENT:2 RUN:999 ====== N(Track)=93 PASSED selection (>=50) ============
 Writer               INFO ================ EVENT:3 RUN:999 ====== N(Track)=76 PASSED selection (>=50) ============
@@ -83,26 +86,25 @@ Writer               INFO ================ EVENT:6 RUN:999 ====== N(Track)=54 PA
 Writer               INFO ================ EVENT:7 RUN:999 ====== N(Track)=20 FAILED selection (<50) ============
 Writer               INFO ================ EVENT:8 RUN:999 ====== N(Track)=30 FAILED selection (<50) ============
 Writer               INFO ================ EVENT:9 RUN:999 ====== N(Track)=43 FAILED selection (<50) ============
-EventSelector     SUCCESS Reading Event record 1101. Record number within stream 2: 100
-EventSelector     SUCCESS Reading Event record 1201. Record number within stream 2: 200
-EventSelector     SUCCESS Reading Event record 1301. Record number within stream 2: 300
-EventSelector     SUCCESS Reading Event record 1401. Record number within stream 2: 400
-EventSelector     SUCCESS Reading Event record 1501. Record number within stream 2: 500
+EventSelector     SUCCESS Reading Event record 1101. Record number within stream 2: 101
+EventSelector     SUCCESS Reading Event record 1201. Record number within stream 2: 201
+EventSelector     SUCCESS Reading Event record 1301. Record number within stream 2: 301
+EventSelector     SUCCESS Reading Event record 1401. Record number within stream 2: 401
 Writer               INFO ================ EVENT:500 RUN:999 ====== N(Track)=52 PASSED selection (>=50) ============
-EventSelector     SUCCESS Reading Event record 1601. Record number within stream 2: 600
-EventSelector     SUCCESS Reading Event record 1701. Record number within stream 2: 700
-EventSelector     SUCCESS Reading Event record 1801. Record number within stream 2: 800
-EventSelector     SUCCESS Reading Event record 1901. Record number within stream 2: 900
-EventSelector     SUCCESS Reading Event record 2001. Record number within stream 2: 1000
+EventSelector     SUCCESS Reading Event record 1501. Record number within stream 2: 501
+EventSelector     SUCCESS Reading Event record 1601. Record number within stream 2: 601
+EventSelector     SUCCESS Reading Event record 1701. Record number within stream 2: 701
+EventSelector     SUCCESS Reading Event record 1801. Record number within stream 2: 801
+EventSelector     SUCCESS Reading Event record 1901. Record number within stream 2: 901
 Writer               INFO ================ EVENT:1000 RUN:999 ====== N(Track)=55 PASSED selection (>=50) ============
 EventLoopMgr         INFO No more events in event selection
 ApplicationMgr       INFO Application Manager Stopped successfully
 EventLoopMgr         INFO Histograms converted successfully according to request.
 ToolSvc              INFO Removing all tools created by ToolSvc
 EvtTupleSvc          INFO NTuples saved successfully
-EvtTupleSvc.Evt...   INFO Disconnected data IO:3C10BD4E-54A1-DD11-A3E0-001CBF7FB485[POOLIO.tags]
-PoolRootEvtCnvSvc    INFO Disconnected data IO:948F1F4C-54A1-DD11-8A0D-001CBF7FB485[POOLIO.mdst]
-PoolRootEvtCnvSvc    INFO Disconnected data IO:C001FF4B-54A1-DD11-8A0D-001CBF7FB485[POOLIO.dst]
+EvtTupleSvc.Evt...   INFO Disconnected data IO:103CB8BA-E0C6-DD11-8BE7-001320A397BC[POOLIO.tags]
+PoolRootEvtCnvSvc    INFO Disconnected data IO:2A41D249-CDC6-DD11-AECC-001320A397BC[POOLIO.mdst]
+PoolRootEvtCnvSvc    INFO Disconnected data IO:A0FF4D49-CDC6-DD11-AECC-001320A397BC[POOLIO.dst]
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
 Number of MyVertex instances:0

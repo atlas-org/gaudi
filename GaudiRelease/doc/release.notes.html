@@ -34,12 +34,115 @@ span.author { color: #737373; }
 <body onload="javascript:LinkToSavannah()">
 <pre>
 Package: GaudiRelease<br>
-Package Coordinator: Pere Mato, Charles Leggett<br>
+Package Coordinator: Marco Clemencic, Charles Leggett<br>
 Purpose: Gaudi common set of packages<br><br>
 </pre>
 <!-- ====================================================================== -->
+<h2><a name="v20r4">Gaudi v20r4</a> (2008-12-15)</h2>
+<h3>Externals version: <a href="http://lcgsoft.cern.ch/index.py?page=cfg_overview&cfg=55c">LCGCMT_55c</a></h3>
+<h3>Main Changes</h3>
+<ul>
+<li>Patch #2699: First version of run records service (<span class="author">Marcus Frank</span>).</li>
+<li>Fixed to compile with any of gcc 4.3, ROOT 5.21/06 and SLC5
+    (<span class="author">Marco Clemencic</span>).</li>
+</ul>
+<h3>Packages Changes</h3>
+<ul>
+<li>GaudiKernel (v26r1):
+<ul>
+<li>Patch #2699: First version of run records service<br/>
+    (<span class="author">Marcus Frank</span>)</li>
+<li>Fixed bug #44504. Inconsistent default for createIf flag for services<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #44279. Ambiguous signature in setProperty functions<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed compilation problems with gcc 4.3 and ROOT 5.21/06<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Improvements and fixes in ConfigurableUser<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul>
+</li>
+<li>GaudiPython (v9r4):<ul>
+<li>Fixed bug #45392: gaudrun.py returns status code 0 even if the application manager fails<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul>
+</li>
+<li>GaudiPolicy (v8r7):
+<ul>
+<li>Fixed compilation problems with SLC5<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixes and improvements in GaudiTest.py<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Patch #2664: Proper handling of shared libraries on Mac OSX platform.<br/>
+    (<span class="author">Charles Leggett</span>)</li>
+</ul>
+</li>
+<li>GaudiAud (v8r8):<ul>
+<li>Patch #2710: NameAuditor support of new FSM<br/>
+    (<span class="author">Frank Winklmeier</span>)</li>
+</ul>
+</li>
+<li>GaudiPoolDb (v4r2):
+<ul>
+<li>Patch #2699: First version of run records service<br/>
+    (<span class="author">Marcus Frank</span>)</li>
+</ul>
+</li>
+<li>GaudiGridSvc (v1r8):
+<ul>
+<li>Disabled on SLC5.<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul>
+</li>
+<li>HbookCnv (v14r14):
+<ul>
+<li>Disable the build of the package on SLC5 (both i686 and x86_64) and with gcc-4.3<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+<li>Fixed bug #44992: CHAR_BIT not defined in HbookCnv with gcc4.3<br/>
+    (<span class="author">Charles Leggett</span>)</li>
+</ul>
+</li>
+<li>Gaudi (v20r4):<ul>
+<li>Fixed bug #45392: gaudrun.py returns status code 0 even if the application manager fails<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul>
+</li>
+<li>GaudiUtils (v2r2):
+<ul>
+<li>Fixed compilation problems with ROOT 5.21/06<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul>
+</li>
+<li>GaudiSvc (v17r3):
+<ul>
+<li>Fixed bug #45180: AuditorSvc creates duplicate auditors.<br/>
+    (<span class="author">Charles Leggett</span>)</li>
+<li>Patch #2699: First version of run records service<br/>
+    (<span class="author">Marcus Frank</span>)</li>
+<li>Patch #2698: StatusCodeSvc checks filter list too early<br/>
+    (<span class="author">Charles Leggett</span>)</li>
+<li>Fixed compilation warning with gcc 4.3.<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul>
+</li>
+<li>GaudiExamples (v20r4):
+<ul>
+<li>Patch #2699: First version of run records service<br/>
+    (<span class="author">Marcus Frank</span>)</li>
+<li>Improvements and updates in tests<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul>
+</li>
+<li>GaudiAlg (v11r3):
+<ul>
+<li>Fixed bug #44504. Inconsistent default for createIf flag for services.<br/>
+    (<span class="author">Marco Clemencic</span>)</li>
+</ul>
+</li>
+</ul>
+<!-- ====================================================================== -->
 <h2><a name="v20r3">Gaudi v20r3</a> (2008-11-10)</h2>
-<h3>Externals version: <a href="https://twiki.cern.ch/twiki/bin/view/SPI/LcgConfiguration55b">LCGCMT_55b</a></h3>
+<h3>Externals version: <a href="http://lcgsoft.cern.ch/index.py?page=cfg_overview&cfg=55b">LCGCMT_55b</a></h3>
 <h3>Packages Changes</h3>
 <ul>
 <li>GaudiKernel (v26r0):<ul>
@@ -269,7 +372,7 @@ Purpose: Gaudi common set of packages<br><br>
 </ul>
 <!-- ====================================================================== -->
 <h2><a name="v20r2">Gaudi v20r2</a> (2008-07-17)</h2>
-<h3>Externals version: <a href="https://twiki.cern.ch/twiki/bin/view/SPI/LcgConfiguration55a">LCGCMT_55a</a></h3>
+<h3>Externals version: <a href="http://lcgsoft.cern.ch/index.py?page=cfg_overview&cfg=55a">LCGCMT_55a</a></h3>
 <h3>Packages Changes</h3>
 <ul>
 <li>GaudiKernel (v25r2):<ul>
@@ -309,7 +412,7 @@ Purpose: Gaudi common set of packages<br><br>
 <!-- ====================================================================== -->
 <h2><a name="v20r1">Gaudi v20r1</a> (2008-06-30)</h2>
 <h3>Externals version: <a
- href="https://twiki.cern.ch/twiki/bin/view/SPI/LcgConfiguration55">LCGCMT_55</a></h3>
+ href="http://lcgsoft.cern.ch/index.py?page=cfg_overview&cfg=55">LCGCMT_55</a></h3>
 <h3>Packages Changes</h3>
 <ul>
 <li>GaudiPolicy (v8r4):
@@ -347,7 +450,7 @@ Purpose: Gaudi common set of packages<br><br>
 <!-- ====================================================================== -->
 <h2><a name="v20r0">Gaudi v20r0</a> (2008-06-13)</h2>
 <h3>Externals version: <a
- href="https://twiki.cern.ch/twiki/bin/view/SPI/LcgConfiguration55">LCGCMT_55</a></h3>
+ href="http://lcgsoft.cern.ch/index.py?page=cfg_overview&cfg=55">LCGCMT_55</a></h3>
 <h3>Packages Changes</h3>
 <ul>
 <li>GaudiPolicy (v8r3):
@@ -478,7 +581,7 @@ Purpose: Gaudi common set of packages<br><br>
 <!-- ====================================================================== -->
 <h2><a name="v19r9">Gaudi v19r9</a> (2008-04-11)</h2>
 <h3>Externals version: <a
- href="https://twiki.cern.ch/twiki/bin/view/SPI/LcgConfiguration54d">LCGCMT_54d</a></h3>
+ href="http://lcgsoft.cern.ch/index.py?page=cfg_overview&cfg=54d">LCGCMT_54d</a></h3>
 <h3>Packages Changes</h3>
 <ul>
 <li>GaudiPolicy (v8r2):</li>
@@ -650,7 +753,7 @@ Purpose: Gaudi common set of packages<br><br>
 <!-- ====================================================================== -->
 <h2><a name="v19r8">Gaudi v19r8</a> (2008-02-29)</h2>
 <h3>Externals version: <a
- href="https://twiki.cern.ch/twiki/bin/view/SPI/LcgConfiguration54b">LCGCMT_54b</a></h3>
+ href="http://lcgsoft.cern.ch/index.py?page=cfg_overview&cfg=54b">LCGCMT_54b</a></h3>
 <h3>Packages Changes</h3>
 <ul>
 <li>GaudiPolicy (v8r1):</li>
@@ -751,7 +854,7 @@ Purpose: Gaudi common set of packages<br><br>
 <!-- ====================================================================== -->
 <h2><a name="v19r7">Gaudi v19r7</a> (2008-01-18)</h2>
 <h3>Externals version: <a
- href="https://twiki.cern.ch/twiki/bin/view/SPI/LcgConfiguration54">LCGCMT_54</a></h3>
+ href="http://lcgsoft.cern.ch/index.py?page=cfg_overview&cfg=54">LCGCMT_54</a></h3>
 <h3>Packages Changes</h3>
 <ul>
 <li>GaudiPolicy (v8r0):</li>

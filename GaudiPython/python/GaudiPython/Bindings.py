@@ -813,19 +813,21 @@ class AppMgr(iService) :
   def start(self) :
     return self._appmgr.start()
   def run(self, n) :
-    if self.FSMState() == Gaudi.StateMachine.CONFIGURED :  self.initialize()
-    if self.FSMState() == Gaudi.StateMachine.INITIALIZED : self.start()
-    self._evtpro.executeRun(n)
+    if self.FSMState() == Gaudi.StateMachine.CONFIGURED :
+      sc = self.initialize()
+      if sc.isFailure(): return sc
+    if self.FSMState() == Gaudi.StateMachine.INITIALIZED :
+      sc = self.start()
+      if sc.isFailure(): return sc
+    return self._evtpro.executeRun(n)
   def executeEvent(self) :
-    self._evtpro.executeEvent()
+    return self._evtpro.executeEvent()
   def execute(self) :
-    self._evtpro.executeEvent()
+    return self._evtpro.executeEvent()
   def exit(self) :
-    if self.FSMState() == Gaudi.StateMachine.RUNNING: self._appmgr.stop()
-    if self.FSMState() == Gaudi.StateMachine.INITIALIZED: self._appmgr.finalize()
-    sc = self._appmgr.terminate()
-    # if sc.isSuccess() : os._exit(0)
-    # else              : os._exit(1)
+    if self.FSMState() == Gaudi.StateMachine.RUNNING: self._appmgr.stop().ignore()
+    if self.FSMState() == Gaudi.StateMachine.INITIALIZED: self._appmgr.finalize().ignore()
+    return self._appmgr.terminate()
   evtSvc  = evtsvc
   histSvc = histsvc
   ntupleSvc = ntuplesvc

@@ -49,9 +49,9 @@ IAuditor* AuditorSvc::newAuditor_( MsgStream& log, const std::string& name ) {
 IAuditor* AuditorSvc::findAuditor_( const std::string& name ) {
   // find an auditor by name, return 0 on error
   IAuditor* aud = 0;
-
+  const std::string item_name = ListItem(name).name();
   for ( ListAudits::iterator it = m_pAudList.begin() ; it != m_pAudList.end(); ++it ) {
-    if ( (*it)->name() == name ) {
+    if ( (*it)->name() == item_name ) {
       (*it)->addRef();
       aud = *it;
       break;

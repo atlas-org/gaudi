@@ -7,9 +7,9 @@
  * exists the User Guide accessible from the
  * <a href="http://cern.ch/gaudi"> GAUDI Project Web page</a>.
  *
- * Use the links in the menu at the top of the page to navigate. In particular,
- * the list of classes can be found <a href="annotated.html">here</a> or via
- * the <a href="hierarchy.html">Class Hierarchy</a> link.
+ * Use the links in the menu at the top of the page to navigate. In particular using
+ * the <a href="annotated.html">list of classes</a> or via
+ * the <a href="hierarchy.html">class hierarchy</a>.
  *
 \htmlonly
 <h3>Version details</h3>
@@ -20,10 +20,9 @@
   </tr>
   <tr>
     <td><b>Description</b></td>
-    <td> Details of the constituent package versions are available
-    <a href="../requirements">here</a>.<br>
-      The release notes (<a href="../release.notes.html">$(GAUDIVERS)</a>)
-      contain the details of changes since the previous release. </td>
+    <td> Details of the constituent package versions are available in the 
+      <a href="https://svnweb.cern.ch/world/wsvn/gaudi/packages/GaudiRelease/tags/$(GAUDIVERS)/cmt/requirements">requirements file</a>.<br>
+      The <a href="../release.notes.html">release notes</a> contain the details of changes since the previous release.</td>
   </tr>
   <tr>
         <td><b>Supported platforms</b></td>
@@ -59,19 +58,29 @@
   </ul></li>
   <li>Externals:
   <UL>
-    <LI> <a href="http://www.boost.org/libs/libraries.htm" target="_blank">Boost $(BoostVERS)</A>
-    <LI> <a href="http://spi.cern.ch/extsoft/packages.php?pkg=uuid" target="_blank">uuid $(uuidVERS)</A>
-    <LI> <a href="http://spi.cern.ch/extsoft/packages.php?pkg=pcre" target="_blank">pcre $(PCREVERS)</A>
-    <LI> <a href="http://spi.cern.ch/extsoft/packages.php?pkg=gccxml" target="_blank">GCC-XML $(GCCXMLVERS)</A>
+    <script type="text/javascript" language="JavaScript">
+      var boostVers = "$(BoostVERS)";
+      var url = "http://www.boost.org/doc/libs/" + boostVers.replace(/\./g,"_") + "/libs/libraries.htm";
+      document.write("<LI> <a href=\"" + url + "\" target=\"_blank\">Boost " + boostVers + "</a>");
+    </script>
+    <LI> <a href="http://lcgsoft.cern.ch/index.py?page=pkg_overview&pkg=uuid" target="_blank">uuid $(uuidVERS)</A>
+    <LI> <a href="http://lcgsoft.cern.ch/index.py?page=pkg_overview&pkg=pcre" target="_blank">pcre $(PCREVERS)</A>
+    <LI> <a href="http://lcgsoft.cern.ch/index.py?page=pkg_overview&pkg=gccxml" target="_blank">GCC-XML $(GCCXMLVERS)</A>
     <LI> <a href="http://aida.freehep.org/doc/v$(AIDAVERS)/api/index.html" target="_blank">AIDA $(AIDAVERS)</A> (histogramming)
-    <LI> <a href="http://xml.apache.org/xerces-c/apiDocs/index.html" target="_blank">Xerces-C $(XercesCVERS)</A>
-    <LI> <a href="http://www.gnu.org/software/gsl/manual/gsl-ref_toc.html" target="_blank">GNU Scientific Library (GSL) $(GSLVERS)</A>
+    <script type="text/javascript" language="JavaScript">
+      var xercesVers = "$(XercesCVERS)";
+      var url = "http://xml.apache.org/xerces-c/apiDocs-" + xercesVers[0] + "/index.html";
+      document.write("<LI> <a href=\"" + url + "\" target=\"_blank\">Xerces-C " + xercesVers + "</a>");
+    </script>
+    <LI> <a href="http://www.gnu.org/software/gsl/manual/html_node/index.html" target="_blank">GNU Scientific Library (GSL) $(GSLVERS)</A>
     <LI> <a href="http://www.python.org/doc/$(PythonVERS)/" target="_blank">Python $(PythonVERS)</A> (scripting and interactivity)
     <LI> <a href="http://lcgapp.cern.ch/project/simu/HepMC/" target="_blank">HepMC $(HepMCVERS)</A>
     <LI> <a href="http://www.codesourcery.com/qmtest/" target="_blank">QMTest $(QMtestVERS)</A>
   </UL></li>
 </UL>
 See also:
-  <a href="http://gcc.gnu.org/onlinedocs/libstdc++/libstdc++-html-USERS-3.4/index.html" target="_blank">Standard Template Library</A>
+  Standard Template Library
+    (<a href="http://gcc.gnu.org/onlinedocs/libstdc++/libstdc++-html-USERS-3.4/index.html" target="_blank">gcc-3.4</a>,
+     <a href="http://gcc.gnu.org/onlinedocs/libstdc++/libstdc++-html-USERS-4.3/index.html" target="_blank">gcc-4.3</a>)
 \endhtmlonly
  */

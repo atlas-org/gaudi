@@ -1,6 +1,6 @@
 // $Id: ExceptionSvc.cpp,v 1.7 2008/06/02 14:21:35 marcocle Exp $ 
 // ============================================================================
-// CVS tag $Name:  $ , version $Revision: 1.7 $
+// CVS tag $Name: GAUDI_v20r2 $ , version $Revision: 1.7 $
 // ============================================================================
 // Include files 
 // ============================================================================
@@ -12,17 +12,28 @@
 // ============================================================================
 #include "GaudiKernel/SvcFactory.h"
 #include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/MsgStream.h"
+#include "GaudiKernel/Tokenizer.h"
 // ============================================================================
 //Local 
 // ============================================================================
 #include "ExceptionSvc.h"
 // ============================================================================
 
+using namespace std;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 DECLARE_SERVICE_FACTORY(ExceptionSvc)
+
+inline void toupper(std::string &s)
+{
+    std::string::iterator it=s.begin();
+    while(it != s.end())
+    {
+        *it = toupper(*it);
+        it++;
+    }
+}
 
 //
 ///////////////////////////////////////////////////////////////////////////
@@ -30,11 +41,14 @@ DECLARE_SERVICE_FACTORY(ExceptionSvc)
 
 ExceptionSvc::ExceptionSvc( const std::string& name, ISvcLocator* svc )
   : Service( name, svc )
-  , m_mode_s ( "all" ) 
-  , m_algs_v (       )
+  , m_mode_exc ( ALL ), m_mode_err( NONE ) 
+  , m_log(msgSvc(), name )
 {
-  declareProperty( "Catch"      , m_mode_s ) ;
-  declareProperty( "Algorithms" , m_algs_v ) ;
+  // for exceptions
+  declareProperty( "Catch"      , m_mode_exc_s="ALL" ) ;
+
+  // for return codes
+  declareProperty( "Errors"     , m_mode_err_s="NONE" ) ;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -48,98 +62,141 @@ ExceptionSvc::~ExceptionSvc() {
 
 StatusCode 
 ExceptionSvc::initialize() {
-  MsgStream log( msgSvc(), name() );
-
   StatusCode status = Service::initialize();
+  m_log.setLevel( m_outputLevel.value() );
   
   if ( status.isFailure() )  { return status ; }                  // RETURN 
   
-  if (m_mode_s == "all" || m_mode_s == "All" || m_mode_s == "ALL") {
-    m_mode = ALL;
-  } else if (m_mode_s == "none" || m_mode_s == "None" || 
-             m_mode_s == "NONE") {
-    m_mode = NONE;
-  } else if (m_mode_s == "list" || m_mode_s == "List" || 
-             m_mode_s == "LIST") {
-    m_mode = LIST;
+  string key = m_mode_exc_s.value();
+
+  string::size_type loc = key.find(" ");
+  std::string mode;
+  if (loc == std::string::npos) {
+    mode = key;
   } else {
-    log << MSG::ERROR << "Unknown value for property \"State\". Must be"
-	<< " one of \"all\", \"none\", or \"list\"" << endreq;
+    mode = key.substr(0,loc);
+  }
+  
+  toupper(mode);
+
+  if (mode == "NONE") {
+    m_mode_exc = NONE;
+  } else if (mode == "ALL") {
+    m_mode_exc = ALL;
+  } else {
+    m_log << MSG::ERROR << "Unknown mode for Exception handling: \"" << mode
+	<< "\". Default must be one of \"ALL\" or \"NONE\"" << endreq;
     m_state = Gaudi::StateMachine::OFFLINE;
     return StatusCode::FAILURE;
   }
 
-  std::vector<std::string>::const_iterator itr;
-  for (itr = m_algs_v.value().begin(); itr != m_algs_v.value().end(); ++itr) {
-    std::string a = *itr;
-    std::string alg(a);
-    ReturnState ret(RETHROW);
-
-    std::string::size_type ieq = a.find("=");
-    if (ieq != std::string::npos) {
-      alg = a;
-      alg.erase(ieq,alg.length());
-      a.erase(0,ieq+1);
-
-      if ( a == "DEFAULT" ) {
-	ret = DEFAULT;
-      } else if ( a == "SUCCESS" ) {
-	log << MSG::WARNING << "Unusual custom error return code SUCCESS for"
-	    << " Algorithm \"" << alg << "\"" <<endreq;
-	ret = SUCCESS;
-      } else if ( a == "FAILURE" ) {
-	ret = FAILURE;
-      } else if ( a == "RECOVERABLE" ) {
-	ret = RECOVERABLE;
-      } else if ( a == "RETHROW" ) {
-	ret = RETHROW;
-      } else {
-	log << MSG::ERROR << "In JobOpts: unknown return code \"" << a 
-	    << "\" for Algorithm " << alg << std::endl
-	    << "Must be one of: DEFAULT, SUCCESS, FAILURE, RECOVERABLE, RETHROW"
-	    << endreq;
-	m_state = Gaudi::StateMachine::OFFLINE;
-	return StatusCode::FAILURE;
-      }
-    }
-
-    m_algs.insert( alg );
-    m_retCodes[alg] = ret;
+  if (loc == string::npos) {
+    key = "";
+  } else {
+    key = key.substr(loc+1,key.length());
   }
 
-  if (m_algs.size() > 0 && m_mode != NONE) {
-    m_mode = LIST;
+  Tokenizer tok(true);
+  std::string val,VAL,TAG;
 
-    log << MSG::DEBUG << "Will catch exceptions thrown by: " << std::endl;
-    std::set<std::string>::const_iterator it;
-    for (it = m_algs.begin(); it != m_algs.end(); ++it) {
-      log << "            " << *it << "  action: ";
+  tok.analyse( key, " ", "", "", "=", "", "");
 
-      ReturnState ret = m_retCodes.find(*it)->second;
+  for ( Tokenizer::Items::iterator i = tok.items().begin(); 
+	i != tok.items().end(); i++)    {
+    const std::string& tag = (*i).tag();  
+    TAG = tag;
 
-      switch( ret ) {
-      case( DEFAULT ):
-	log << "DEFAULT";
-	break;
-      case( SUCCESS ):
-	log << "SUCCESS";
-	break;
-      case( FAILURE ):
-	log << "FAILURE";
-	break;
-      case( RECOVERABLE ):
-	log << "RECOVERABLE";
-	break;
-      case( RETHROW ):
-	log << "RETHROW";
-	break;
-      }
+    val = (*i).value();
+    VAL = val;
+    toupper(VAL);
 
-      log << std::endl;
+    if (VAL == "SUCCESS") {
+      m_retCodesExc[TAG] = SUCCESS;
+    } else if ( VAL == "FAILURE" ) {
+      m_retCodesExc[TAG] = FAILURE;
+    } else if ( VAL == "REVOVERABLE" ) {
+      m_retCodesExc[TAG] = RECOVERABLE;
+    } else if ( VAL == "RETHROW" ) {
+      m_retCodesExc[TAG] = RETHROW;
+    } else if ( VAL == "DEFAULT" ) {
+      m_retCodesExc[TAG] = DEFAULT;
+    } else {
+      m_log << MSG::ERROR << "In JobOpts: unknown return code \"" << VAL
+	  << "\" for Algorithm " << TAG << std::endl
+	  << "   Must be one of: DEFAULT, SUCCESS, FAILURE, RECOVERABLE, RETHROW"
+	  << endreq;
+      m_state = Gaudi::StateMachine::OFFLINE;
+      return StatusCode::FAILURE;
     }
-    log << endreq;
+
+    m_log << MSG::DEBUG << "Will catch exceptions thrown by: " << TAG 
+	<< " -> action: " << VAL << endreq;
 
   }
+
+  // now process errors
+
+  key = m_mode_err_s.value();
+
+  loc = key.find(" ");
+  if (loc == std::string::npos) {
+    mode = key;
+  } else {
+    mode = key.substr(0,loc);
+  }
+  
+  toupper(mode);
+
+  if (mode == "NONE") {
+    m_mode_err = NONE;
+  } else if (mode == "ALL") {
+    m_mode_err = ALL;
+  } else {
+    m_log << MSG::ERROR << "Unknown mode for Error handling: \"" << mode
+	<< "\". Default must be one of \"ALL\" or \"NONE\"" << endreq;
+    m_state = Gaudi::StateMachine::OFFLINE;
+    return StatusCode::FAILURE;
+  }
+
+  if (loc == string::npos) {
+    key = "";
+  } else {
+    key = key.substr(loc+1,key.length());
+  }
+
+  Tokenizer tok2(true);
+  tok2.analyse( key, " ", "", "", "=", "", "");
+
+  for ( Tokenizer::Items::iterator i = tok2.items().begin(); 
+	i != tok2.items().end(); i++)    {
+    const std::string& tag = (*i).tag();  
+    TAG = tag;
+
+    val = (*i).value();
+    VAL = val;
+    toupper(VAL);
+
+    if (VAL == "SUCCESS") {
+      m_retCodesErr[TAG] = SUCCESS;
+    } else if ( VAL == "FAILURE" ) {
+      m_retCodesErr[TAG] = FAILURE;
+    } else if ( VAL == "RECOVERABLE" ) {
+      m_retCodesErr[TAG] = RECOVERABLE;
+    } else {
+      m_log << MSG::ERROR << "In JobOpts: unknown return code \"" << VAL
+	  << "\" for Algorithm " << TAG << std::endl
+	  << "   Must be one of: SUCCESS, FAILURE, RECOVERABLE"
+	  << endreq;
+      m_state = Gaudi::StateMachine::OFFLINE;
+      return StatusCode::FAILURE;
+    }
+
+    m_log << MSG::DEBUG << "Will process Errors returned by: " << TAG 
+	<< " -> action: " << VAL << endreq;
+
+  }
+
+
 
   return status;
 }
@@ -148,8 +205,6 @@ ExceptionSvc::initialize() {
 
 StatusCode 
 ExceptionSvc::finalize() {
-  MsgStream log( msgSvc(), name() );
-
   StatusCode status = Service::finalize();
 
   return status;
@@ -181,86 +236,76 @@ StatusCode ExceptionSvc::handleErr
 ( const INamedInterface& alg , 
   const StatusCode&      st  ) const 
 {
-  MsgStream log( msgSvc(), name() );
-  
-  log << MSG::DEBUG << "Handling Error " << alg.name() << endreq;
-  
-  // Don't do anything
-  if (m_mode == NONE) {
-    return st;
+  m_log << MSG::DEBUG << "Handling Error from " << alg.name() << endreq;
+
+  // is this Alg special?
+  if (m_retCodesErr.find(alg.name()) != m_retCodesErr.end()) {
+    ReturnState iret = m_retCodesErr.find(alg.name())->second;
+
+    switch ( iret ) {
+    case SUCCESS:
+      return StatusCode::SUCCESS;
+    case FAILURE:
+      return StatusCode::FAILURE;
+    case RECOVERABLE:
+      return StatusCode::RECOVERABLE;
+    case RETHROW:
+      // should never get here
+      break;
+    case DEFAULT:
+      // should never get here
+      break;
+    }
+
+  } else {
+    
+    if (m_mode_err == ALL) {
+      // turn it into a FAILURE
+      return StatusCode::FAILURE;
+
+    } else {
+      assert (m_mode_err == NONE );
+      // don't touch the return code
+      return st;
+    }
   }
-  
-  if (m_mode == ALL) {
-    return StatusCode::FAILURE;
-  }
-  
-  assert (m_mode == LIST);
-  
-  // Not one of the requested algs
-  if (m_algs.find(alg.name()) == m_algs.end()) {
-    return st;
-  }
-  
-  // Requested to do something with this alg
-  ReturnState iret = m_retCodes.find(alg.name())->second;
-  
-  switch ( iret ) {
-  case DEFAULT:
-    // there is no default
-    return st;
-  case SUCCESS:
-    return StatusCode::SUCCESS;
-  case FAILURE:
-    return StatusCode::FAILURE;
-  case RECOVERABLE:
-    return StatusCode::RECOVERABLE;
-  case RETHROW:
-    return st;
-  }
-  
-  return st;
-  
+
+  return StatusCode::FAILURE;
+ 
 }
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 StatusCode ExceptionSvc::handle 
 ( const INamedInterface& alg ) const
 {
-  MsgStream log( msgSvc(), name() );
+  m_log << MSG::DEBUG << "Handling unknown exception for " << alg.name() << endreq;
   
-  log << MSG::DEBUG << "Handling unknown exception for " << alg.name() << endreq;
-  
-  // Don't do anything
-  if (m_mode == NONE) {
-    return StatusCode::FAILURE;
-  }
+  // is this Alg special?
+  if (m_retCodesExc.find(alg.name()) != m_retCodesExc.end()) {
+    ReturnState iret = m_retCodesExc.find(alg.name())->second;
 
-  if (m_mode == ALL) {
-    throw;
-  }
+    switch ( iret ) {
+    case DEFAULT:
+      // there is no default
+      return StatusCode::FAILURE;
+    case SUCCESS:
+      return StatusCode::SUCCESS;
+    case FAILURE:
+      return StatusCode::FAILURE;
+    case RECOVERABLE:
+      return StatusCode::RECOVERABLE;
+    case RETHROW:
+      throw;    
+    }
 
-  assert (m_mode == LIST);
+  } else {
 
-  // Not one of the requested algs
-  if (m_algs.find(alg.name()) == m_algs.end()) {
-    return StatusCode::FAILURE;
-  }
-
-  // Requested to do something with this alg
-  ReturnState iret = m_retCodes.find(alg.name())->second;
-  
-  switch ( iret ) {
-  case DEFAULT:
-    // there is no default
-    return StatusCode::FAILURE;
-  case SUCCESS:
-    return StatusCode::SUCCESS;
-  case FAILURE:
-    return StatusCode::FAILURE;
-  case RECOVERABLE:
-    return StatusCode::RECOVERABLE;
-  case RETHROW:
-    throw;    
+    if (m_mode_exc == ALL) {
+      throw;
+    } else {
+      assert (m_mode_exc == NONE);
+      return StatusCode::FAILURE;
+    }
   }
 
   return StatusCode::FAILURE;
@@ -272,45 +317,34 @@ StatusCode ExceptionSvc::handle
 ( const INamedInterface& alg , 
   const std::exception & exc ) const
 {
-  MsgStream log( msgSvc(), name() );
-  
-  log << MSG::DEBUG << "Handling std:except for " << alg.name() << endreq;
-  
-  // Don't do anything
-  if (m_mode == NONE) {
-    return StatusCode::FAILURE;
-  }
-  
-  if (m_mode == ALL) {
-    throw ( exc );
-  }
+  m_log << MSG::DEBUG << "Handling std:except for " << alg.name() << endreq;
 
-  assert (m_mode == LIST);
+  // is this Alg special?
+  if (m_retCodesExc.find(alg.name()) != m_retCodesExc.end()) {
+    ReturnState iret = m_retCodesExc.find(alg.name())->second;
 
-  // Not one of the requested algs
-  if (m_algs.find(alg.name()) == m_algs.end()) {
-    return StatusCode::FAILURE;
-  }
+    switch ( iret ) {
+    case DEFAULT:
+      // there is no default
+      return StatusCode::FAILURE;
+    case SUCCESS:
+      return StatusCode::SUCCESS;
+    case FAILURE:
+      return StatusCode::FAILURE;
+    case RECOVERABLE:
+      return StatusCode::RECOVERABLE;
+    case RETHROW:
+      throw ( exc );    
+    }
 
-  // Requested to do something with this alg
-  ReturnState iret = m_retCodes.find(alg.name())->second;
-  
-  switch ( iret ) {
-  case DEFAULT:
-    // there is no default
-    return StatusCode::FAILURE;
-    break;
-  case SUCCESS:
-    return StatusCode::SUCCESS;
-    break;
-  case FAILURE:
-    return StatusCode::FAILURE;
-    break;
-  case RECOVERABLE:
-    return StatusCode::RECOVERABLE;
-    break;
-  case RETHROW:
-    throw ( exc );    
+  } else {
+
+    if (m_mode_exc == ALL) {
+      throw (exc);
+    } else {
+      assert (m_mode_exc == NONE);
+      return StatusCode::FAILURE;
+    }
   }
 
   return StatusCode::FAILURE;
@@ -323,42 +357,35 @@ StatusCode ExceptionSvc::handle
   const GaudiException & exc ) const 
 {
   
-  MsgStream log( msgSvc(), name() );
-  log << MSG::DEBUG << "Handling GaudiExcept for " << alg.name() << endreq;
+  m_log << MSG::DEBUG << "Handling GaudiExcept for " << alg.name() << endreq;
   
-  // Don't do anything
-  if (m_mode == NONE) {
-    return StatusCode::FAILURE;
-  }
-  
-  // rethrow
-  if (m_mode == ALL) {
-    throw (exc);
-    return StatusCode::FAILURE;
-  }
-  
-  assert(m_mode == LIST);
-  
-  //  Not one of the requested algs
-  if (m_algs.find(alg.name()) == m_algs.end()) {
-    return StatusCode::FAILURE;
-  }
-  
-  // Requested to do something with this alg
-  ReturnState iret = m_retCodes.find(alg.name())->second;
+  // is this Alg special?
+  if (m_retCodesExc.find(alg.name()) != m_retCodesExc.end()) {
+    ReturnState iret = m_retCodesExc.find(alg.name())->second;
 
-  switch ( iret ) {
-  case DEFAULT:
-    return exc.code();
-  case SUCCESS:
-    return StatusCode::SUCCESS;
-  case FAILURE:
-    return StatusCode::FAILURE;
-  case RECOVERABLE:
-    return StatusCode::RECOVERABLE;
-  case RETHROW:
-    throw ( exc );    
+    switch ( iret ) {
+    case DEFAULT:
+      return exc.code();
+    case SUCCESS:
+      return StatusCode::SUCCESS;
+    case FAILURE:
+      return StatusCode::FAILURE;
+    case RECOVERABLE:
+      return StatusCode::RECOVERABLE;
+    case RETHROW:
+      throw ( exc );    
+    }
+
+  } else {
+
+    if (m_mode_exc == ALL) {
+      throw (exc);
+    } else {
+      assert (m_mode_exc == NONE);
+      return StatusCode::FAILURE;
+    }
   }
+
 
   return StatusCode::FAILURE;
 

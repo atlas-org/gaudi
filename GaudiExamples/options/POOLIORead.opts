@@ -36,6 +36,8 @@ EventSelector.Input += { "DATAFILE='PFN:POOLIO.mdst' TYP='POOL_ROOT' OPT='READ'"
 
 FileCatalog.Catalogs += { "xmlcatalog_file:POOLIO.xml" } ;
 
+ApplicationMgr.ExtSvc += { "RunRecordDataSvc" };
+
 // ============================================================================
 // The END 
 // ============================================================================

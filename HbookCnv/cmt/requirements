@@ -3,7 +3,7 @@
 # CVS tag $Name:  $, version $Revision: 1.48 $
 # =============================================================================
 package HbookCnv
-version v14r13
+version v14r14
 
 branches src cmt doc
 
@@ -31,15 +31,23 @@ macro_append HbookCnv_fflags " $(cernlib_fflags)"
 macro_append HbookCnv_shlibflags ""\
              WIN32 "/INCLUDE:_MZSTOR /INCLUDE:_MZCHNB /INCLUDE:_MZLINT /INCLUDE:_MZLINK /INCLUDE:_MZPAW /INCLUDE:_MZPUSH /INCLUDE:_MZRELB /INCLUDE:_MZWORK " 
 
-apply_pattern disable_package_on platform=Darwin
+# Disabled on 64 bits machines
+apply_pattern disable_package_on platform=target-x86_64
 apply_pattern disable_package_on platform=slc4-amd64
+apply_pattern disable_package_on platform=slc5-amd64
 
+# Disabled on SLC5
+apply_pattern disable_package_on platform=target-slc5
+apply_pattern disable_package_on platform=slc5-ia32
+
+# Disabled on gcc-4.x compilers
+apply_pattern disable_package_on platform=target-gcc40
+apply_pattern disable_package_on platform=target-gcc41
+apply_pattern disable_package_on platform=target-gcc42
+apply_pattern disable_package_on platform=target-gcc43
+apply_pattern disable_package_on platform=Darwin
 apply_pattern disable_package_on platform=slc4-ia32&gcc41
-# FIXME: It should be
-#  apply_pattern disable_package_on platform=gcc41
-#  apply_pattern disable_package_on platform=gcc-4.0
-# or something like
-#  apply_pattern disable_package_on platform=gcc-4
+apply_pattern disable_package_on platform=slc4-ia32&gcc43
 
 # =============================================================================
 # The END 

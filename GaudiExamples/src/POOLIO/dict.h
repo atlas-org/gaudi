@@ -7,6 +7,7 @@
 #include "Collision.h"
 #include "MyTrack.h"
 #include "MyVertex.h"
+#include "Counter.h"
 
 //template ObjectVector<MyTrack>;
 //template ObjectVector<MyVertex>;

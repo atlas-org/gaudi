@@ -8,4 +8,5 @@ ApplicationMgr.TopAlg = { "LoopAlg" };
 <argument name="validator"><text>
 findReferenceBlock('ServiceManager      ERROR Initialization loop detected when creating service "ServiceB"')
 </text></argument>
+<argument name="exit_code"><integer>1</integer></argument>
 </extension>

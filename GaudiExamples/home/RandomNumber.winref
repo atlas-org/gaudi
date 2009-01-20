@@ -16,8 +16,8 @@ JobOptionsSvc        INFO Job options successfully read in from ..\options\Rando
 ApplicationMgr      DEBUG Getting my own properties
 ApplicationMgr    SUCCESS
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr $Revision: 1.6 $
-                                          running on MCLVIRT01 on Tue Jun 03 11:49:56 2008
+                                                   Welcome to ApplicationMgr $Revision: 1.77 $
+                                          running on WOD01-001 on Mon Dec 15 22:02:40 2008
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 ServiceManager      DEBUG Initializing service AppMgrRunable
@@ -64,16 +64,16 @@ RRWNTupleCnv         INFO ID 100: added branch: Gauss / Gauss/F
 RRWNTupleCnv         INFO ID 100: added branch: Exp / Exp/F
 RRWNTupleCnv         INFO ID 100: added branch: Poisson / Poisson/F
 RRWNTupleCnv         INFO Booked TTree with ID:100 "Hello World"
-ServiceManager      DEBUG Stopping service AppMgrRunable
-ServiceManager      DEBUG Stopping service IncidentSvc
-ServiceManager      DEBUG Stopping service RndmGenSvc
-ServiceManager      DEBUG Stopping service RootHistSvc
-ServiceManager      DEBUG Stopping service HistogramPersistencySvc
-ServiceManager      DEBUG Stopping service HistogramDataSvc
-ServiceManager      DEBUG Stopping service NTupleSvc
-ServiceManager      DEBUG Stopping service EventPersistencySvc
-ServiceManager      DEBUG Stopping service EventDataSvc
 ServiceManager      DEBUG Stopping service EventLoopMgr
+ServiceManager      DEBUG Stopping service EventDataSvc
+ServiceManager      DEBUG Stopping service EventPersistencySvc
+ServiceManager      DEBUG Stopping service NTupleSvc
+ServiceManager      DEBUG Stopping service HistogramDataSvc
+ServiceManager      DEBUG Stopping service HistogramPersistencySvc
+ServiceManager      DEBUG Stopping service RootHistSvc
+ServiceManager      DEBUG Stopping service RndmGenSvc
+ServiceManager      DEBUG Stopping service IncidentSvc
+ServiceManager      DEBUG Stopping service AppMgrRunable
 ApplicationMgr       INFO Application Manager Stopped successfully
 ServiceManager      DEBUG Finalizing service EventLoopMgr
 Destructor Called for RandomNumberAlg

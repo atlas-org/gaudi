@@ -6,7 +6,6 @@
 
 // Compiler include files
 #include <cstdio>
-#include <climits>
 
 // Include files
 #include "GaudiKernel/xtoa.h"
@@ -20,6 +19,7 @@
 #include "HCWNTupleCnv.h"
 #include "NTupleInfo.h"
 #include "HbookDef.h"
+#include <climits>
 
 //------------------------------------------------------------------------------
 //
@@ -33,8 +33,8 @@
 // instances of this service
 DECLARE_NAMESPACE_CONVERTER_FACTORY(HbookCnv,HCWNTupleCnv)
 
-template <class T> void analyzeItem(const char typ, 
-                                    const NTuple::_Data<T>* it, 
+template <class T> void analyzeItem(const char typ,
+                                    const NTuple::_Data<T>* it,
                                     std::string& desc,
 				    std::string& block_name,
                                     long& size)    {
@@ -61,7 +61,7 @@ template <class T> void analyzeItem(const char typ,
     std::string ind = it->index();
     HbookCnv::parseName(ind,ind_blk,ind_var);
     if (ind_blk != block_name) {
-      std::cerr << "ERROR: Index for CWNT variable " << ind_var 
+      std::cerr << "ERROR: Index for CWNT variable " << ind_var
 		<< " is in a differnt block: " << ind_blk << std::endl;
     }
     desc += ind_var;
@@ -111,11 +111,11 @@ StatusCode HbookCnv::HCWNTupleCnv::declare(long idh, INTuple* nt)  {
         analyzeItem('L', dynamic_cast<const NTuple::_Data<bool>*>(*i),item,
 		    block_name,size);
         break;
-      case DataTypeInfo::CHAR:              // char 
+      case DataTypeInfo::CHAR:              // char
         analyzeItem('I', dynamic_cast<const NTuple::_Data<char>*>(*i),item,
 		    block_name,size);
         break;
-      case DataTypeInfo::INT:               // int 
+      case DataTypeInfo::INT:               // int
         analyzeItem('I', dynamic_cast<const NTuple::_Data<int>*>(*i),item,
 		    block_name,size);
         break;
@@ -123,11 +123,11 @@ StatusCode HbookCnv::HCWNTupleCnv::declare(long idh, INTuple* nt)  {
         analyzeItem('I', dynamic_cast<const NTuple::_Data<short>*>(*i),item,
 		    block_name,size);
         break;
-      case DataTypeInfo::LONG:              // long 
+      case DataTypeInfo::LONG:              // long
         analyzeItem('I', dynamic_cast<const NTuple::_Data<long>*>(*i),item,
 		    block_name,size);
         break;
-      case DataTypeInfo::UCHAR:             // unsigned char 
+      case DataTypeInfo::UCHAR:             // unsigned char
         analyzeItem('U', dynamic_cast<const NTuple::_Data<unsigned char>*>(*i),
 		    item,block_name,size);
         break;
@@ -135,19 +135,19 @@ StatusCode HbookCnv::HCWNTupleCnv::declare(long idh, INTuple* nt)  {
         analyzeItem('U', dynamic_cast<const NTuple::_Data<unsigned short>*>(*i),
 		    item,block_name,size);
         break;
-      case DataTypeInfo::UINT:              // unsigned int 
+      case DataTypeInfo::UINT:              // unsigned int
         analyzeItem('U', dynamic_cast<const NTuple::_Data<unsigned int>*>(*i),
 		    item,block_name,size);
         break;
-      case DataTypeInfo::ULONG:             // unsigned long 
+      case DataTypeInfo::ULONG:             // unsigned long
         analyzeItem('U', dynamic_cast<const NTuple::_Data<unsigned long>*>(*i),
 		    item,block_name,size);
         break;
-      case DataTypeInfo::DOUBLE:            // double 
+      case DataTypeInfo::DOUBLE:            // double
         analyzeItem('R', dynamic_cast<const NTuple::_Data<double>*>(*i),item,
 		    block_name,size);
         break;
-      case DataTypeInfo::FLOAT:             // float 
+      case DataTypeInfo::FLOAT:             // float
         analyzeItem('R', dynamic_cast<const NTuple::_Data<float>*>(*i),item,
 		    block_name,size);
       default:
@@ -177,16 +177,16 @@ StatusCode HbookCnv::HCWNTupleCnv::declare(long idh, INTuple* nt)  {
     /// Loop over items, add them to ntuple blocks
 
     for (itr=item_name.begin(); itr!=end; ++itr) {
-      buf_pos = buff + item_size[pos++]; 
+      buf_pos = buff + item_size[pos++];
       block_desc = itr->second;
 
       ::HBNAME(idh, itr->first.c_str(), buf_pos, block_desc.c_str());
-      
-      log << MSG::DEBUG << "CWNT " << idh << ": added " 
+
+      log << MSG::DEBUG << "CWNT " << idh << ": added "
 	  << itr->first << " : " << block_desc << endreq;
 
     }
-    
+
     return StatusCode::SUCCESS;
   }
   catch (...)   {
@@ -210,7 +210,7 @@ StatusCode HbookCnv::HCWNTupleCnv::book(long idh, const std::string& loc, INTupl
       status = declare(idh, nt);
       if ( status.isSuccess() )  {
         log << MSG::INFO << "Booked Column wise HBOOK N tuple with ID:" << idh
-            << " \"" << nt->title() 
+            << " \"" << nt->title()
             << "\" in directory <" << loc << ">" << endreq;
         log << MSG::DEBUG;
         if ( log.isActive() ) ::HPRINT (idh);
@@ -218,12 +218,12 @@ StatusCode HbookCnv::HCWNTupleCnv::book(long idh, const std::string& loc, INTupl
       }
     }
     log << MSG::ERROR << "Column wise HBOOK N tuple " << idh
-        << "\"" << nt->title() 
+        << "\"" << nt->title()
         << "\" cannot be booked"
         << " in directory <" << loc << ">" << endreq;
     return status;
   }
-  log << MSG::ERROR << "Column wise HBOOK N tuple " << idh << "\"" << nt->title() 
+  log << MSG::ERROR << "Column wise HBOOK N tuple " << idh << "\"" << nt->title()
       << "\" already exists in directory <" << loc << ">" << endreq;
   return StatusCode::FAILURE;
 }
@@ -240,7 +240,7 @@ StatusCode HbookCnv::HCWNTupleCnv::writeData(long idh, INTuple* nt)   {
     case DataTypeInfo::BOOL:              // bool
       tar += saveItem(tar, (bool*)(*i)->buffer(),   (*i)->length());
       break;
-    case DataTypeInfo::CHAR:              // char 
+    case DataTypeInfo::CHAR:              // char
       tar += saveItem(tar, (char*)(*i)->buffer(),   (*i)->length());
       break;
     case DataTypeInfo::SHORT:             // short
@@ -249,10 +249,10 @@ StatusCode HbookCnv::HCWNTupleCnv::writeData(long idh, INTuple* nt)   {
     case DataTypeInfo::INT:             // short
       tar += saveItem(tar, (int*)(*i)->buffer(),    (*i)->length());
       break;
-    case DataTypeInfo::LONG:             // short      
+    case DataTypeInfo::LONG:             // short
       tar += saveItem(tar, (long*)(*i)->buffer(),   (*i)->length());
       break;
-    case DataTypeInfo::UCHAR:             // unsigned char 
+    case DataTypeInfo::UCHAR:             // unsigned char
       tar += saveItem(tar, (unsigned char*)(*i)->buffer(),  (*i)->length());
       break;
     case DataTypeInfo::USHORT:            // unsigned short
@@ -295,7 +295,7 @@ StatusCode HbookCnv::HCWNTupleCnv::readData(long idh, INTuple* ntup, long ievt) 
       case DataTypeInfo::BOOL:              // bool
         src += loadItem(src, (bool*)(*i)->buffer(), (*i)->length());
         break;
-      case DataTypeInfo::CHAR:              // char 
+      case DataTypeInfo::CHAR:              // char
         src += loadItem(src, (char*)(*i)->buffer(), (*i)->length());
         break;
       case DataTypeInfo::SHORT:             // short
@@ -304,10 +304,10 @@ StatusCode HbookCnv::HCWNTupleCnv::readData(long idh, INTuple* ntup, long ievt) 
       case DataTypeInfo::INT:             // short
         src += loadItem(src, (int*)(*i)->buffer(), (*i)->length());
         break;
-      case DataTypeInfo::LONG:             // short      
+      case DataTypeInfo::LONG:             // short
         src += loadItem(src, (long*)(*i)->buffer(), (*i)->length());
         break;
-      case DataTypeInfo::UCHAR:             // unsigned char 
+      case DataTypeInfo::UCHAR:             // unsigned char
         src += loadItem(src, (unsigned char*)(*i)->buffer(), (*i)->length());
         break;
       case DataTypeInfo::USHORT:            // unsigned short
@@ -333,7 +333,7 @@ StatusCode HbookCnv::HCWNTupleCnv::readData(long idh, INTuple* ntup, long ievt) 
   }
 
   log << MSG::ERROR << "Error reading data from N tuple ID:" << idh
-      << " " << ntup->title() 
+      << " " << ntup->title()
       << endreq;
   return StatusCode::FAILURE;
 }
@@ -375,7 +375,7 @@ StatusCode HbookCnv::HCWNTupleCnv::load(long idh, INTuple*& refpObject)   {
             //   item = createNTupleItem(tags, i, ntup, NTuple::Range<short>::min(), NTuple::Range<short>::max(), size);
             // else if ( tags.size[i] <= sizeof(unsigned int)*CHAR_BIT )
             //   item = createNTupleItem(tags, i, ntup, NTuple::Range<int>::min(), NTuple::Range<int>::max(), size);
-            // else 
+            // else
             item = createNTupleItem(tags, i, ntup, NTuple::Range<long>::min(), NTuple::Range<long>::max(), size);
             break;
           case 'U':
@@ -385,7 +385,7 @@ StatusCode HbookCnv::HCWNTupleCnv::load(long idh, INTuple*& refpObject)   {
             //   item = createNTupleItem(tags, i, ntup, NTuple::Range<unsigned short>::min(), NTuple::Range<unsigned short>::max(), size);
             // else if ( tags.size[i] <= sizeof(unsigned int)*CHAR_BIT )
             //   item = createNTupleItem(tags, i, ntup, NTuple::Range<unsigned int>::min(), NTuple::Range<unsigned int>::max(), size);
-            // else 
+            // else
             item = createNTupleItem(tags, i, ntup, NTuple::Range<unsigned long>::min(), NTuple::Range<unsigned long>::max(), size);
             break;
           case 'R':
@@ -401,7 +401,7 @@ StatusCode HbookCnv::HCWNTupleCnv::load(long idh, INTuple*& refpObject)   {
       long ii;
       ntup->add(item);
       total_size += size;
-      log << MSG::DEBUG << "Create Var[" << i << "]: " 
+      log << MSG::DEBUG << "Create Var[" << i << "]: "
 	  << item->typeName() << "[";
       for ( ii = 0; ii < item->ndim()-1; ii++ )    {
 	log << item->dim(ii) << ", ";
@@ -411,7 +411,7 @@ StatusCode HbookCnv::HCWNTupleCnv::load(long idh, INTuple*& refpObject)   {
     } else {
       log << MSG::FATAL << "Cannot deduce type for Var[" << i << "]: ";
     }
-    
+
 
     // add sizes up
     blkname.push_back(tags.block[i]);
@@ -432,7 +432,7 @@ StatusCode HbookCnv::HCWNTupleCnv::load(long idh, INTuple*& refpObject)   {
       log << tags.frange[i][0] << "," << tags.frange[i][1];
     log << "]" << endreq;
   }
-  log << MSG::DEBUG << "Total buffer size of NTuple: " << total_size << " Bytes." << endreq; 
+  log << MSG::DEBUG << "Total buffer size of NTuple: " << total_size << " Bytes." << endreq;
 
   ntup->setBuffer(new char[total_size]);
   long ievt = 0;
@@ -453,7 +453,7 @@ StatusCode HbookCnv::HCWNTupleCnv::load(long idh, INTuple*& refpObject)   {
       oldblock = blkname[ib];
     }
   }
-    
+
   refpObject = ntup;
   return StatusCode::SUCCESS;
       }

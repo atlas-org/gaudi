@@ -30,11 +30,13 @@ EventPersistenc...   INFO  'CnvServices':[ 'PoolRootEvtCnvSvc' , 'PoolRootTreeEv
 ApplicationMgr       INFO Application Manager Started successfully
 EventPersistenc...   INFO Added successfully Conversion service:PoolRootEvtCnvSvc
 EventSelector        INFO Stream:EventSelector.DataStreamTool_1 Def:DATAFILE='EvtColsEx.dst' TYP='POOL_ROOT' OPT='READ'
-EvtColsEx.dst     SUCCESS Root file version:51800
-EvtColsEx.dst     SUCCESS Root file version:51800
+RootDBase.open    SUCCESS EvtColsEx.dst File version:51800
+RootDBase.open    SUCCESS EvtColsEx.dst File version:51800
+PoolRootEvtCnvSvc    INFO No RunRecords present in:5C32CC50-E0C6-DD11-BE0D-001320A397BC
 EventSelector     SUCCESS Reading Event record 1. Record number within stream 1: 1
 EventPersistenc...   INFO Added successfully Conversion service:PoolRootTreeEvtCnvSvc
-EvtTags1.root     SUCCESS Root file version:51800
+IODataManager        INFO Referring to dataset EvtTags1.root by its file ID:6C9E2D78-E0C6-DD11-B970-001320A397BC
+RootDBase.open    SUCCESS EvtTags1.root File version:51800
 PoolDbDatabaseCnv    INFO Recreate Database file:PFN:EvtTags1.root as /EVTTAGS
 EventSelector     SUCCESS Reading Event record 1001. Record number within stream 1: 1001
 EventSelector     SUCCESS Reading Event record 2001. Record number within stream 1: 2001
@@ -53,7 +55,8 @@ RootHistSvc       WARNING no ROOT output file name, Histograms cannot be persist
 EventLoopMgr         INFO Histograms converted successfully according to request.
 ToolSvc              INFO Removing all tools created by ToolSvc
 EvtTupleSvc          INFO NTuples saved successfully
-EvtTupleSvc.EVT...   INFO Disconnected data IO:A28A37A7-B6E6-DC11-8322-23037B682C1B[EvtTags1.root]
-PoolRootEvtCnvSvc    INFO Disconnected data IO:406BDE9F-B6E6-DC11-92C2-C352786744BF[EvtColsEx.dst]
+EvtTupleSvc.EVT...   INFO Disconnected data IO:6C9E2D78-E0C6-DD11-B970-001320A397BC[EvtTags1.root]
+PoolRootEvtCnvSvc    INFO Disconnected data IO:5C32CC50-E0C6-DD11-BE0D-001320A397BC[EvtColsEx.dst]
+XMLCatalog           INFO File 'test_catalog.xml' does not exist. New file created.
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully

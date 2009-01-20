@@ -1,7 +1,7 @@
 JobOptionsSvc        INFO
 //GP:================================================================================
 //GP: include "../options/POOLIOExtCollRead.opts"                             (0,0)
-//GP: include "/Users/marcocle/GAUDI/GaudiPoolDb/options/GaudiPoolDbRoot.opts" (15,10)
+//GP: include "/Users/marcocle/cmtuser/GAUDI/GAUDI_HEAD/GaudiPoolDb/options/GaudiPoolDbRoot.opts" (15,10)
 ApplicationMgr.ExtSvc +=  [ "Gaudi::MultiFileCatalog/FileCatalog" , "Gaudi::IODataManager/IODataManager" , "PoolDbCacheSvc/PoolDbCacheSvc" , "PoolDbCnvSvc/PoolRootEvtCnvSvc" , "PoolDbCnvSvc/PoolRootKeyEvtCnvSvc" , "PoolDbCnvSvc/PoolRootTreeEvtCnvSvc" ] ;//GP: (1,1)
 EventPersistencySvc.CnvServices +=  [ "PoolRootEvtCnvSvc" ] ;           //GP: (1,1)
 EventPersistencySvc.CnvServices +=  [ "PoolRootTreeEvtCnvSvc" ] ;       //GP: (1,1)
@@ -12,7 +12,17 @@ PoolRootTreeEvtCnvSvc.DbType = "POOL_ROOTTREE";                         //GP: (1
 PoolDbCacheSvc.Dlls =  [ "lcg_RootStorageSvc" , "GaudiKernelDict" ] ;   //GP: (1,1)
 PoolDbCacheSvc.OutputLevel = 4;                                         //GP: (1,1)
 PoolDbCacheSvc.DomainOpts =  [ "Domain[ROOT_All].TREE_MAX_SIZE=500000000000 TYP=longlong" ] ;//GP: (1,1)
-//GP: end  "/Users/marcocle/GAUDI/GaudiPoolDb/options/GaudiPoolDbRoot.opts"   (22,1)
+ApplicationMgr.ExtSvc +=  [ "PoolDbCnvSvc/RunRecordCnvSvc" ] ;          //GP: (1,1)
+RunRecordPersistencySvc.CnvServices +=  [ "RunRecordCnvSvc" ] ;         //GP: (1,1)
+RunRecordCnvSvc.DbType = "POOL_ROOTTREE";                               //GP: (1,1)
+RunRecordCnvSvc.ShareFiles = 1;                                         //GP: (1,1)
+RunRecordDataSvc.ForceLeaves = 1;                                       //GP: (1,1)
+RunRecordDataSvc.EnableFaultHandler = 1;                                //GP: (1,1)
+RunRecordDataSvc.RootCLID = 1;                                          //GP: (1,1)
+PoolRootEvtCnvSvc.EnableIncident = 1;                                   //GP: (1,1)
+PoolRootKeyEvtCnvSvc.EnableIncident = 1;                                //GP: (1,1)
+PoolRootTreeEvtCnvSvc.EnableIncident = 1;                               //GP: (1,1)
+//GP: end  "/Users/marcocle/cmtuser/GAUDI/GAUDI_HEAD/GaudiPoolDb/options/GaudiPoolDbRoot.opts" (36,1)
 ApplicationMgr.ExtSvc +=  [ "TagCollectionSvc/EvtTupleSvc" ] ;          //GP: (15,10)
 PoolDbCacheSvc.DLLs +=  [ "GaudiExamplesDict" ] ;                       //GP: (15,10)
 FileCatalog.Catalogs +=  [ "xmlcatalog_file:POOLIO.xml" ] ;             //GP: (15,10)
@@ -26,14 +36,15 @@ EventSelector.PrintFreq = 100;                                          //GP: (1
 JobOptionsSvc        INFO Job options successfully read in from ../options/POOLIOExtCollRead.opts
 ApplicationMgr    SUCCESS
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr $Revision: 1.6 $
-                                          running on macphsft06.cern.ch on Thu Jun  5 12:17:35 2008
+                                                   Welcome to ApplicationMgr $Revision: 1.77 $
+                                          running on macphsft06.cern.ch on Mon Dec 15 19:01:56 2008
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
+RunRecordPersis...   INFO  'CnvServices':[ 'RunRecordCnvSvc' ]
 EventPersistenc...   INFO  'CnvServices':[ 'PoolRootEvtCnvSvc' , 'PoolRootTreeEvtCnvSvc' , 'PoolRootKeyEvtCnvSvc' ]
 EvtTupleSvc          INFO Added stream file:PFN:POOLIO.etags as EventSelector.DataStreamTool_1
 PoolDbDatabaseCnv    INFO Connect to existing Database file:PFN:POOLIO.etags as /EventSelector.DataStreamTool_1 for READ
-POOLIO.etags      SUCCESS Root file version:51800
+RootDBase.open    SUCCESS POOLIO.etags File version:51800
 EventSelector        INFO Stream:EventSelector.DataStreamTool_1 Def:COLLECTION='Fill/MyCOL1' DATAFILE='PFN:POOLIO.etags' TYP='POOL_ROOT' SEL='(Ntrack>9 && Ntrack<20 && Energy<180)' FUN='Gaudi::Examples::EvtCollectionSelector'
 HistogramPersis...   INFO  'CnvServices':[ 'HbookHistSvc' , 'RootHistSvc' ]
 HistogramPersis...WARNING Histograms saving not required.
@@ -97,7 +108,7 @@ Gaudi::Examples::EvtCollectionSelector	 -> Track :  px=12.15 py=9.06596 pz=10.42
 Gaudi::Examples::EvtCollectionSelector   SELECTED : False
 EvtTupleSvc          INFO Added stream file:PFN:POOLIO.tags as EventSelector.DataStreamTool_2
 PoolDbDatabaseCnv    INFO Connect to existing Database file:PFN:POOLIO.tags as /EventSelector.DataStreamTool_2 for READ
-POOLIO.tags       SUCCESS Root file version:51800
+RootDBase.open    SUCCESS POOLIO.tags File version:51800
 EventSelector        INFO Stream:EventSelector.DataStreamTool_2 Def:COLLECTION='Dir1/Dir2/Dir3/Collection' DATAFILE='PFN:POOLIO.tags' TYP='POOL_ROOT' SEL='(Ntrack>15)' FUN='Gaudi::Examples::EvtCollectionSelector'
 Gaudi::Examples::EvtCollectionSelector	 -> #tracks : 93
 Gaudi::Examples::EvtCollectionSelector	 -> Momenta : [0]=16.6809 [1]=14.9037 [2]=16.7944 [3]=17.0709 [4]=17.3469
@@ -106,72 +117,78 @@ Gaudi::Examples::EvtCollectionSelector   SELECTED : True
 EventSelector     SUCCESS Reading Event record 1. Record number within stream 2: 1
 EventPersistenc...   INFO Added successfully Conversion service:PoolRootEvtCnvSvc
 EventPersistenc...   INFO Added successfully Conversion service:PoolRootTreeEvtCnvSvc
-POOLIO.dst        SUCCESS Root file version:51800
-ReadAlg              INFO ========= EVENT:2 RUN:999 TIME:1212661033.556706 0 (0) 1 (1) 2 (2)
+RootDBase.open    SUCCESS POOLIO.dst File version:51800
+PoolRootTreeEvt...   INFO RunRecords token:[DB=CA9F1F63-D2CA-DD11-B339-0017F201FD68][CNT=/RunRecords][CLID=00000001-0000-0000-0000-000000000000][TECH=00000202][OID=0000000A-00000000]
+RunRecordDataSvc  SUCCESS Request to load run record for file CA9F1F63-D2CA-DD11-B339-0017F201FD68
+ReadAlg              INFO ========= EVENT:2 RUN:999 TIME:1229364085.147699 0 (0) 1 (1) 2 (2)
+RunRecordPersis...   INFO Added successfully Conversion service:RunRecordCnvSvc
+ReadAlg           SUCCESS RunInfo record: Counter=1
 Gaudi::Examples::EvtCollectionSelector	 -> #tracks : 76
 Gaudi::Examples::EvtCollectionSelector	 -> Momenta : [0]=17.7422 [1]=16.7922 [2]=17.6961 [3]=16.0612 [4]=15.7365
 Gaudi::Examples::EvtCollectionSelector	 -> Track :  px=10.4989 py=10.4342 pz=9.78193
 Gaudi::Examples::EvtCollectionSelector   SELECTED : True
-ReadAlg              INFO ========= EVENT:3 RUN:999 TIME:1212661033.569004 0 (0) 1 (1) 2 (2)
+ReadAlg              INFO ========= EVENT:3 RUN:999 TIME:1229364085.166035 0 (0) 1 (1) 2 (2)
 Gaudi::Examples::EvtCollectionSelector	 -> #tracks : 93
 Gaudi::Examples::EvtCollectionSelector	 -> Momenta : [0]=16.7554 [1]=16.91 [2]=17.424 [3]=17.0529 [4]=16.2021
 Gaudi::Examples::EvtCollectionSelector	 -> Track :  px=8.95659 py=9.22111 pz=10.7468
 Gaudi::Examples::EvtCollectionSelector   SELECTED : True
-ReadAlg              INFO ========= EVENT:4 RUN:999 TIME:1212661033.57714 0 (0) 1 (1) 2 (2)
+ReadAlg              INFO ========= EVENT:4 RUN:999 TIME:1229364085.177447 0 (0) 1 (1) 2 (2)
 Gaudi::Examples::EvtCollectionSelector	 -> #tracks : 54
 Gaudi::Examples::EvtCollectionSelector	 -> Momenta : [0]=18.3973 [1]=15.7355 [2]=17.3919 [3]=17.6139 [4]=15.3032
 Gaudi::Examples::EvtCollectionSelector	 -> Track :  px=10.7592 py=9.68162 pz=11.3563
 Gaudi::Examples::EvtCollectionSelector   SELECTED : True
-ReadAlg              INFO ========= EVENT:6 RUN:999 TIME:1212661033.592511 0 (0) 1 (1) 2 (2)
+ReadAlg              INFO ========= EVENT:6 RUN:999 TIME:1229364085.199142 0 (0) 1 (1) 2 (2)
 Gaudi::Examples::EvtCollectionSelector	 -> #tracks : 52
 Gaudi::Examples::EvtCollectionSelector	 -> Momenta : [0]=16.7278 [1]=19.0105 [2]=17.2653 [3]=17.9376 [4]=18.0045
 Gaudi::Examples::EvtCollectionSelector	 -> Track :  px=9.79151 py=8.83918 pz=10.2866
 Gaudi::Examples::EvtCollectionSelector   SELECTED : True
-ReadAlg              INFO ========= EVENT:500 RUN:999 TIME:1212661035.552501 0 (0) 1 (1) 2 (2)
+ReadAlg              INFO ========= EVENT:500 RUN:999 TIME:1229364088.53367 0 (0) 1 (1) 2 (2)
 Gaudi::Examples::EvtCollectionSelector	 -> #tracks : 55
 Gaudi::Examples::EvtCollectionSelector	 -> Momenta : [0]=17.3344 [1]=16.8644 [2]=17.1626 [3]=19.4074 [4]=18.0094
 Gaudi::Examples::EvtCollectionSelector	 -> Track :  px=10.7646 py=8.89134 pz=10.2737
 Gaudi::Examples::EvtCollectionSelector   SELECTED : True
-ReadAlg              INFO ========= EVENT:1000 RUN:999 TIME:1212661037.552206 0 (0) 1 (1) 2 (2)
+ReadAlg              INFO ========= EVENT:1000 RUN:999 TIME:1229364091.915971 0 (0) 1 (1) 2 (2)
 Gaudi::Examples::EvtCollectionSelector	 -> #tracks : 93
 Gaudi::Examples::EvtCollectionSelector	 -> Momenta : [0]=16.6809 [1]=14.9037 [2]=16.7944 [3]=17.0709 [4]=17.3469
 Gaudi::Examples::EvtCollectionSelector	 -> Track :  px=10.1578 py=9.51566 pz=9.19358
 Gaudi::Examples::EvtCollectionSelector   SELECTED : True
-POOLIO.mdst       SUCCESS Root file version:51800
-IODataManager        INFO Disconnect from dataset POOLIO.etags [7EF6833F-6132-DD11-8E9B-0017F201FD68]
-ReadAlg              INFO ========= EVENT:2 RUN:999 TIME:1212661033.556706 0 (0) 1 (1) 2 (2)
+RootDBase.open    SUCCESS POOLIO.mdst File version:51800
+IODataManager        INFO Disconnect from dataset POOLIO.etags [1470BA71-D2CA-DD11-9C8E-0017F201FD68]
+PoolRootTreeEvt...   INFO No RunRecords present in:84E27263-D2CA-DD11-B339-0017F201FD68
+RunRecordDataSvc    ERROR Failed to register run record for:84E27263-D2CA-DD11-B339-0017F201FD68 [Invalid Address]
+ReadAlg              INFO ========= EVENT:2 RUN:999 TIME:1229364085.147699 0 (0) 1 (1) 2 (2)
 Gaudi::Examples::EvtCollectionSelector	 -> #tracks : 76
 Gaudi::Examples::EvtCollectionSelector	 -> Momenta : [0]=17.7422 [1]=16.7922 [2]=17.6961 [3]=16.0612 [4]=15.7365
 Gaudi::Examples::EvtCollectionSelector	 -> Track :  px=10.4989 py=10.4342 pz=9.78193
 Gaudi::Examples::EvtCollectionSelector   SELECTED : True
-ReadAlg              INFO ========= EVENT:3 RUN:999 TIME:1212661033.569004 0 (0) 1 (1) 2 (2)
+ReadAlg              INFO ========= EVENT:3 RUN:999 TIME:1229364085.166035 0 (0) 1 (1) 2 (2)
 Gaudi::Examples::EvtCollectionSelector	 -> #tracks : 93
 Gaudi::Examples::EvtCollectionSelector	 -> Momenta : [0]=16.7554 [1]=16.91 [2]=17.424 [3]=17.0529 [4]=16.2021
 Gaudi::Examples::EvtCollectionSelector	 -> Track :  px=8.95659 py=9.22111 pz=10.7468
 Gaudi::Examples::EvtCollectionSelector   SELECTED : True
-ReadAlg              INFO ========= EVENT:4 RUN:999 TIME:1212661033.57714 0 (0) 1 (1) 2 (2)
+ReadAlg              INFO ========= EVENT:4 RUN:999 TIME:1229364085.177447 0 (0) 1 (1) 2 (2)
 Gaudi::Examples::EvtCollectionSelector	 -> #tracks : 54
 Gaudi::Examples::EvtCollectionSelector	 -> Momenta : [0]=18.3973 [1]=15.7355 [2]=17.3919 [3]=17.6139 [4]=15.3032
 Gaudi::Examples::EvtCollectionSelector	 -> Track :  px=10.7592 py=9.68162 pz=11.3563
 Gaudi::Examples::EvtCollectionSelector   SELECTED : True
-ReadAlg              INFO ========= EVENT:6 RUN:999 TIME:1212661033.592511 0 (0) 1 (1) 2 (2)
+ReadAlg              INFO ========= EVENT:6 RUN:999 TIME:1229364085.199142 0 (0) 1 (1) 2 (2)
 Gaudi::Examples::EvtCollectionSelector	 -> #tracks : 52
 Gaudi::Examples::EvtCollectionSelector	 -> Momenta : [0]=16.7278 [1]=19.0105 [2]=17.2653 [3]=17.9376 [4]=18.0045
 Gaudi::Examples::EvtCollectionSelector	 -> Track :  px=9.79151 py=8.83918 pz=10.2866
 Gaudi::Examples::EvtCollectionSelector   SELECTED : True
-ReadAlg              INFO ========= EVENT:500 RUN:999 TIME:1212661035.552501 0 (0) 1 (1) 2 (2)
+ReadAlg              INFO ========= EVENT:500 RUN:999 TIME:1229364088.53367 0 (0) 1 (1) 2 (2)
 Gaudi::Examples::EvtCollectionSelector	 -> #tracks : 55
 Gaudi::Examples::EvtCollectionSelector	 -> Momenta : [0]=17.3344 [1]=16.8644 [2]=17.1626 [3]=19.4074 [4]=18.0094
 Gaudi::Examples::EvtCollectionSelector	 -> Track :  px=10.7646 py=8.89134 pz=10.2737
 Gaudi::Examples::EvtCollectionSelector   SELECTED : True
-ReadAlg              INFO ========= EVENT:1000 RUN:999 TIME:1212661037.552206 0 (0) 1 (1) 2 (2)
+ReadAlg              INFO ========= EVENT:1000 RUN:999 TIME:1229364091.915971 0 (0) 1 (1) 2 (2)
 EventLoopMgr         INFO No more events in event selection
 ApplicationMgr       INFO Application Manager Stopped successfully
 EventLoopMgr         INFO Histograms converted successfully according to request.
 ToolSvc              INFO Removing all tools created by ToolSvc
-EvtTupleSvc.Eve...   INFO Disconnected data IO:9E52B339-6132-DD11-9980-0017F201FD68[POOLIO.tags]
-PoolRootTreeEvt...   INFO Disconnected data IO:1207B235-6132-DD11-9D09-0017F201FD68[POOLIO.dst]
-PoolRootTreeEvt...   INFO Disconnected data IO:A8ACEE35-6132-DD11-9D09-0017F201FD68[POOLIO.mdst]
+EvtTupleSvc.Eve...   INFO Disconnected data IO:1C7E6B69-D2CA-DD11-B0ED-0017F201FD68[POOLIO.tags]
+PoolRootTreeEvt...   INFO Disconnected data IO:84E27263-D2CA-DD11-B339-0017F201FD68[POOLIO.mdst]
+PoolRootTreeEvt...   INFO Disconnected data IO:CA9F1F63-D2CA-DD11-B339-0017F201FD68[POOLIO.dst]
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
 Number of MyVertex instances:0

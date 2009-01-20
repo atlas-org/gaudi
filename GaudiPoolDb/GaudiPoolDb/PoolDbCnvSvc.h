@@ -27,6 +27,7 @@
 class IPoolCacheSvc;
 class IDataManagerSvc;
 namespace Gaudi {
+  class IIncidentSvc;
   class IFileCatalog;
   class IIODataManager;
   class IDataConnection;
@@ -110,6 +111,11 @@ protected:
   /// Reference to the I/O data manager
   Gaudi::IIODataManager*   m_ioMgr;
 
+  /// Reference to incident service
+  IIncidentSvc*            m_incidentSvc;
+
+  /// Flag to enable incidents on FILE_OPEN
+  bool                     m_incidentEnabled;
 public:
   /// Standard constructor
   PoolDbCnvSvc(const std::string& name, ISvcLocator* svc);
@@ -295,6 +301,17 @@ public:
     */
   virtual pool::DbSelect* createSelect(const std::string& criteria,
                                        const std::string& dbName,
+                                       const std::string& cntName);
+
+  /** Request an iterator over a container from the service
+    * @param      criteria    Selection criteria to restrict iteration
+    * @param      dbH         Handle to POOL database
+    * @param      cntName     String containing the name of the 
+    *                         container object
+    * @return     Reference to the selection object
+    */
+  virtual pool::DbSelect* createSelect(const std::string& criteria,
+                                       pool::DbDatabase&  dbH,
                                        const std::string& cntName);
 
   /** Marks a reference to be written.

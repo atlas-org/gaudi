@@ -1,6 +1,15 @@
 Package GaudiExamples
 Package manager : Pere Mato
 
+================ GaudiExamples v20r4 ====================================
+! 2008-12-10 - Marco Clemencic
+ - Updated the reference files after patch #2699.
+ - Renamed the previous version of the POOLIO examples as POOLIO*FSR.
+
+! 2008-12-10 - Marcus Frank
+ - Patch #2699: First version of run records service
+   Update of POOLIO example to use RunRecords.
+
 ! 2008-12-01 - Marco Clemencic
  - Added an example with private and public tool handles in AlgTools.py.
 

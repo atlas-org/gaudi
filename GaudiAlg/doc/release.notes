@@ -1,6 +1,7 @@
 Package: GaudiAlg
 Package manager : Pere Mato
 
+================ GaudiAlg v11r3 ====================================
 ! 2008-12-01 - Marco Clemencic
  - Fixed bug #44504. Inconsistent default for createIf flag for services.
    Set the default of the flag to "true" as in IServiceLocator.

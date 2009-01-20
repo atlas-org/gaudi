@@ -307,6 +307,14 @@ MsgStream& operator<< (MsgStream& lhs, const T& arg)  {
   return lhs;
 }
 
+// /// Specialize const char* to optimize
+inline
+MsgStream& operator<< (MsgStream& lhs, const char* arg) {
+  if(lhs.isActive()) lhs.stream() << arg;
+  return lhs;
+} 
+
+
 #ifdef __GNUC__
 /// compiler is stupid. Must specialize
 template<typename T>

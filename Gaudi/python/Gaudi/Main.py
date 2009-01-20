@@ -72,4 +72,8 @@ class gaudimain(object) :
         #--- Instantiate the ApplicationMgr------------------------------
         import GaudiPython
         self.g = GaudiPython.AppMgr()
-        self.g.run(self.g.EvtMax)
+        success = self.g.run(self.g.EvtMax).isSuccess()
+        success = self.g.exit().isSuccess() and success
+        if not success:
+            return 1
+        return 0

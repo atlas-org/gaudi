@@ -1,5 +1,9 @@
 Package: GaudiGridSvc
-Package manager : Hubert Degaudenzi
+Package manager : Marco Clemencic
+
+================ GaudiGridSvc v1r8 ====================================
+! 2008-12-12 - Marco Clemencic
+ - Disabled on SLC5 (missing externals).
 
 ================ GaudiGridSvc v1r7 ====================================
 ! 2008-10-27 - Marco Clemencic

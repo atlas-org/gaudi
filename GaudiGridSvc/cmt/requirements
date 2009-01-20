@@ -3,7 +3,7 @@
 # Maintainer : Andres Felipe OSORIO OLIVEROS
 #============================================================================
 package           GaudiGridSvc
-version           v1r7
+version           v1r8
 
 #============================================================================
 # Structure, i.e. directories to process. 
@@ -54,7 +54,10 @@ apply_pattern disable_package_on platform=WIN32
 apply_pattern disable_package_on platform=osx104
 apply_pattern disable_package_on platform=osx105
 
+# The external grid libraries are not available for the following platforms
 apply_pattern disable_package_on platform=gcc43
+apply_pattern disable_package_on platform=slc5-ia32
+apply_pattern disable_package_on platform=slc5-amd64
 
 # Explicitly requested by ATLAS (patch #1611)
 apply_pattern disable_package_on platform=ATLAS

@@ -1,6 +1,24 @@
 package GaudiPolicy
 package manager: Pere Mato
 
+================ GaudiPolicy v8r7 ====================================
+! 2008-12-12 - Marco Clemencic
+ - Removed the (unused) environment variable <project>_HOME (cmt_path_pattern)
+   to avoid problems with some ATLAS project with names containing a '-'.
+
+! 2008-12-09 - Marco Clemencic
+ - Fixed a compilation problem on *-slc5-gcc34-*.
+
+! 2008-12-08 - Marco Clemencic
+ - Fixed a problem in the logic of cmpTreesDicts in GaudiTest.py.
+ - Added -ldl to the link flags of the executables. It was already present in
+   the libraries, but it is needed explicitely in the executables on SLC5
+   (problem with cppunit).   
+
+! 2008-12-05 - Marco Clemencic
+ - Updates in the standard output filter of GaudiTest.py
+ - Update of the macro 'cpp' to work on SLC5 with gcc-3.4.
+
 ! 2008-12-03 - Marco Clemencic
  - Adapted the test class to absorb a change in the standard output with the
    latest version of POOL.

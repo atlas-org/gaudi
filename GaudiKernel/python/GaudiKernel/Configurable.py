@@ -172,7 +172,7 @@ class Configurable( object ):
             #---PM: Initialize additional properties
             for n,v in kwargs.items():
                 setattr(conf, n, v)
-            if not "_enabled" in kwargs and isinstance(conf, ConfigurableUser):
+            if not cls._configurationLocked and not "_enabled" in kwargs and isinstance(conf, ConfigurableUser):
                 # Ensure that the ConfigurableUser gets enabled if nothing is
                 # specified in the constructor.
                 setattr(conf, "_enabled", True)
@@ -570,7 +570,7 @@ class Configurable( object ):
     def getValuedProperties( self ):
         props = {}
         for name, proxy in self._properties.items():
-            try:
+            if self.isPropertySet(name):
                 value = proxy.__get__( self )
                 if hasattr(value, 'getFullName') :
                     value = value.getFullName()
@@ -590,11 +590,8 @@ class Configurable( object ):
                         else:
                             new_value[i] = value[i]
                     value = new_value
-                if not hasattr(proxy,'default') or value != proxy.default :
-                    props[ name ] = value
-            except AttributeError:
-                pass
-
+                props[ name ] = value
+        
         return props
 
     def properties( self ):
@@ -650,7 +647,26 @@ class Configurable( object ):
         """Set the value of a given property
         """
         return setattr(self, name, value)
-
+    
+    def isPropertySet(self, name):
+        """Tell if the property 'name' has been set or not.
+        
+        Because of a problem with list and dictionary properties, in those cases
+        if the value is equal to the default, the property is considered as not
+        set.
+        """
+        if not hasattr(self, name):
+            return False
+        else:
+            try:
+                default = self.getDefaultProperties()[name]
+                if isinstance(default, (list, dict)):
+                    value = getattr(self, name)
+                    return value != default
+            except KeyError:
+                pass # no default found
+            return True
+    
     def getType( cls ):
         return cls.__name__
 
@@ -850,7 +866,7 @@ class Configurable( object ):
                     strDef = None
                 else:
                     # convert configurable to handle
-                    if isinstance(v,Configurable):
+                    if hasattr(v,"getGaudiHandle"):
                         vv = v.getGaudiHandle()
                     else:
                         vv = v
@@ -1096,9 +1112,12 @@ class ConfigurableUser( Configurable ):
     __slots__ = { "__users__": [],
                   "__used_instances__": [],
                   "_enabled": True }
-    # list of ConfigurableUser classes this one is going to use in the
-    # __apply_configuration__ method
+    ## list of ConfigurableUser classes this one is going to modify in the
+    #  __apply_configuration__ method
     __used_configurables__ = []
+    ## list of ConfigurableUser classes this one is going to query in the
+    #  __apply_configuration__ method
+    __queried_configurables__ = []
     def __init__( self, name = Configurable.DefaultName, _enabled = True, **kwargs ):
         super( ConfigurableUser, self ).__init__( name )
         for n, v in kwargs.items():
@@ -1113,10 +1132,29 @@ class ConfigurableUser( Configurable ):
                 inst = used(_enabled = False)
             except AttributeError:
                 inst = used()
-            if hasattr(inst, "__users__"): # allow usage of plain Configurables
-                inst.__users__.append(self)
-            self.__used_instances__.append(inst)
-        
+            self.__addActiveUseOf(inst)
+        for queried in self.__queried_configurables__:
+            try:
+                inst = queried(_enabled = False)
+            except AttributeError:
+                inst = queried()
+            self.__addPassiveUseOf(inst)
+    def __addActiveUseOf(self, other):
+        """
+        Declare that we are going to modify the Configurable 'other' in our
+        __apply_configuration__. 
+        """
+        self.__used_instances__.append(other)
+        if hasattr(other, "__users__"): # allow usage of plain Configurables
+            other.__users__.append(self)
+    def __addPassiveUseOf(self, other):
+        """
+        Declare that we are going to retrieve property values from the
+        ConfigurableUser 'other' in our __apply_configuration__. 
+        """
+        if not isinstance(other, ConfigurableUser):
+            raise Error("'%s': Cannot make passive use of '%s', it is not a ConfigurableUser" % (self.name(), other.name()))
+        other.__addActiveUseOf(self)
     def getGaudiType( self ):
         return 'User'
     def getDlls( self ):
@@ -1143,27 +1181,39 @@ class ConfigurableUser( Configurable ):
                 propagate only to it
             list of configurable instances:
                 propagate to all of them.
+        
+        
+        The logic is:
+        - if the local property is set, the other property will be overwritten
+        - local property not set and other set => keep other
+        - local property not set and other not set => overwrite the default for
+            ConfigurableUser instances and set the property for Configurables
         """
-        if not hasattr(self, name):
-            # Do not propagate if not set
-            return
-        value = getattr(self, name)
         # transform 'others' to a list of configurable instances
         if others is None:
             others = self.__used_instances__
         elif type(others) not in [ list, tuple ] :
             others = [ others ]
-        for o in others:
-            if name in o.__slots__:
-                if not force and hasattr(o,name):
-                    log.warning("%s(%r).%s already defined, ignoring %s.%s",
-                                o.__class__.__name__, o.name(), name,
-                                self.name(), name)
+        # these can be computed before the loop
+        local_is_set = self.isPropertySet(name)
+        value = self.getProp(name)
+        # loop over the others that do have 'name' in their slots
+        for other in [ o for o in others if name in o.__slots__ ]:
+            # If self property is set, use it
+            if local_is_set:
+                if other.isPropertySet(name):
+                    log.warning("Property '%(prop)s' is set in both '%(self)s' and '%(other)s', using '%(self)s.%(prop)s'"%
+                                { "self": self.name(),
+                                  "other": other.name(),
+                                  "prop": name } )
+                other.setProp(name, value)
+            # If not, and other property also not set, propagate the default
+            elif not other.isPropertySet(name):
+                if isinstance(other,ConfigurableUser):
+                    other._properties[name].setDefault(value)
                 else:
-                    log.info("%s: setting %s(%r).%s to %r",
-                             self.name(),
-                             o.__class__.__name__, o.name(), name, value)
-                    setattr(o, name, value)
+                    other.setProp(name, value)
+            # If not set and other set, do nothing
         
     def propagateProperties(self, names = None, others = None, force = True):
         """
@@ -1243,6 +1293,7 @@ def applyConfigurableUsers():
                 if enabled:
                     log.info("applying configuration of %s", c.name())
                     c.__apply_configuration__()
+                    log.info(c)
                 else:
                     log.info("skipping configuration of %s", c.name())
                 if hasattr(c, "__detach_used__"):

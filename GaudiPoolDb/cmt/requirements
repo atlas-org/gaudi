@@ -1,5 +1,5 @@
 package GaudiPoolDb
-version v4r1
+version v4r2
 
 branches  cmt doc src GaudiPoolDb options main test
 
@@ -68,6 +68,4 @@ macro_append POOL_pp_cppflags " -include ../src/poolDb_hack.h" \
            ROOT_GE_5_15&WIN32 "" \
                         WIN32 " /FI..\src\poolDb_hack.h"
 #===============================================================
-# Explicitly requested by ATLAS (patch #1611)
-apply_pattern disable_package_on platform=ATLAS
 

@@ -1,5 +1,6 @@
 <lcgdict>
 
+  <class name="Gaudi::Examples::Counter"     id="0000006D-0000-0000-0000-000000000000"/>
   <class name="Gaudi::Examples::Event"       id="0000006E-0000-0000-0000-000000000000"/>
   <class name="Gaudi::Examples::Collision"   id="0000006F-0000-0000-0000-000000000000"/>
   <class name="Gaudi::Examples::MyTrack"     id="00000163-0000-0000-0000-000000000000"/>

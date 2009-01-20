@@ -15,6 +15,8 @@
 #include "GaudiKernel/SvcFactory.h"
 #include "GaudiKernel/CnvFactory.h"
 #include "GaudiKernel/IRegistry.h"
+#include "GaudiKernel/DataIncident.h"
+#include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/IDataManagerSvc.h"
 #include "GaudiKernel/IDataProviderSvc.h"
 
@@ -92,6 +94,7 @@ PoolDbCnvSvc::PoolDbCnvSvc(CSTR nam, ISvcLocator* svc)
   declareProperty("ShareFiles",       m_shareFiles       = "NO");
   declareProperty("SafeTransactions", m_safeTransactions = false);
   declareProperty("CheckFIDs",        m_checkFIDs        = true);
+  declareProperty("EnableIncident",   m_incidentEnabled  = false);
 }
 
 /// Standard destructor
@@ -144,6 +147,12 @@ StatusCode PoolDbCnvSvc::initialize()  {
         << "Unable to localize interface from service:FileCatalog" << endreq;
     return status;
   }
+  status = service("IncidentSvc", m_incidentSvc);
+  if( !status.isSuccess() ) {
+    log << MSG::ERROR 
+        << "Unable to localize interface from service:IncidentSvc" << endreq;
+    return status;
+  }
   DbOptionCallback cb(m_cacheSvc->callbackHandler());
   if ( m_domH.open(m_cacheSvc->session(),m_type,pool::UPDATE).isSuccess() )  {
     SmartIF<IProperty> prp(m_ioMgr);
@@ -181,6 +190,7 @@ StatusCode PoolDbCnvSvc::finalize()    {
   m_domH.close();
   m_domH = 0;
   if ( m_dataMgr ) m_dataMgr->clearStore().ignore();
+  pool::releasePtr(m_incidentSvc);
   pool::releasePtr(m_dataMgr);
   pool::releasePtr(m_catalog);
   pool::releasePtr(m_cacheSvc);
@@ -344,6 +354,7 @@ PoolDbCnvSvc::connectDatabase(int typ, CSTR dataset, DbAccessMode mode, PoolDbDa
   try {
     DbOptionCallback cb(m_cacheSvc->callbackHandler());
     IDataConnection* c = m_ioMgr->connection(dataset);
+    bool fire_incident = false;
     if ( !c )  {
       DbType dbType(DbType(m_type).majorType());
       std::auto_ptr<IDataConnection> connection(new PoolDbDataConnection(this,dataset,typ,mode,m_domH));
@@ -351,8 +362,13 @@ PoolDbCnvSvc::connectDatabase(int typ, CSTR dataset, DbAccessMode mode, PoolDbDa
 	? m_ioMgr->connectRead(false,connection.get())
 	: m_ioMgr->connectWrite(connection.get(),IDataConnection::IoType(mode),dbType.storageName());
       c = sc.isSuccess() ? m_ioMgr->connection(dataset) : 0;
-      if ( c ) connection.release();
-      else     return sc;
+      if ( c )   {
+	fire_incident = m_incidentEnabled && (0 != (mode&(pool::UPDATE|pool::READ)));
+	connection.release();
+      }
+      else  {
+	return sc;
+      }
     }
     PoolDbDataConnection* pc = dynamic_cast<PoolDbDataConnection*>(c);
     if ( pc )  {
@@ -368,7 +384,41 @@ PoolDbCnvSvc::connectDatabase(int typ, CSTR dataset, DbAccessMode mode, PoolDbDa
       *con = pc;
       pc->resetAge();
     }
-    return *con ? StatusCode::SUCCESS : StatusCode::FAILURE;
+    if ( *con )  {
+      if ( fire_incident ) {
+	PoolDbAddress* pAddr = 0;
+	MsgStream log(msgSvc(), name());
+	pool::Token* token = 0, *prev = 0;
+	std::string cntName = "/RunRecords";
+	DbDatabase& dbH = pc->database();
+	if ( dbH.cntToken(cntName) )   {
+	  std::auto_ptr<pool::DbSelect> sel(createSelect("*",dbH,"/RunRecords"));
+	  if ( sel.get() ) {
+	    while(1) {
+	      if ( prev ) prev->release();
+	      prev = token;
+	      if ( prev ) prev->addRef();
+	      if ( !sel->next(token).isSuccess() ) break;
+	    }
+	  }
+	  if ( prev ) {
+	    log << MSG::INFO << "RunRecords token:" << prev->toString() << endmsg;
+	    if ( !createAddress(prev,&pAddr).isSuccess() ) {
+	      prev->release();
+	    }
+	  }
+	  else {
+	    log << MSG::INFO << "No RunRecord entries present in:" << c->fid() << endmsg;
+	  }
+	}
+	else {
+	  log << MSG::INFO << "No RunRecords present in:" << c->fid() << endmsg;
+	}
+	m_incidentSvc->fireIncident(ContextIncident<IOpaqueAddress*>(c->fid(),"FILE_OPEN_READ",pAddr));
+      }
+      return StatusCode::SUCCESS;
+    }
+    return StatusCode::FAILURE;
   }
   catch (std::exception& e)  {
     return error(std::string("connectDatabase> Caught exception:")+e.what(), false);
@@ -449,18 +499,23 @@ StatusCode PoolDbCnvSvc::disconnect(CSTR dataset)  {
 }
 
 // Request an iterator over a container from the service
-pool::DbSelect* PoolDbCnvSvc::createSelect(CSTR criteria,CSTR db,CSTR cnt) {
+pool::DbSelect* PoolDbCnvSvc::createSelect(CSTR criteria, CSTR db, CSTR cnt) {
   PoolDbDataConnection* c = 0;
   StatusCode sc = connectDatabase(UNKNOWN, db, pool::READ, &c);
   if ( sc.isSuccess() )  {
-    // Now select according to criteria
-    std::auto_ptr<pool::DbSelect> sel(new pool::DbSelect(criteria));
-    if ( sel->start(c->database(), cnt).isSuccess() )  {
-      return sel.release();          
-    }
-    return 0;
+    return createSelect(criteria,c->database(), cnt);
   }
   error("createSelect> Cannot open database:"+db, false);
+  return 0;
+}
+
+// Request an iterator over a container from the service
+pool::DbSelect* PoolDbCnvSvc::createSelect(CSTR criteria, DbDatabase& dbH, CSTR cnt) {
+  // Now select according to criteria
+  std::auto_ptr<pool::DbSelect> sel(new pool::DbSelect(criteria));
+  if ( sel->start(dbH, cnt).isSuccess() )  {
+    return sel.release();          
+  }
   return 0;
 }
 
@@ -524,7 +579,7 @@ PoolDbCnvSvc::markWrite(pool::DataCallBack* call,CSTR cntName,PoolDbAddress** pp
       	      }
               else {
                 *ppAddr = new PoolDbAddress(token.get());
-	            }
+	      }
             }
             long cnt = token->release();
             if ( cnt > 1 ) {

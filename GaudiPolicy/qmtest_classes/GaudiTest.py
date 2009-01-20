@@ -379,7 +379,7 @@ skipEmptyLines = FilePreprocessor()
 # FIXME: that's ugly
 skipEmptyLines.__processLine__ = lambda line: (line.strip() and line) or None
 
-# Preprocessors for GaudiExamples        
+# Preprocessors for GaudiExamples
 normalizeExamples = maskPointers + normalizeDate 
 for w,o,r in [
               #("TIMER.TIMER",r"[0-9]", "0"), # Normalize time output
@@ -388,6 +388,8 @@ for w,o,r in [
               ("0x########",r"\[.*/([^/]*.*)\]",r"[\1]"),
               ("^#.*file",r"file '.*[/\\]([^/\\]*)$",r"file '\1"),
               ("^JobOptionsSvc.*options successfully read in from",r"read in from .*[/\\]([^/\\]*)$",r"file \1"), # normalize path to options
+              # Normalize UUID, except those ending with all 0s (i.e. the class IDs)
+              (None,r"[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}(?!-0{12})-[0-9A-Fa-f]{12}","00000000-0000-0000-0000-000000000000")
               ]: #[ ("TIMER.TIMER","[0-9]+[0-9.]*", "") ]
     normalizeExamples += RegexpReplacer(o,r,w)
 normalizeExamples = LineSkipper(["//GP:",
@@ -401,9 +403,6 @@ normalizeExamples = LineSkipper(["//GP:",
                                  "[INFO]","[WARNING]",
                                  "DEBUG No writable file catalog found which contains FID:",
                                  "0 local", # hack for ErrorLogExample
-                                 # These two are because of unchecked StatusCodes in the dictionaries
-                                 "ROOT::Reflex::NewDelFunctionsT<StatusCode>::delete_T(void*)", # ROOT 5.18
-                                 "| local                          | libGaudiKernelDict.so",    # ROOT 5.21
                                  # This comes from ROOT, when using GaudiPython 
                                  'Note: (file "(tmpfile)", line 2) File "set" already loaded',
                                  ],regexps = [
@@ -424,7 +423,10 @@ normalizeExamples = LineSkipper(["//GP:",
                                  r"Num\s*|\s*Function\s*|\s*Source Library",
                                  r"^[-+]*\s*$",
                                  # Hide the fake error message coming from POOL/ROOT (ROOT 5.21)
-                                 r"([.\w]*)\s*ERROR Failed to modify file: \1 Errno=2 No such file or directory",
+                                 r"ERROR Failed to modify file: .* Errno=2 No such file or directory",
+                                 # Hide unckeched StatusCodes  from dictionaries
+                                 r"^ +[0-9]+ \|.*ROOT", 
+                                 r"^ +[0-9]+ \|.*\|.*Dict", 
                                  # Remove ROOT TTree summary table, which changes from one version to the other
                                  r"^\*.*\*$",
                                  # Remove Histos Summaries
@@ -621,37 +623,33 @@ def findTTreeSummaries(stdout):
 def cmpTreesDicts(reference, to_check, ignore = None):
     """
     Check that all the keys in reference are in to_check too, with the same value.
-    If the value is a dict, the function is called recursively. reference can
-    contain more keys than to_check, that will not be tested.
+    If the value is a dict, the function is called recursively. to_check can
+    contain more keys than reference, that will not be tested.
+    The function returns at the first difference found. 
     """
     fail_keys = []
+    # filter the keys in the reference dictionary
     if ignore:
         ignore_re = re.compile(ignore)
-        keys = [ key for key in to_check if not ignore_re.match(key) ]
+        keys = [ key for key in reference if not ignore_re.match(key) ]
     else:
-        keys = to_check.keys()
+        keys = reference.keys()
+    # loop over the keys (not ignored) in the reference dictionary
     for k in keys:
-        if k in reference:
-            if k in to_check:
-                if type(reference[k]) is dict:
-                    fail_keys = cmpTreesDicts(reference[k], to_check[k], ignore)
-                    tmp = fail_keys
-                else:
-                    tmp = to_check[k] != reference[k]
-            else: # handle missing keys in the dictionary to check
-                print "MARCO ======================================================"
-                print "to_check[k] = None"
-                print "to_check[%r] = None" % k
-                print "MARCO ======================================================"
-                to_check[k] = None
-                tmp = True # Means Failure
-            if tmp:
-                fail_keys.insert(0, k)
-                return fail_keys
-        else:
+        if k in to_check: # the key must be in the dictionary to_check
+            if (type(reference[k]) is dict) and (type(to_check[k]) is dict):
+                # if both reference and to_check values are dictionaries, recurse
+                failed = fail_keys = cmpTreesDicts(reference[k], to_check[k], ignore)
+            else:
+                # compare the two values
+                failed = to_check[k] != reference[k]
+        else: # handle missing keys in the dictionary to check (i.e. failure)
+            to_check[k] = None
+            failed = True
+        if failed:
             fail_keys.insert(0, k)
-            return fail_keys
-    return fail_keys
+            break # exit from the loop at the first failure
+    return fail_keys # return the list of keys bringing to the different values
 
 def getCmpFailingValues(reference, to_check, fail_path):
     c = to_check

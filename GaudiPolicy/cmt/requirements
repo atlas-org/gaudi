@@ -1,5 +1,5 @@
 package GaudiPolicy
-version v8r6
+version v8r7
 
 branches cmt doc
 
@@ -32,7 +32,7 @@ pattern install_more_includes \
 make_fragment install_more_includes -header=install_more_includes_header
 
 cmtpath_pattern \
-  macro <project>_home "<path>" 
+   macro <project>_home "<path>"
 
 cmtpath_pattern_reverse \
    macro <project>_install_include "" \
@@ -44,6 +44,15 @@ cmtpath_pattern_reverse \
 macro copyInclude "cp -Rup " \
       WIN32       "xcopy /S/Q/Y/I/D " \
       Darwin      "cp -Rp"
+
+macro ar     "$(ar)" \
+     Darwin "libtool -o"
+
+# This command is not needed on MacOSX, being replaced via the libtool
+# command (which is used instead of ar)
+macro ranlib "ranlib" \
+     Darwin "touch"
+
 
 # standard patterns ================================================================
 pattern Obj2Doth \
@@ -520,9 +529,13 @@ macro bindirname "bin" # defaults for fragments of libs and bins
 
 # Compilation and Linking flags==============================================
 
-macro  cpp           "g++" \
-       slc4&gcc323   "gcc32" \
-       Darwin        "c++"
+macro  cpp                      "g++" \
+       host-slc5&target-gcc34   "g++34" \
+       slc5&gcc34               "g++34" \
+       slc4&gcc323              "gcc32" \
+       Darwin                   "c++" \
+       WIN32                    "cl"
+macro shlibbuilder "$(cpp)"
 
 # use of the "distcc" utility
 
@@ -636,7 +649,8 @@ macro cppflags  " -fmessage-length=0 -Df2cFortran -fPIC -shared -D_GNU_SOURCE -D
 #             WIN32    " /arch:SSE2"
 
 macro_append cppflags  "" \
-             slc4-ia32 " -m32"
+             slc4-ia32 " -m32" \
+             slc5-ia32 " -m32"
 
 # FIXME: (MCl) Temporaty work-around until gccxml understands unordered_map
 macro_append cppflags "" \
@@ -650,10 +664,12 @@ macro for       "g77" \
       Darwin    "gfortran -ff2c" \
       WIN32     "f77.exe"
 macro_append fflags  "" \
-      slc4-ia32      " -m32"
+      slc4-ia32      " -m32" \
+      slc5-ia32      " -m32"
 
 macro_append shlibflags ""\
-             slc4-ia32  " -m32"
+             slc4-ia32  " -m32" \
+             slc5-ia32  " -m32"
 
 macro fflags    "-fmessage-length=0 -O2 -fdollar-ok -ff90 -w -fPIC" \
       Darwin    "-fno-automatic -fdollar-ok -w" \
@@ -670,7 +686,8 @@ macro fcomp     "$(for) -c $(fincludes) $(fdebugflags) $(fflags) $(pp_fflags)" \
 macro_append cflags " -fmessage-length=0 -fPIC " \
              WIN32    " "
 macro_append cflags  "" \
-      slc4-ia32      " -m32"	
+      slc4-ia32      " -m32" \
+      slc5-ia32      " -m32"
 
 # macro_append cflags " -msse2 -mfpmath=sse" \
 #             WIN32    " /arch:SSE2"
@@ -689,7 +706,7 @@ macro makeLinkMap     ""\
       WIN32           "/map"
 
 macro cpplinkflags "" \
-      Linux          "-Wl,-Bdynamic $(linkdebugflags) -Wl,--as-needed " \
+      Linux          "-Wl,-Bdynamic $(linkdebugflags) -ldl -Wl,--as-needed " \
       vc++6.0        "/nologo /machine:ix86 $(linkdebugflags) $(makeLinkMap) /nodefaultlib kernel32.lib user32.lib ws2_32.lib advapi32.lib shell32.lib msvcrt.lib msvcprt.lib msvcirt.lib oldnames.lib " \ 
       vc++7.0        "/nologo /machine:ix86 $(linkdebugflags) $(makeLinkMap) /nodefaultlib kernel32.lib user32.lib ws2_32.lib advapi32.lib shell32.lib msvcrt.lib msvcprt.lib oldnames.lib "  \
       vc++7.1        "/nologo /machine:ix86 $(linkdebugflags) $(makeLinkMap) /nodefaultlib kernel32.lib user32.lib ws2_32.lib advapi32.lib shell32.lib msvcrt.lib msvcprt.lib oldnames.lib "  
@@ -700,8 +717,9 @@ macro_append cpplinkflags "" \
 macro_append cpplinkflags  ""\
       Unix&static           " -ldl"
 
-macro_append cpplinkflags  ""\
-      slc4-ia32            " -m32"
+macro_append cpplinkflags  "" \
+      slc4-ia32            " -m32" \
+      slc5-ia32            " -m32"
 
 macro_append cpplinkflags "" \
       coverage " $(linkdebugflags) "
@@ -727,7 +745,8 @@ macro_append componentshr_linkopts "" \
       coverage  " $(linkdebugflags) "
 
 macro_append componentshr_linkopts "" \
-      slc4-ia32   " -m32"
+      slc4-ia32   " -m32" \
+      slc5-ia32   " -m32"
 
 macro libraryshr_linkopts   "" \
       Linux                 "-fPIC -ldl -Wl,--as-needed " \
@@ -740,7 +759,8 @@ macro_append libraryshr_linkopts   "" \
 	coverage  " $(linkdebugflags) "
 
 macro_append libraryshr_linkopts   "" \
-        slc4-ia32             " -m32"
+        slc4-ia32             " -m32" \
+        slc5-ia32             " -m32"
 
 macro application_linkopts  "" \
       Linux                 "-Wl,--export-dynamic "

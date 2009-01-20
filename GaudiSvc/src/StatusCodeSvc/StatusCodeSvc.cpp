@@ -109,6 +109,11 @@ StatusCodeSvc::finalize() {
 void
 StatusCodeSvc::regFnc(const std::string& fnc, const std::string& lib) {
 
+  if (m_state == Gaudi::StateMachine::OFFLINE || 
+      m_state == Gaudi::StateMachine::CONFIGURED) {
+    return;
+  }
+
   if (m_filter.find(fnc) != m_filter.end()) {
     return;
   }
