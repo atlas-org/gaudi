@@ -539,34 +539,35 @@ macro shlibbuilder "$(cpp)"
 
 # use of the "distcc" utility
 
-macro_prepend cpp "" \
-	distcc	"distcc "
-
-macro_prepend cc "" \
-	distcc	"distcc "
-
-macro_prepend for "" \
-	distcc	"distcc "
-
-
+# supplied by LCGCMT_56b and later
+# macro_prepend cpp "" \
+#	distcc	"distcc "
+#
+# macro_prepend cc "" \
+# 	distcc	"distcc "
+#
+# macro_prepend for "" \
+# 	distcc	"distcc "
+#
+#
 # use of the "ccache" utility with or without "distcc"
-
-set CCACHE_PREFIX "" ccache&distcc "distcc"
-
-macro_remove cpp "" \
-	ccache&distcc	"distcc "
-macro_prepend cpp "" \
-	ccache	"ccache "
-
-macro_remove cc "" \
-	ccache&distcc	"distcc "
-macro_prepend cc "" \
-	ccache	"ccache "
-
-macro_remove for "" \
-	ccache&distcc	"distcc "
-macro_prepend for "" \
-	ccache	"ccache "
+#
+# set CCACHE_PREFIX "" ccache&distcc "distcc"
+#
+# macro_remove cpp "" \
+# 	ccache&distcc	"distcc "
+# macro_prepend cpp "" \
+# 	ccache	"ccache "
+#
+# macro_remove cc "" \
+# 	ccache&distcc	"distcc "
+# macro_prepend cc "" \
+# 	ccache	"ccache "
+#
+# macro_remove for "" \
+# 	ccache&distcc	"distcc "
+# macro_prepend for "" \
+# 	ccache	"ccache "
 
 
 
