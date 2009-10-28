@@ -7,6 +7,8 @@
 #include "GaudiKernel/Service.h"
 #include "GaudiUtils/IIODataManager.h"
 
+class IIncidentSvc;
+
 /*
  *  LHCb namespace declaration
  */
@@ -21,6 +23,8 @@ namespace Gaudi  {
     *  @authot  M.Frank
     *  @version 1.0
     *  @date    20/10/2007
+    *  @author  R. Lambert
+    *  @date    03/09/2009
     */
   class IODataManager : virtual public IIODataManager, public Service  {
   protected:
@@ -41,7 +45,7 @@ namespace Gaudi  {
     std::string          m_catalogSvcName;
     /// Property: Age limit
     int                  m_ageLimit;
-    /// Property: Flag for auto gfal data acesss
+    /// Property: Flag for auto gfal data access
     bool                 m_useGFAL;
     /// Property: Flag if unaccessible files should be quarantines in job
     bool                 m_quarantine;
@@ -56,6 +60,9 @@ namespace Gaudi  {
     StatusCode reconnect(Entry* e);
     StatusCode error(CSTR msg, bool rethrow);
     StatusCode establishConnection(Connection* con);
+    
+    IIncidentSvc *m_incSvc; ///the incident service
+
   public:
 
     /** Initializing constructor

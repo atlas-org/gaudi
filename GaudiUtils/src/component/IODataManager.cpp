@@ -5,6 +5,8 @@
 #include "GaudiKernel/DeclareFactoryEntries.h"
 #include "GaudiUtils/IFileCatalog.h"
 #include "IODataManager.h"
+#include "GaudiKernel/Incident.h"
+#include "GaudiKernel/IIncidentSvc.h"
 
 #include <set>
 
@@ -52,6 +54,11 @@ StatusCode IODataManager::initialize()  {
         << m_catalogSvcName << endreq;
     return status;
   }
+  status = serviceLocator()->service("IncidentSvc", m_incSvc);
+  if( !status.isSuccess() ) {
+    log << MSG::ERROR << "Error initializing IncidentSvc!" << endreq;
+    return status;
+  }
   return status;
 }
 
@@ -60,6 +67,10 @@ StatusCode IODataManager::finalize()  {
   if ( m_catalog )  {
     m_catalog->release();
     m_catalog = 0;
+  }
+  if ( m_incSvc )  {
+    m_incSvc->release();
+    m_incSvc = 0;
   }
   return Service::finalize();
 }
@@ -218,7 +229,8 @@ StatusCode IODataManager::establishConnection(Connection* con)  {
       ConnectionMap::const_iterator i=m_connectionMap.find(con->name());
       if ( i != m_connectionMap.end() )  {
         Connection* c = (*i).second->connection;
-        if ( c != con )  {
+        if ( c != con )  { 
+          m_incSvc->fireIncident(Incident(con->name(),IncidentType::FailInputFile));
           return error("Severe logic bug: Twice identical connection object for DSN:"+con->name(),true);
         }
         if ( reconnect((*i).second).isSuccess() ) {
@@ -249,6 +261,7 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
       return connectDataIO(PFN, rw, dsn, technology, keep_open, connection);
     
     if(std::find(s_badFiles.begin(),s_badFiles.end(),dsn) != s_badFiles.end())  {
+      m_incSvc->fireIncident(Incident(dsn,IncidentType::FailInputFile));
       return IDataConnection::BAD_DATA_CONNECTION;
     }
     if ( typ == FID )  {
@@ -259,6 +272,7 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
         if ( files.size() == 0 ) {
           if ( !m_useGFAL )   {
             if ( m_quarantine ) s_badFiles.insert(dsn);
+            m_incSvc->fireIncident(Incident(dsn,IncidentType::FailInputFile));
             error("connectDataIO> failed to resolve FID:"+dsn,false);
 	    return IDataConnection::BAD_DATA_CONNECTION;
           }
@@ -270,6 +284,7 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
             if ( m_quarantine ) s_badFiles.insert(dsn);
           }
           if ( m_quarantine ) s_badFiles.insert(dsn);
+          m_incSvc->fireIncident(Incident(dsn,IncidentType::FailInputFile));
           error("connectDataIO> Failed to resolve FID:"+dsn,false);
 	  return IDataConnection::BAD_DATA_CONNECTION;
         }
@@ -277,9 +292,11 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
         m_fidMap[dsn] = m_fidMap[dataset] = m_fidMap[pfn] = dsn;
         sc = connectDataIO(PFN, rw, pfn, technology, keep_open, connection);
         if ( !sc.isSuccess() )  {
-	  if ( m_quarantine ) s_badFiles.insert(pfn);
-	  return IDataConnection::BAD_DATA_CONNECTION;
-	}
+          if ( m_quarantine ) s_badFiles.insert(pfn);
+          m_incSvc->fireIncident(Incident(pfn,IncidentType::FailInputFile));
+          return IDataConnection::BAD_DATA_CONNECTION;
+        }
+        
         return sc;
       }
       return S_ERROR;
@@ -296,6 +313,7 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
       case LFN:
         fid = m_catalog->lookupLFN(dsn);
         if ( fid.empty() )  {
+          m_incSvc->fireIncident(Incident(dsn,IncidentType::FailInputFile));
           log << MSG::ERROR << "Failed to resolve LFN:" << dsn
               << " Cannot access this dataset." << endmsg;
 	  return IDataConnection::BAD_DATA_CONNECTION;
@@ -332,6 +350,7 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
         if ( !reconnect(e).isSuccess() )   {
           delete e;
           if ( m_quarantine ) s_badFiles.insert(dsn);
+          m_incSvc->fireIncident(Incident(dsn,IncidentType::FailInputFile));
           error("connectDataIO> Cannot connect to database: PFN="+dsn+" FID="+fid,false);
 	  return IDataConnection::BAD_DATA_CONNECTION;
         }
@@ -341,7 +360,7 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
           if ( strcasecmp(dsn.c_str(),fid.c_str()) == 0 )  {
             log << MSG::ERROR << "Referring to existing dataset " << dsn
                 << " by its physical name." << endmsg;
-            log << "You may not be able to nagivate back to the input file"
+            log << "You may not be able to navigate back to the input file"
                 << " -- processing continues" << endmsg;
           }
         }
@@ -351,6 +370,7 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
       // Here we open the file!
       if ( !reconnect((*fi).second).isSuccess() )   {
         if ( m_quarantine ) s_badFiles.insert(dsn);
+        m_incSvc->fireIncident(Incident(dsn,IncidentType::FailInputFile));
         error("connectDataIO> Cannot connect to database: PFN="+dsn+" FID="+fid,false);
 	return IDataConnection::BAD_DATA_CONNECTION;
       }
@@ -370,6 +390,7 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
   }
   catch(...)  {
   }
+  m_incSvc->fireIncident(Incident(dsn,IncidentType::FailInputFile));
   error("connectDataIO> The dataset "+dsn+" cannot be opened.",false).ignore();
   s_badFiles.insert(dsn);
   return IDataConnection::BAD_DATA_CONNECTION;
