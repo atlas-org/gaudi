@@ -125,6 +125,7 @@ EventSelector::firstOfNextStream(bool shutDown, EvtSelectorContext& iter) const 
         }
       }
     }
+    if(s!=NULL) m_incidentSvc->fireIncident(Incident(s->dbName(),IncidentType::FailInputFile));
   }
 
   iter.set(this, -1, 0, 0);
@@ -230,6 +231,7 @@ StatusCode EventSelector::next(Context& refCtxt, int /* jump */ ) const  {
       if ( it && sel )    { // First exploit the current stream
         StatusCode sc = sel->next(*it);  // This stream is empty: advance to the next stream
         if ( !sc.isSuccess() )   {
+          if(s!=NULL) m_incidentSvc->fireIncident(Incident(s->dbName(),IncidentType::EndInputFile));
           sc = firstOfNextStream(true, *pIt);
           if (sc.isSuccess() ) sc = next(*pIt);
         }

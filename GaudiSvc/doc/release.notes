@@ -1,6 +1,10 @@
 Package: GaudiSvc
 Package manager : Marco Clemencic
 
+! 2009-10-28 - Charles Leggett
+  - ToolSvc: start/stop transitions
+  - THistSvc: exists( name )
+
 ================ GaudiSvc v17r3 ====================================
 ! 2008-12-11 - Charles Leggett
  - Fixed bug #45180: AuditorSvc creates duplicate auditors.

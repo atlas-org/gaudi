@@ -611,6 +611,18 @@ StatusCode ToolSvc::create(const std::string& tooltype,
     return sc;
   }
 
+  // Start the tool if we are running.
+  if (m_state == Gaudi::StateMachine::RUNNING) {
+    sc = toolguard->sysStart();
+
+    if (sc.isFailure()) {
+      MsgStream log( msgSvc(), name() );
+      log << MSG::ERROR << "Error starting tool '" << fullname << "'" << endmsg;
+      return sc;
+    }
+  }
+  
+
   // The tool has been successfully created and initialized,
   // so we the guard can be released
   tool = toolguard.release();
@@ -764,4 +776,64 @@ void ToolSvc::unRegisterObserver(IToolSvc::Observer* obs) {
   std::vector<IToolSvc::Observer*>::iterator i =
     find(m_observers.begin(),m_observers.end(),obs);
   if (i!=m_observers.end()) m_observers.erase(i);
+}
+
+//------------------------------------------------------------------------------
+StatusCode
+ToolSvc::start()
+//------------------------------------------------------------------------------
+{
+
+  MsgStream log( msgSvc(), name() );
+  log << MSG::DEBUG << "START transition for AlgTools" << endmsg;
+
+  bool fail(false);
+  for ( ListTools::const_iterator iTool = m_instancesTools.begin();
+	iTool != m_instancesTools.end(); ++iTool ) {
+    log << MSG::VERBOSE << (*iTool)->name() << "::start()" << endmsg;
+    
+    if (!(*iTool)->sysStart().isSuccess()) {
+      fail = true;
+      log << MSG::ERROR << (*iTool)->name() << " failed to start()" << endmsg;
+    }
+    
+  }
+
+  if (fail) {
+    log << MSG::ERROR << "One or more AlgTools failed to start()" << endmsg;
+    return StatusCode::FAILURE;
+  } else {
+    return StatusCode::SUCCESS;
+  }
+
+}
+
+//------------------------------------------------------------------------------
+StatusCode
+ToolSvc::stop()
+//------------------------------------------------------------------------------
+{
+
+  MsgStream log( msgSvc(), name() );
+  log << MSG::DEBUG << "STOP transition for AlgTools" << endmsg;
+
+  bool fail(false);
+  for ( ListTools::const_iterator iTool = m_instancesTools.begin();
+	iTool != m_instancesTools.end(); ++iTool ) {
+    log << MSG::VERBOSE << (*iTool)->name() << "::start()" << endmsg;
+
+    if (!(*iTool)->sysStop().isSuccess()) {
+      fail = true;
+      log << MSG::ERROR << (*iTool)->name() << " failed to stop()" << endmsg;
+    }
+
+  }
+
+  if (fail) {
+    log << MSG::ERROR << "One or more AlgTools failed to stop()" << endmsg;
+    return StatusCode::FAILURE;
+  } else {
+    return StatusCode::SUCCESS;
+  }
+
 }

@@ -33,6 +33,12 @@ public:
   /// Finalize the service.
   virtual StatusCode finalize();
   
+  // Start transition for tools
+  virtual StatusCode start();
+  
+  // Stop transition for tools
+  virtual StatusCode stop();
+
   /// Query the interfaces.
   virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface );
     

@@ -1160,7 +1160,7 @@ THistSvc::connect(const std::string& ident) {
     static int ishared = 0;
     stringstream out;
     string realfilename=filename;
-    out << ishared;
+    out << ishared++;
     filename = string("tmp_THistSvc_")+out.str()+string(".root");
     
     log << MSG::DEBUG << "Creating temp file \"" << filename
@@ -1371,3 +1371,13 @@ void THistSvc::MergeRootFile(TDirectory *target, TDirectory *source) {
 }
 
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *//
+
+bool
+THistSvc::exists( const std::string& name ) const {
+
+  TH1* h;
+
+  return getHist_i(name,h,true).isSuccess();
+
+
+}

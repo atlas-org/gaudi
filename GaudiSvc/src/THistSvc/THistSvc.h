@@ -64,6 +64,7 @@ public:
   virtual StatusCode getTTrees(TDirectory *td, TList &) const;
   virtual StatusCode getTTrees(const std::string& name, TList &) const;
 
+  virtual bool exists(const std::string& name) const;
 
   THistSvc(const std::string& name, ISvcLocator *svc );
 
@@ -118,7 +119,7 @@ private:
   template <typename T>
   StatusCode regHist_i(T* hist, const std::string& name);
   template <typename T>
-  StatusCode getHist_i(const std::string& name, T*& hist) const;
+  StatusCode getHist_i(const std::string& name, T*& hist, bool quiet=false) const;
   template <typename T>
   StatusCode readHist_i(const std::string& name, T*& hist) const;
 
