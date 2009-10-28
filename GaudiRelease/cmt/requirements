@@ -3,11 +3,11 @@
 
 package GaudiRelease
 
-version v20r4
+version v20r4p6
 branches doc cmt 
 
 # CMT and Gaudi policy
-use GaudiPolicy	   v8r7
+use GaudiPolicy	   v10r1
 
 # Note for conditional use statements: only the tags which are defined
 # at the level of CMT (and CMTSITE) can be used. This means that
@@ -47,7 +47,7 @@ use GaudiExamples   v20r4
 
 
 # Atlas packages
-use PartPropSvc      v2r7
+use PartPropSvc      v3r1
 
 #LHCb external packages
 macro COOL_use "" LHCb "COOL v* LCG_Interfaces"
