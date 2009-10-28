@@ -683,8 +683,11 @@ StatusCode Algorithm::sysFinalize() {
     // Order changed (bug #3903 overview: finalize and nested algorithms)
     // Finalize first any sub-algoithms (it can be done more than once)
     std::vector<Algorithm *>::iterator it;
+    bool fail(false);
     for (it = m_subAlgms->begin(); it != m_subAlgms->end(); it++) {
-      (*it)->sysFinalize().ignore();
+      if (!(*it)->sysFinalize().isSuccess()) {
+	fail = true;
+      }
     }
 
     { // limit the scope of the guard
@@ -695,7 +698,7 @@ StatusCode Algorithm::sysFinalize() {
       // Invoke the finalize() method of the derived class
       sc = finalize();
     }
-    if( !sc.isSuccess() )  return StatusCode::FAILURE;
+    if( !sc.isSuccess() || fail )  return StatusCode::FAILURE;
 
     // Release all sub-algorithms
     for (it = m_subAlgms->begin(); it != m_subAlgms->end(); it++) {

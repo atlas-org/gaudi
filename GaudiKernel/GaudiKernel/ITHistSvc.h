@@ -54,6 +54,8 @@ public:
   virtual StatusCode regGraph(const std::string& name, TGraph*) = 0;
   virtual StatusCode getGraph(const std::string& name, TGraph*&) const = 0;
 
+  virtual bool exists(const std::string& name) const = 0;
+
 };
 
 inline

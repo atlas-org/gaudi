@@ -160,14 +160,20 @@ void Property::useReadHandler   () const
 // ============================================================================
 // use the call-back function at update
 // ============================================================================
-void Property::useUpdateHandler () 
+bool Property::useUpdateHandler () 
 {
-  if ( 0 == m_updateCallBack ) { return ; }              // RETURN
+  bool sc(true);
+  if ( 0 == m_updateCallBack ) { return sc; }  // RETURN
   PropertyCallbackFunctor* theCallBack = m_updateCallBack;
   // avoid infinite loop
   m_updateCallBack = 0;
-  (*theCallBack)( *this ) ;
+  try {
+    (*theCallBack)( *this ) ;
+  } catch(...) {
+    sc = false;
+  }    
   m_updateCallBack = theCallBack;
+  return sc;
 } 
 // ============================================================================
 // the printout of the property value
@@ -243,8 +249,7 @@ GaudiHandleProperty::GaudiHandleProperty
 
 bool GaudiHandleProperty::setValue( const GaudiHandleBase& value ) {
   m_pValue->setTypeAndName( value.typeAndName() );
-  useUpdateHandler();
-  return true;
+  return useUpdateHandler();
 }
 
 std::string GaudiHandleProperty::toString( ) const {
@@ -254,8 +259,7 @@ std::string GaudiHandleProperty::toString( ) const {
 
 StatusCode GaudiHandleProperty::fromString( const std::string& s) { 
   m_pValue->setTypeAndName( s );
-  useUpdateHandler();
-  return StatusCode::SUCCESS; 
+  return useUpdateHandler()?StatusCode::SUCCESS:StatusCode::FAILURE;
 }
 
 
@@ -270,8 +274,7 @@ GaudiHandleArrayProperty::GaudiHandleArrayProperty( const std::string& name, Gau
 
 bool GaudiHandleArrayProperty::setValue( const GaudiHandleArrayBase& value ) {
   m_pValue->setTypesAndNames( value.typesAndNames() );
-  useUpdateHandler();
-  return true;
+  return useUpdateHandler();
 }
 
 std::string GaudiHandleArrayProperty::toString() const {
@@ -286,8 +289,7 @@ StatusCode GaudiHandleArrayProperty::fromString( const std::string& source ) {
   StatusCode sc = Gaudi::Parsers::parse ( tmp , source );
   if ( sc.isFailure() ) return sc;
   if ( !m_pValue->setTypesAndNames( tmp ) ) return StatusCode::FAILURE;
-  useUpdateHandler();
-  return StatusCode::SUCCESS;
+  return useUpdateHandler()?StatusCode::SUCCESS:StatusCode::FAILURE;
 }
 
 

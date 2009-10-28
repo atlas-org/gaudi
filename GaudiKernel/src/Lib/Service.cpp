@@ -60,7 +60,7 @@ StatusCode Service::queryInterface
 
 // IService::sysInitialize
 StatusCode Service::sysInitialize() {
-  StatusCode sc;
+  StatusCode sc(StatusCode::FAILURE);
 
   try {
     m_targetState = Gaudi::StateMachine::INITIALIZED;
@@ -71,7 +71,6 @@ StatusCode Service::sysInitialize() {
     sc = initialize(); // This should change the state to Gaudi::StateMachine::CONFIGURED
     if (sc.isSuccess())
       m_state = m_targetState;
-    return sc;
   }
   catch ( const GaudiException& Exception )  {
     MsgStream log ( msgSvc() , name() );
@@ -92,7 +91,7 @@ StatusCode Service::sysInitialize() {
     //	  Stat stat( chronoSvc() , "*UNKNOWN Exception*" ) ;
   }
 
-  return StatusCode::FAILURE;
+  return sc;
 }
 
 
@@ -110,7 +109,7 @@ StatusCode Service::initialize() {
 
 // IService::sysStart
 StatusCode Service::sysStart() {
-  StatusCode sc;
+  StatusCode sc(StatusCode::FAILURE);
 
   try {
     m_targetState = Gaudi::StateMachine::ChangeState(Gaudi::StateMachine::START,m_state);
@@ -121,7 +120,6 @@ StatusCode Service::sysStart() {
     sc = start();
     if (sc.isSuccess())
       m_state = m_targetState;
-    return sc;
   }
   catch ( const GaudiException& Exception )  {
     MsgStream log ( msgSvc() , name() );
@@ -142,12 +140,12 @@ StatusCode Service::sysStart() {
     //    Stat stat( chronoSvc() , "*UNKNOWN Exception*" ) ;
   }
 
-  return StatusCode::FAILURE;
+  return sc;
 }
 
 // IService::sysStop
 StatusCode Service::sysStop() {
-  StatusCode sc;
+  StatusCode sc(StatusCode::FAILURE);
 
   try {
     m_targetState = Gaudi::StateMachine::ChangeState(Gaudi::StateMachine::STOP,m_state);
@@ -158,7 +156,6 @@ StatusCode Service::sysStop() {
     sc = stop();
     if (sc.isSuccess())
       m_state = m_targetState;
-    return sc;
   }
   catch ( const GaudiException& Exception )  {
     MsgStream log ( msgSvc() , name() );
@@ -179,7 +176,7 @@ StatusCode Service::sysStop() {
     //    Stat stat( chronoSvc() , "*UNKNOWN Exception*" ) ;
   }
 
-  return StatusCode::FAILURE;
+  return sc;
 }
 
 
@@ -252,7 +249,7 @@ StatusCode Service::finalize() {
 //--- IService::sysReinitialize
 StatusCode Service::sysReinitialize() {
 
-  StatusCode sc;
+  StatusCode sc(StatusCode::FAILURE);
 
   // Check that the current status is the correct one.
   if ( Gaudi::StateMachine::INITIALIZED != FSMState() ) {
@@ -260,7 +257,7 @@ StatusCode Service::sysReinitialize() {
     log << MSG::ERROR
         << "sysReinitialize(): cannot reinitialize service not initialized"
         << endreq;
-    return StatusCode::FAILURE;
+    return sc;
   }
 
   try {
@@ -270,7 +267,6 @@ StatusCode Service::sysReinitialize() {
                                       (m_auditorReinitialize) ? auditorSvc() : 0,
                                       IAuditor::ReInitialize);
     sc = reinitialize();
-    return sc;
   }
   catch( const GaudiException& Exception ) {
     MsgStream log ( msgSvc() , name() + ".sysReinitialize()" );
@@ -290,14 +286,14 @@ StatusCode Service::sysReinitialize() {
     log << MSG::FATAL << "UNKNOWN Exception is caught " << endreq;
     //    Stat stat( chronoSvc() , "*UNKNOWN Exception*" ) ;
   }
-  return StatusCode::FAILURE ;
+  return sc;
 
 }
 
 //--- IService::sysRestart
 StatusCode Service::sysRestart() {
 
-  StatusCode sc;
+  StatusCode sc(StatusCode::FAILURE);
 
   // Check that the current status is the correct one.
   if ( Gaudi::StateMachine::RUNNING != FSMState() ) {
@@ -306,7 +302,7 @@ StatusCode Service::sysRestart() {
         << "sysRestart(): cannot restart service in state " << FSMState()
         << " -- must be RUNNING "
         << endreq;
-    return StatusCode::FAILURE;
+    return sc;
   }
 
   try {
@@ -316,7 +312,6 @@ StatusCode Service::sysRestart() {
                                       (m_auditorRestart) ? auditorSvc() : 0,
                                       IAuditor::ReStart);
     sc = restart();
-    return sc;
   }
   catch( const GaudiException& Exception ) {
     MsgStream log ( msgSvc() , name() + ".sysRestart()" );
@@ -336,7 +331,7 @@ StatusCode Service::sysRestart() {
     log << MSG::FATAL << "UNKNOWN Exception is caught " << endreq;
     //    Stat stat( chronoSvc() , "*UNKNOWN Exception*" ) ;
   }
-  return StatusCode::FAILURE ;
+  return sc;
 
 }
 
@@ -357,7 +352,6 @@ StatusCode Service::reinitialize() {
   if (sc.isFailure()) {
     MsgStream log ( msgSvc() , name() );
     log << MSG::ERROR << "reinitialize(): cannot be initialized" << endreq;
-    return sc;
   }
   */
   return StatusCode::SUCCESS;
@@ -376,9 +370,8 @@ StatusCode Service::restart() {
   if (sc.isFailure()) {
     MsgStream log ( msgSvc() , name() );
     log << MSG::ERROR << "restart(): cannot be started" << endreq;
-    return sc;
   }
-  return StatusCode::SUCCESS;
+  return sc;
 }
 
 //--- IService::getServiceName

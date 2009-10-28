@@ -29,6 +29,9 @@ public:
   /// Retrieve interface ID
   static const InterfaceID& interfaceID() { return IID_IAlgTool; }
 
+  /// Virtual destructor.
+  virtual ~IAlgTool(){}
+
   /// The type of an AlgTool, meaning the concrete AlgTool class.
   virtual const std::string&  type() const = 0;
 

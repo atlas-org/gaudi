@@ -6,8 +6,8 @@
 //
 //
 //	Author     : M.Frank
-//  Created    : 4/10/00
-//	Changes    : 
+//      Created    : 4/10/00
+//	Changes    : R. Lambert 2009-09-04
 //
 //====================================================================
 #define GAUDISVC_EVENTSELECTOR_EVENTSELECTORDATASTREAM_CPP 1
@@ -126,7 +126,7 @@ StatusCode EventSelectorDataStream::initialize()   {
     cnt = eds->rootName();
   }
   eds->release();
-  m_selectorType = m_criteria = "";
+  m_selectorType = m_criteria = m_dbName= "";
   m_properties->erase(m_properties->begin(), m_properties->end());
 
   tok.analyse(m_definition, " ", "", "", "=", "'", "'");
@@ -154,12 +154,14 @@ StatusCode EventSelectorDataStream::initialize()   {
       break;
     case 'D':
       m_criteria     = "FILE " + val;
+      m_dbName=val;
       break;
     case 'F':
       switch( ::toupper(tag[1]) )    {
       case 'I':
         dbtyp        = "SICB";
         m_criteria   = "FILE " + val;
+	m_dbName=val;
         break;
       case 'U':
         stmt = val;
@@ -170,6 +172,7 @@ StatusCode EventSelectorDataStream::initialize()   {
       break;
     case 'J':
       m_criteria     = "JOBID " + val;
+      m_dbName=val;
       dbtyp          = "SICB";
       break;
     case 'T':
@@ -179,6 +182,7 @@ StatusCode EventSelectorDataStream::initialize()   {
         break;
       case 'A':
         m_criteria   = "TAPE " + val;
+	m_dbName=val;
         dbtyp        = "SICB";
         break;
       default:
@@ -202,7 +206,7 @@ StatusCode EventSelectorDataStream::initialize()   {
       break;
     }
   }
-  if ( !isData )    { // Unfortunaltely options do not come in order...
+  if ( !isData )    { // Unfortunately options do not come in order...
     m_selectorType = "EventCollectionSelector";
   }
   else if ( dbtyp == "SICB" )    {
@@ -226,7 +230,7 @@ StatusCode EventSelectorDataStream::initialize()   {
       status = ipers->getService(dbtyp, icnvSvc);
       if ( status.isSuccess() )   {
         IService* isvc = 0;
-        status = icnvSvc->queryInterface(IID_IService, pp_cast<void>(&isvc));
+        status = icnvSvc->queryInterface(IService::interfaceID(), pp_cast<void>(&isvc));
         if ( status.isSuccess() )   {
           svc = isvc->name();
           isvc->release();

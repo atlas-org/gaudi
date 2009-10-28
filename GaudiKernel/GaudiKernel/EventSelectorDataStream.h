@@ -5,7 +5,8 @@
 //	Package    : EventSelectorDataStream  (LHCb Event Selector Package)
 //
 //	Author     : M.Frank
-//  Created    : 4/10/00
+//      Created    : 4/10/00
+//	Changes    : R. Lambert 2009-09-04
 //
 //====================================================================
 #ifndef GAUDIKERNEL_EVENTSELECTORDATASTREAM_H
@@ -26,16 +27,19 @@ class EventSelectorDataStream;
 
 /** Definition of class EventSelectorDataStream
 
-    Small class which eases the management of multiple 
+    Small class which eases the management of multiple
     input streams for the event selector.
 
     History:
-    +---------+----------------------------------------------+---------+
-    |    Date |                 Comment                      | Who     |
-    +---------+----------------------------------------------+---------+
-    | 3/10/00 | Initial version                              | M.Frank |
-    +---------+----------------------------------------------+---------+
+    +---------+----------------------------------------------+------------+
+    |    Date |                 Comment                      |    Who     |
+    +---------+----------------------------------------------+------------+
+    | 3/10/00 | Initial version                              | M.Frank    |
+    +---------+----------------------------------------------+------------+
+    | 4/09/09 | Added m_dbName and dbName()                  | R. Lambert |
+    +---------+----------------------------------------------+------------+
    @author Markus Frank
+   @author R. Lambert
    @version 1.0
 */
 class EventSelectorDataStream : virtual public IInterface   {
@@ -54,6 +58,8 @@ protected:
   std::string             m_definition;
   /// Criteria
   std::string             m_criteria;
+  /// String with name of the db as parsed
+  std::string             m_dbName;
   /// Event selector type
   std::string             m_selectorType;
   /// Pointer to valid selector
@@ -100,6 +106,10 @@ public:
   const std::string& criteria()   const   {
     return m_criteria;
   }
+  /// Retrieve stream dbName
+  const std::string& dbName()   const   {
+    return m_dbName;
+  }
   /// Retrieve event selector type
   const std::string& selectorType()   const   {
     return m_selectorType;
@@ -112,7 +122,7 @@ public:
   IEvtSelector* selector()  const  {
     return m_pSelector;
   }
-  /// Check initialisation status
+  /// Check initialization status
   bool isInitialized()  const   {
     return m_initialized;
   }

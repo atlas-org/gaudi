@@ -94,6 +94,7 @@ public:
 
   /// destructor (perform the deletion of "previous" field!) 
   virtual ~GaudiException() throw() {
+    m_code.setChecked();
     if( 0 != m_previous ) { delete m_previous ; m_previous = 0 ; }
   } 
   

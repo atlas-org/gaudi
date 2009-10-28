@@ -81,7 +81,7 @@ public:
   /// use the call-back function at reading
   virtual void useReadHandler   () const ;
   /// use the call-back function at update
-  virtual void useUpdateHandler ()       ;
+  virtual bool useUpdateHandler ()       ;
 public:
   /// virtual destructor
   virtual ~Property() ;
@@ -406,8 +406,7 @@ PropertyWithVerifier<TYPE,VERIFIER>::set( const TYPE& value )
   /// update the value
   i_set( value ) ;
   /// invoke the update handler
-  this->useUpdateHandler() ;
-  return true ;
+  return this->useUpdateHandler() ;
 }
 // ============================================================================
 /// assignement

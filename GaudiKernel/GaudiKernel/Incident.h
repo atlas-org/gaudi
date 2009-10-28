@@ -61,6 +61,21 @@ namespace IncidentType
   const std::string EndStream  = "EndStream";  ///< Processing of the stream has finished
 
   const std::string AbortEvent = "AbortEvent"; ///< Stop processing the current event and pass to te next one
+  
+  //Added by R. Lambert 2009-09-03, for summary services
+  //define a preprocessor macro to allow backward-compatibility
+#define GAUDI_FILE_INCIDENTS
+
+  const std::string BeginOutputFile = "BeginOutputFile"; ///< a new output file has been created
+  const std::string FailOutputFile = "FailOutputFile"; ///< could not create or write to this file
+  const std::string WroteToOutputFile = "WroteToOutputFile"; ///< the output file was written to in this event
+  const std::string EndOutputFile   = "EndOutputFile";   ///< an output file has been finished
+  
+  const std::string BeginInputFile = "BeginInputFile"; ///< a new input file has been started
+  const std::string FailInputFile = "FailInputFile"; ///< could not open or read from this file
+  const std::string EndInputFile   = "EndInputFile";   ///< an input file has been finished
+  
+
 }
 
 #endif //GAUDI_INCIDENT_H

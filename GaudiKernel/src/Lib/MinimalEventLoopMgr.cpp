@@ -326,11 +326,13 @@ StatusCode MinimalEventLoopMgr::restart() {
 StatusCode MinimalEventLoopMgr::finalize()    {
   MsgStream log( msgSvc(), name() );
   StatusCode sc = StatusCode::SUCCESS;
+  StatusCode scRet = StatusCode::SUCCESS;
   // Call the finalize() method of all top algorithms
   ListAlg::iterator ita;
   for ( ita = m_topAlgList.begin(); ita != m_topAlgList.end(); ita++ ) {
     sc = (*ita)->sysFinalize();
     if( !sc.isSuccess() ) {
+      scRet = StatusCode::FAILURE;
       log << MSG::WARNING << "Finalization of algorithm " << (*ita)->name() << " failed" << endreq;
     }
   }
@@ -338,6 +340,7 @@ StatusCode MinimalEventLoopMgr::finalize()    {
   for ( ita = m_outStreamList.begin(); ita != m_outStreamList.end(); ita++ ) {
     sc = (*ita)->sysFinalize();
     if( !sc.isSuccess() ) {
+      scRet = StatusCode::FAILURE;
       log << MSG::WARNING << "Finalization of algorithm " << (*ita)->name() << " failed" << endreq;
     }
   }
@@ -345,6 +348,7 @@ StatusCode MinimalEventLoopMgr::finalize()    {
   SmartIF<IAlgManager> algMan(IID_IAlgManager, serviceLocator());
   for ( ita = m_topAlgList.begin(); ita != m_topAlgList.end(); ita++ ) {
     if (algMan->removeAlgorithm(*ita).isFailure()) {
+      scRet = StatusCode::FAILURE;
       log << MSG::ERROR << "Problems removing Algorithm " << (*ita)->name()
 	  << endreq;
     }
@@ -365,7 +369,16 @@ StatusCode MinimalEventLoopMgr::finalize()    {
   m_incidentSvc = releaseInterface(m_incidentSvc);
   m_appMgrUI = releaseInterface(m_appMgrUI);
   
-  return Service::finalize();
+  sc = Service::finalize();
+  
+  if (sc.isFailure()) {
+    log << MSG::ERROR << "Problems finalizing Service base class" 
+	<< endreq;
+    scRet = StatusCode::FAILURE;
+  }
+
+  return scRet;
+
 }
 
 //--------------------------------------------------------------------------------------------
