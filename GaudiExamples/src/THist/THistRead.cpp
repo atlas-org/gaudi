@@ -43,6 +43,13 @@ StatusCode THistRead::initialize()
   }
 
   // stream read1, 1D in "/xxx"
+
+  if (! m_ths->exists("/read1/xxx/1Dgauss")) {
+    log << MSG::INFO << "1Dgauss doesn't exist yet, which is OK" << endreq;
+  } else {
+    log << MSG::ERROR << "1Dgauss shouldn't exist yet!!" << endreq;
+  }
+
   TH1 *h1(0);
   if (m_ths->regHist("/read1/xxx/1Dgauss").isFailure() || 
       m_ths->getHist("/read1/xxx/1Dgauss",h1).isFailure()) {
@@ -50,6 +57,12 @@ StatusCode THistRead::initialize()
   } else {
     log << MSG::INFO << h1->GetName() << ": " << h1->GetEntries()
 	<< endreq;
+  }
+
+  if (m_ths->exists("/read1/xxx/1Dgauss")) {
+    log << MSG::INFO << "1Dgauss now exists." << endreq;
+  } else {
+    log << MSG::ERROR << "1Dgauss should exist but doesn't!!" << endreq;
   }
 
   
