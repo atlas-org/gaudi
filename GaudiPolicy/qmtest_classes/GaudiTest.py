@@ -1,25 +1,6 @@
 ########################################################################
-# File:   CoolTestExtensions.py
+# File:   GaudiTest.py
 # Author: Marco Clemencic CERN/PH-LBC
-# Date:   16/10/2007  
-#
-# Contents:
-#   TemporaryEnvironment: class to change the environment and revert to
-#                         the original one
-#
-#   DBPreparer: handle the details for temporary test databases
-#
-#   StandardTest: extension to ShellCommandTest that finds Python
-#                 scripts in the PATH ad run them through the
-#                 interpreter
-#
-#   DatabaseTest: run a test that needs a database
-#
-#   SourceTargetTest: run a test that needs 2 databases
-#                     (source and target)
-#
-# Copyright (c) 2003 by CodeSourcery, LLC.  All rights reserved.
-#
 ########################################################################
 __author__  = 'Marco Clemencic CERN/PH-LBC' 
 __version__ = "$Revision: 1.52 $" 
@@ -38,6 +19,27 @@ from subprocess import Popen, PIPE, STDOUT
 
 import qm
 from qm.test.classes.command import ExecTestBase
+
+### Needed by the re-implementation of TimeoutExecutable
+import qm.executable
+import time, signal
+# The classes in this module are implemented differently depending on
+# the operating system in use.
+if sys.platform == "win32":
+    import msvcrt
+    import pywintypes
+    from   threading import *
+    import win32api
+    import win32con
+    import win32event
+    import win32file
+    import win32pipe
+    import win32process
+else:
+    import cPickle
+    import fcntl
+    import select
+    import qm.sigmask
 
 ########################################################################
 # Utility Classes
@@ -350,6 +352,22 @@ class LineSkipper(FilePreprocessor):
             if r.search(line): return None
         return line
 
+class BlockSkipper(FilePreprocessor):
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+        self._skipping = False
+        
+    def __processLine__(self, line):
+        if self.start in line:
+            self._skipping = True
+            return None
+        elif self.end in line:
+            self._skipping = False
+        elif self._skipping:
+            return None
+        return line
+
 class RegexpReplacer(FilePreprocessor):
     def __init__(self, orig, repl = "", when = None):
         if when:
@@ -379,6 +397,21 @@ skipEmptyLines = FilePreprocessor()
 # FIXME: that's ugly
 skipEmptyLines.__processLine__ = lambda line: (line.strip() and line) or None
 
+## Special preprocessor sorting the list of strings (whitespace separated)
+#  that follow a signature on a single line
+class LineSorter(FilePreprocessor):
+    def __init__(self, signature):
+        self.signature = signature
+        self.siglen = len(signature)
+    def __processLine__(self, line):
+        pos = line.find(self.signature)
+        if pos >=0:
+            line = line[:(pos+self.siglen)]
+            lst = line[(pos+self.siglen):].split()
+            lst.sort()
+            line += " ".join(lst)
+        return line
+
 # Preprocessors for GaudiExamples
 normalizeExamples = maskPointers + normalizeDate 
 for w,o,r in [
@@ -389,7 +422,9 @@ for w,o,r in [
               ("^#.*file",r"file '.*[/\\]([^/\\]*)$",r"file '\1"),
               ("^JobOptionsSvc.*options successfully read in from",r"read in from .*[/\\]([^/\\]*)$",r"file \1"), # normalize path to options
               # Normalize UUID, except those ending with all 0s (i.e. the class IDs)
-              (None,r"[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}(?!-0{12})-[0-9A-Fa-f]{12}","00000000-0000-0000-0000-000000000000")
+              (None,r"[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}(?!-0{12})-[0-9A-Fa-f]{12}","00000000-0000-0000-0000-000000000000"),
+              # Absorb a change in ServiceLocatorHelper
+              ("ServiceLocatorHelper::", "ServiceLocatorHelper::(create|locate)Service", "ServiceLocatorHelper::service")
               ]: #[ ("TIMER.TIMER","[0-9]+[0-9.]*", "") ]
     normalizeExamples += RegexpReplacer(o,r,w)
 normalizeExamples = LineSkipper(["//GP:",
@@ -403,6 +438,7 @@ normalizeExamples = LineSkipper(["//GP:",
                                  "[INFO]","[WARNING]",
                                  "DEBUG No writable file catalog found which contains FID:",
                                  "0 local", # hack for ErrorLogExample
+                                 "DEBUG Service base class initialized successfully", # changed between v20 and v21 
                                  # This comes from ROOT, when using GaudiPython 
                                  'Note: (file "(tmpfile)", line 2) File "set" already loaded',
                                  ],regexps = [
@@ -434,7 +470,8 @@ normalizeExamples = LineSkipper(["//GP:",
                                  r"^ \|",
                                  r"^ ID=",
                                  ] ) + normalizeExamples + skipEmptyLines + \
-                                  normalizeEOL
+                                  normalizeEOL + \
+                                  LineSorter("Services to release : ")
 
 class ReferenceFileValidator:
     def __init__(self, reffile, cause, result_key, preproc = normalizeExamples):
@@ -662,7 +699,7 @@ def getCmpFailingValues(reference, to_check, fail_path):
     return (fail_path, r, c)
 
 # signature of the print-out of the histograms
-h_count_re = re.compile(r"SUCCESS\s+Booked (\d+) Histogram\(s\) :\s+(.*)")
+h_count_re = re.compile(r"^(.*)SUCCESS\s+Booked (\d+) Histogram\(s\) :\s+(.*)")
 
 def parseHistosSummary(lines, pos):
     """
@@ -677,11 +714,13 @@ def parseHistosSummary(lines, pos):
     
     # decode header
     m = h_count_re.search(lines[pos])
-    total = int(m.group(1))
-    partials = {}
-    for k, v in [ x.split("=") for x in  m.group(2).split() ]:
-        partials[k] = int(v)
+    name = m.group(1).strip()
+    total = int(m.group(2))
+    header = {}
+    for k, v in [ x.split("=") for x in  m.group(3).split() ]:
+        header[k] = int(v)
     pos += 1
+    header["Total"] = total
     
     summ = {}
     while pos < nlines:
@@ -717,10 +756,12 @@ def parseHistosSummary(lines, pos):
             if not d in summ:
                 summ[d] = {}
             summ[d][t] = cont
-            summ[d]["header"] = partials
-            summ[d]["header"]["Total"] = total
+            summ[d]["header"] = header
         else:
             break
+    if not summ:
+        # If the full table is not present, we use only the header
+        summ[name] = {"header": header}
     return summ, pos
 
 def findHistosSummaries(stdout):
@@ -744,7 +785,164 @@ def findHistosSummaries(stdout):
             summ, pos = parseHistosSummary(outlines, pos)
         summaries.update(summ)
     return summaries
+
+class GaudiFilterExecutable(qm.executable.Filter):
+    def __init__(self, input, timeout = -1):
+        """Create a new 'Filter'.
+
+        'input' -- The string containing the input to provide to the
+        child process.
+
+        'timeout' -- As for 'TimeoutExecutable.__init__'."""
+
+        super(GaudiFilterExecutable, self).__init__(input, timeout)
+        self.__input = input
+        self.__timeout = timeout
+        self.stack_trace_file = None
+        # Temporary file to pass the stack trace from one process to the other
+        # The file must be closed and reopened when needed to avoid conflicts
+        # between the processes
+        tmpf = tempfile.mkstemp()
+        os.close(tmpf[0])
+        self.stack_trace_file = tmpf[1] # remember only the name
     
+    def __UseSeparateProcessGroupForChild(self):
+        """Copied from TimeoutExecutable to allow the re-implementation of
+           _HandleChild.
+        """
+        if sys.platform == "win32":
+            # In Windows 2000 (or later), we should use "jobs" by
+            # analogy with UNIX process groups.  However, that
+            # functionality is not (yet) provided by the Python Win32
+            # extensions.
+            return 0
+        
+        return self.__timeout >= 0 or self.__timeout == -2
+    ##
+    # Needs to replace the ones from RedirectedExecutable and TimeoutExecutable
+    def _HandleChild(self):
+        """Code copied from both FilterExecutable and TimeoutExecutable.
+        """
+        # Close the pipe ends that we do not need.
+        if self._stdin_pipe:
+            self._ClosePipeEnd(self._stdin_pipe[0])
+        if self._stdout_pipe:
+            self._ClosePipeEnd(self._stdout_pipe[1])
+        if self._stderr_pipe:
+            self._ClosePipeEnd(self._stderr_pipe[1])
+
+        # The pipes created by 'RedirectedExecutable' must be closed
+        # before the monitor process (created by 'TimeoutExecutable')
+        # is created.  Otherwise, if the child process dies, 'select'
+        # in the parent will not return if the monitor process may
+        # still have one of the file descriptors open.
+        
+        super(qm.executable.TimeoutExecutable, self)._HandleChild()
+        
+        if self.__UseSeparateProcessGroupForChild():
+            # Put the child into its own process group.  This step is
+            # performed in both the parent and the child; therefore both
+            # processes can safely assume that the creation of the process
+            # group has taken place.
+            child_pid = self._GetChildPID()
+            try:
+                os.setpgid(child_pid, child_pid)
+            except:
+                # The call to setpgid may fail if the child has exited,
+                # or has already called 'exec'.  In that case, we are
+                # guaranteed that the child has already put itself in the
+                # desired process group.
+                pass
+            # Create the monitoring process.
+            #
+            # If the monitoring process is in parent's process group and
+            # kills the child after waitpid has returned in the parent, we
+            # may end up trying to kill a process group other than the one
+            # that we intend to kill.  Therefore, we put the monitoring
+            # process in the same process group as the child; that ensures
+            # that the process group will persist until the monitoring
+            # process kills it.
+            self.__monitor_pid = os.fork()
+            if self.__monitor_pid != 0:
+                # Make sure that the monitoring process is placed into the
+                # child's process group before the parent process calls
+                # 'waitpid'.  In this way, we are guaranteed that the process
+                # group as the child 
+                os.setpgid(self.__monitor_pid, child_pid)
+            else:
+                # Put the monitoring process into the child's process
+                # group.  We know the process group still exists at
+                # this point because either (a) we are in the process
+                # group, or (b) the parent has not yet called waitpid.
+                os.setpgid(0, child_pid)
+
+                # Close all open file descriptors.  They are not needed
+                # in the monitor process.  Furthermore, when the parent
+                # closes the write end of the stdin pipe to the child,
+                # we do not want the pipe to remain open; leaving the
+                # pipe open in the monitor process might cause the child
+                # to block waiting for additional input.
+                try:
+                    max_fds = os.sysconf("SC_OPEN_MAX")
+                except:
+                    max_fds = 256
+                for fd in xrange(max_fds):
+                    try:
+                        os.close(fd)
+                    except:
+                        pass
+                try:
+                    if self.__timeout >= 0:
+                        # Give the child time to run.
+                        time.sleep (self.__timeout)
+                        #######################################################
+                        ### This is the interesting part: dump the stack trace to a file
+                        if sys.platform == "linux2": # we should be have /proc and gdb
+                            cmd = ["gdb",
+                                   os.path.join("/proc", str(child_pid), "exe"),
+                                   str(child_pid),
+                                   "-batch", "-n", "-x",
+                                   "'%s'" % os.path.join(os.path.dirname(__file__), "stack-trace.gdb")]
+                            # FIXME: I wanted to use subprocess.Popen, but it doesn't want to work
+                            #        in this context.
+                            o = os.popen(" ".join(cmd)).read()
+                            open(self.stack_trace_file,"w").write(o)
+                        #######################################################
+                            
+                        # Kill all processes in the child process group.
+                        os.kill(0, signal.SIGKILL)
+                    else:
+                        # This call to select will never terminate.
+                        select.select ([], [], [])
+                finally:
+                    # Exit.  This code is in a finally clause so that
+                    # we are guaranteed to get here no matter what.
+                    os._exit(0)
+        elif self.__timeout >= 0 and sys.platform == "win32":
+            # Create a monitoring thread.
+            self.__monitor_thread = Thread(target = self.__Monitor)
+            self.__monitor_thread.start()
+
+    if sys.platform == "win32":
+
+        def __Monitor(self):
+            """Code copied from FilterExecutable.
+            Kill the child if the timeout expires.
+
+            This function is run in the monitoring thread."""
+        
+            # The timeout may be expressed as a floating-point value
+            # on UNIX, but it must be an integer number of
+            # milliseconds when passed to WaitForSingleObject.
+            timeout = int(self.__timeout * 1000)
+            # Wait for the child process to terminate or for the
+            # timer to expire.
+            result = win32event.WaitForSingleObject(self._GetChildPID(),
+                                                    timeout)
+            # If the timeout occurred, kill the child process.
+            if result == win32con.WAIT_TIMEOUT:
+                self.Kill()
+
 ########################################################################
 # Test Classes
 ########################################################################
@@ -1245,9 +1443,17 @@ class GaudiExeTest(ExecTestBase):
             # orphaned child processes created by the test will be
             # cleaned up.
             timeout = -2
-        e = qm.executable.Filter(self.stdin, timeout)
+        e = GaudiFilterExecutable(self.stdin, timeout)
         # Run it.
         exit_status = e.Run(arguments, environment, path = program)
+        # Get the stack trace from the temporary file (if present)
+        if e.stack_trace_file and os.path.exists(e.stack_trace_file):
+            stack_trace = open(e.stack_trace_file).read()
+            os.remove(e.stack_trace_file)
+        else:
+            stack_trace = None
+        if stack_trace:
+            result["ExecTest.stack_trace"] = result.Quote(stack_trace)
 
         # If the process terminated normally, check the outputs.
         if sys.platform == "win32" or os.WIFEXITED(exit_status):

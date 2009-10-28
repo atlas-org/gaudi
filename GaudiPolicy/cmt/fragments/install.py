@@ -325,7 +325,12 @@ def update(src,dest,old_dest = None, syml = False, logdir = realpath(".")):
     realdest = normpath(join(logdir, dest))
     dest_path = split(realdest)[0]
     realsrc = normpath(join(dest_path,src))
-    if (not exists(realdest)) or (getmtime(realsrc) > getmtime(realdest)):
+    # The modification time is compared only with the precision of the second
+    # to avoid a bug in Python 2.5 + Win32 (Fixed in Python 2.5.1).
+    # See:
+    #   http://bugs.python.org/issue1671965
+    #   http://bugs.python.org/issue1565150
+    if (not exists(realdest)) or (int(getmtime(realsrc)) > int(getmtime(realdest))):
         if not isdir(dest_path):
             print "Create dir '%s'"%(dest_path)
             makedirs(dest_path)

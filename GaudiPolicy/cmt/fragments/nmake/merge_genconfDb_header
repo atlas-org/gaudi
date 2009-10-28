@@ -1,6 +1,6 @@
 # File: cmt/fragments/merge_genconfDb_header
 # Author: Sebastien Binet (binet@cern.ch)
-          Pere Mato (for the Windows version)
+#         Pere Mato (for the Windows version)
 
 # Makefile fragment to merge a <library>_confDb.py file into a single
 # <project>_merged_confDb.py file in the (python) install area

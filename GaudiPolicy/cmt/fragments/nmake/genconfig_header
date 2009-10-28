@@ -14,6 +14,11 @@ instdir = $(CMTINSTALLAREA)\python\$(package)
 product = $(instdir)\$(confpy)
 initpy  = $(instdir)\__init__.py
 
+!if defined (GENCONF_ECHO)
+genconf_silent =
+!else
+genconf_silent = $(silent)
+!endif
 
 ${CONSTITUENT} :: ${CONSTITUENT}install
 
@@ -24,7 +29,7 @@ ${CONSTITUENT}install : $(outdir)\$(confpy)
 
 
 $(outdir)\$(confpy) : $(conflib) $(outdir)
-	@"$(genconfig_cmd)" $(library_preload) -o $(outdir) -p $(package) \
+	$(genconf_silent) "$(genconfig_cmd)" $(library_preload) -o $(outdir) -p $(package) \
           --configurable-module=$(confModuleName) \
           --configurable-default-name=$(confDefaultName) \
           --configurable-algorithm=$(confAlgorithm) \
@@ -38,7 +43,7 @@ $(outdir) :
 
 
 ${CONSTITUENT}clean :: ${CONSTITUENT}uninstall
-	@$(cleanup_silent) $(remove_command) $(outdir)\$(confpy) $(outdir)\$(dbpy)
+	$(cleanup_silent) $(remove_command) $(outdir)\$(confpy) $(outdir)\$(dbpy)
 
 uninstall :: ${CONSTITUENT}uninstall
 

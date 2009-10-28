@@ -1,5 +1,5 @@
 package GaudiPolicy
-version v8r7
+version v10r1
 
 branches cmt doc
 
@@ -7,7 +7,12 @@ branches cmt doc
 use LCG_Settings *
 use Python * LCG_Interfaces -no_auto_imports
 
-macro_remove  LCG_platform "" LOCAL&Linux  "_dbg"
+# Note: Local installations except WinXP use the optimized versions of the AA
+#       projects instead of the debug ones.
+macro  LCG_platform      "$(LCG_platform)" \
+       target-winxp      "$(LCG_platform)" \
+       LOCAL&target-dbg  "$(LCG_system)"
+
 
 # project strategies ========================================================
 setup_strategy root
@@ -37,21 +42,21 @@ cmtpath_pattern \
 cmtpath_pattern_reverse \
    macro <project>_install_include "" \
          <project>_without_installarea "" \
-         <project>_with_installarea&Unix " <path>/$(<project>_installarea_prefix)/include "\
-         <project>_with_installarea&WIN32 ' "<path>\$(<project>_installarea_prefix)\include"' ; \
-   include_dirs ${<project>_install_include} 
+         <project>_with_installarea&target-unix " <path>/$(<project>_installarea_prefix)/include "\
+         <project>_with_installarea&target-winxp ' "<path>\$(<project>_installarea_prefix)\include"' ; \
+   include_dirs ${<project>_install_include}
 
 macro copyInclude "cp -Rup " \
-      WIN32       "xcopy /S/Q/Y/I/D " \
-      Darwin      "cp -Rp"
+      host-winxp  "xcopy /S/Q/Y/I/D " \
+      host-darwin "cp -Rp"
 
-macro ar     "$(ar)" \
-     Darwin "libtool -o"
+macro ar            "$(ar)" \
+      target-darwin "libtool -o"
 
 # This command is not needed on MacOSX, being replaced via the libtool
 # command (which is used instead of ar)
-macro ranlib "ranlib" \
-     Darwin "touch"
+macro ranlib       "ranlib" \
+     target-darwin "touch"
 
 
 # standard patterns ================================================================
@@ -59,7 +64,7 @@ pattern Obj2Doth \
     document obj2doth  <package>Obj2Doth ../xml/*.xml
 
 pattern packageOpts \
-    set <PACKAGE>OPTS "$(<package>_root)/options" WIN32 "$(<package>_root)\options"
+    set <PACKAGE>OPTS "$(<package>_root)/options" target-winxp "$(<package>_root)\options"
 
 # coding conventions ========================================================
 
@@ -73,18 +78,14 @@ pattern  RuleChecker \
 
 pattern libraryShr\
     set <library>Shr   "" \
-        <project>_without_installarea&Unix  "$(<package>Dir)/lib<library>" \
-        <project>_without_installarea&WIN32  "$(<package>Dir)\<library>"
+        <project>_without_installarea&target-unix    "$(<package>Dir)/lib<library>" \
+        <project>_without_installarea&target-winxp  "$(<package>Dir)\<library>"
 
 pattern library_stamps \
     macro <package>_stamps "${<PACKAGE>ROOT}/${BINDIR}/<library>.stamp "
 
 pattern library_shlibflags \
     macro <library>_shlibflags "$(libraryshr_linkopts)"
-
-pattern library_Clinkopts\
-    macro_prepend <package>_linkopts " "\
-    Unix&static    " $(<library>Dir)/lib<library>.a -u <library>_loadRef $(<import>_linkopts) $(<import2>_linkopts) $(<import3>_linkopts)"
 
 pattern library_Cshlibflags \
     private ; \
@@ -93,11 +94,10 @@ pattern library_Cshlibflags \
 
 pattern library_Llinkopts \
     macro_append <package>_linkopts                 "" \
-         <project>_with_installarea&Unix     " -l<library> "\
-         <project>_with_installarea&WIN32    " <library>.lib "\
-         <project>_without_installarea&Unix  " -L$(<package>Dir) -l<library> "\
-         <project>_without_installarea&WIN32 " $(<package>Dir)/<library>.lib "\
-                                Unix&static  " $(<package>Dir)/lib<library>.a "
+         <project>_with_installarea&target-unix     " -l<library> "\
+         <project>_with_installarea&target-winxp    " <library>.lib "\
+         <project>_without_installarea&target-unix  " -L$(<package>Dir) -l<library> "\
+         <project>_without_installarea&target-winxp " $(<package>Dir)/<library>.lib "
 
 
 pattern library_Lshlibflags \
@@ -107,21 +107,20 @@ pattern library_Lshlibflags \
     end_private
 
 pattern library_Softlinks \
-    macro_append <package>_libraries        "" \
-         <project>_without_installarea&Unix " <library> "\
-                 WIN32                      "" \
-                 Unix&static                ""
+    macro_append <package>_libraries              "" \
+         <project>_without_installarea&target-unix " <library> "\
+                 target-winxp                     ""
 
 cmtpath_pattern \
-    path_prepend DYLD_LIBRARY_PATH "" <project>_with_installarea&Darwin "<path>/$(<project>_installarea_prefix)/${CMTCONFIG}/lib"
+    path_prepend DYLD_LIBRARY_PATH "" <project>_with_installarea&target-darwin "<path>/$(<project>_installarea_prefix)/${CMTCONFIG}/lib"
 
 pattern library_path \
-    path_remove PATH ""  WIN32 "\<package>\" ; \
+    path_remove PATH ""  target-winxp "\<package>\" ; \
     path_prepend PATH ""  \
-        <project>_without_installarea&WIN32 "${<package>_root}\${<package>_tag}" ; \
-    path_remove DYLD_LIBRARY_PATH "" Darwin "/<package>/" ; \
+        <project>_without_installarea&target-winxp "${<package>_root}\${<package>_tag}" ; \
+    path_remove DYLD_LIBRARY_PATH "" target-darwin "/<package>/" ; \
     path_append DYLD_LIBRARY_PATH "" \
-        <project>_without_installarea&Darwin "${<package>_root}/${<package>_tag}" ; \
+        <project>_without_installarea&target-darwin "${<package>_root}/${<package>_tag}" ; \
     apply_pattern library_Softlinks library="<library>"
 
 
@@ -138,8 +137,13 @@ pattern linker_library \
     apply_pattern library_Llinkopts   library="<library>" ; \
     apply_pattern library_Lshlibflags library="<library>" ; \
     apply_pattern library_stamps      library="<library>" ; \
-    macro <package>_linker_library    "<library>"
-
+    macro <package>_linker_library    "<library>" ; \
+    private ; \
+    macro_append lib_<library>_pp_cppflags " -DGAUDI_LINKER_LIBRARY " ; \
+    macro <library>exportsymb "-export_all_symbols" target-winxp "-export_all_symbols" \
+                              GAUDI_V21 "" GAUDI_V22 "" G21_HIDE_SYMBOLS ""; \
+    macro <library>installlib  "yes" ; \
+    end_private
 
 #--------------------------------------------
 # Patterns for specifically declaring and installing jobOptions files in the
@@ -150,7 +154,7 @@ make_fragment data_installer -header=data_installer_header
 pattern declare_joboptions \
     macro_append <package>_joboptions " -s=../share <files> " ; \
     document data_installer install_<name>joboptions prefix=jobOptions $(<package>_joboptions) ; \
-    macro_remove constituents " " WIN32 install_<name>joboptions
+    macro_remove constituents " " target-winxp install_<name>joboptions
 
 pattern declare_scripts \
     macro_append <package>_scripts " -s=$(<PACKAGE>ROOT)/share <files> " ; \
@@ -165,8 +169,8 @@ pattern declare_scripts \
 cmtpath_pattern \
    macro <project>_install_python "" \
          <project>_without_installarea "" \
-         <project>_with_installarea&Unix "<path>/$(<project>_installarea_prefix)/python"\
-         <project>_with_installarea&WIN32 "<path>\$(<project>_installarea_prefix)\python" ; \
+         <project>_with_installarea&target-unix "<path>/$(<project>_installarea_prefix)/python"\
+         <project>_with_installarea&target-winxp "<path>\$(<project>_installarea_prefix)\python" ; \
     path_remove  PYTHONPATH ${<project>_install_python} ; \ 
     path_prepend PYTHONPATH ${<project>_install_python}
 
@@ -174,13 +178,13 @@ cmtpath_pattern \
 pattern declare_python_modules \
     macro_append <package>_python_modules " -s=../python <files> " ; \
     document data_installer install_<name>python_modules prefix=python $(<package>_python_modules) ; \
-    macro_remove constituents " " WIN32 install_<name>python_modules
+    macro_remove constituents " " target-winxp install_<name>python_modules
 
 
 pattern install_python_modules \
     macro <package>_install_python "" \
-         <project>_without_installarea&Unix "$(<package>_root)/python" \
-         <project>_without_installarea&WIN32 "$(<package>_root)\python" ; \
+         <project>_without_installarea&target-unix "$(<package>_root)/python" \
+         <project>_without_installarea&target-winxp "$(<package>_root)\python" ; \
     path_remove  PYTHONPATH ${<package>_install_python} ; \
     path_prepend PYTHONPATH ${<package>_install_python} ; \
     document install_python <package>_python ; \
@@ -190,8 +194,8 @@ pattern install_python_modules \
     
 pattern install_custom_python_modules \
     macro <package>_install_python "" \
-         <project>_without_installarea&Unix "$(<package>_root)/<source>" \
-         <project>_without_installarea&WIN32 "$(<package>_root)\<source>" ; \
+         <project>_without_installarea&target-unix "$(<package>_root)/<source>" \
+         <project>_without_installarea&target-winxp "$(<package>_root)\<source>" ; \
     path_remove  PYTHONPATH ${<package>_install_python} ; \ 
     path_prepend PYTHONPATH ${<package>_install_python} ; \
     document install_python <package>_<source>_<offset>_python source=<source> offset=<offset> ; \
@@ -210,8 +214,8 @@ make_fragment python_init -header=python_init_header
 
 pattern pyd_module \
   macro <package>_install_pyd_module "" \
-        <project>_without_installarea&Unix "$(<package>_root)/$(tag)" \
-        <project>_without_installarea&WIN32 "$(<package>_root)\$(tag)" ; \
+        <project>_without_installarea&target-unix "$(<package>_root)/$(tag)" \
+        <project>_without_installarea&target-winxp "$(<package>_root)\$(tag)" ; \
   path_remove  PYTHONPATH $(<package>_install_pyd_module) ; \ 
   path_prepend PYTHONPATH $(<package>_install_pyd_module) ; \
   macro <module>_shlibflags  "$(libraryshr_linkopts) $(use_linkopts)" ;\
@@ -219,22 +223,22 @@ pattern pyd_module \
   private ; \
   macro shlibsuffix "$(shlibsuffix)" target_<module> "pyd" ; \
   macro library_prefix "$(library_prefix)" target_<module> "" ; \
-  macro <module>_install_dir "$(CMTINSTALLAREA)/$(tag)/python" WIN32 "$(CMTINSTALLAREA)\$(tag)\python" ; \
+  macro <module>_install_dir "$(CMTINSTALLAREA)/$(tag)/python" target-winxp "$(CMTINSTALLAREA)\$(tag)\python" ; \
   library <module> -import=Python -target_tag install_dir="$(<module>_install_dir)" <files> ; \
   end_private ; \
-  macro_append <module>_cppflags " -ftemplate-depth-64" WIN32 "" ;
+  macro_append <module>_cppflags " -ftemplate-depth-64" target-winxp "" ;
 
 cmtpath_pattern \
    macro <project>_install_pyd_module "" \
          <project>_without_installarea "" \
-         <project>_with_installarea&Unix "<path>/$(<project>_installarea_prefix)/$(tag)/python" \
-         <project>_with_installarea&WIN32 "<path>\$(<project>_installarea_prefix)\$(tag)\python" ; \
+         <project>_with_installarea&target-unix "<path>/$(<project>_installarea_prefix)/$(tag)/python" \
+         <project>_with_installarea&target-winxp "<path>\$(<project>_installarea_prefix)\$(tag)\python" ; \
     path_remove  PYTHONPATH $(<project>_install_pyd_module) ; \ 
     path_prepend PYTHONPATH $(<project>_install_pyd_module) ; 
 
 
 action CompilePython "python -m compileall $(CMTINSTALLAREA)/python $(CMTINSTALLAREA)/scripts" \
-	    WIN32        "python -m compileall $(CMTINSTALLAREA)\python $(CMTINSTALLAREA)\scripts"
+	    target-winxp "python -m compileall $(CMTINSTALLAREA)\python $(CMTINSTALLAREA)\scripts"
 	    
 macro_remove cmt_actions_constituents "CompilePython "
 macro_remove cmt_actions_constituentsclean "CompilePythonclean "
@@ -252,20 +256,20 @@ cmtpath_pattern \
 #cmtpath_pattern \
 #   macro scripts_offset "share" ; \
 #   macro scripts_maindir "bin" ; \
-#   macro scripts_dir "$(scripts_offset)/$(scripts_maindir)" WIN32 "$(scripts_offset)\$(scripts_maindir)"
+#   macro scripts_dir "$(scripts_offset)/$(scripts_maindir)" target-winxp "$(scripts_offset)\$(scripts_maindir)"
 
 cmtpath_pattern \
    macro <project>_install_scripts "" \
          <project>_without_installarea "" \
-         <project>_with_installarea&Unix "<path>/$(<project>_installarea_prefix)/$(scripts_dir)"\
-         <project>_with_installarea&WIN32 "<path>\$(<project>_installarea_prefix)\$(scripts_dir)" ; \
+         <project>_with_installarea&target-unix "<path>/$(<project>_installarea_prefix)/$(scripts_dir)"\
+         <project>_with_installarea&target-winxp "<path>\$(<project>_installarea_prefix)\$(scripts_dir)" ; \
     path_remove  PATH ${<project>_install_scripts} ; \ 
     path_prepend PATH ${<project>_install_scripts}
 
 pattern install_scripts \
     macro <package>_install_scripts "" \
-         <project>_without_installarea&Unix "$(<package>_root)/$(scripts_dir)" \
-         <project>_without_installarea&WIN32 "$(<package>_root)\$(scripts_dir)" ; \
+         <project>_without_installarea&target-unix "$(<package>_root)/$(scripts_dir)" \
+         <project>_without_installarea&target-winxp "$(<package>_root)\$(scripts_dir)" ; \
     path_remove  PATH ${<package>_install_scripts} ; \ 
     path_prepend PATH ${<package>_install_scripts} ; \
     document install_scripts install_scripts source=$(scripts_dir) offset=$(scripts_offset) 
@@ -293,9 +297,9 @@ macro uninstall_command 'python $(GaudiPolicy_root)/cmt/fragments/install.py -u 
 macro remove_command "$(cmt_uninstallarea_command)"
 
 macro library_install_command "python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x.svn -x*~ -x*.stamp -s --log=./install.history " \
-      VisualC                 "copy "
+      host-winxp              "copy "
 macro cmt_installarea_command "python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x.svn -x*~ -x*.stamp -s --log=./install.history " \
-      WIN32                   "xcopy /S /E /Y "
+      host-winxp              "xcopy /S /E /Y "
 
 pattern declare_runtime \
     macro_append <package>_runtime " -s=../share <files> <extras> " ; \
@@ -370,37 +374,37 @@ pattern package_Lshlibflags \
 
 pattern package_Slinkopts \
 macro <package>_linkopts "$(<package>Dir)/lib<package>.a -u <package>_loadRef"\
-       WIN32   "$(<package>Dir)/<package>.lib /include:_<package>_loadRef "
+       target-winxp      "$(<package>Dir)/<package>.lib /include:_<package>_loadRef "
 
 # <package> Fortran library patterns =======================================
 
 pattern package_Flinkopts \
     macro <package>_linkopts "$(<package>Dir)/lib<package>.a "\
-                     WIN32   "$(<package>Dir)/<package>.lib "
+              target-winxp   "$(<package>Dir)/<package>.lib "
     
 macro dq '"'
 pattern package_fflags \
   macro <package>_fflags   ' ' \
-WIN32 '/fpp:$(dq)/I$(<PACKAGE>ROOT)$(dq) /fpp:$(dq)/I$(<PACKAGE>ROOT)/src$(dq)'
+      target-winxp '/fpp:$(dq)/I$(<PACKAGE>ROOT)$(dq) /fpp:$(dq)/I$(<PACKAGE>ROOT)/src$(dq)'
 
 # handle LD_LIBRARY_PATH ====================================================
 
 pattern ld_library_path \
-    path_remove LD_LIBRARY_PATH "/<package>/" WIN32 "" ; \
+    path_remove LD_LIBRARY_PATH "/<package>/" target-winxp "" ; \
     path_append LD_LIBRARY_PATH ""\
-        <project>_without_installarea&Unix   "${<package>_root}/${<package>_tag}" ; \
-    path_remove PATH "" WIN32  "\<package>\" ; \
+        <project>_without_installarea&target-unix   "${<package>_root}/${<package>_tag}" ; \
+    path_remove PATH "" target-winxp  "\<package>\" ; \
     path_prepend PATH "" \
-        <project>_without_installarea&WIN32   "${<package>_root}/${<package>_tag}" ; \
-    path_remove DYLD_LIBRARY_PATH "" Darwin "/<package>/" ; \
+        <project>_without_installarea&target-winxp   "${<package>_root}/${<package>_tag}" ; \
+    path_remove DYLD_LIBRARY_PATH "" target-darwin "/<package>/" ; \
     path_append DYLD_LIBRARY_PATH "" \
-        <project>_without_installarea&Darwin "${<package>_root}/${<package>_tag}"
+        <project>_without_installarea&target-darwin "${<package>_root}/${<package>_tag}"
 
-# to add the application_path to LD_LIBRARY_PATH on Unix
+# to add the application_path to LD_LIBRARY_PATH on target-unix
 pattern application_path \
-    path_remove  LD_LIBRARY_PATH  "/<package>/" WIN32 "" ; \
+    path_remove  LD_LIBRARY_PATH  "/<package>/" target-winxp "" ; \
     path_prepend LD_LIBRARY_PATH  "" \
-        <project>_without_installarea&Unix "${<package>_root}/$(<package>_tag)"
+        <project>_without_installarea&target-unix "${<package>_root}/$(<package>_tag)"
 
 pattern generate_rootmap \
   document genmap <library>RootMap -group=<group> LIBNAME=<library> ; \
@@ -420,61 +424,48 @@ pattern generate_rootmap \
 
 # Tags and Global macros=====================================================
 
-macro BINDIR              "$(tag)"\
-    CERN                  "$(tag)"\
-    CERN_WIN32            "$(tag)"\
-    LOCAL                 "$(tag)"\
-    static              "${CMTCONFIG}"
+macro BINDIR              "$(tag)"
 
-tag slc3_ia32_gcc323_cov   slc3_ia32_gcc323_dbg coverage
-tag slc3_ia32_gcc323_pro   slc3_ia32_gcc323_dbg profiled
+# LHCb tags
 
-tag slc3_ia32_gcc344_cov   slc3_ia32_gcc344_dbg coverage
-tag slc3_ia32_gcc344_pro   slc3_ia32_gcc344_dbg profiled
+tag slc4_ia32_gcc34_cov    slc4_ia32_gcc34_dbg target-cov
+tag slc4_ia32_gcc34_pro    slc4_ia32_gcc34_dbg target-pro
+tag slc4_amd64_gcc34_cov   slc4_amd64_gcc34_dbg target-cov
+tag slc4_amd64_gcc34_pro   slc4_amd64_gcc34_dbg target-pro
 
-tag slc4_ia32_gcc34_cov   slc4_ia32_gcc34_dbg coverage
-tag slc4_ia32_gcc34_pro   slc4_ia32_gcc34_dbg profiled
+tag slc4_ia32_gcc41_cov    slc4_ia32_gcc41_dbg target-cov
+tag slc4_ia32_gcc41_pro    slc4_ia32_gcc41_dbg target-pro
+tag slc4_amd64_gcc41_cov   slc4_amd64_gcc41_dbg target-cov
+tag slc4_amd64_gcc41_pro   slc4_amd64_gcc41_dbg target-pro
 
-tag slc4_amd64_gcc34_cov   slc4_amd64_gcc34_dbg coverage
-tag slc4_amd64_gcc34_pro   slc4_amd64_gcc34_dbg profiled
+tag slc4_ia32_gcc43_cov    slc4_ia32_gcc43_dbg target-cov
+tag slc4_ia32_gcc43_pro    slc4_ia32_gcc43_dbg target-pro
+tag slc4_amd64_gcc43_cov   slc4_amd64_gcc43_dbg target-cov
+tag slc4_amd64_gcc43_pro   slc4_amd64_gcc43_dbg target-pro
 
-# ATLAS CMTCONFIG Tags
-tag i686-slc3-gcc323-opt  slc3_gcc323
-tag i686-slc3-gcc323-dbg  slc3_gcc323_dbg
-tag i686-slc4-gcc34-opt   slc4_gcc34      slc4-ia32 32 gcc optimized
-tag i686-slc4-gcc34-dbg   slc4_gcc34_dbg  slc4-ia32 32 gcc debug
-tag x86_64-slc4-gcc34-opt slc4_gcc34      64 gcc optimized
-tag x86_64-slc4-gcc34-dbg slc4_gcc34_dbg  64 gcc debug
-tag i386-mac104-gcc40-opt Darwin gcc40 gcc-4.0 optimized
-tag i386-mac104-gcc40-dbg Darwin gcc40 gcc-4.0 optimized
- 
-tag fc1_gcc323          Linux FedoraCore1 gcc-3.2.3 optimized
-tag fc1_gcc323opt       Linux FedoraCore1 gcc-3.2.3 optimized
-tag fc1_gcc323_dbg      Linux FedoraCore1 gcc-3.2.3 debug
+tag osx105_ia32_gcc401_cov  target-unix target-darwin target-i386 target-mac105 target-gcc40 target-cov
+tag osx105_ia32_gcc401_pro  target-unix target-darwin target-i386 target-mac105 target-gcc40 target-pro
 
-tag fc2_gcc323          Linux FedoraCore2 gcc-3.2.3 optimized
-tag fc2_gcc323opt       Linux FedoraCore2 gcc-3.2.3 optimized
-tag fc2_gcc323_dbg      Linux FedoraCore2 gcc-3.2.3 debug
 
-# MAC OS X (Darwin)
-tag Darwin-gcc          Darwin gcc-4.0
-tag Darwin-gcc-dbg      Darwin gcc-4.0 debug
-tag Darwin-gcc-opt      Darwin gcc-4.0 optimized
-tag Darwin-gcc-prof     Darwin gcc-4.0 optimized profiled
+# common tags
 
-# Windows with VC++ 
-tag Win32               WIN32 vc++6.0
-tag Win32Debug          WIN32 vc++6.0  debug
+tag i686-slc5-gcc34-cov    i686-slc5-gcc34-dbg target-cov
+tag i686-slc5-gcc34-pro    i686-slc5-gcc34-dbg target-pro
+tag x86_64-slc5-gcc34-cov  x86_64-slc5-gcc34-dbg target-cov
+tag x86_64-slc5-gcc34-pro  x86_64-slc5-gcc34-dbg target-pro
+
+tag i686-slc5-gcc41-cov    i686-slc5-gcc41-dbg target-cov
+tag i686-slc5-gcc41-pro    i686-slc5-gcc41-dbg target-pro
+tag x86_64-slc5-gcc41-cov  x86_64-slc5-gcc41-dbg target-cov
+tag x86_64-slc5-gcc41-pro  x86_64-slc5-gcc41-dbg target-pro
+
+tag i686-slc5-gcc43-cov    i686-slc5-gcc43-dbg target-cov
+tag i686-slc5-gcc43-pro    i686-slc5-gcc43-dbg target-pro
+tag x86_64-slc5-gcc43-cov  x86_64-slc5-gcc43-dbg target-cov
+tag x86_64-slc5-gcc43-pro  x86_64-slc5-gcc43-dbg target-pro
 
 # Specify Common Unix tag associations
-tag Linux   Unix
-tag Darwin  Unix
-
-# Tag for using distcc
-tag CERNDISTCC CERN distcc
-
-#backward compatibility for cmt < v1r14. Does it work/matter?
-tag Unix&static UnixStatic
+tag host-darwin    host-unix
 
 # Fragments =================================================================
 
@@ -505,9 +496,14 @@ make_fragment sln_dependency_project
 make_fragment sln_dependency_header
 make_fragment sln_dependency_trailer
 
-macro vsCONFIG   "Release"   debug  "Debug"
-macro vsDebug    "2"         debug  "1"
-macro vsOptimize "2"         debug  "0" 
+# Local copy of the dependencies fragment to allow a "QUICK" option that
+# completely ignores dependencies (useful to speed up builds from scratch).
+macro dep_fragment "" CMTp20070208 "dependencies"
+make_fragment $(dep_fragment)
+
+macro vsCONFIG   "Release"   target-dbg  "Debug"
+macro vsDebug    "2"         target-dbg  "1"
+macro vsOptimize "2"         target-dbg  "0" 
 macro vsVersion  ""   vc++7.1  "7.10"  vc++7.0 "7.00"
 macro package_GUID "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}"
 macro GUID_all "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC955}"
@@ -515,183 +511,183 @@ macro GUID_all "{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC955}"
 macro make_shlib    "echo" \
       HP-UX         "${CMTROOT}/mgr/cmt_make_shlib_common.sh extract" \
       OSF1          "${CMTROOT}/mgr/cmt_make_shlib_common.sh noextract" \
-      Linux         "${CMTROOT}/mgr/cmt_make_shlib_common.sh extract" \
+      host-linux  "${CMTROOT}/mgr/cmt_make_shlib_common.sh extract" \
       CYGWIN        "${CMTROOT}/mgr/cmt_make_shlib_common.sh extract" \
       SunOS         "${CMTROOT}/mgr/cmt_make_shlib_common.sh extract" \
-      Darwin        "${CMTROOT}/mgr/cmt_make_shlib_common.sh extract" \
-      VisualC       "$(GAUDIPOLICYROOT)\cmt\cmt_make_shlib.bat"
+      host-darwin "${CMTROOT}/mgr/cmt_make_shlib_common.sh extract" \
+      host-visualc "$(GAUDIPOLICYROOT)\cmt\cmt_make_shlib.bat"
 
 macro merge_rootmap_cmd ${GaudiPolicy_root}/cmt/fragments/merge_files.py
 make_fragment merge_rootmap -header=merge_rootmap_header
 macro libdirname "lib" # defaults for fragments of libs and bins 
 macro bindirname "bin" # defaults for fragments of libs and bins
 
+# Override library fragment
+# Needed only for Windows, but it must be present for Unix too, so we included
+# a version working for CMT v1r20p20070208 and v1r20p20090520 (only on WinXP)
+macro lib_fragment "" \
+       CMTp20070208 "library -header=library_header -dependencies" \
+       CMTp20090520&target-winxp "library -header=library_header -dependencies"
+make_fragment $(lib_fragment)
 
 # Compilation and Linking flags==============================================
 
-macro  cpp                      "g++" \
-       host-slc5&target-gcc34   "g++34" \
-       slc5&gcc34               "g++34" \
-       slc4&gcc323              "gcc32" \
-       Darwin                   "c++" \
-       WIN32                    "cl"
-macro shlibbuilder "$(cpp)"
+# C++ compiler
+macro_prepend  cpp_name ""  \
+    lcg-compiler&target-gcc       "lcg-"
+macro_append   cpp_name ""  \
+    lcg-compiler&target-gcc       "-$(gcc_config_version)"
 
-# use of the "distcc" utility
+# C compiler
+macro_prepend  cc_name  ""  \
+    lcg-compiler&target-gcc       "lcg-"
+macro_append   cc_name  ""  \
+    lcg-compiler&target-gcc       "-$(gcc_config_version)"
 
-# supplied by LCGCMT_56b and later
-# macro_prepend cpp "" \
-#	distcc	"distcc "
-#
-# macro_prepend cc "" \
-# 	distcc	"distcc "
-#
-# macro_prepend for "" \
-# 	distcc	"distcc "
-#
-#
-# use of the "ccache" utility with or without "distcc"
-#
-# set CCACHE_PREFIX "" ccache&distcc "distcc"
-#
-# macro_remove cpp "" \
-# 	ccache&distcc	"distcc "
-# macro_prepend cpp "" \
-# 	ccache	"ccache "
-#
-# macro_remove cc "" \
-# 	ccache&distcc	"distcc "
-# macro_prepend cc "" \
-# 	ccache	"ccache "
-#
-# macro_remove for "" \
-# 	ccache&distcc	"distcc "
-# macro_prepend for "" \
-# 	ccache	"ccache "
-
-
-
-# Setup overrides for 32-bit mode on a 64-bit machine
-macro_append cpp          "" x86_64&gcc&32 " -m32"
-macro_append cc           "" x86_64&gcc&32 " -m32"
-macro_append shlibbuilder "" x86_64&gcc&32 " -m32"
-
+# FORTRAN compiler
+macro_prepend  for_name ""  \
+    lcg-compiler&target-gcc       "lcg-"
+macro_append   for_name ""  \
+    lcg-compiler&target-gcc       "-$(gcc_config_version)"
 
 # C++ debug, optimized and profiled options
 macro cppdebugflags    "" \
-      debug            "$(cppdebugflags_s)"\
-      optimized        "$(cppoptimized_s)"
+      target-dbg        "$(cppdebugflags_s)"\
+      target-opt        "$(cppoptimized_s)"
 macro cppdebugflags_s  "-g" \ 
-      WIN32            "/Od /Z7"
+      target-winxp            "/Od /Z7"
 macro cppoptimized_s   "-O2" \
-      WIN32            "" 
+      target-winxp            "" 
 macro cppprofiled_s   "-pg" \
-      WIN32            "" 
+      target-winxp            "" 
 macro_append cppdebugflags "" \
-      profiled        " $(cppprofiled_s)"
+      target-pro        " $(cppprofiled_s)"
 macro cppcoverage_s   "-fprofile-arcs -ftest-coverage" \
-      WIN32            "" 
+      target-winxp            "" 
 macro_append cppdebugflags "" \
-      coverage        " $(cppcoverage_s)"
+      target-cov        " $(cppcoverage_s)"
 
-      
 # C debug, optimized and profiled options
 macro cdebugflags     "" \
-      debug           "$(cdebugflags_s)"
+      target-dbg           "$(cdebugflags_s)"
 macro cdebugflags_s   "-g" \
-      WIN32           "/Od /Z7"
+      target-winxp           "/Od /Z7"
 macro ccoverage_s     "-fprofile-arcs -ftest-coverage" \
-      WIN32            "" 
+      target-winxp            "" 
 macro_append cdebugflags "" \
-      coverage        " $(ccoverage_s)"
-
+      target-cov        " $(ccoverage_s)"
 
 # Fortran debug, optimized and profiled options 
 macro fdebugflags      "" \
-      debug            "$(fdebugflags_s)"
+      target-dbg            "$(fdebugflags_s)"
 macro fdebugflags_s    "-g"\ 
-      WIN32            "/nopdbfile /debug:full /optimize:0"
+      target-winxp            "/nopdbfile /debug:full /optimize:0"
 macro foptimized_s     "-O2" \
-      WIN32            "" 
+      target-winxp            "" 
 macro_append fdebugflags "" \
-      optimized        " $(foptimized_s)"
+      target-opt        " $(foptimized_s)"
 macro fprofiled_s      "-pg" \
-      WIN32            "" 
+      target-winxp            "" 
 macro_append fdebugflags "" \
-      profiled        " $(fprofiled_s)"
+      target-pro        " $(fprofiled_s)"
 macro fcoverage_s     "-fprofile-arcs -ftest-coverage" \
-      WIN32            "" 
+      target-winxp            "" 
 macro_append fdebugflags "" \
-      coverage        " $(fcoverage_s)"
+      target-cov        " $(fcoverage_s)"
 
 # Link debug options
 macro linkdebugflags   "" \
-      debug            "$(linkdebugflags_s)"
+      target-dbg            "$(linkdebugflags_s)"
 macro linkdebugflags_s "" \
-      WIN32            "/debug /verbose:lib "
+      target-winxp            "/debug /verbose:lib "
 
 
 macro linkcoverage_s   "-lgcov" \
-      WIN32            ""
+      target-winxp            ""
 
 macro_append linkdebugflags "" \
-      coverage        " $(linkcoverage_s)"
+      target-cov        " $(linkcoverage_s)"
 
 macro_append use_linkopts "" \
-	coverage            " $(linkcoverage_s) " 
+	  target-cov            " $(linkcoverage_s) "
 
 
 
-macro cppflags  " -fmessage-length=0 -Df2cFortran -fPIC -shared -D_GNU_SOURCE -Dlinux -Dunix -pipe -ansi -Wall -Wextra -pthread " \
-      Darwin    " -Df2cFortran -fPIC -D_GNU_SOURCE -Dunix -pipe -ansi -Wall -Wextra -Wno-long-double " \
-      WIN32     '$(includes) /D "WIN32" /D "_MBCS"  /D "_WINDOWS" /FD /c /nologo /W3 /GX /MD /GR /Zm500'
+macro cppflags         " -fmessage-length=0 -Df2cFortran -fPIC -shared -D_GNU_SOURCE -Dlinux -Dunix -pipe -ansi -Wall -Wextra -pthread " \
+      target-darwin    " -Df2cFortran -fPIC -D_GNU_SOURCE -Dunix -pipe -ansi -Wall -Wextra -Wno-long-double " \
+      target-winxp     '$(includes) /D "WIN32" /D "_MBCS"  /D "_WINDOWS" /FD /c /nologo /W3 /GX /MD /GR /Zm500'
 
 # macro_append cppflags " -msse2 -mfpmath=sse" \
-#             WIN32    " /arch:SSE2"
+#             target-winxp    " /arch:SSE2"
+
+macro_append cppflags "" \
+      GAUDI_V21&target-gcc4 " -fvisibility=hidden " \
+      G21_HIDE_SYMBOLS&target-gcc4 " -fvisibility=hidden -fvisibility-inlines-hidden "
+
+# Use Gaudi v20 compatibility mode unless we have the extra tag GAUDI_V21
+macro_append pp_cppflags  " -DGAUDI_V20_COMPAT " \
+             GAUDI_V21    "" \
+             GAUDI_V22    " -DGAUDI_V22_API "
+macro_append pp_cppflags "" \
+      G21_NEW_INTERFACES " -DG21_NEW_INTERFACES "
+macro_append pp_cppflags "" \
+        G21_HIDE_SYMBOLS " -DG21_HIDE_SYMBOLS "
+macro_append pp_cppflags "" \
+           G21_NO_ENDREQ " -DG21_NO_ENDREQ "
+macro_append pp_cppflags "" \
+       G21_NO_DEPRECATED " -DG21_NO_DEPRECATED "
+macro_append pp_cppflags "" \
+      G22_NEW_SVCLOCATOR " -DG22_NEW_SVCLOCATOR "
+macro_append pp_cppflags "" \
+       G22_NO_DEPRECATED " -DG22_NO_DEPRECATED "
 
 macro_append cppflags  "" \
-             slc4-ia32 " -m32" \
-             slc5-ia32 " -m32"
+      target-gcc&target-i686&host-x86_64 " -m32" \
+      target-gcc&target-i386&host-x86_64 " -m32"
 
-# FIXME: (MCl) Temporaty work-around until gccxml understands unordered_map
+# FIXME: (MCl) Temporary work-around until gccxml understands unordered_map
 macro_append cppflags "" \
-              gcc43 " -Wno-deprecated"
+         target-gcc43 " -Wno-deprecated"
 
 # ppcmd=-I can be used on Windows as on Linux
 macro ppcmd "-I"
 
 # Fortran compiler
-macro for       "g77" \
-      Darwin    "gfortran -ff2c" \
-      WIN32     "f77.exe"
+macro for_name      "gfortran" \
+      target-slc4   "g77" \
+      target-darwin "gfortran -ff2c" \
+      target-winxp  "f77.exe"
+      
+macro for "$(for_name)"
+      
 macro_append fflags  "" \
-      slc4-ia32      " -m32" \
-      slc5-ia32      " -m32"
+      target-gcc&target-i686&host-x86_64 " -m32" \
+      target-gcc&target-i386&host-x86_64 " -m32"
 
 macro_append shlibflags ""\
-             slc4-ia32  " -m32" \
-             slc5-ia32  " -m32"
+      target-gcc&target-i686&host-x86_64 " -m32" \
+      target-gcc&target-i386&host-x86_64 " -m32"
 
-macro fflags    "-fmessage-length=0 -O2 -fdollar-ok -ff90 -w -fPIC" \
-      Darwin    "-fno-automatic -fdollar-ok -w" \
-      WIN32     '/compile_only /nologo /warn:nofileopt /warn:nouncalled /fpp:"/m" /fpp:"/I.." '
+macro fflags           "-fmessage-length=0 -O2 -fdollar-ok -ff90 -w -fPIC" \
+      target-darwin    "-fno-automatic -fdollar-ok -w" \
+      target-winxp     '/compile_only /nologo /warn:nofileopt /warn:nouncalled /fpp:"/m" /fpp:"/I.." '
 
 # macro_append fflags " -msse2 -mfpmath=sse" \
-#             WIN32    " "
+#             target-winxp    " "
 
-macro fcomp     "$(for) -c $(fincludes) $(fdebugflags) $(fflags) $(pp_fflags)" \
-      WIN32     "$(for) $(fdebugflags) $(fflags) $(pp_fflags)"
+macro fcomp            "$(for) -c $(fincludes) $(fdebugflags) $(fflags) $(pp_fflags)" \
+      target-winxp     "$(for) $(fdebugflags) $(fflags) $(pp_fflags)"
 
 # C compiler
 
 macro_append cflags " -fmessage-length=0 -fPIC " \
-             WIN32    " "
+             target-winxp    " "
 macro_append cflags  "" \
-      slc4-ia32      " -m32" \
-      slc5-ia32      " -m32"
+      target-gcc&target-i686&host-x86_64 " -m32" \
+      target-gcc&target-i386&host-x86_64 " -m32"
 
 # macro_append cflags " -msse2 -mfpmath=sse" \
-#             WIN32    " /arch:SSE2"
+#             target-winxp    " /arch:SSE2"
 
 # Link options
 
@@ -702,72 +698,72 @@ macro_append cflags  "" \
 # The following allows for potential platform-specific overrides of the
 # defaults.
 
-macro makeLinkMap     ""\
-      Linux           "-Wl,-Map,Linux.map"\
-      WIN32           "/map"
+macro makeLinkMap            ""\
+      target-linux           "-Wl,-Map,Linux.map"\
+      target-winxp           "/map"
 
 macro cpplinkflags "" \
-      Linux          "-Wl,-Bdynamic $(linkdebugflags) -ldl -Wl,--as-needed " \
-      vc++6.0        "/nologo /machine:ix86 $(linkdebugflags) $(makeLinkMap) /nodefaultlib kernel32.lib user32.lib ws2_32.lib advapi32.lib shell32.lib msvcrt.lib msvcprt.lib msvcirt.lib oldnames.lib " \ 
-      vc++7.0        "/nologo /machine:ix86 $(linkdebugflags) $(makeLinkMap) /nodefaultlib kernel32.lib user32.lib ws2_32.lib advapi32.lib shell32.lib msvcrt.lib msvcprt.lib oldnames.lib "  \
-      vc++7.1        "/nologo /machine:ix86 $(linkdebugflags) $(makeLinkMap) /nodefaultlib kernel32.lib user32.lib ws2_32.lib advapi32.lib shell32.lib msvcrt.lib msvcprt.lib oldnames.lib "  
+      target-linux "-Wl,-Bdynamic $(linkdebugflags) -ldl -Wl,--as-needed " \
+      target-vc    "/nologo /machine:ix86 $(linkdebugflags) $(makeLinkMap) /nodefaultlib kernel32.lib user32.lib ws2_32.lib advapi32.lib shell32.lib msvcrt.lib msvcprt.lib oldnames.lib "
 
 macro_append cpplinkflags "" \
-      Linux      "-Wl,--no-undefined " 
-
-macro_append cpplinkflags  ""\
-      Unix&static           " -ldl"
+      target-linux               "-Wl,--no-undefined "
 
 macro_append cpplinkflags  "" \
-      slc4-ia32            " -m32" \
-      slc5-ia32            " -m32"
+      target-gcc&target-i686&host-x86_64 " -m32" \
+      target-gcc&target-i386&host-x86_64 " -m32"
 
 macro_append cpplinkflags "" \
-      coverage " $(linkdebugflags) "
+      target-cov " $(linkdebugflags) "
 
 macro_append cpplinkflags "" \
-      profiled        " $(cppprofiled_s)"
+      target-pro        " $(cppprofiled_s)"
 
 macro cpplink         "$(cpp) $(cpplinkflags)" \
-      WIN32           "link.exe $(cpplinkflags)"
+      target-winxp           "link.exe $(cpplinkflags)"
 
 macro componentshr_linkopts "" \
-      Linux                 "-fPIC -Wl,-s -ldl -Wl,--as-needed " \
-      WIN32                 "/DLL "
+      target-linux          "-fPIC -ldl -Wl,--as-needed " \
+      target-winxp          "/DLL "
 
 macro_append componentshr_linkopts "" \
-      Linux        "-Wl,--no-undefined " 
-
-macro_remove componentshr_linkopts "" \
-      debug                        "-Wl,-s" \
-      coverage                     "-Wl,-s"
+      target-linux                 "-Wl,--no-undefined "
 
 macro_append componentshr_linkopts "" \
-      coverage  " $(linkdebugflags) "
+      target-linux&target-opt&strip-symbols "-Wl,-s "
 
 macro_append componentshr_linkopts "" \
-      slc4-ia32   " -m32" \
-      slc5-ia32   " -m32"
+      target-cov  " $(linkdebugflags) "
+
+macro_append componentshr_linkopts "" \
+      target-gcc&target-i686&host-x86_64 " -m32" \
+      target-gcc&target-i386&host-x86_64 " -m32"
+
+# Add 64-bit link options for SLC5. This overrides the default library segment alignment of 1MB
+macro_append componentshr_linkopts "" \
+       target-gcc&slc5&x86_64               " -Wl,-z,max-page-size=0x1000 "
+macro_append libraryshr_linkopts   "" \
+       target-gcc&slc5&x86_64               " -Wl,-z,max-page-size=0x1000 "
 
 macro libraryshr_linkopts   "" \
-      Linux                 "-fPIC -ldl -Wl,--as-needed " \
-      WIN32                 "/DLL"
+      target-linux          "-fPIC -ldl -Wl,--as-needed " \
+      target-winxp          "/DLL"
 
 macro_append libraryshr_linkopts "" \
-      Linux            "-Wl,--no-undefined "
+      target-linux               "-Wl,--no-undefined "
 
 macro_append libraryshr_linkopts   "" \
-	coverage  " $(linkdebugflags) "
+	  target-cov  " $(linkdebugflags) "
 
 macro_append libraryshr_linkopts   "" \
-        slc4-ia32             " -m32" \
-        slc5-ia32             " -m32"
+      target-gcc&target-i686&host-x86_64 " -m32" \
+      target-gcc&target-i386&host-x86_64 " -m32"
 
 macro application_linkopts  "" \
-      Linux                 "-Wl,--export-dynamic "
+      target-linux                 "-Wl,--export-dynamic "
 
 macro shlibsuffix   "so" \
-      WIN32         "dll"
+      target-winxp         "dll"
 
 
 #cmtpath_pattern \
@@ -778,34 +774,6 @@ macro shlibsuffix   "so" \
 #apply_pattern get_files scripts=symlink.sh name=GaudiPolicy
 
 #macro GaudiPolicy_CMT_files "../src/symlink.sh"
-
-#-------------------------------------------------------------------
-# SLC3 backward compatibility
-#-------------------------------------------------------------------
-# Marco Clemencic: this section is meant to collect all the hacks to allow
-#                  compilation on SCL3/gcc3.2.3, so that it can be removed easily  
-
-# Options that gcc 3.2.3 does not understand: 
-
-# * "-Wextra" is the new name of "-W"
-macro_remove cppflags      "" \
-      slc3_ia32_gcc323     "-Wextra" \
-      slc3_ia32_gcc323_dbg "-Wextra"
-macro_append cppflags      "" \
-      slc3_ia32_gcc323     "-W" \
-      slc3_ia32_gcc323_dbg "-W"
-
-# * "--as-needed" (linker)
-macro_remove cpplinkflags  "" \
-      slc3_ia32_gcc323     "-Wl,--as-needed" \
-      slc3_ia32_gcc323_dbg "-Wl,--as-needed"
-macro_remove componentshr_linkopts  "" \
-      slc3_ia32_gcc323              "-Wl,--as-needed" \
-      slc3_ia32_gcc323_dbg          "-Wl,--as-needed"
-macro_remove libraryshr_linkopts  "" \
-      slc3_ia32_gcc323            "-Wl,--as-needed" \
-      slc3_ia32_gcc323_dbg        "-Wl,--as-needed"
-
 
 #-------------------------------------------------------------------
 # begin of genconf
@@ -826,14 +794,14 @@ public
 #
 
 macro genconfDir    "/genConf/" \
-      WIN32         "\genConf\"
+      target-winxp         "\genConf\"
 
 cmtpath_pattern \
     macro genconfInstallDir "" \
-       <project>_without_installarea&Unix "$(<package>_root)/python" \
-       <project>_without_installarea&WIN32 "$(<package>_root)\python" \
-       <project>_with_installarea&Unix "<path>/$(<project>_installarea_prefix)/python"\
-       <project>_with_installarea&WIN32 '"<path>\$(<project>_installarea_prefix)\python"'
+       <project>_without_installarea&target-unix "$(<package>_root)/python" \
+       <project>_without_installarea&target-winxp "$(<package>_root)\python" \
+       <project>_with_installarea&target-unix "<path>/$(<project>_installarea_prefix)/python"\
+       <project>_with_installarea&target-winxp '"<path>\$(<project>_installarea_prefix)\python"'
 
 make_fragment genconfig -header=genconfig_header
 
@@ -855,16 +823,16 @@ macro genconfig_preload ""
 pattern genconfig_add_preload \
    macro_append genconfig_preload "--load-library=<library> " ;
 
-# this pattern creates the helper library 
+# this pattern creates the helper library
 
 pattern genconf_helper_lib \
    library <package>GenConfHelperLib <src> ; \
    macro <package>_genconfig_preload_lib "$(<package>_root)/$(tag)/$(library_prefix)<package>GenConfHelperLib.$(shlibsuffix)" \
-              WIN32             "$(<package>_root)\$(tag)\$(library_prefix)<package>GenConfHelperLib.$(shlibsuffix)" ; \
+              target-winxp             "$(<package>_root)\$(tag)\$(library_prefix)<package>GenConfHelperLib.$(shlibsuffix)" ; \
    macro <package>GenConfHelperLib_shlibflags "$(<package>GenConfHelperLib_use_linkopts)" ; \
    apply_pattern linker_library library=<package>GenConfHelperLib ; \
    macro_remove <package>_linkopts " -l<package>GenConfHelperLib" \
-              WIN32                " <package>GenConfHelperLib.lib" ; \
+              target-winxp                " <package>GenConfHelperLib.lib" ; \
    macro_append <package>Conf_dependencies " <package>GenConfHelperLib "
 
 # this pattern uses the helper library. the "pkg" argument is the package
@@ -896,8 +864,8 @@ pattern generate_configurables \
 
 pattern generate_configurables_internal \
   macro <package>_genConf_python "" \
-       <project>_without_installarea&Unix "$(genconfInstallDir)" \
-       <project>_without_installarea&WIN32 "$(genconfInstallDir)" ; \
+       <project>_without_installarea&target-unix "$(genconfInstallDir)" \
+       <project>_without_installarea&target-winxp "$(genconfInstallDir)" ; \
   path_remove  PYTHONPATH ${<package>_genConf_python} ; \ 
   path_prepend PYTHONPATH ${<package>_genConf_python} ; \
   private ; \
@@ -988,7 +956,7 @@ pattern QMTestCommon \
 pattern QMTest \
   apply_pattern QMTestCommon ; \
   private ; \
-    macro qmtest_local_dir "../tests/qmtest" WIN32 "..\tests\qmtest" ; \
+    macro qmtest_local_dir "../tests/qmtest" target-winxp "..\tests\qmtest" ; \
     set QMTESTLOCALDIR "" QMTest "$(qmtest_local_dir)" ; \
     action qmtest_run "cmt -tag_add=QMTest run python $(GaudiPolicy_root)/cmt/fragments/run_qmtest.py $(package) $(cmt_args)" ; \
     macro_append qmtest_run_dependencies " tests " ; \
@@ -1003,7 +971,7 @@ pattern QMTestSummarize \
     macro qmtest_summarize_script "$(GaudiPolicy_root)/cmt/fragments/qmtest_summarize.py" ; \
     action qmtest_summarize "cmt -tag_add=QMTest run python $(qmtest_summarize_script) $(cmt_args)" ; \
     action TestProject "cmt br cmt TestPackage ; cmt qmtest_summarize" \
-                 WIN32 "cmt br cmt TestPackage & cmt qmtest_summarize" ; \
+                 target-winxp "cmt br cmt TestPackage & cmt qmtest_summarize" ; \
   end_private
 
 # Add the Gaudi specialized test extension to the QMTest path
@@ -1102,7 +1070,9 @@ make_fragment template -header=template_header -dependencies
 # Path cleaner
 #-------------------------------------------------------------------
 
-macro strip_script "$(GAUDIPOLICYROOT)/scripts/StripPath" WIN32 "$(GAUDIPOLICYROOT)\scripts\StripPath" 
+macro strip_script "$(GAUDIPOLICYROOT)/scripts/StripPath" \
+     no-strip-path "" \
+      target-winxp "$(GAUDIPOLICYROOT)\scripts\StripPath"
 
 cmtpath_pattern \
     setup_script $(strip_script) ;
@@ -1113,13 +1083,13 @@ cmtpath_pattern \
 # 
 #-------------------------------------------------------------------
 macro GenConfUser_script "genconfuser.py" \
-                   WIN32 "genconfuser.bat"
+                   target-winxp "genconfuser.bat"
 pattern real_genconfuser \
 	private ; \
 	macro <package>GenConfUser_output "$(<package>_root)$(genconfDir)<package>/<package>_user_confDb.py" \
-	                            WIN32 "$(<package>_root)$(genconfDir)<package>\<package>_user_confDb.py" ; \
+	                            target-winxp "$(<package>_root)$(genconfDir)<package>\<package>_user_confDb.py" ; \
 	macro <package>GenConfUser_python "$(<package>_root)/python" \
-                                    WIN32 "$(<package>_root)\python" ; \
+                                    target-winxp "$(<package>_root)\python" ; \
 	macro <package>GenConfUser_command "$(GenConfUser_script) -r $(<package>GenConfUser_python) -o $(<package>GenConfUser_output) <package> $(<package>ConfUserModules)" ; \
 	apply_pattern CallCommand target=<package>GenConfUser ; \
 	document merge_genconfDb <package>ConfUserDbMerge -group=<group> \

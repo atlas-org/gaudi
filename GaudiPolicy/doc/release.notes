@@ -1,5 +1,135 @@
 package GaudiPolicy
-package manager: Pere Mato
+package manager: Marco Clemencic
+
+! 2009-07-14 - Marco Clemencic
+ - Modified the library fragment on for NMake to work with both CMT
+   v1r20p20070208 and v1r20p20090520.
+
+================ GaudiPolicy v10r1 ====================================
+! 2009-07-09 - Marco Clemencic
+ - Reverted to the original manipulation of PYTHONPATH for testing.
+
+! 2009-07-08 - Marco Clemencic
+ - Re-enabled distcc when using the LCG-distributed compiler.
+
+! 2009-07-06 - Marco Clemencic
+ - Fixed bug #52831: Disable StripPath in GaudiPolicy
+   Added a tag to disable the "strip path" setup script.
+
+! 2009-07-03 - Marco Clemencic
+ - Fixed a problem introduced with the latest change (too many removals from
+   PYTHONPATH).
+
+! 2009-07-02 - Marco Clemencic, Hubert Degaudenzi
+ - Modified the patterns for PYTHONPATH to remove the project name or the
+   package name instead of the full path to them. 
+
+================ GaudiPolicy v10r0 ====================================
+  *** requires LCGCMT >= 56b ***
+
+! 2009-06-26 - Marco Clemencic
+ - Modified to use the new features of LCG_Setting in LCGCMT 56b. Cannot work
+   with lower versions.
+ - Modified genconfig_header to allow easier debugging. The environment variable
+   GENCONF_ECHO can be set to have the genconf command line printed.
+ - Removed the link option "-Wl,-s" for Linux optimized libraries to make the
+   profiling easier. It can be re-enabled with the tag "strip-symbols".
+ - Disabled distcc when using the LCG-distributed compiler (the tag force-distcc
+   can be used for testing).
+
+! 2009-06-22 - Marco Clemencic
+ - Disable the macros for the visibility of symbols on Windows, because it is
+   impossible (currently) to make coexists the gcc and VC ways.
+ - Fixed a problem with local installations on Win32.
+
+! 2009-06-11 - Hubert Degaudenzi
+ - use the new LCG tag convention.
+ - removed slc3
+ - removed static build
+ 
+! 2009-06-11 - Marco Clemencic
+ - Modified the way to locate gcc43 (expected to be in LGC_contrib).
+ - Use the special imported fragments "library" and "dependencies" only with
+   CMT v1r20p20070208 (they do not work with most recent versions).
+
+! 2009-06-10 - Marco Clemencic
+ - Imported and modified the library fragment and the linking .bat scripts to
+   avoid the installation of .lib files for non-linker libraries (components and
+   dictionaries).
+
+! 2009-06-05 - Marco Clemencic
+ - Added a part of GaudiFilterExecutable (in GaudiTest.py) that is requested on
+   Win32.
+
+! 2009-05-26 - Marco Clemencic
+ - Modified createProjVersHeader.py to create the destination directory if it
+   does not exist.
+ - Removed the "touch" command in merge_genconfDb_header, not needed because the
+   Python script is able to handle new files (related to bug #50600). 
+ 
+================ GaudiPolicy v9r1 ====================================
+! 2009-05-12 - Marco Clemencic
+ - Fixed bug #50070: error in GaudiPolicy for gcc43 and 32 bits.
+   The native compiler must be used even when building i686 binaries on
+   x86_64.
+
+! 2009-04-27 - Marco Clemencic
+ - Added specific macros to disable specific backward compatibility hacks.
+   See GaudiKernel release.notes.
+
+================ GaudiPolicy v9r0 ====================================
+! 2009-04-27 - Marco Clemencic
+ - Automatic support for GCC 4.3 at CERN.
+   The value of CMTCONFIG triggers the correct setting of PATH and
+   LD_LIBRARY_PATH. It requires LCGCMT 56 and will be obsolete with LCGCMT 56a.
+
+! 2009-04-24 - Marco Clemencic
+ - Extended GaudiTest.py with a re-implementation of the QMTest
+   TimeoutExecutable class that allows to get the stack trace for a process
+   being terminated. 
+
+! 2009-04-21 - Marco Clemencic
+ - Added a work-around in install.py for a problem of shutil.copy2 on win32
+   as of Python 2.5 (fixed in 2.5.1). See
+    # http://bugs.python.org/issue1671965
+    # http://bugs.python.org/issue1565150
+
+! 2009-03-13 - Marco Clemencic
+ - Added the tag GAUDI_V22 to enable future API changes.
+ - Minor updates of GaudiTest.py to absorb changes in the reference files. 
+
+! 2009-02-13 - Marco Clemencic
+ - Fixed a problem in the histogram summary comparison in GaudiTest.py.
+   If only the header was present (GaudiHistoAlg.HistoPrint == False), it was
+   ignored.
+
+! 2009-01-29 - Marco Clemencic
+ - Symbol visibility
+   - Added the (C++) compiler flag -fvisibility=hidden for gcc-4 to switch on
+     the symbol hiding if the CMT tag "GAUDI_V21" is used. In the future it
+     should be on by default unless a special tag is used
+     (e.g. EXPORT_ALL_SYMBOLS). 
+   - When compiling a linker library the preprocessor macro GAUDI_LINKER_LIBRARY
+     is defined, so that the macro GAUDI_API (defined in GaudiKernel) is mapped
+     to GAUDI_EXPORT. The default (for component libraries) is to have GAUDI_API
+     mapped to GAUDI_IMPORT. Unfortunately, the .cpp files of the component
+     library that lives in the same package of a linker library are also
+     compiled with GAUDI_LINKER_LIBRARY. This has to be fixed later.
+   - Modified cmt_make_shlib.bat to avoid the creation of the .def file if the
+     environment variable EXPORT_ALL_SYMBOLS is defined (done by the
+     linker_library pattern if the visibility control is enabled, i.e.
+     GAUDI_V21). A hack has been introduced to exclude some symbols from a
+     linker library (detail@boost) to allow the compilation of GaudiKernel (it
+     overcomes the 32000 symbols limit of VC71).
+
+! 2009-01-23 - Marco Clemencic
+ - Moved the preprocessor macro GAUDI_V20_COMPAT to the right place (pp_cppflags
+   instead of cppflags) to get it propagated to gccxml too.
+
+! 2009-01-22 - Marco Clemencic
+ - Added by default the preprocessor macro GAUDI_V20_COMPAT. That macro is used
+   to enable the compatibility hacks needed to allow a smooth migration between
+   Gaudi v20 and Gaudi v21. It can be disabled using the CMT tag GAUDI_V21.
 
 ================ GaudiPolicy v8r7 ====================================
 ! 2008-12-12 - Marco Clemencic
