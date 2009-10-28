@@ -4,9 +4,12 @@
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/IPartPropSvc.h"
 #include "HepPDT/ParticleDataTable.hh"
+#include "HepPDT/TableBuilder.hh"
 
 #include <vector>
 #include <string>
+#include <utility>
+#include <iostream>
 
 // Forward declarations
 template <class TYPE> class SvcFactory;
@@ -29,18 +32,18 @@ class PartPropSvc: public Service, virtual public IPartPropSvc {
 public:
 
   virtual StatusCode initialize();
+  virtual StatusCode reinitialize();
   virtual StatusCode finalize();
 
   // Query the interfaces.
   virtual StatusCode queryInterface( const InterfaceID& riid, 
 				     void** ppvInterface );
 
-  // Service type.
-  virtual const InterfaceID& type() const;
-
   // The table
-  HepPDT::ParticleDataTable *PDT() { return m_pdt; };
-
+  HepPDT::ParticleDataTable *PDT();
+  
+  void setUnknownParticleHandler( HepPDT::ProcessUnknownID*, 
+				  const std::string&);
 protected:
 
   PartPropSvc( const std::string& name, ISvcLocator* svc );
@@ -53,11 +56,22 @@ private:
   // Allow SvcFactory to instantiate the service.
   friend class SvcFactory<PartPropSvc>;
 
-  std::string m_inputType;
-  std::vector<std::string> m_pdtFiles;
+  StatusCode createTable();
+  std::vector< std::pair<std::string, 
+			 bool(*) (std::istream&,HepPDT::TableBuilder&)> > m_inputs;
+
+  StringProperty m_pdtFiles;
+  HepPDT::ProcessUnknownID* m_upid;
+  std::string m_upid_name;
 
   HepPDT::ParticleDataTable *m_pdt;
 
+  bool (*parseTableType(std::string&))(std::istream&, HepPDT::TableBuilder&);
+
+  mutable MsgStream m_log;
+
+  bool m_upid_local;
+  
 
 };
 

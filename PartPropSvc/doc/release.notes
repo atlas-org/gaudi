@@ -1,5 +1,19 @@
-Package : ParticleProp
+Package : PartPropSvc
 Package manager : Charles Leggett
+
+================ PartPropSvc v3r1 ====================================
+! 20090820 Charles Leggett
+ - delete m_pdt in finalize instead of destructor
+ - delete UnknownParticleHandler in finalize if created locally
+
+
+================ PartPropSvc v3r0 ====================================
+! 20090729 Charles Leggett
+ - change way jobOpts handled: now assign type with each file
+ - make log member var
+ - allow user to specify UnknownParticleHandler function
+ - instantiate PDT on first use, not before
+
 
 ! 20081028 Marco Clemencic
  - Removed extra "-lHepPID" from link options (already included in the LCG
