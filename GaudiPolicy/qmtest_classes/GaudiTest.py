@@ -19,6 +19,7 @@ from subprocess import Popen, PIPE, STDOUT
 
 import qm
 from qm.test.classes.command import ExecTestBase
+from qm.test.result_stream import ResultStream
 
 ### Needed by the re-implementation of TimeoutExecutable
 import qm.executable
@@ -258,6 +259,22 @@ class CMT:
         else:
             return self.show(["macro_value",k]).strip()
 
+## Locates an executable in the executables path ($PATH) and returns the full
+#  path to it.
+#  If the excutable cannot be found, None is returned
+def which(executable):
+    for d in os.environ.get("PATH").split(os.pathsep):
+        fullpath = os.path.join(d,executable)
+        if os.path.exists(fullpath):
+            return fullpath
+    return None
+
+def rationalizepath(p):
+    p = os.path.normpath(os.path.expandvars(p))
+    if os.path.exists(p):
+        p = os.path.realpath(p)
+    return p
+
 ########################################################################
 # Output Validation Classes
 ########################################################################
@@ -424,7 +441,9 @@ for w,o,r in [
               # Normalize UUID, except those ending with all 0s (i.e. the class IDs)
               (None,r"[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}(?!-0{12})-[0-9A-Fa-f]{12}","00000000-0000-0000-0000-000000000000"),
               # Absorb a change in ServiceLocatorHelper
-              ("ServiceLocatorHelper::", "ServiceLocatorHelper::(create|locate)Service", "ServiceLocatorHelper::service")
+              ("ServiceLocatorHelper::", "ServiceLocatorHelper::(create|locate)Service", "ServiceLocatorHelper::service"),
+              # Remove the leading 0 in Windows' exponential format
+              (None, r"e([-+])0([0-9][0-9])", r"e\1\2"),
               ]: #[ ("TIMER.TIMER","[0-9]+[0-9.]*", "") ]
     normalizeExamples += RegexpReplacer(o,r,w)
 normalizeExamples = LineSkipper(["//GP:",
@@ -439,8 +458,11 @@ normalizeExamples = LineSkipper(["//GP:",
                                  "DEBUG No writable file catalog found which contains FID:",
                                  "0 local", # hack for ErrorLogExample
                                  "DEBUG Service base class initialized successfully", # changed between v20 and v21 
+                                 "DEBUG Incident  timing:", # introduced with patch #3487
                                  # This comes from ROOT, when using GaudiPython 
                                  'Note: (file "(tmpfile)", line 2) File "set" already loaded',
+                                 # The signal handler complains about SIGXCPU not defined on some platforms
+                                 'SIGXCPU',
                                  ],regexps = [
                                  r"^#", # Ignore python comments
                                  r"(Always|SUCCESS)\s*(Root f|[^ ]* F)ile version:", # skip the message reporting the version of the root file
@@ -1206,12 +1228,16 @@ class GaudiExeTest(ExecTestBase):
         causes = self.CheckHistosSummaries(stdout, result, causes)
         
         if causes: # Write a new reference file for stdout
-            newref = open(reference + ".new","w")
-            # sanitize newlines
-            for l in stdout.splitlines():
-                newref.write(l.rstrip() + '\n')
-            del newref # flush and close
-        
+            try:
+                newref = open(reference + ".new","w")
+                # sanitize newlines
+                for l in stdout.splitlines():
+                    newref.write(l.rstrip() + '\n')
+                del newref # flush and close
+            except IOError:
+                # Ignore IO errors when trying to update reference files
+                # because we may be in a read-only filesystem
+                pass
         
         # check standard error
         reference = self._expandReferenceFileName(self.error_reference)
@@ -1337,12 +1363,6 @@ class GaudiExeTest(ExecTestBase):
         if self.PlatformIsNotSupported(context, result):
             return
         
-        def rationalizepath(p):
-            p = os.path.normpath(os.path.expandvars(p))
-            if os.path.exists(p):
-                p = os.path.realpath(p)
-            return p
-        
         # Prepare program name and arguments (expanding variables, and converting to absolute) 
         if self.program:
             prog = rationalizepath(self.program)
@@ -1389,8 +1409,11 @@ class GaudiExeTest(ExecTestBase):
         origdir = os.getcwd()
         if self.workdir:
             os.chdir(str(os.path.normpath(os.path.expandvars(self.workdir))))
-        elif "qmtest.tmpdir" in context and self.use_temp_dir == "true":
-            os.chdir(context["qmtest.tmpdir"])
+        elif self.use_temp_dir == "true":
+            if "QMTEST_TMPDIR" in os.environ:
+                os.chdir(os.environ["QMTEST_TMPDIR"])
+            elif "qmtest.tmpdir" in context: 
+                os.chdir(context["qmtest.tmpdir"])
         
         if "QMTEST_IGNORE_TIMEOUT" not in os.environ:
             self.timeout = max(self.timeout,600)
@@ -1398,6 +1421,8 @@ class GaudiExeTest(ExecTestBase):
             self.timeout = -1
         
         try:
+            # Generate eclipse.org debug launcher for the test 
+            self._CreateEclipseLaunch(prog, args, destdir = origdir)
             # Run the test
             self.RunProgram(prog, 
                             [ prog ] + args,
@@ -1488,7 +1513,12 @@ class GaudiExeTest(ExecTestBase):
             # The target program terminated with a signal.  Construe
             # that as a test failure.
             signal_number = str(os.WTERMSIG(exit_status))
-            result.Fail("Program terminated by signal.")
+            if not stack_trace:
+                result.Fail("Program terminated by signal.")
+            else:
+                # The presence of stack_trace means tha we stopped the job because
+                # of a time-out
+                result.Fail("Exceeded time limit (%ds), terminated." % timeout)
             result["ExecTest.signal_number"] = signal_number
             result["ExecTest.stdout"] = result.Quote(e.stdout)
             result["ExecTest.stderr"] = result.Quote(e.stderr)
@@ -1496,7 +1526,12 @@ class GaudiExeTest(ExecTestBase):
             # The target program was stopped.  Construe that as a
             # test failure.
             signal_number = str(os.WSTOPSIG(exit_status))
-            result.Fail("Program stopped by signal.")
+            if not stack_trace:
+                result.Fail("Program stopped by signal.")
+            else:
+                # The presence of stack_trace means tha we stopped the job because
+                # of a time-out
+                result.Fail("Exceeded time limit (%ds), stopped." % timeout)
             result["ExecTest.signal_number"] = signal_number
             result["ExecTest.stdout"] = result.Quote(e.stdout)
             result["ExecTest.stderr"] = result.Quote(e.stderr)
@@ -1512,3 +1547,249 @@ class GaudiExeTest(ExecTestBase):
         result["ExecTest.stdout"] = result["ExecTest.stdout"].replace(esc,repr_esc)
         # TODO: (MCl) improve the hack for colors in standard output
         #             may be converting them to HTML tags
+
+    def _CreateEclipseLaunch(self, prog, args, destdir = None):
+        # Find the project name used in ecplise.
+        # The name is in a file called ".project" in one of the parent directories
+        projbasedir = os.path.normpath(destdir)
+        while not os.path.exists(os.path.join(projbasedir, ".project")):
+            oldprojdir = projbasedir
+            projbasedir = os.path.normpath(os.path.join(projbasedir, os.pardir))
+            # FIXME: the root level is invariant when trying to go up one level,
+            #        but it must be cheched on windows
+            if oldprojdir == projbasedir:
+                # If we cannot find a .project, so no point in creating a .launch file
+                return
+        # Use ElementTree to parse the XML file 
+        from xml.etree import ElementTree as ET
+        t = ET.parse(os.path.join(projbasedir, ".project"))
+        projectName = t.find("name").text
+
+        # prepare the name/path of the generated file
+        destfile = "%s.launch" % self._Runnable__id
+        if destdir:
+            destfile = os.path.join(destdir, destfile)
+        
+        if self.options.strip():
+            # this means we have some custom options in the qmt file, so we have
+            # to copy them from the temporary file at the end of the arguments
+            # in another file
+            tempfile = args.pop()
+            optsfile = destfile + os.path.splitext(tempfile)[1]
+            shutil.copyfile(tempfile, optsfile)
+            args.append(optsfile)
+        
+        # prepare the data to insert in the XML file
+        from xml.sax.saxutils import quoteattr # useful to quote XML special chars
+        data = {}
+        # Note: the "quoteattr(k)" is not needed because special chars cannot be part of a variable name,
+        # but it doesn't harm.
+        data["environment"] = "\n".join(['<mapEntry key=%s value=%s/>' % (quoteattr(k), quoteattr(v))
+                                         for k, v in os.environ.iteritems()])
+        
+        data["exec"] = which(prog)
+        
+        data["args"] = "&#10;".join(map(rationalizepath, args))
+        
+        if not self.use_temp_dir:
+            data["workdir"] = os.getcwd()
+        else:
+            # If the test is using a tmporary directory, it is better to run it
+            # in the same directory as the .launch file when debugged in eclipse
+            data["workdir"] = destdir
+        
+        data["project"] = projectName.strip()
+        
+        # Template for the XML file, based on eclipse 3.4 
+        xml = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.cdt.launch.applicationLaunchType">
+<booleanAttribute key="org.eclipse.cdt.debug.mi.core.AUTO_SOLIB" value="true"/>
+<listAttribute key="org.eclipse.cdt.debug.mi.core.AUTO_SOLIB_LIST"/>
+<stringAttribute key="org.eclipse.cdt.debug.mi.core.DEBUG_NAME" value="gdb"/>
+<stringAttribute key="org.eclipse.cdt.debug.mi.core.GDB_INIT" value=".gdbinit"/>
+<listAttribute key="org.eclipse.cdt.debug.mi.core.SOLIB_PATH"/>
+<booleanAttribute key="org.eclipse.cdt.debug.mi.core.STOP_ON_SOLIB_EVENTS" value="false"/>
+<stringAttribute key="org.eclipse.cdt.debug.mi.core.protocol" value="mi"/>
+<stringAttribute key="org.eclipse.cdt.launch.COREFILE_PATH" value=""/>
+<stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_ID" value="org.eclipse.cdt.debug.mi.core.CDebugger"/>
+<stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_REGISTER_GROUPS" value=""/>
+<stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_START_MODE" value="run"/>
+<booleanAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN" value="true"/>
+<stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN_SYMBOL" value="main"/>
+<booleanAttribute key="org.eclipse.cdt.launch.ENABLE_REGISTER_BOOKKEEPING" value="false"/>
+<booleanAttribute key="org.eclipse.cdt.launch.ENABLE_VARIABLE_BOOKKEEPING" value="false"/>
+<stringAttribute key="org.eclipse.cdt.launch.FORMAT" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&lt;contentList/&gt;"/>
+<stringAttribute key="org.eclipse.cdt.launch.GLOBAL_VARIABLES" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;globalVariableList/&gt;&#10;"/>
+<stringAttribute key="org.eclipse.cdt.launch.MEMORY_BLOCKS" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;memoryBlockExpressionList/&gt;&#10;"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_ARGUMENTS" value="%(args)s"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="%(exec)s"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="%(project)s"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value=""/>
+<stringAttribute key="org.eclipse.cdt.launch.WORKING_DIRECTORY" value="%(workdir)s"/>
+<booleanAttribute key="org.eclipse.cdt.launch.use_terminal" value="true"/>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/%(project)s"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="4"/>
+</listAttribute>
+<booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="false"/>
+<mapAttribute key="org.eclipse.debug.core.environmentVariables">
+%(environment)s
+</mapAttribute>
+<mapAttribute key="org.eclipse.debug.core.preferred_launchers">
+<mapEntry key="[debug]" value="org.eclipse.cdt.cdi.launch.localCLaunch"/>
+</mapAttribute>
+<listAttribute key="org.eclipse.debug.ui.favoriteGroups">
+<listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
+</listAttribute>
+</launchConfiguration>
+""" % data
+
+        # Write the output file
+        open(destfile, "w").write(xml)
+        #open(destfile + "_copy.xml", "w").write(xml)
+
+
+try:
+    import json
+except ImportError:
+    # Hack: json is not available, so I use the version we ship 
+    sys.path.append(os.path.dirname(__file__))
+    import simplejson as json
+
+class HTMLResultStream(ResultStream):
+    """An 'HTMLResultStream' writes its output to a set of HTML files.
+
+    The argument 'dir' is used to select the destination directory for the HTML
+    report.
+    The destination directory may already contain the report from a previous run
+    (for example of a different package), in which case it will be extended to
+    include the new data. 
+    """
+    arguments = [
+        qm.fields.TextField(
+            name = "dir",
+            title = "Destination Directory",
+            description = """The name of the directory.
+
+            All results will be written to the directory indicated.""",
+            verbatim = "true",
+            default_value = ""),
+    ]
+    
+    def __init__(self, arguments = None, **args):
+        """Prepare the destination directory.
+        
+        Creates the destination directory and store in it some preliminary
+        annotations and the static files found in the template directory
+        'html_report'. 
+        """
+        ResultStream.__init__(self, arguments, **args)
+        self._summary = []
+        self._summaryFile = os.path.join(self.dir, "summary.json")
+        self._annotationsFile = os.path.join(self.dir, "annotations.json")
+        # Prepare the destination directory using the template 
+        templateDir = os.path.join(os.path.dirname(__file__), "html_report")
+        if not os.path.isdir(self.dir):
+            os.makedirs(self.dir)
+        # Copy the files in the template directory excluding the directories
+        for f in os.listdir(templateDir):
+            src = os.path.join(templateDir, f)
+            dst = os.path.join(self.dir, f)
+            if not os.path.isdir(src) and not os.path.exists(dst):
+                shutil.copy(src, dst)
+        # Add some non-QMTest attributes
+        if "CMTCONFIG" in os.environ:
+            self.WriteAnnotation("cmt.cmtconfig", os.environ["CMTCONFIG"])
+        import socket 
+        self.WriteAnnotation("hostname", socket.gethostname())
+        
+    def _updateSummary(self):
+        """Helper function to extend the global summary file in the destination
+        directory.
+        """
+        if os.path.exists(self._summaryFile):
+            oldSummary = json.load(open(self._summaryFile))
+        else:
+            oldSummary = []
+        ids = set([ i["id"] for i in self._summary ])
+        newSummary = [ i for i in oldSummary if i["id"] not in ids ]
+        newSummary.extend(self._summary)
+        json.dump(newSummary, open(self._summaryFile, "w"),
+                  sort_keys = True)
+    
+    def WriteAnnotation(self, key, value):
+        """Writes the annotation to the annotation file.
+        If the key is already present with a different value, the value becomes
+        a list and the new value is appended to it, except for start_time and
+        end_time. 
+        """
+        # Initialize the annotation dict from the file (if present)
+        if os.path.exists(self._annotationsFile):
+            annotations = json.load(open(self._annotationsFile))
+        else:
+            annotations = {}
+        # hack because we do not have proper JSON support
+        key, value = map(str, [key, value])
+        if key == "qmtest.run.start_time":
+            # Special handling of the start time:
+            # if we are updating a result, we have to keep the original start
+            # time, but remove the original end time to mark the report to be
+            # in progress.
+            if key not in annotations:
+                annotations[key] = value
+            if "qmtest.run.end_time" in annotations:
+                del annotations["qmtest.run.end_time"]
+        else:
+            # All other annotations are added to a list
+            if key in annotations:
+                old = annotations[key]
+                if type(old) is list:
+                    if value not in old:
+                        annotations[key].append(value)
+                elif value != old:
+                    annotations[key] = [old, value]
+            else:
+                annotations[key] = value
+        # Write the new annotations file
+        json.dump(annotations, open(self._annotationsFile, "w"),
+                  sort_keys = True)
+         
+    def WriteResult(self, result):
+        """Prepare the test result directory in the destination directory storing
+        into it the result fields.
+        A summary of the test result is stored both in a file in the test directory
+        and in the global summary file. 
+        """
+        summary = {}
+        summary["id"] = result.GetId()
+        summary["outcome"] = result.GetOutcome()
+        summary["cause"] = result.GetCause()
+        summary["fields"] = result.keys()
+        summary["fields"].sort()
+        
+        # Since we miss proper JSON support, I hack a bit 
+        for f in ["id", "outcome", "cause"]:
+            summary[f] = str(summary[f])
+        summary["fields"] = map(str, summary["fields"])
+        
+        self._summary.append(summary)
+        
+        # format:
+        # testname/summary.json
+        # testname/field1
+        # testname/field2
+        testOutDir = os.path.join(self.dir, summary["id"])
+        if not os.path.isdir(testOutDir):
+            os.makedirs(testOutDir)
+        json.dump(summary, open(os.path.join(testOutDir, "summary.json"), "w"),
+                  sort_keys = True)
+        for f in summary["fields"]:
+            open(os.path.join(testOutDir, f), "w").write(result[f])
+        
+        self._updateSummary()
+        
+    def Summarize(self):
+        # Not implemented.
+        pass

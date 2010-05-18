@@ -1,11 +1,13 @@
 Package : PartPropSvc
 Package manager : Charles Leggett
 
-================ PartPropSvc v3r1 ====================================
-! 20090820 Charles Leggett
- - delete m_pdt in finalize instead of destructor
- - delete UnknownParticleHandler in finalize if created locally
+=== ATLAS Gaudi v20r4p6 ===
+! 2009-08-20: Charles Leggett
+ - PartPropSvc/PartPropSvc.cpp: delete things in finalize instead of dtor.
 
+=== ATLAS Gaudi v20r4p5 ===
+! 2009-06-04: Charles Leggett
+ - PartPropSvc.cpp: handle heavy ions
 
 ================ PartPropSvc v3r0 ====================================
 ! 20090729 Charles Leggett

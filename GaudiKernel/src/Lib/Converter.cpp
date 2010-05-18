@@ -2,6 +2,7 @@
 
 // Include Files
 #include "GaudiKernel/Converter.h"
+#include "GaudiKernel/INamedInterface.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IMessageSvc.h"
 #include "GaudiKernel/IDataManagerSvc.h"
@@ -216,8 +217,8 @@ Converter::service_i(const std::string& svcName, bool createIf,
 		     const InterfaceID& iid, void** ppSvc) const {
   StatusCode sc(StatusCode::FAILURE);
   // Check for name of conversion service
-  ConversionSvc* cnvsvc =
-    dynamic_cast<ConversionSvc*> (Converter::conversionSvc());
+  INamedInterface* cnvsvc =
+    dynamic_cast<INamedInterface*> (Converter::conversionSvc());
   if( cnvsvc != 0 ) {
     MsgStream log(msgSvc(),"Converter");
     ServiceLocatorHelper helper(*serviceLocator(), log, cnvsvc->name());

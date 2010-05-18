@@ -14,95 +14,41 @@ Command line:
    
 @author: Marco Clemencic <marco.clemencic@cern.ch>
 """
-# Needed to for the local copy of the function os.walk, introduced in Python 2.3
-# It must be removed when the support for Python 2.2 is dropped
-from __future__ import generators # should be at the first line to please Python 2.5
 _version = "$Id: install.py,v 1.15 2008/10/28 17:24:39 marcocle Exp $"
 
+import os, sys
+from os import (makedirs, listdir, rmdir, walk, sep)
+from os.path import (exists, isdir, getmtime, split, join, realpath, dirname,
+                     normpath, splitext, splitdrive)
+from pickle import (dump, load)
+from fnmatch import fnmatch
+import itertools, shutil
+
 def main():
-    try:
-        # optparse is available only since Python 2.3
-        from optparse import OptionParser
-        parser = OptionParser()
-        parser.add_option("-x","--exclude",action="append",
-                          metavar="PATTERN", default = [],
-                          dest="exclusions", help="which files/directories to avoid to install")
-        parser.add_option("-l","--log",action="store",
-                          dest="logfile", default="install.log",
-                          help="where to store the informations about installed files [default: %default]")
-        parser.add_option("-d","--destname",action="store",
-                          dest="destname", default=None,
-                          help="name to use when installing the source into the destination directory [default: source name]")
-        parser.add_option("-u","--uninstall",action="store_true",
-                          dest="uninstall", default=False,
-                          help="do uninstall")
-        parser.add_option("-s","--symlink",action="store_true",
-                          dest="symlink", default=False,
-                          help="create symlinks instead of copy")
-        #parser.add_option("-p","--permission",action="store",
-        #                  metavar="PERM",
-        #                  dest="permission",
-        #                  help="modify the permission of the destination file (see 'man chown'). Unix only.")
-        (opts,args) = parser.parse_args()
-    except ImportError:
-        # Old style option parsing
-        # It must be removed when the support for Python 2.2 is dropped
-        from getopt import getopt, GetoptError
-        from sys import argv,exit
-        class _DummyParserClass:
-            def __init__(self):
-                self.usage = "usage: install.py [options]"
-                self.help = """options:
-  -h, --help            show this help message and exit
-  -x PATTERN, --exclude=PATTERN
-                        which files/directories to avoid to install
-  -l LOGFILE, --log=LOGFILE
-                        where to store the informations about installed files
-                        [default: install.log]
-  -d DESTNAME, --destname=DESTNAME
-                        name to use when installing the source into the
-                        destination directory [default: source name]
-  -u, --uninstall       do uninstall
-  -s, --symlink         create symlinks instead of copy"""
-            def error(self,msg=None):
-                print self.usage + "\n"
-                if not msg:
-                    msg = self.help
-                print msg
-                exit(1)
-        parser = _DummyParserClass()
-        try:
-            optlist, args = getopt(argv[1:],"hx:l:d:us",
-                                   ["help","exclude","log","destname","uninstall","symlink"])
-        except GetoptError:
-            # print help information and exit:
-            parser.error()
-        # Dummy option class
-        class _DummyOptionsClass:
-            def __init__(self):
-                # defaults
-                self.exclusions = []
-                self.uninstall = False
-                self.logfile = "install.log"
-                self.destname = None
-                self.symlink = False
-        opts = _DummyOptionsClass()
-        for opt,val in optlist:
-            if opt in [ "-h", "--help" ]:
-                parser.error()
-            elif opt in [ "-x", "--exclude" ]:
-                opts.exclusions.append(val)
-            elif opt in [ "-l", "--log" ]:
-                opts.logfile = val
-            elif opt in [ "-d", "--destname" ]:
-                opts.destname = val
-            elif opt in [ "-u", "--uninstall" ]:
-                opts.uninstall = True
-            elif opt in [ "-s", "--symlink" ]:
-                opts.symlink = True
+    from optparse import OptionParser
+    parser = OptionParser()
+    parser.add_option("-x","--exclude",action="append",
+                      metavar="PATTERN", default = [],
+                      dest="exclusions", help="which files/directories to avoid to install")
+    parser.add_option("-l","--log",action="store",
+                      dest="logfile", default="install.log",
+                      help="where to store the informations about installed files [default: %default]")
+    parser.add_option("-d","--destname",action="store",
+                      dest="destname", default=None,
+                      help="name to use when installing the source into the destination directory [default: source name]")
+    parser.add_option("-u","--uninstall",action="store_true",
+                      dest="uninstall", default=False,
+                      help="do uninstall")
+    parser.add_option("-s","--symlink",action="store_true",
+                      dest="symlink", default=False,
+                      help="create symlinks instead of copy")
+    #parser.add_option("-p","--permission",action="store",
+    #                  metavar="PERM",
+    #                  dest="permission",
+    #                  help="modify the permission of the destination file (see 'man chown'). Unix only.")
+    (opts,args) = parser.parse_args()
+    
     # options consistency check
-    from pickle import dump,load
-    from os.path import realpath
     if opts.uninstall:
         if opts.exclusions:
             parser.error("Exclusion list does not make sense for uninstall")
@@ -138,51 +84,6 @@ def main():
                 opts.symlink, realpath(dirname(opts.logfile)))
         dump(log,open(opts.logfile,"wb"))
 
-from os import makedirs, listdir, rmdir
-from os.path import exists, isdir, getmtime, split, join, realpath, dirname
-
-try:
-    from os import walk
-except ImportError:
-    def walk(top, topdown=True, onerror=None):
-        """Copied from Python 2.3 os.py (see original file for copyright)
-        This function has been introduced in Python 2.3, and this copy should
-        be removed once the support for Python 2.2 is dropped.
-        """
-    
-        from os.path import join, isdir, islink
-    
-        # We may not have read permission for top, in which case we can't
-        # get a list of the files the directory contains.  os.path.walk
-        # always suppressed the exception then, rather than blow up for a
-        # minor reason when (say) a thousand readable directories are still
-        # left to visit.  That logic is copied here.
-        try:
-            # Note that listdir and error are globals in this module due
-            # to earlier import-*.
-            names = listdir(top)
-        except error, err:
-            if onerror is not None:
-                onerror(err)
-            return
-    
-        dirs, nondirs = [], []
-        for name in names:
-            if isdir(join(top, name)):
-                dirs.append(name)
-            else:
-                nondirs.append(name)
-    
-        if topdown:
-            yield top, dirs, nondirs
-        for name in dirs:
-            path = join(top, name)
-            if not islink(path):
-                for x in walk(path, topdown, onerror):
-                    yield x
-        if not topdown:
-            yield top, dirs, nondirs
-
 class LogFile:
     """
     Class to incapsulate the logfile functionalities.
@@ -215,7 +116,6 @@ def filename_match(name,patterns,default=False):
     """
     Check if the name is matched by any of the patterns in exclusions.
     """
-    from fnmatch import fnmatch
     for x in patterns:
         if fnmatch(name,x):
             return True
@@ -251,18 +151,16 @@ def expand_source_dir(source, destination, exclusions = [],
     return expansion
 
 def remove(file, logdir):
-    from os import remove
-    from os.path import normpath, splitext, exists
     file = normpath(join(logdir, file))
     try:
         print "Remove '%s'"%file
-        remove(file)
+        os.remove(file)
         # For python files, remove the compiled versions too 
         if splitext(file)[-1] == ".py":
             for c in ['c', 'o']:
                 if exists(file + c):
                     print "Remove '%s'" % (file+c)
-                    remove(file+c)
+                    os.remove(file+c)
         file_path = split(file)[0]
         while file_path and (len(listdir(file_path)) == 0):
             print "Remove empty dir '%s'"%file_path
@@ -276,16 +174,13 @@ def remove(file, logdir):
         
 
 def getCommonPath(dirname, filename):
-    from os import sep
-    from itertools import izip
-    from os.path import splitdrive
     # if the 2 components are on different drives (windows)
     if splitdrive(dirname)[0] != splitdrive(filename)[0]:
         return None
     dirl = dirname.split(sep)
     filel = filename.split(sep)
     commpth = []
-    for d, f in izip(dirl, filel):
+    for d, f in itertools.izip(dirl, filel):
         if d == f :
             commpth.append(d)
         else :
@@ -299,7 +194,6 @@ def getCommonPath(dirname, filename):
 
 def getRelativePath(dirname, filename):
     """ calculate the relative path of filename with regards to dirname """
-    import os.path
     # Translate the filename to the realpath of the parent directory + basename
     filepath,basename = os.path.split(filename)
     filename = os.path.join(os.path.realpath(filepath),basename)
@@ -317,11 +211,6 @@ def getRelativePath(dirname, filename):
     return relname
     
 def update(src,dest,old_dest = None, syml = False, logdir = realpath(".")):
-    from shutil import copy2
-    from sys import platform
-    from os.path import normpath
-    if platform != "win32":
-        from os import symlink
     realdest = normpath(join(logdir, dest))
     dest_path = split(realdest)[0]
     realsrc = normpath(join(dest_path,src))
@@ -335,14 +224,20 @@ def update(src,dest,old_dest = None, syml = False, logdir = realpath(".")):
             print "Create dir '%s'"%(dest_path)
             makedirs(dest_path)
         # the destination file is missing or older than the source
-        if syml and platform != "win32" :
+        if syml and sys.platform != "win32" :
             if exists(realdest):
                 remove(realdest,logdir)
             print "Create Link to '%s' in '%s'"%(src,dest_path)
-            symlink(src,realdest)
+            os.symlink(src,realdest)
         else:
-            print "Copy '%s' -> '%s'"%(src,realdest)
-            copy2(realsrc,realdest) # do the copy (cp -p src dest)
+            print "Copy '%s' -> '%s'"%(src, realdest)
+            if exists(realdest):
+                # If the destination path exists it is better to remove it before
+                # doing the copy (shutil.copystat fails if the destination file
+                # is not owned by the current user).
+                os.remove(realdest)
+            shutil.copy2(realsrc, realdest) # do the copy (cp -p src dest)
+            
     #if old_dest != dest: # the file was installed somewhere else
     #    # remove the old destination
     #    if old_dest is not None:

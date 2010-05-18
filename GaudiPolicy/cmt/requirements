@@ -1,11 +1,14 @@
 package GaudiPolicy
-version v10r1
+version v10r7
 
 branches cmt doc
 
 # LCG debug libraries are not distributed (LOCAL) ===========================
 use LCG_Settings *
 use Python * LCG_Interfaces -no_auto_imports
+
+# Add Google malloc replacement to the LD_LIBRARY_PATH
+use tcmalloc v* LCG_Interfaces -no_auto_imports
 
 # Note: Local installations except WinXP use the optimized versions of the AA
 #       projects instead of the debug ones.
@@ -169,9 +172,11 @@ pattern declare_scripts \
 cmtpath_pattern \
    macro <project>_install_python "" \
          <project>_without_installarea "" \
-         <project>_with_installarea&target-unix "<path>/$(<project>_installarea_prefix)/python"\
-         <project>_with_installarea&target-winxp "<path>\$(<project>_installarea_prefix)\python" ; \
-    path_remove  PYTHONPATH ${<project>_install_python} ; \ 
+         <project>_with_installarea&target-unix&no-pyzip "<path>/$(<project>_installarea_prefix)/python"\
+         <project>_with_installarea&target-winxp&no-pyzip "<path>\$(<project>_installarea_prefix)\python" \
+         <project>_with_installarea&target-unix "<path>/$(<project>_installarea_prefix)/python.zip" \
+         <project>_with_installarea&target-winxp "<path>\$(<project>_installarea_prefix)\python.zip" ; \
+    path_remove  PYTHONPATH ${<project>_install_python} ; \
     path_prepend PYTHONPATH ${<project>_install_python}
 
 
@@ -204,9 +209,10 @@ pattern install_custom_python_modules \
 
 make_fragment install_python -header=install_python_header
 
-
 pattern install_python_init \
-	document python_init <package>_python_init package=<package>
+	document python_init <group><package>_python_init -group=<group> package=<group><package> ; \
+	apply_pattern zip_python_modules package=<package> group=<group> ; \
+  	macro_append zip_<group><package>_python_modules_dependencies " <group><package>_python_init "
 
 make_fragment python_init -header=python_init_header
 
@@ -291,14 +297,14 @@ make_fragment install_scripts -header=install_scripts_header
 #
 # Some data files are specified using a directory.
 #
-macro install_command 'python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x.svn -x*~ -x*.stamp --log=./install.history '
-macro uninstall_command 'python $(GaudiPolicy_root)/cmt/fragments/install.py -u --log=./install.history '
+macro install_command 'python $(GaudiPolicy_root)/scripts/install.py -xCVS -x*~ -x*.stamp -x*.bak -x.* -x*.pyc -x*.pyo --log=./install.history '
+macro uninstall_command 'python $(GaudiPolicy_root)/scripts/install.py -u --log=./install.history '
 
 macro remove_command "$(cmt_uninstallarea_command)"
 
-macro library_install_command "python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x.svn -x*~ -x*.stamp -s --log=./install.history " \
+macro library_install_command "python $(GaudiPolicy_root)/scripts/install.py -xCVS -x*~ -x*.stamp -x*.bak -x.* -x*.pyc -x*.pyo -s --log=./install.history " \
       host-winxp              "copy "
-macro cmt_installarea_command "python $(GaudiPolicy_root)/cmt/fragments/install.py -xCVS -x.svn -x*~ -x*.stamp -s --log=./install.history " \
+macro cmt_installarea_command "python $(GaudiPolicy_root)/scripts/install.py -xCVS -x*~ -x*.stamp -x*.bak -x.* -x*.pyc -x*.pyo -s --log=./install.history " \
       host-winxp              "xcopy /S /E /Y "
 
 pattern declare_runtime \
@@ -426,46 +432,17 @@ pattern generate_rootmap \
 
 macro BINDIR              "$(tag)"
 
-# LHCb tags
-
-tag slc4_ia32_gcc34_cov    slc4_ia32_gcc34_dbg target-cov
-tag slc4_ia32_gcc34_pro    slc4_ia32_gcc34_dbg target-pro
-tag slc4_amd64_gcc34_cov   slc4_amd64_gcc34_dbg target-cov
-tag slc4_amd64_gcc34_pro   slc4_amd64_gcc34_dbg target-pro
-
-tag slc4_ia32_gcc41_cov    slc4_ia32_gcc41_dbg target-cov
-tag slc4_ia32_gcc41_pro    slc4_ia32_gcc41_dbg target-pro
-tag slc4_amd64_gcc41_cov   slc4_amd64_gcc41_dbg target-cov
-tag slc4_amd64_gcc41_pro   slc4_amd64_gcc41_dbg target-pro
-
-tag slc4_ia32_gcc43_cov    slc4_ia32_gcc43_dbg target-cov
-tag slc4_ia32_gcc43_pro    slc4_ia32_gcc43_dbg target-pro
-tag slc4_amd64_gcc43_cov   slc4_amd64_gcc43_dbg target-cov
-tag slc4_amd64_gcc43_pro   slc4_amd64_gcc43_dbg target-pro
-
-tag osx105_ia32_gcc401_cov  target-unix target-darwin target-i386 target-mac105 target-gcc40 target-cov
-tag osx105_ia32_gcc401_pro  target-unix target-darwin target-i386 target-mac105 target-gcc40 target-pro
-
-
-# common tags
-
-tag i686-slc5-gcc34-cov    i686-slc5-gcc34-dbg target-cov
-tag i686-slc5-gcc34-pro    i686-slc5-gcc34-dbg target-pro
-tag x86_64-slc5-gcc34-cov  x86_64-slc5-gcc34-dbg target-cov
-tag x86_64-slc5-gcc34-pro  x86_64-slc5-gcc34-dbg target-pro
-
-tag i686-slc5-gcc41-cov    i686-slc5-gcc41-dbg target-cov
-tag i686-slc5-gcc41-pro    i686-slc5-gcc41-dbg target-pro
-tag x86_64-slc5-gcc41-cov  x86_64-slc5-gcc41-dbg target-cov
-tag x86_64-slc5-gcc41-pro  x86_64-slc5-gcc41-dbg target-pro
-
-tag i686-slc5-gcc43-cov    i686-slc5-gcc43-dbg target-cov
-tag i686-slc5-gcc43-pro    i686-slc5-gcc43-dbg target-pro
-tag x86_64-slc5-gcc43-cov  x86_64-slc5-gcc43-dbg target-cov
-tag x86_64-slc5-gcc43-pro  x86_64-slc5-gcc43-dbg target-pro
-
 # Specify Common Unix tag associations
 tag host-darwin    host-unix
+
+# SL5 to SLC5 mapping (should go in LCG_Settings in LCG 57b)
+tag sl51   host-slc5 
+tag sl52   host-slc5 
+tag sl53   host-slc5 
+tag sl54   host-slc5 
+tag sl55   host-slc5 
+tag sl56   host-slc5 
+tag sl57   host-slc5 
 
 # Fragments =================================================================
 
@@ -517,7 +494,8 @@ macro make_shlib    "echo" \
       host-darwin "${CMTROOT}/mgr/cmt_make_shlib_common.sh extract" \
       host-visualc "$(GAUDIPOLICYROOT)\cmt\cmt_make_shlib.bat"
 
-macro merge_rootmap_cmd ${GaudiPolicy_root}/cmt/fragments/merge_files.py
+macro merge_rootmap_cmd "python $(GaudiPolicy_root)/scripts/merge_files.py" \
+           target-winxp "$(GaudiPolicy_root)/scripts/merge_files.py"
 make_fragment merge_rootmap -header=merge_rootmap_header
 macro libdirname "lib" # defaults for fragments of libs and bins 
 macro bindirname "bin" # defaults for fragments of libs and bins
@@ -529,31 +507,41 @@ macro lib_fragment "" \
        CMTp20070208 "library -header=library_header -dependencies" \
        CMTp20090520&target-winxp "library -header=library_header -dependencies"
 make_fragment $(lib_fragment)
+macro lib_no_static_fragment "" \
+       CMTp20070208&target-winxp "library_no_static" \
+       CMTp20090520&target-winxp "library_no_static"
+make_fragment $(lib_no_static_fragment)
 
 # Compilation and Linking flags==============================================
 
 # C++ compiler
-macro_prepend  cpp_name ""  \
+macro_prepend  cpp_name "" \
     lcg-compiler&target-gcc&CERNDISTCC "" \
+    lcg-compiler&target-gccmax    "" \
     lcg-compiler&target-gcc       "lcg-"
-macro_append   cpp_name ""  \
+macro_append   cpp_name "" \
     lcg-compiler&target-gcc&CERNDISTCC "" \
+    lcg-compiler&target-gccmax    "" \
     lcg-compiler&target-gcc       "-$(gcc_config_version)"
 
 # C compiler
-macro_prepend  cc_name  ""  \
+macro_prepend  cc_name  "" \
     lcg-compiler&target-gcc&CERNDISTCC "" \
+    lcg-compiler&target-gccmax    "" \
     lcg-compiler&target-gcc       "lcg-"
-macro_append   cc_name  ""  \
+macro_append   cc_name  "" \
     lcg-compiler&target-gcc&CERNDISTCC "" \
+    lcg-compiler&target-gccmax    "" \
     lcg-compiler&target-gcc       "-$(gcc_config_version)"
 
 # FORTRAN compiler
-macro_prepend  for_name ""  \
-    lcg-compiler&target-gcc       "lcg-" \
-    lcg-compiler&target-gcc&CERNDISTCC ""
-macro_append   for_name ""  \
+macro_prepend  for_name "" \
     lcg-compiler&target-gcc&CERNDISTCC "" \
+    lcg-compiler&target-gccmax    "" \
+    lcg-compiler&target-gcc       "lcg-"
+macro_append   for_name "" \
+    lcg-compiler&target-gcc&CERNDISTCC "" \
+    lcg-compiler&target-gccmax    "" \
     lcg-compiler&target-gcc       "-$(gcc_config_version)"
 
 # C++ debug, optimized and profiled options
@@ -623,11 +611,42 @@ macro cppflags         " -fmessage-length=0 -Df2cFortran -fPIC -shared -D_GNU_SO
       target-darwin    " -Df2cFortran -fPIC -D_GNU_SOURCE -Dunix -pipe -ansi -Wall -Wextra -Wno-long-double " \
       target-winxp     '$(includes) /D "WIN32" /D "_MBCS"  /D "_WINDOWS" /FD /c /nologo /W3 /GX /MD /GR /Zm500'
 
+##############################################################################
+# Intel compiler support
+macro_remove cppflags "" target-icc "-pedantic"
+macro_remove cppflags "" target-icc "-Wextra"
+macro_remove cppflags "" target-icc "-Wno-long-long"
+### Disable some non interesting "remarks" (inspired by CoolKernel)
+# Permanently disabled
+#  - remark #383:  valued copied to temporary, reference to temporary
+macro_append cppflags '' target-icc '-wd383 '
+#  - remark #981:  operands are evaluated in unspecified order
+macro_append cppflags '' target-icc '-wd981 '
+#  - remark #1418: external function definition with no prior declaration
+macro_append cppflags '' target-icc '-wd1418 '
+#  - remark #1419: external declaration in primary source file
+#                  (triggers on forward declarations in a .cpp)
+macro_append cppflags '' target-icc '-wd1419 '
+# Non permanent
+#  - remark #82:     storage class is not first
+#                    (appears only once in ROOT)
+macro_append cppflags '' no-hide-warnings '' target-icc '-wd82 '
+#  - remark #522:    function "X" redeclared "inline" after being called
+#                    (fixed those in Gaudi, but a lot are coming from ROOT, Reflex and HepPDT)
+macro_append cppflags '' no-hide-warnings '' target-icc '-wd522 '
+#  - remark #444:    destructor for base class "X" is not virtual
+#                    (gives a lot of fals positives, e.g. std::unary_function)
+macro_append cppflags '' no-hide-warnings '' target-icc '-wd444 '
+#  - remark #304:    access control not specified ("public/private" by default)
+#                    (fixed one in GaudiKernel, but most are from Boost)
+macro_append cppflags '' no-hide-warnings '' target-icc '-wd304 '
+##############################################################################
+
 # macro_append cppflags " -msse2 -mfpmath=sse" \
 #             target-winxp    " /arch:SSE2"
 
 macro_append cppflags "" \
-      GAUDI_V21&target-gcc4 " -fvisibility=hidden " \
+      GAUDI_V21&target-gcc4 " -fvisibility=hidden -fvisibility-inlines-hidden " \
       G21_HIDE_SYMBOLS&target-gcc4 " -fvisibility=hidden -fvisibility-inlines-hidden "
 
 # Use Gaudi v20 compatibility mode unless we have the extra tag GAUDI_V21
@@ -651,9 +670,16 @@ macro_append cppflags  "" \
       target-gcc&target-i686&host-x86_64 " -m32" \
       target-gcc&target-i386&host-x86_64 " -m32"
 
+# ---- Disable warnings coming from external libraries
+#      the hacks can be disabled with the tag "no-hide-warnings".
 # FIXME: (MCl) Temporary work-around until gccxml understands unordered_map
 macro_append cppflags "" \
+         no-hide-warnings "" \
          target-gcc43 " -Wno-deprecated"
+# FIXME: (MCl) 
+macro_append cppflags "" \
+         no-hide-warnings "" \
+         target-gcc43 " -Wno-empty-body"
 
 # ppcmd=-I can be used on Windows as on Linux
 macro ppcmd "-I"
@@ -675,6 +701,7 @@ macro_append shlibflags ""\
       target-gcc&target-i386&host-x86_64 " -m32"
 
 macro fflags           "-fmessage-length=0 -O2 -fdollar-ok -ff90 -w -fPIC" \
+      target-gcc4      "-fmessage-length=0 -O2 -fdollar-ok -w -fPIC" \
       target-darwin    "-fno-automatic -fdollar-ok -w" \
       target-winxp     '/compile_only /nologo /warn:nofileopt /warn:nouncalled /fpp:"/m" /fpp:"/I.." '
 
@@ -709,6 +736,7 @@ macro makeLinkMap            ""\
       target-winxp           "/map"
 
 macro cpplinkflags "" \
+      target-icc   "-Wl,-Bdynamic $(linkdebugflags) -ldl " \
       target-linux "-Wl,-Bdynamic $(linkdebugflags) -ldl -Wl,--as-needed " \
       target-vc    "/nologo /machine:ix86 $(linkdebugflags) $(makeLinkMap) /nodefaultlib kernel32.lib user32.lib ws2_32.lib advapi32.lib shell32.lib msvcrt.lib msvcprt.lib oldnames.lib "
 
@@ -745,12 +773,6 @@ macro_append componentshr_linkopts "" \
       target-gcc&target-i686&host-x86_64 " -m32" \
       target-gcc&target-i386&host-x86_64 " -m32"
 
-# Add 64-bit link options for SLC5. This overrides the default library segment alignment of 1MB
-macro_append componentshr_linkopts "" \
-       target-gcc&slc5&x86_64               " -Wl,-z,max-page-size=0x1000 "
-macro_append libraryshr_linkopts   "" \
-       target-gcc&slc5&x86_64               " -Wl,-z,max-page-size=0x1000 "
-
 macro libraryshr_linkopts   "" \
       target-linux          "-fPIC -ldl -Wl,--as-needed " \
       target-winxp          "/DLL"
@@ -764,6 +786,13 @@ macro_append libraryshr_linkopts   "" \
 macro_append libraryshr_linkopts   "" \
       target-gcc&target-i686&host-x86_64 " -m32" \
       target-gcc&target-i386&host-x86_64 " -m32"
+
+# Add 64-bit link options for SLC5. This overrides the default library segment
+# alignment of 1MB
+macro_append componentshr_linkopts       "" \
+      target-gcc&host-slc5&target-x86_64 " -Wl,-z,max-page-size=0x1000 "
+macro_append libraryshr_linkopts         "" \
+      target-gcc&host-slc5&target-x86_64 " -Wl,-z,max-page-size=0x1000 "
 
 macro application_linkopts  "" \
       target-linux                 "-Wl,--export-dynamic "
@@ -811,7 +840,7 @@ cmtpath_pattern \
 
 make_fragment genconfig -header=genconfig_header
 
-macro merge_genconfDb_cmd ${GaudiPolicy_root}/cmt/fragments/merge_files.py
+macro merge_genconfDb_cmd "python $(GaudiPolicy_root)/scripts/merge_files.py"
 make_fragment merge_genconfDb -header=merge_genconfDb_header
 
 ## genconf configuration defaults
@@ -896,7 +925,7 @@ pattern do_real_genconfig \
            confService=$(genconfig_configurableService) \
            $(library_prefix)<library>.$(shlibsuffix) ; \
   macro_append <library>Conf_dependencies " <library> " ; \
-  apply_pattern install_python_init package=<group><package> ; \
+  apply_pattern install_python_init package=<package> group=<group> ; \
   macro_append <group><package>_python_init_dependencies " <library>Conf " ; \
   private ; \
     macro merge_genconfDb_tag "--do-merge"   \
@@ -908,6 +937,7 @@ pattern do_real_genconfig \
 	     merge_genconfDb_switch=$(merge_genconfDb_tag)  \
 	     $(bin)$(library_prefix)<library>.$(shlibsuffix) ; \
     macro_append <library>ConfDbMerge_dependencies " <library>Conf " ; \
+    macro_append zip_<group><package>_python_modules_dependencies " <library>ConfDbMerge " ; \
   end_private
 
 
@@ -964,9 +994,11 @@ pattern QMTest \
   private ; \
     macro qmtest_local_dir "../tests/qmtest" target-winxp "..\tests\qmtest" ; \
     set QMTESTLOCALDIR "" QMTest "$(qmtest_local_dir)" ; \
-    action qmtest_run "cmt -tag_add=QMTest run python $(GaudiPolicy_root)/cmt/fragments/run_qmtest.py $(package) $(cmt_args)" ; \
+    action qmtest_run "cmt -tag_add=QMTest run python $(GaudiPolicy_root)/scripts/run_qmtest.py $(package) $(cmt_args)" ; \
     macro_append qmtest_run_dependencies " tests " ; \
     action TestPackage "cmt qmtest_run $(cmt_args)" ; \
+    action QMTestTestsDatabase "cmt qmtest_run --no-output --dry-run" ; \
+    action QMTestGUI "cmt -tag_add=QMTest run 'cd $(qmtest_local_dir) ; qmtest gui'" ; \
   end_private
 
 # Pattern allowing a package to generate a summary of the results run in the
@@ -974,7 +1006,7 @@ pattern QMTest \
 pattern QMTestSummarize \
   apply_pattern QMTestCommon ; \
   private ; \
-    macro qmtest_summarize_script "$(GaudiPolicy_root)/cmt/fragments/qmtest_summarize.py" ; \
+    macro qmtest_summarize_script "$(GaudiPolicy_root)/scripts/qmtest_summarize.py" ; \
     action qmtest_summarize "cmt -tag_add=QMTest run python $(qmtest_summarize_script) $(cmt_args)" ; \
     action TestProject "cmt br cmt TestPackage ; cmt qmtest_summarize" \
                  target-winxp "cmt br cmt TestPackage & cmt qmtest_summarize" ; \
@@ -990,6 +1022,7 @@ macro_remove cmt_actions_constituents 'qmtest_run'
 macro_remove cmt_actions_constituents 'qmtest_summarize'
 macro_remove cmt_actions_constituents 'TestPackage'
 macro_remove cmt_actions_constituents 'TestProject'
+macro_remove cmt_actions_constituents 'QMTestGUI'
 
 #-------------------------------------------------------------------
 # Pattern to disable a package on ath given platform or combination of tags.
@@ -1042,7 +1075,13 @@ pattern GaudiApp \
 make_fragment call_command -header=call_command_header
 pattern CallCommand \
    document call_command <target> -group=<group> name="<target>"
-   
+
+# Empty pattern to be able to have a conditional apply of "CallCommand"
+pattern NullCommand \
+    private ; \
+        macro dummy_for_NullCommand "<target> <group>" ; \
+    end_private
+
 #-------------------------------------------------------------------
 # Pattern to create a <package>Version.h header file in the InstallArea/include.
 # Usage:
@@ -1055,7 +1094,7 @@ pattern ProjectVersionHeader \
 	private ; \
 	macro ProjectVersionHeader_output "$(CMTINSTALLAREA)/include/<project>_VERSION.h" ; \
 	macro ProjectVersionHeader_deps "../cmt/requirements" ; \
-	macro ProjectVersionHeader_command "python $(GaudiPolicy_root)/cmt/fragments/createProjVersHeader.py <project> <version> $(ProjectVersionHeader_output)" \
+	macro ProjectVersionHeader_command "python $(GaudiPolicy_root)/scripts/createProjVersHeader.py <project> <version> $(ProjectVersionHeader_output)" \
 	     <project>_without_installarea "" ; \
 	apply_pattern CallCommand target=ProjectVersionHeader ; \
 	end_private ; \
@@ -1096,7 +1135,8 @@ pattern real_genconfuser \
 	                            target-winxp "$(<package>_root)$(genconfDir)<package>\<package>_user_confDb.py" ; \
 	macro <package>GenConfUser_python "$(<package>_root)/python" \
                                     target-winxp "$(<package>_root)\python" ; \
-	macro <package>GenConfUser_command "$(GenConfUser_script) -r $(<package>GenConfUser_python) -o $(<package>GenConfUser_output) <package> $(<package>ConfUserModules)" ; \
+	macro <package>GenConfUser_deps "FORCE" ; \
+	macro <package>GenConfUser_command "$(GenConfUser_script) --lockerpath $(GaudiPolicy_root)/scripts -r $(<package>GenConfUser_python) -o $(<package>GenConfUser_output) <package> $(<package>ConfUserModules)" ; \
 	apply_pattern CallCommand target=<package>GenConfUser ; \
 	document merge_genconfDb <package>ConfUserDbMerge -group=<group> \
 		inDir=$(<package>_root)$(genconfDir)<package> \
@@ -1116,6 +1156,41 @@ pattern genconfuser \
 	end_private
 
 #-------------------------------------------------------------------
+# Pattern to flag a package as "container package".
+# The container package must have the line:
+#
+#  apply_pattern container_package
+#
+# Global patterns that needs to behave differently in a container
+# package can use the tag "containter-package" (private).
+#-------------------------------------------------------------------
+pattern container_package \
+	private ; \
+	apply_tag container-package ; \
+	end_private
+
+#-------------------------------------------------------------------
+# Zip Python modules
+#-------------------------------------------------------------------
+pattern zip_python_modules \
+	private ; \
+	macro zip_<group><package>_python_modules_output "$(CMTINSTALLAREA)/python.zip" ; \
+	macro zip_<group><package>_python_modules_deps "FORCE" ; \
+	macro zip_<group><package>_python_modules_command "python $(GaudiPolicy_root)/scripts/ZipPythonDir.py $(CMTINSTALLAREA)/python" ; \
+	macro zip_<group><package>_python_modules_pattern_applied "CallCommand" \
+		no-pyzip&container-package "CallCommand" \
+		no-pyzip "NullCommand" ; \
+	apply_pattern $(zip_<group><package>_python_modules_pattern_applied) target=zip_<group><package>_python_modules group=<group> ; \
+	end_private
+
+pattern -global zip_python_modules_container_fallback \
+	private ; \
+	macro zip_python_modules_container_fallback_pattern "" \
+		no-pyzip&container-package "zip_python_modules" ; \
+	apply_pattern $(zip_python_modules_container_fallback_pattern) ; \
+	end_private
+
+#-------------------------------------------------------------------
 # Doxygen business
 #-------------------------------------------------------------------
 
@@ -1130,7 +1205,6 @@ apply_pattern doxy_vers_set external=CORAL
 apply_pattern doxy_vers_set external=ROOT
 apply_pattern doxy_vers_set external=Boost
 apply_pattern doxy_vers_set external=uuid
-apply_pattern doxy_vers_set external=PCRE
 apply_pattern doxy_vers_set external=GCCXML
 apply_pattern doxy_vers_set external=AIDA
 apply_pattern doxy_vers_set external=XercesC
@@ -1143,3 +1217,14 @@ set LCGCMTVERS "$(LCG_config_version)"
 
 # Base directory of doxygen documentation
 set GAUDI_DOXY_HOME $(GAUDI_home)/GaudiRelease/doc
+
+
+
+# ICC hacks for LCG_Interfaces
+#-------------------------------------------------------------------
+# ATLAS specific stuff
+#-------------------------------------------------------------------
+
+# don't create zipped python files for ATLAS
+tag ATLAS no-pyzip
+

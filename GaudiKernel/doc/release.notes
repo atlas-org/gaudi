@@ -1,6 +1,69 @@
 Package : GaudiKernel
 Package manager : Marco Clemencic
 
+! 2010-02-24: Charles Leggett
+    - GaudiKernel/Converter.cpp: bug #63502: don't assume converter 
+	is a ConverterSvc when retrieving name
+
+==== ATLAS Gaudi v20r4p6 ===
+
+! 2010-01-27: Charles Leggett 
+    - GaudiKernel/Algorithm.cpp: rework to eliminate unchecked status
+      codes when exceptions are thrown.
+	 
+! 2009-12-16: Charles Leggett 
+    - GaudiKernel/ProcessDescriptor.cpp: fix bug #59450 (valgrind)
+
+! 2009-11-03: Charles Leggett 
+    - GaudiKernel: FileIncident.h
+
+! 2009-10-28: Charles Leggett 
+    - GaudiKernel: ITHistSvc::exists(name) 
+
+! 2009-09-11: Charles Leggett 
+    - new incidents for EventSelector 
+	GaudiKernel: Incident.h, EventSelectorDataStream.h/cpp
+
+
+==== ATLAS Gaudi v20r4p5 ====
+
+! 2009-07-17: Charles Leggett
+    - GaudiKernel/IPartPropSvc
+
+! 2009-06-10: Charles Leggett
+    - GaudiKernel/Service.cpp, AlgTool.cpp: fix unchecked StatusCodes
+        gerenated when exceptions are thrown.
+
+! 2009-05-12: Charles Leggett
+    - AlgTool.cpp: don't finalize if state != INITIALIZED
+
+! 2009-04-29: Charles Leggett
+    - GaudiException.h: StatusCode
+
+! 2009-03-13: Charles Leggett
+     - Property.h: useUpdateHanlder() returns a bool (patch #2871)
+     - Algorithm.cpp, MinimalEventLoopMgr.cpp: proper exit code when
+          Algorithm finalize() throws an exception. (patch #2867)
+
+! 2009-01-21: Charles Leggett
+     - GaudiKernel/IAlgTool.h: virtual destructor
+                               bug #2747
+
+! 2009-01-15: Charles Leggett
+     - GaudiKernel/MsgStream.h: specialize operator<< for const char*
+
+! 2009-01-14: Charles Leggett
+     - add IIoComponent, IIoComponentMgr
+     - Bootstrap.h/cpp: hasApplicationMgr()
+     - StatusCode.cpp: move operator= to cpp (IssueSeverity)
+     - PropertyMgr.h: ServiceHandleArray
+     - ServiceHandle.h: ServiceHandleArray
+     - IStateful.h, IAlgTool.h, AlgTool.h: disable configure()
+     - python/GaudiKernel/GaudiHandles.py: ServiceHandleArray
+     - ApplicationMgr, ServiceMgr: loopCheckIgnore()
+     - ServiceMgr.cpp: delete all services in finalize recursively
+
+
 ================ GaudiKernel v26r1 ====================================
 ! 2008-12-16 - Marco Clemencic
  - Modified the Configurable.getValuedProperties logic to use all the explicitly

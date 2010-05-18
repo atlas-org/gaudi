@@ -9,6 +9,7 @@
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
+#include <typeinfo>
 
 #include "GaudiKernel/Kernel.h"
 #include "GaudiKernel/swab.h"

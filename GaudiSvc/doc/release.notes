@@ -1,9 +1,67 @@
 Package: GaudiSvc
 Package manager : Marco Clemencic
 
-! 2009-10-28 - Charles Leggett
-  - ToolSvc: start/stop transitions
-  - THistSvc: exists( name )
+=== ATLAS Gaudi v20r4p7 ===
+! 2010-03-12: Charles Leggett
+  - GaudiSvc/THistSvc: deprecate CompressionLevel jobOption
+                     : add CL parameter to Output Property to set compression 
+                       level for individual files. 
+                     : ugly hack in initialize() to set output level immediately
+
+! 2010-03-03: Charles Leggett
+  - GaudiSvc/THistSvc: fix iterator for large root file
+                     : stop job when output file gets too big
+                     : make MsgStream member data
+
+=== ATLAS Gaudi v20r4p6 ===
+
+! 2010-01-14: Charles Leggett
+ - GaudiSvc/StatusCodeSvc: filter out libraries, ignore Dicts.so 
+     StatusCodeSvc.Filter = [ function, FNC=function1, FNC=function2, LIB=lib ]
+     StatusCodeSvc.IgnoreDicts = True
+
+! 2009-12-16: Charles Leggett
+ - GaudiSvc/THistSvc.cpp: fire a BeginHistFile FileIncident
+
+! 2009-12-14: Charles Leggett
+ - GaudiSvc/IncidentSvc.cpp: fix bug in printing out name of Incidents.
+ - GaudiSvc/THistSvc.cpp: don't fire a BeginInputFile FileIncident
+
+! 2009-12-07: Charles Leggett
+ - GaudiSvc/src/THistSvc.cpp: move GlobalDirectoryRestore before initialize
+ - bug #60162
+		
+! 2009-11-09: Charles Leggett
+ - GaudiSvc/IncidentSvc.cpp: print out name of incident when exception is 
+   caught. bug #57416
+
+! 2009-11-03: Charles Leggett
+ - GaudiSvc/THistSvc: fire FileIncidents
+
+! 2009-10-28: Charles Leggett
+ - GaudiSvc/THistSvc: THistSvc::exists(name) : test for existence of hist
+
+! 2009-09-11: Charles Leggett
+ - new incidents for EventSelector 
+   GaudiSvc: EventSelector.h/cpp
+
+=== ATLAS Gaudi v20r4p5 ===
+
+! 2009-08-07: Charles Leggett
+ - THistSvc/THistSvc.cpp: ishared++
+
+! 2009-04-03: Charles Leggett
+ - ToolSvc: added start() and stop() methods (bug#48942)
+
+! 2009-01-27: Charles Leggett
+ - ApplicationMgr/ApplicationMgr.cpp: in terminate(), call finalize
+   on MessageSvc and JobOptionsSvc instead of sysFinalize to avoid
+   auditors segfaulting
+
+! 2009-01-14: Charles Leggett
+ - ExceptionSvc: rewrite, new jobOpt syntax
+ - THistSvc: add int property CompressionLevel for ROOT output file
+             patch #2754
 
 ================ GaudiSvc v17r3 ====================================
 ! 2008-12-11 - Charles Leggett

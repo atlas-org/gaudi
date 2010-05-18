@@ -26,7 +26,12 @@ def broadcast_packages():
     Returns a list of pairs ("package name","path to the cmt directory"). 
     """
     # make cmt print one line per package with python syntax
-    pkg_dirs = "[" + cmt("broadcast",r'echo "(\"<package>\", \"$PWD\"),"')[0] + ']'
+    if not sys.platform.startswith("win"):
+        pkg_dirs = "[\n" + cmt("broadcast",r'echo "(\"<package>\", \"$PWD\"),"')[0] + ']'
+    else:
+        pkg_dirs = "[\n" + cmt("broadcast",r'echo ("<package>", r"%<package>root%\cmt"),')[0] + ']'
+    # Clean up a bit the output (actually needed only on Windows because of the newlines)
+    pkg_dirs = "\n".join([l.strip() for l in pkg_dirs.splitlines() if not l.startswith("#")])
     return eval(pkg_dirs)
 
 def matches(filename, patterns):
@@ -82,7 +87,7 @@ def diff_pkg(name, cmtdir, exclusions = []):
     rootdir = os.path.dirname(cmtdir)
     out, err = revision_diff_cmd(cwd = rootdir)
     # extract new files
-    new_files = [ l.split()[1]
+    new_files = [ l.split(None,1)[1]
                   for l in out.splitlines()
                   if l.startswith("? ") ]
     new_files = expand_dirs(new_files, rootdir)
@@ -121,7 +126,7 @@ def diff_pkg(name, cmtdir, exclusions = []):
             out += '-%s\n' % l
     # Fix the paths to have the package names
     rex = re.compile(r"^(Index: |\? |\+\+\+ |--- (?!/dev/null))", re.MULTILINE)
-    out = rex.sub(r"\1%s%s" % (name, os.sep), out)     
+    out = rex.sub(r"\1%s/" % name, out)
     return out
 
 def main():
@@ -171,8 +176,13 @@ def main():
                          "i686-slc4-gcc41*",
                          "x86_64-slc4-gcc34*",
                          "x86_64-slc4-gcc41*",
+                         "i686-slc5-gcc43*",
+                         "x86_64-slc5-gcc43*",
                          "genConf",
+                         "cmt/version.cmt",
                          ]
+    if "CMTCONFIG" in os.environ:
+        opts.exclusions.append(os.environ["CMTCONFIG"])
     
     # check if we are in the cmt directory before broadcasting
     if not (os.path.basename(os.getcwd()) == "cmt" and os.path.exists("requirements")):
@@ -189,6 +199,10 @@ def main():
         logging.info("Processing %s from %s (%d/%d)",
                      name, os.path.dirname(path), count, num_pkgs)
         patch += diff_pkg(name, path, opts.exclusions)
+
+    if sys.platform.startswith("win"):
+        # fix newlines chars
+        patch = patch.replace("\r","")
 
     if opts.output:
         logging.info("Writing patch file %r", opts.output)

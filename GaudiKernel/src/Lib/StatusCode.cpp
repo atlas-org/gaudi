@@ -48,7 +48,7 @@ StatusCode& StatusCode::operator=(const StatusCode& rhs) {
 StatusCode::~StatusCode() {
   if(s_checking) {
 
-    if (!m_checked ) {
+    if (!m_checked && !GaudiException::s_proc) {
 
       IMessageSvc* msg = 0 ;
       if(Gaudi::svcLocator()->service("MessageSvc", msg, true).isFailure()) {

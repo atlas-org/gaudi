@@ -1,6 +1,8 @@
 project GAUDI
 
-use LCGCMT LCGCMT-preview
+#use LCGCMT LCGCMT-preview
+#use LCGCMT LCGCMT_56-patches
+use LCGCMT LCGCMT_56g
 
 build_strategy     with_installarea
 setup_strategy     no_config

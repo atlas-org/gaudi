@@ -1,8 +1,9 @@
 Package: GaudiPython
 Package manager : Marco Clemencic
 
-2009-10-28 - Charles Leggett
- - Fixed typo in Bindigs.py
+=== ATLAS Gaudi v20r4p5 ===
+! 2009-10-20: Charles Leggett
+ - Bindings.py: fix typo (bug #57398)
 
 ================ GaudiPython v9r4 ====================================
 ! 2008-12-16 - Marco Clemencic

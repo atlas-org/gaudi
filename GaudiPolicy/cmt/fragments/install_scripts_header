@@ -22,7 +22,7 @@ $(install_scripts_dir) ::
 	  if [ -d $$src ]; then \
 	     echo "Installing files from source $$src to $$dest"; \
 	     $(install_command) --exclude="*.py?" $$src $$dest ;\
-	     chmod -R +x $$dest ; \
+	     chmod -R +x $$dest/$(source) ; \
 	  else \
 	     echo "no source  $$src"; \
 	  fi; \

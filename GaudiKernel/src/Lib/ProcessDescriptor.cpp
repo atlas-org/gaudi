@@ -384,12 +384,15 @@ long System::ProcessDescriptor::query(long pid,
     status = (status==0) ? 1 : 0;
 #elif _WIN32                              // Windows 95,98...
 #elif defined(linux)                      // Linux
-    char buf[1024];
+    const ssize_t bufsize = 1024;
+    char buf[bufsize];
     sprintf(buf,"/proc/%ld/statm", processID(pid));
     long size, resident, share, trs, lrs, drs, dt;
     int fd = open(buf,O_RDONLY);
-    read(fd, buf, sizeof(buf));  
+    ssize_t nread = read(fd, buf, bufsize);
     close(fd);
+    if ( nread < bufsize && nread >= 0 )
+      buf[nread]='\0';
     fd = sscanf(buf, "%ld %ld %ld %ld %ld %ld %ld",
                      &size, &resident, &share, &trs, &drs, &lrs, &dt);
     linux_proc prc;

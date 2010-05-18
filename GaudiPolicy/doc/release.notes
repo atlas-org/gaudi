@@ -1,11 +1,234 @@
 package GaudiPolicy
 package manager: Marco Clemencic
 
+============================= GaudiPolicy v10r7 ==============================
+! 2010-04-23 - Marco Clemencic
+ - Hack to allow the compilation with the gcc preview provided by LCGCMT
+   (AKA gccmax).
+
+! 2010-04-22 - Marco Clemencic
+ - Added the possibility to choose the test suite to run with QMTest via an
+   environment variable (GAUDI_QMTEST_DEFAULT_SUITE).
+   The content of the variable must be a comma-separated list of possible names
+   among which the first one is chosen. If the variable is not set or none of
+   its entries is found, the suite with the same name as the package is tried
+   (old behavior).
+
+! 2010-04-20 - Marco Clemencic
+ - Removed ICC warnings and remarks.
+ - Fixed a problem in install.py when using shared directories.
+   If the destination file is owned by somebody else and writable, shutil.copy2
+   fails in copystat because the access and modify times of the destination
+   cannot be changed.
+   The solution is to remove the file before making the copy.
+
+! 2010-04-16 - Marco Clemencic
+ - Modified the implementation of the fix to bug #62374 (Handling of signal
+   SIGXCPU).
+   A minor change in GaudiTest.py (exclusion list for reference files) was
+   needed.
+
+============================= GaudiPolicy v10r6 ==============================
+! 2010-03-15 - Marco Clemencic
+ - Added a cmt action to start the QMTest GUI (cmt QMTestGUI).
+   It simplifies the creation of tests, but still has some problems to run them.
+
+! 2010-03-15 - Gerhard Raven
+ - Patch #3854: Reduce verbosity of zipping of python modules.
+
+! 2010-03-10 - Marco Clemencic
+ - Added a specialized QMTest ResultStream implementation to produce an HTML
+   summary with collapsable lists and AJAX-style dynamic load of the content.
+   The generation of the HTML output can be generated using the option
+   --html-output to TestPackage or the environment variable
+   GAUDI_QMTEST_HTML_OUTPUT. In both cases the user should specify the full path
+   to the directory meant to contain the data.
+   Note: The HTMLResultStream class uses the Python module "simplejson" included
+         in qmtest_classes (backport of the Python 2.6 module "json"), unless
+         the native Python module is found.
+         The dynamic HTML uses the jQuery JavaScript library (included).
+
+! 2010-01-29 - Marco Clemencic
+ - Ignored icc remarks
+   #1419: external declaration in primary source file
+          (triggers on forward declarations in a .cpp)
+
+! 2010-01-28 - Marco Clemencic
+ - Ignored icc remarks
+   #383:  valued copied to temporary, reference to temporary
+   #981:  operands are evaluated in unspecified order
+   #1418: external function definition with no prior declaration
+          (triggers on templates)
+   #82:   storage class is not first
+          (appears only once in ROOT)
+   #522:  function "X" redeclared "inline" after being called
+          (fixed those in Gaudi, but a lot are coming from ROOT, Reflex and
+           HepPDT)
+   #444:  destructor for base class "X" is not virtual
+          (gives a lot of false positives, e.g. std::unary_function)
+   #304:  access control not specified ("public/private" by default)
+          (fixed one in GaudiKernel, but most are from Boost)
+
+============================= GaudiPolicy v10r5 ==============================
+! 2010-01-15 - Marco Clemencic
+ - Fixed compilation on icc 11.
+   - cmt/requirements:
+     removed the cppflags -pedantic, -Wextra and -Wno-long-long, because not
+     understood by icc (only for icc). 
+
+! 2010-01-11 - Marco Clemencic
+ - Added an excluded line when comparing reference files in the tests to avoid
+   (because of patch #3487).
+
+! 2009-12-18 - Marco Clemencic
+ - Improvements to the testing infrastructure.
+   - Allow testing from a read-only location:
+     - modified GaudiExeTest to ignore failures when writing the new reference
+       files
+     - modified run_qmtest.py and qmtest_summarize.py to use the environment
+       variable QMTESTRESULTSDIR as base path for the QMTest result files (.qmr)
+   - Modified GaudiExeTest to correctly report a failure due to timeout limits.  
+
+! 2009-12-04 - Marco Clemencic
+ - Avoid the manipulation of the compiler name for the LCG compiler if the tag
+   CERNDISTCC (Atlas distcc cluster) is defined, because the manipulation for
+   that case is already done in LCG_Settings.
+
+! 2009-11-26 - Marco Clemencic
+ - Fixed a problem in locker.py (LockFile) on Win32.
+
+! 2009-11-19 - Marco Clemencic
+ - Removed run-time dependency on PCRE (which has been removed from LCGCMT).
+
+============================= GaudiPolicy v10r4 ==============================
+! 2009-11-10 - Marco Clemencic
+ - Modified ZipPythonDir.py to remove old .pyc files before adding the .py to
+   the .zip file to force a re-compilation.
+ - Added mapping of SL5 tags to host-slc5 (the will go in LCG 57b).
+
+! 2009-11-09 - Marco Clemencic
+ - Minor changes to the requirements:
+   - added *.py[co] to the exclusion list of install.py
+   - removed the _cov and _pro tags because conflicting with the LCG ones  
+
+! 2009-11-03 - Hubert Degaudenzi
+ - Fixed bug #57319: Suppression of GaudiPolicy/scripts/StripPath.sh
+   requirements: added a switch on the StripPath script. if GAUDI_NO_STRIP_PATH is 
+   set in the environment, no path stripping will occur at setup time.
+
+================ GaudiPolicy v10r3 ====================================
+! 2009-10-16 - Hubert Degaudenzi
+ - requirements: removed the compile option "-ff90" for the target-gcc4 tag. 
+   This flag is obsolete for the gfortran compiler.
+
+! 2009-10-13 - Marco Clemencic
+ - GaudiTest.py: remove leading '0' from Windows' exponential notation when
+   comparing stdout with reference files in tests (not perfect)  
+
+! 2009-10-07 - Marco Clemencic
+ - Fixed a problem with the generation of the python.zip files on Windows.
+   The file, once created, was not overwritten.
+
+! 2009-10-05 - Charles Leggett
+ - Fixed bug #55550: saving memory with alignment of libraries
+
+! 2009-10-05 - Gerhard Raven
+ - Patch #3295: do not copy back-up files to InstallArea
+
+! 2009-10-02 - Marco Clemencic
+ - Modified the generated Eclipse launchers, such that the options file extracted
+   from the .qmt files can be added easily to the ignored list of SVN/CVS. 
+
+! 2009-09-25 - Marco Clemencic
+ - Instrumented GaudiTest.py to produce an Eclipse CDT debug launcher
+   configuration for each test. The configuration is automatically discovered by
+   Eclipse and inserted in the list of debug configurations with the name of the
+   test.
+
+! 2009-09-21 - Marco Clemencic
+ - Added "*.cmtref" to the list of exclusion patterns in ZipPythonDir.py
+
+================ GaudiPolicy v10r2 ====================================
+! 2009-09-02 - Marco Clemencic
+ - Added a pattern useful to mark the container package of a project
+   (container_package).
+ - Modified the effect of the no-pyzip tag at compile time. If specified, the
+   python.zip file is generated only once, during the build of the container
+   package.  
+
+! 2009-07-30 - Marco Clemencic
+ - Fixed some doxygen warnings.
+ - Use the special name for LCG-distributed compiler always.
+   (removed the exception on ATLAS)
+ - Added the C++ flag "-Wno-empty-body" to hide the warnings from XercesC.
+ - Added the tag "no-hide-warnings" to re-enable the warnings disabled because
+   coming from external libraries.
+
+! 2009-07-29 - Marco Clemencic
+ - Moved the Python scripts and modules to the directory scripts and modified
+   the genconfuser pattern to locate the locker.py module.
+ - The scripts merge_files.py, ZipPythonDir.py and genconfuser.py can now be
+   synchronized with a "global lock file" defined with the environment variable
+   GAUDI_BUILD_LOCK (needed when using tbroadcast or equivalent).
+
+! 2009-07-28 - Marco Clemencic
+ - Fixed problems on Windows:
+   - added a custom "library_no_static" fragment (identical to "library") needed
+     because of the library flag "-no_static" recently added
+   - solved a portability problem in ZipPythonDir.py
+
+! 2009-07-24 - Marco Clemencic
+ - Fixed a problem of ZipPythonDir.py on Windows (unlocking must precede close).   
+
+! 2009-07-21 - Marco Clemencic
+ - Added .cvsignore to the exclusion list of install.py
+ - Modified the zipping script to collect the changes needed in the zip file
+   before actually writing it, to be able to avoid unnecessary writes.
+
+! 2009-07-20 - Marco Clemencic
+ - Fixed a possible race condition during the build between MergeConfDb and the
+   zipping of python modules.
+ - Use a memory buffer instead of writing directly the Python zipped file to
+   reduce the probability of a conflict between a test on a platform and a build
+   on another (like in the nightly builds).
+ - Moved the use of tcmalloc from Gaudi to GaudiPolicy to make it available
+   everywhere.
+
+! 2009-07-17 - Marco Clemencic
+ - Modified the QMTest pattern to force the creation of the QMTest directory
+   (needed to call qmtest) during the build, so that it becomes part of the
+   distribution. It also required a restructuring of run_qmtest.py.
+
+! 2009-07-16 - Marco Clemencic
+ - Minor restructuring an clean up of install.py
+
+! 2009-07-16 - Marco Clemencic
+ - Support for zipped python directories.
+     The "InstallArea/python" directory is replaced, in PYTHONPATH, by
+   "InstallArea/python.zip". The old directory is still present and used to
+   generate the .zip file or for debugging (can be used at run-time specifying
+   the CMT tag "no-pyzip").
+     The use of .zip files increases significantly the speed of the
+   configuration of an application (when using configurables).
+     Since .zip files can only contain python files, it is not possible to store
+   anything else under InstallArea/python path.
+     The current implementation re-creates the .zip file during the build of
+   each package, so re-compressing files already in the original .zip, which can
+   become a problem with very large projects. A merge feature would be welcome,
+   but it has to allow also the removal of the files that have been removed from
+   the original python directory (a la install.py). Note that the current
+   implementation of the module "zipfile" does not allow replacement or removal.     
+     This, implicitely, addresses bug #39868 because the .pyc files are
+   automatically generated during the zipping step to be included in the .zip
+   file.
+   
+   See http://www.python.org/dev/peps/pep-0273 for more information.
+
+================ GaudiPolicy v10r1 ====================================
 ! 2009-07-14 - Marco Clemencic
  - Modified the library fragment on for NMake to work with both CMT
    v1r20p20070208 and v1r20p20090520.
 
-================ GaudiPolicy v10r1 ====================================
 ! 2009-07-09 - Marco Clemencic
  - Reverted to the original manipulation of PYTHONPATH for testing.
 

@@ -58,6 +58,7 @@ library GaudiExamples     AbortEvent/*.cpp \
                           Timing/*.cpp \
                           Selections/*.cpp \
                           SvcInitLoop/*.cpp \
+                          StatusCodeSvc/*.cpp \
                           Dll/GaudiExamples*.cpp
 
 

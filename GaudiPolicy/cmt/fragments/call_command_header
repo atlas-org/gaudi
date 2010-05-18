@@ -12,4 +12,6 @@ ${CONSTITUENT}clean ::
 
 $(output):: $(deps)
 	$(command)
+
+FORCE:
 # ============= call_command_header:end =============

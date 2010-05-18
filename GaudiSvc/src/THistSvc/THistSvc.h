@@ -3,6 +3,8 @@
 
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/ITHistSvc.h"
+#include "GaudiKernel/IIncidentListener.h"
+#include "GaudiKernel/MsgStream.h"
 
 #include "TObject.h"
 #include "TH1.h"
@@ -21,7 +23,9 @@
 // Forward declarations
 template <class TYPE> class SvcFactory;
 
-class THistSvc: public Service, virtual public ITHistSvc {
+class THistSvc: public Service, virtual public ITHistSvc,
+		virtual public IIncidentListener
+{
 
 public:
 
@@ -68,6 +72,7 @@ public:
 
   THistSvc(const std::string& name, ISvcLocator *svc );
 
+  void handle(const Incident&);
 
 protected:
 
@@ -111,6 +116,8 @@ private:
     SHARE
   };
 
+  mutable MsgStream m_log;
+
   typedef std::map<std::string, THistID> uidMap;
   typedef std::multimap<std::string, THistID> idMap;
   typedef std::map<TObject*, THistID> objMap;
@@ -146,12 +153,14 @@ private:
   /// call-back method to handle input stream property
   void setupInputFile( Property& inputfile );
 
-  /// call-back method to handle input stream property
+  /// call-back method to handle output stream property
   void setupOutputFile( Property& outputfile );
+
+  void setupCompressionLevel( Property& cmp );
 
   StringArrayProperty m_inputfile, m_outputfile;
   std::vector<std::string> m_Rstream, m_Wstream;
-  IntegerProperty m_autoSave, m_compressionLevel;
+  IntegerProperty m_autoSave, m_compressionLevel, m_maxFileSize;
   BooleanProperty m_print;
 
   /// list of already connected files. This is to keep track of files 
@@ -173,6 +182,8 @@ private:
 
   std::map<std::string, std::string > m_sharedFiles; // stream->filename of shared files
   void MergeRootFile( TDirectory *target, TDirectory *source); 
+
+  bool signaledStop;
 
 };
 

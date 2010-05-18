@@ -1,5 +1,11 @@
 @echo off
 
+rem Check if we were asked to export all the symbols in the library
+if %1 equ -export_all_symbols (
+    set EXPORT_ALL_SYMBOLS=yes
+    shift
+)
+
 rem #
 set bin=..\%1%
 set name=%2%
@@ -37,12 +43,14 @@ rem  to project-specific implementation.
 rem   We need to define a better way to specify that option 
 rem
 
-if exist %bin%\%name%\%name%_dll.obj goto component
-if exist %bin%\%name%\%name%_entries.obj goto componentnew
+rem Special action if the environment variable EXPORT_ALL_SYMBOLS is defined
+IF NOT DEFINED EXPORT_ALL_SYMBOLS goto standard
 
-:linker
-
+:export_all
 %CMTROOT%\%CMTBIN%\cmt.exe build windefs %bin%\%name%.arc >%bin%\%name%.def
+
+rem Hack to reduce the number of exported symbols
+python %GAUDIPOLICYROOT%/scripts/remove_lines.py %bin%\%name%.def "details?@boost"
 
 lib.exe /nologo /machine:ix86 /def:%bin%\%name%.def /out:%bin%\%name%.lib
 
@@ -52,12 +60,9 @@ link.exe /nologo /dll /out:%bin%\%name%.dll %bin%\%name%.exp %bin%\%name%.arc %i
 
 goto return
 
-:component
+:standard
 link.exe /nologo /dll /out:%bin%\%name%.dll %bin%\%name%\*.obj /machine:ix86 %indirectlinkopts%
 goto return
- 
-:componentnew
-link.exe /nologo /dll /out:%bin%\%name%.dll %bin%\%name%\*.obj /machine:ix86 %indirectlinkopts%
 
 :return
 if exist %tmplinkopts% del %tmplinkopts%

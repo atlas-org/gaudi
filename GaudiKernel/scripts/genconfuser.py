@@ -26,22 +26,35 @@ def _inheritsfrom(derived, basename):
                 return True
     return False
 
-def getConfigurableUsers(modulename, root):
+def getConfigurableUsers(modulename, root, mayNotExist = False):
     """
     Find in the module 'modulename' all the classes that derive from ConfigurableUser.
     Return the list of the names.
+    The flag mayNotExist is used to choose the level of the logging message in case
+    the requested module does not exist.
     """
-    # hack the sys.path to add the first part of the module name after root
+    # remember the old system path
     oldpath = list(sys.path)
-    # hack the sys.path to add the first part of the module name after root
+    # we need to hack the sys.path to add the first part of the module name after root
     moduleelements = modulename.split('.')
     if len(moduleelements) > 1:
-        sys.path.insert(0,os.sep.join([root] + moduleelements[:-1]))
+        moddir = os.sep.join([root] + moduleelements[:-1])
     else:
-        sys.path.insert(0,root)
-    logging.verbose("sys.path prepended with %r", sys.path[0])
+        moddir = root
     # this is the name of the submodule to import
     shortmodname = moduleelements[-1]
+    # check if the module file actually exists
+    if not os.path.exists(os.path.join(moddir, shortmodname) + ".py"):
+        msg = "Module %s does not exist" % modulename
+        if mayNotExist:
+            logging.verbose(msg)
+        else:
+            logging.error(msg)
+        # no file -> do not try to import
+        return []
+    # prepend moddir to the path
+    sys.path.insert(0, moddir)
+    logging.verbose("sys.path prepended with %r", sys.path[0])
     
     logging.info("Looking for ConfigurableUser in %r", modulename)
     g, l = {}, {}
@@ -80,6 +93,9 @@ def main():
                       help="root directory of the python modules [default = '../python'].")
     parser.add_option("-v", "--verbose", action="store_true",
                       help="print some debugging information")
+    parser.add_option("--lockerpath", action="store",
+                      metavar = "DIRNAME",
+                      help="directory where to find the module 'locker'")
     parser.set_defaults(root = os.path.join("..","python"))
     
     opts, args = parser.parse_args()
@@ -108,20 +124,63 @@ def main():
     else:
         outputfile = opts.output
     
+    # The locking ensures that nobody tries to modify the python.zip file while
+    # we read it.
+    dbLock = None
+    if "GAUDI_BUILD_LOCK" in os.environ:
+        if opts.lockerpath:
+            sys.path.append(opts.lockerpath)
+        # Get the LockFile class from the locker module in GaudiPolicy or use a fake
+        # factory.
+        try:
+            from locker import LockFile
+        except ImportError:
+            def LockFile(*args, **kwargs):
+                return None
+        # obtain the lock
+        dbLock = LockFile(os.environ["GAUDI_BUILD_LOCK"], temporary =  True) 
+    
+    # We can disable the error on missing configurables only if we can import Gaudi.Configurables
+    # It must be done at this point because it may conflict with logging.basicConfig
+    try:
+        import Gaudi.Configurables
+        Gaudi.Configurables.ignoreMissingConfigurables = True
+    except:
+        pass
     # load configurables database to avoid fake duplicates
     loadConfigurableDb()
+    # ensure that local configurables are in the database
+    try:
+        # Add the local python directories to the python path to be able to import the local
+        # configurables
+        sys.path.insert(0, os.path.join("..", "genConf"))
+        sys.path.insert(0, os.path.join("..", "python"))
+        localConfDb = os.path.join("..", "genConf", package_name, package_name + '_confDb.py')
+        if os.path.exists(localConfDb):
+            execfile(localConfDb, {}, {})
+    except:
+        pass # ignore failures (not important)
+    del dbLock # Now we can let the others operate on the install area python directory
+    
     # Collecting ConfigurableUser specializations
     cus = {}
     for mod in args:
+        lst = None
         try:
-            lst = getConfigurableUsers(mod, root = opts.root)
+            lst = getConfigurableUsers(mod, root = opts.root, mayNotExist = usingConvention)
         except ImportError:
-            if usingConvention: # the conventional module may not exist
-                continue
-            logging.error("Cannot import module %r", mod)
+            import traceback
+            logging.error("Cannot import module %r:\n%s", mod,
+                          traceback.format_exc().rstrip()) # I remove the trailing '\n'
             return 2
         if lst:
             cus[mod] = lst
+            # Add the configurables to the database as fake entries to avoid duplicates
+            for m in lst:
+                cfgDb.add(configurable = m,
+                          package = 'None',
+                          module  = 'None',
+                          lib     = 'None')
         elif not usingConvention:
             logging.warning("Specified module %r does not contain ConfigurableUser specializations", mod)
     

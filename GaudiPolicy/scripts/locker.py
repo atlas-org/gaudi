@@ -3,7 +3,7 @@
 ##  http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/65203
 ##
 
-import os, sys 
+import os, time
 
 if os.name == 'nt':
     import msvcrt
@@ -44,7 +44,7 @@ if os.name == 'nt':
         file.seek(pos) # reset position
 
 elif os.name =='posix':
-    import socket,errno,time
+    import socket, errno
 
     def _tmpFileName(fileName):
         return "%s.%s.%d" % ( fileName, socket.gethostname(), os.getpid() )
@@ -122,5 +122,37 @@ elif os.name =='posix':
             if e.errno != errno.ENOENT:
                 raise
         return
-    
-		
+
+import logging
+## Lock a file.
+#  The file for the lock is created if it doesn't exists and it the "temporary"
+#  argument is set to True it will also be deleted when the lock is not needed.
+#  The unlocking is done in the destructor (RAII pattern).
+class LockFile(object):
+    def __init__(self, name, temporary = False):
+        self.name = name
+        self.temporary = temporary
+        self.file = None
+        self.log = logging.getLogger("LockFile")
+        self.log.info("%s - Locking on %s", time.strftime("%Y-%m-%d_%H:%M:%S"), self.name)
+        if not os.path.exists(name):
+            mode = "w"
+        else:
+            self.temporary = False # I do not want to delete a file I didn't create
+            mode = "r+"
+        try:
+            self.file = open(self.name, mode)
+            lock(self.file)
+        except:
+            self.log.warning("Cannot acquire lock on %s", self.name)
+    def __del__(self):
+        if self.file:
+            unlock(self.file)
+            self.file.close()
+            if self.temporary:
+                try:
+                    os.remove(self.name)
+                except:
+                    pass
+            self.log.info("%s - Lock on %s released", time.strftime("%Y-%m-%d_%H:%M:%S"), self.name)
+
