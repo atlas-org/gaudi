@@ -1,3 +1,6 @@
+2010-05-20:
+    - cmt/project.cmt: setup_strategy root,no_config
+
 2010-05-17: 
     - Update GAUDI_ATLAS to v20r4p8
     - LCGCMT_56g
