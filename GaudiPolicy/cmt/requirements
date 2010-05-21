@@ -6,6 +6,7 @@ branches cmt doc
 # LCG debug libraries are not distributed (LOCAL) ===========================
 use LCG_Settings *
 use Python * LCG_Interfaces -no_auto_imports
+use pytools v* LCG_Interfaces
 
 # Add Google malloc replacement to the LD_LIBRARY_PATH
 use tcmalloc v* LCG_Interfaces -no_auto_imports
@@ -129,7 +130,7 @@ pattern library_path \
 
 pattern component_library \
     apply_pattern libraryShr library="<library>" ; \
-    apply_pattern library_Clinkopts library="<library>" ; \
+#    apply_pattern library_Clinkopts library="<library>" ; \
     apply_pattern library_Cshlibflags library="<library>" ;\
     macro <library>_dependencies "$(<package>_linker_library) " ;\
     apply_pattern generate_rootmap library=<library> group=<group> ; \
@@ -359,7 +360,7 @@ pattern packageShr \
     apply_pattern libraryShr library="<package>"
 
 pattern package_Clinkopts \
-    apply_pattern library_Clinkopts library="<package>"
+#    apply_pattern library_Clinkopts library="<package>"
 
 pattern package_Cshlibflags \
     apply_pattern library_Cshlibflags library="<package>"

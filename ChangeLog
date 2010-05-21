@@ -1,3 +1,7 @@
+2010-05-21:
+    - GaudiPolicy/cmt/requirements: add "use pytools v* LCG_Interfaces" for qmtests
+    - GaudiSvc/cmt/requirements, GaudiPolicy/cmt/requirements: remove library_Clinkopts pattern
+
 2010-05-20:
     - cmt/project.cmt: setup_strategy root,no_config
 
