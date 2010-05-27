@@ -66,13 +66,22 @@ struct TGFALSystem : public TSystem {
 using namespace ROOT::Reflex;
 
 typedef const std::vector<void*>& _Args;
-template <class T> static void* ctor(void* m,_Args,void*)  {  return ::new(m) T();      }
-template <class T> static void* dtor(void* m,_Args,void*)  {  ((T*)m)->~T(); return 0;  }
-static void* TGFALFile_ctor(void* mem, _Args args, void*)
-{  return ::new(mem) TGFALFile((const char*)args[0],(const char*)args[1],(const char*)args[2],*(int*)args[3]);  }
+template <class T>
+static void ctor(void* retaddr, void* mem, _Args, void*) {
+  if (retaddr) *(void**)retaddr = ::new(mem) T();
+  else ::new(mem) T();
+}
+template <class T>
+static void dtor(void*, void* m, _Args, void*) {
+  ((T*)m)->~T();
+}
+static void TGFALFile_ctor(void* retaddr, void* mem, _Args args, void*){
+  if (retaddr) *(void**)retaddr = ::new(mem) TGFALFile((const char*)args[0],(const char*)args[1],(const char*)args[2],*(int*)args[3]);
+  else ::new(mem) TGFALFile((const char*)args[0],(const char*)args[1],(const char*)args[2],*(int*)args[3]);
+}
 
 namespace { 
-  struct __init  {  
+  struct __init  {
     __init()  {
       ClassBuilderT<TGFALFile>()
         .AddBase<TFile>()
@@ -87,7 +96,7 @@ namespace {
         .AddFunctionMember<void(void)>("~TGFALSystem", dtor<TGFALSystem>, 0, 0, PUBLIC | DESTRUCTOR );
       gROOT->GetPluginManager()->AddHandler("TSystem",PLUGIN_NAME,"TGFALSystem", "testGaudiPoolDb", "TGFALSystem()");
     }
-  }; 
+  };
   static __init _i;
-} 
+}
 void* __init_TGFALFile ()  {return &_i;}
