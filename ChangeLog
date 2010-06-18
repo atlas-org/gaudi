@@ -1,3 +1,9 @@
+2010-06-18:
+    - Update THistSvc to v20r4p8
+    M GaudiKernel/GaudiKernel/ITHistSvc.h
+    M GaudiSvc/src/THistSvc/THistSvc.h
+    M GaudiSvc/src/THistSvc/THistSvc.cpp
+
 2010-05-21:
     - GaudiPolicy/cmt/requirements: add "use pytools v* LCG_Interfaces" for qmtests
     - GaudiSvc/cmt/requirements, GaudiPolicy/cmt/requirements: remove library_Clinkopts pattern

@@ -44,7 +44,7 @@ THistSvc::THistSvc( const std::string& name, ISvcLocator* svc )
 
   declareProperty ("AutoSave", m_autoSave=0 );
   declareProperty ("PrintAll", m_print=false);
-  declareProperty ("MaxFileSize", m_maxFileSize=5120, 
+  declareProperty ("MaxFileSize", m_maxFileSize=10240, 
 		   "maximum file size in MB. if exceeded, will cause an abort");
   declareProperty ("CompressionLevel", m_compressionLevel=1 )->declareUpdateHandler( &THistSvc::setupCompressionLevel, this );
   declareProperty ("Output", m_outputfile )->declareUpdateHandler( &THistSvc::setupOutputFile, this );
@@ -393,8 +393,7 @@ THistSvc::browseTDir(TDirectory *dir) const {
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *//
 
 StatusCode
-THistSvc::getTHists(TDirectory *td, TList & tl) const {
-
+THistSvc::getTHists(TDirectory *td, TList & tl, bool rcs) const {
   GlobalDirectoryRestore restore;
 
   gErrorIgnoreLevel = kBreak;
@@ -412,21 +411,38 @@ THistSvc::getTHists(TDirectory *td, TList & tl) const {
   while (TKey *key = (TKey*)nextkey()) {
     m_log << MSG::DEBUG << "  key: " << key->GetName();
     TObject *obj = key->ReadObj();
-    if (obj != 0 && obj->IsA()->InheritsFrom("TH1")) {
+    if (obj != 0 && obj->IsA()->InheritsFrom("TDirectory")) {
+      m_log << " (" << obj->IsA()->GetName() << ")";
+    } else if (obj != 0 && obj->IsA()->InheritsFrom("TH1")) {
       m_log << " (" << obj->IsA()->GetName() << ")";
       tl.Add(obj);
+    } else if (obj != 0) {
+      m_log << " [" << obj->IsA()->GetName() << "]";
     }
     m_log << endreq;
   }
 
+  // operate recursively
+  if (rcs) {
+    nextkey = td->GetListOfKeys();
+    while (TKey *key = (TKey*)nextkey()) {
+      TObject *obj = key->ReadObj();
+      if (obj != 0 && obj->IsA()->InheritsFrom("TDirectory")) {
+	  TDirectory *tt = dynamic_cast<TDirectory*>(obj);
+	  getTHists(tt, tl, rcs);
+      }
+    }
+  }
+
   return StatusCode::SUCCESS;
+
 
 }
 
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *//
 
 StatusCode
-THistSvc::getTHists(const std::string& dir, TList & tl) const {
+THistSvc::getTHists(const std::string& dir, TList & tl, bool rcs) const {
 
   GlobalDirectoryRestore restore;
 
@@ -448,7 +464,10 @@ THistSvc::getTHists(const std::string& dir, TList & tl) const {
 	  << itr->second.first->GetName() << "\"" << endreq;
 
     if (gDirectory->cd(r2.c_str())) {
-      return getTHists(gDirectory,tl);
+      m_curstream = stream;
+      sc = getTHists(gDirectory,tl,rcs);
+      m_curstream = "";
+      return sc;
     } else {
       m_log << MSG::DEBUG << "getTHists: no such TDirectory \"" 
 	    << r2 << "\"" << endreq;
@@ -459,14 +478,12 @@ THistSvc::getTHists(const std::string& dir, TList & tl) const {
 	  << endreq;
   }
 
-  
-
   if (!gDirectory->cd(dir.c_str())) {
     m_log << MSG::ERROR << "getTHists: No such TDirectory/stream \"" << dir 
 	  << "\"" << endreq;
     sc = StatusCode::FAILURE;
   } else {
-    sc = getTHists(gDirectory,tl);
+    sc = getTHists(gDirectory,tl,rcs);
   }
 
   return sc;
@@ -475,7 +492,225 @@ THistSvc::getTHists(const std::string& dir, TList & tl) const {
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *//
 
 StatusCode
-THistSvc::getTTrees(TDirectory *td, TList & tl) const {
+THistSvc::getTTrees(TDirectory *td, TList & tl, bool rcs) const {
+  GlobalDirectoryRestore restore;
+
+  gErrorIgnoreLevel = kBreak;
+
+  if (!td->cd()) {
+    m_log << MSG::ERROR << "getTTrees: No such TDirectory \"" 
+	  << td->GetPath() << "\"" << endreq;
+    return StatusCode::FAILURE;
+  }
+
+  m_log << MSG::DEBUG << "getTHists: \"" << td->GetPath() << "\": found " 
+	<< td->GetListOfKeys()->GetSize() << " keys" << endreq;
+
+  TIter nextkey(td->GetListOfKeys());
+  while (TKey *key = (TKey*)nextkey()) {
+    m_log << MSG::DEBUG << "  key: " << key->GetName();
+    TObject *obj = key->ReadObj();
+    if (obj != 0 && obj->IsA()->InheritsFrom("TDirectory")) {
+      m_log << " (" << obj->IsA()->GetName() << ")";
+    } else if (obj != 0 && obj->IsA()->InheritsFrom("TTree")) {
+      m_log << " (" << obj->IsA()->GetName() << ")";
+      tl.Add(obj);
+    } else if (obj != 0) {
+      m_log << " [" << obj->IsA()->GetName() << "]";
+    }
+    m_log << endreq;
+  }
+  
+  // operate recursively
+  if (rcs) {
+    nextkey = td->GetListOfKeys();
+    while (TKey *key = (TKey*)nextkey()) {
+      TObject *obj = key->ReadObj();
+      if (obj != 0 && obj->IsA()->InheritsFrom("TDirectory")) {
+	  TDirectory *tt = dynamic_cast<TDirectory*>(obj);
+	  getTTrees(tt, tl, rcs);
+      }
+    }
+  }
+
+  return StatusCode::SUCCESS;
+
+}
+
+//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *//
+
+StatusCode
+THistSvc::getTTrees(const std::string& dir, TList & tl, bool rcs) const {
+  GlobalDirectoryRestore restore;
+
+  gErrorIgnoreLevel = kBreak;
+
+  StatusCode sc;
+
+  std::string stream,rem,r2;
+  parseString(dir,stream,rem);
+
+  map< string,pair<TFile*,Mode> >::const_iterator itr = m_files.find(stream);
+  if (itr != m_files.end()) {
+    r2 = itr->second.first->GetName();
+    r2 += ":/";
+    r2 += rem;
+
+    m_log << MSG::DEBUG << "getTTrees: \"" << dir 
+	  << "\" looks like a stream name."  << " associated TFile: \"" 
+	  << itr->second.first->GetName() << "\"" << endreq;
+
+    if (gDirectory->cd(r2.c_str())) {
+      return getTTrees(gDirectory,tl,rcs);
+    } else {
+      m_log << MSG::DEBUG << "getTTrees: no such TDirectory \"" 
+	    << r2 << "\"" << endreq;
+    }
+
+  } else {
+    m_log << MSG::DEBUG << "getTTrees: stream \"" << stream << "\" not found" 
+	  << endreq;
+  }
+
+  if (!gDirectory->cd(dir.c_str())) {
+    m_log << MSG::ERROR << "getTTrees: No such TDirectory/stream \"" << dir 
+	  << "\"" << endreq;
+    sc = StatusCode::FAILURE;
+  } else {
+    sc = getTTrees(gDirectory,tl,rcs);
+  }
+
+  return sc;
+
+
+}
+
+
+//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *//
+
+StatusCode
+THistSvc::getTHists(TDirectory *td, TList & tl, bool rcs, bool reg) {
+
+  GlobalDirectoryRestore restore;
+
+  gErrorIgnoreLevel = kBreak;
+
+  if (!td->cd()) {
+    m_log << MSG::ERROR << "getTHists: No such TDirectory \"" << td->GetPath() 
+	  << "\"" << endreq;
+    return StatusCode::FAILURE;
+  }
+
+  m_log << MSG::DEBUG << "getTHists: \"" << td->GetPath() << "\": found " 
+	<< td->GetListOfKeys()->GetSize() << " keys" << endreq;
+
+  TIter nextkey(td->GetListOfKeys());
+  while (TKey *key = (TKey*)nextkey()) {
+    m_log << MSG::DEBUG << "  key: " << key->GetName();
+    TObject *obj = key->ReadObj();
+    if (obj != 0 && obj->IsA()->InheritsFrom("TDirectory")) {
+      m_log << " (" << obj->IsA()->GetName() << ")";
+    } else if (obj != 0 && obj->IsA()->InheritsFrom("TH1")) {
+      m_log << " (" << obj->IsA()->GetName() << ")";
+      tl.Add(obj);
+      if (reg && m_curstream != "") {
+	string dir = td->GetPath();
+	string fil = td->GetFile()->GetName();
+	dir.erase(0,fil.length()+1);
+	string id = "/" + m_curstream;
+	if ( dir == "/" ) {
+	  id = id + "/" + key->GetName();
+	} else {
+	  id = id + dir + "/" + key->GetName();
+	}
+	if (!exists(id)) {
+	  m_log << "  reg as \"" << id << "\"";
+	  regHist(id).ignore();
+	} else {
+	  m_log << "  already registered";
+	}
+      }
+    } else if (obj != 0) {
+      m_log << " [" << obj->IsA()->GetName() << "]";
+    }
+    m_log << endreq;
+  }
+
+  // operate recursively
+  if (rcs) {
+    nextkey = td->GetListOfKeys();
+    while (TKey *key = (TKey*)nextkey()) {
+      TObject *obj = key->ReadObj();
+      if (obj != 0 && obj->IsA()->InheritsFrom("TDirectory")) {
+	  TDirectory *tt = dynamic_cast<TDirectory*>(obj);
+	  getTHists(tt, tl, rcs, reg);
+      }
+    }
+  }
+
+  return StatusCode::SUCCESS;
+
+}
+
+//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *//
+
+StatusCode
+THistSvc::getTHists(const std::string& dir, TList & tl, bool rcs, bool reg) {
+
+  GlobalDirectoryRestore restore;
+
+  gErrorIgnoreLevel = kBreak;
+
+  StatusCode sc;
+
+  std::string stream,rem,r2;
+  parseString(dir,stream,rem);
+
+  map< string,pair<TFile*,Mode> >::const_iterator itr = m_files.find(stream);
+  if (itr != m_files.end()) {
+    r2 = itr->second.first->GetName();
+    r2 += ":/";
+    r2 += rem;
+
+    m_log << MSG::DEBUG << "getTHists: \"" << dir 
+	  << "\" looks like a stream name."  << " associated TFile: \"" 
+	  << itr->second.first->GetName() << "\"" << endreq;
+
+    if (gDirectory->cd(r2.c_str())) {
+      m_curstream = stream;
+      sc = getTHists(gDirectory,tl,rcs,reg);
+      m_curstream = "";
+      return sc;
+    } else {
+      m_log << MSG::DEBUG << "getTHists: no such TDirectory \"" 
+	    << r2 << "\"" << endreq;
+    }
+
+  } else {
+    m_log << MSG::DEBUG << "getTHists: stream \"" << stream << "\" not found" 
+	  << endreq;
+  }
+
+  if (!gDirectory->cd(dir.c_str())) {
+    m_log << MSG::ERROR << "getTHists: No such TDirectory/stream \"" << dir 
+	  << "\"" << endreq;
+    sc = StatusCode::FAILURE;
+  } else {
+    if (reg) {
+      m_log << MSG::WARNING << "Unable to register histograms automatically "
+	    << "without a valid stream name" << endreq;
+      reg = false;
+    }
+    sc = getTHists(gDirectory,tl,rcs,reg);
+  }
+
+  return sc;
+
+}
+//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *//
+
+StatusCode
+THistSvc::getTTrees(TDirectory *td, TList & tl, bool rcs, bool reg) {
 
   GlobalDirectoryRestore restore;
 
@@ -494,13 +729,46 @@ THistSvc::getTTrees(TDirectory *td, TList & tl) const {
   while (TKey *key = (TKey*)nextkey()) {
     m_log << MSG::DEBUG << "  key: " << key->GetName();
     TObject *obj = key->ReadObj();
-    if (obj != 0 && obj->IsA()->InheritsFrom("TTree")) {
+    if (obj != 0 && obj->IsA()->InheritsFrom("TDirectory")) {
+      m_log << " (" << obj->IsA()->GetName() << ")";
+    } else if (obj != 0 && obj->IsA()->InheritsFrom("TTree")) {
       m_log << " (" << obj->IsA()->GetName() << ")";
       tl.Add(obj);
+      if (reg && m_curstream != "") {
+	string dir = td->GetPath();
+	string fil = td->GetFile()->GetName();
+	dir.erase(0,fil.length()+1);
+	string id = "/" + m_curstream;
+	if ( dir == "/" ) {
+	  id = id + "/" + key->GetName();
+	} else {
+	  id = id + dir + "/" + key->GetName();
+	}
+	if (!exists(id)) {
+	  m_log << "  reg as \"" << id << "\"";
+	  regHist(id).ignore();
+	} else {
+	  m_log << "  already registered";
+	}
+      }
+    } else if (obj != 0) {
+      m_log << " [" << obj->IsA()->GetName() << "]";
     }
     m_log << endreq;
   }
   
+  // operate recursively
+  if (rcs) {
+    nextkey = td->GetListOfKeys();
+    while (TKey *key = (TKey*)nextkey()) {
+      TObject *obj = key->ReadObj();
+      if (obj != 0 && obj->IsA()->InheritsFrom("TDirectory")) {
+	  TDirectory *tt = dynamic_cast<TDirectory*>(obj);
+	  getTTrees(tt, tl, rcs, reg);
+      }
+    }
+  }
+
   return StatusCode::SUCCESS;
 
 }
@@ -508,7 +776,7 @@ THistSvc::getTTrees(TDirectory *td, TList & tl) const {
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *//
 
 StatusCode
-THistSvc::getTTrees(const std::string& dir, TList & tl) const {
+THistSvc::getTTrees(const std::string& dir, TList & tl, bool rcs, bool reg) {
 
   GlobalDirectoryRestore restore;
 
@@ -530,7 +798,7 @@ THistSvc::getTTrees(const std::string& dir, TList & tl) const {
 	  << itr->second.first->GetName() << "\"" << endreq;
 
     if (gDirectory->cd(r2.c_str())) {
-      return getTTrees(gDirectory,tl);
+      return getTTrees(gDirectory,tl,rcs,reg);
     } else {
       m_log << MSG::DEBUG << "getTTrees: no such TDirectory \"" 
 	    << r2 << "\"" << endreq;
@@ -546,17 +814,8 @@ THistSvc::getTTrees(const std::string& dir, TList & tl) const {
 	  << "\"" << endreq;
     sc = StatusCode::FAILURE;
   } else {
-    sc = getTTrees(gDirectory,tl);
+    sc = getTTrees(gDirectory,tl,rcs,reg);
   }
-
-
-//   if (!gDirectory->cd(dir.c_str())) {
-//     m_log << MSG::ERROR << "No such TDirectory \"" << dir << "\""
-// 	  << endreq;
-//     sc = StatusCode::FAILURE;
-//   } else {
-//     sc = getTTrees(gDirectory,tl);
-//   }
 
   return sc;
 
