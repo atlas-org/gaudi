@@ -54,6 +54,7 @@ public:
     // check for random numbers service
     Assert ( randSvc() != 0, "Random Service is not available!");
     //
+    m_evtCount = 0; // reset event counter
     return StatusCode::SUCCESS ;
   };
   /** the only one essential method
@@ -68,7 +69,7 @@ public:
   TupleAlg
   ( const std::string& name ,
     ISvcLocator*       pSvc )
-    : GaudiTupleAlg ( name , pSvc ) {};
+    : GaudiTupleAlg ( name , pSvc ), m_evtCount(0) {};
   // destructor
   virtual ~TupleAlg() {} ;
 private:
@@ -76,8 +77,10 @@ private:
   TupleAlg() ;
   // copy constructor is disabled
   TupleAlg( const TupleAlg& ) ;
-  // assignement op[erator is disabled
+  // assignment operator is disabled
   TupleAlg& operator=( const TupleAlg& ) ;
+
+  unsigned long long m_evtCount;
 };
 
 
@@ -97,6 +100,8 @@ StatusCode TupleAlg::execute()
   Rndm::Numbers breit   ( randSvc() , Rndm::BreitWigner (   0.0 ,  1.0 ) ) ;
   Rndm::Numbers poisson ( randSvc() , Rndm::Poisson     (   2.0        ) ) ;
   Rndm::Numbers binom   ( randSvc() , Rndm::Binomial    (   8   , 0.25 ) ) ;
+
+  ++m_evtCount;
 
   // ==========================================================================
   // book and fill simple Row-wise NTuple with scalar items only
@@ -120,6 +125,9 @@ StatusCode TupleAlg::execute()
 
   // fill N-Tuple with "boolean" numbers:
   tuple1 -> column ( "poisb"  ,  poisson ()  > 0.0) ;
+
+  // event counter
+  tuple1 -> column ( "event"  , m_evtCount ) ;
 
   tuple1->write() ;
 
@@ -145,6 +153,9 @@ StatusCode TupleAlg::execute()
 
   // fill N-Tuple with "boolean" numbers:
   tuple2 -> column ( "poisb"  , poisson () > 0.0 ) ;
+
+  // event counter
+  tuple2 -> column ( "event"  , m_evtCount ) ;
 
   tuple2 -> write () ;
 
