@@ -27,6 +27,7 @@
 #include "GaudiKernel/IToolSvc.h"
 #include "GaudiKernel/IMonitorSvc.h"
 #include "GaudiKernel/IExceptionSvc.h"
+#include "GaudiKernel/IAlgContextSvc.h"
 #include "GaudiKernel/Property.h"
 
 #ifndef PACKAGE_VERSION
@@ -50,7 +51,7 @@
  *  constructor of a concrete algorithm is the declaration of
  *  member variables as properties. All other functionality,
  *  i.e. the use of services and the creation of sub-algorithms,
- *  may be used only in initialise() and afterwards (see the
+ *  may be used only in initialize() and afterwards (see the
  *  Gaudi user guide).
  *
  *  @author Paul Maley
@@ -58,9 +59,7 @@
  *  @author David Quarrie
  *  @date   1998
  */
-class Algorithm : virtual public IAlgorithm,
-                  virtual public IProperty,
-                  virtual public IStateful {
+class GAUDI_API Algorithm: public implements3<IAlgorithm, IProperty, IStateful> {
 public:
 
   /** Constructor
@@ -149,7 +148,7 @@ public:
   virtual StatusCode configure () { return StatusCode::SUCCESS ; }
   /// Dummy implementation of IStateful::terminate() method
   virtual StatusCode terminate () { return StatusCode::SUCCESS ; }
-  
+
   /// the default (empty) implementation of IStateful::initialize() method
   virtual StatusCode initialize () { return StatusCode::SUCCESS ; }
   /// the default (empty) implementation of IStateful::start() method
@@ -163,7 +162,7 @@ public:
   virtual StatusCode reinitialize ();
   /// the default (empty) implementation of IStateful::restart() method
   virtual StatusCode restart ();
-  
+
   /// Has this algorithm been executed since the last reset?
   virtual bool isExecuted( ) const;
 
@@ -182,10 +181,10 @@ public:
 
   /// Algorithm end run. This method is called at the end of the event loop
   virtual StatusCode endRun();
-  
+
   /// returns the current state of the algorithm
   virtual Gaudi::StateMachine::State FSMState() const { return m_state; }
-  
+
   /// returns the state the algorithm will be in after the ongoing transition
   virtual Gaudi::StateMachine::State targetFSMState() const { return m_targetState; }
 
@@ -212,102 +211,111 @@ public:
     return service_i(svcType, svcName, T::interfaceID(), (void**)&psvc);
   }
 
-  /// Set the outputlevel for current algorithm
+  /// Return a pointer to the service identified by name (or "type/name")
+  SmartIF<IService> service(const std::string& name, const bool createIf = true, const bool quiet = false) const;
+
+  /// Set the output level for current algorithm
   void setOutputLevel( int level );
 
   /** The standard auditor service.May not be invoked before sysInitialize()
    *  has been invoked.
    */
-  IAuditorSvc* auditorSvc() const;
+  SmartIF<IAuditorSvc>& auditorSvc() const;
 
   /** The standard Chrono & Stat service,
    *  Return a pointer to the service if present
    */
-  IChronoStatSvc* chronoSvc() const;
+  SmartIF<IChronoStatSvc>& chronoSvc() const;
   /// Obsoleted name, kept due to the backwards compatibility
-  IChronoStatSvc* chronoStatService() const;
+  SmartIF<IChronoStatSvc>& chronoStatService() const;
 
   /** The standard detector data service.
    *  May not be invoked before sysInitialize() has been invoked.
    */
-  IDataProviderSvc* detSvc() const;
+  SmartIF<IDataProviderSvc>& detSvc() const;
 
   /// Obsoleted name, kept due to the backwards compatibility
-  IDataProviderSvc* detDataService() const;
+  SmartIF<IDataProviderSvc>& detDataService() const;
 
   /** The standard detector data persistency conversion service.
    *  May not be invoked before sysInitialize() has been invoked.
    */
-  IConversionSvc* detCnvSvc() const;
+  SmartIF<IConversionSvc>& detCnvSvc() const;
 
   /// Obsoleted name, kept due to the backwards compatibility
-  IConversionSvc* detDataCnvService() const;
+  SmartIF<IConversionSvc>& detDataCnvService() const;
 
   /** The standard event data service.
    *  May not be invoked before sysInitialize() has been invoked.
    */
-  IDataProviderSvc* eventSvc() const;
+  SmartIF<IDataProviderSvc>& eventSvc() const;
   /// shortcut for  method eventSvc
-  IDataProviderSvc* evtSvc  () const { return eventSvc() ; }
+  SmartIF<IDataProviderSvc>& evtSvc  () const { return eventSvc() ; }
   /// Obsoleted name, kept due to the backwards compatibility
-  IDataProviderSvc* eventDataService() const;
+  SmartIF<IDataProviderSvc>& eventDataService() const;
 
   /** The standard event data persistency conversion service.
    *  May not be invoked before sysInitialize() has been invoked.
    */
-  IConversionSvc*   eventCnvSvc() const;
+  SmartIF<IConversionSvc>&   eventCnvSvc() const;
   /// Obsoleted name, kept due to the backwards compatibility
-  IConversionSvc*   eventDataCnvService() const;
+  SmartIF<IConversionSvc>&   eventDataCnvService() const;
 
   /** The standard histogram service.
    *  May not be invoked before sysInitialize() has been invoked.
    */
-  IHistogramSvc* histoSvc() const;
+  SmartIF<IHistogramSvc>& histoSvc() const;
   /// Obsoleted name, kept due to the backwards compatibility
-  IHistogramSvc* histogramDataService() const;
+  SmartIF<IHistogramSvc>& histogramDataService() const;
 
   /** The standard message service.
    *  Returns a pointer to the standard message service.
    *  May not be invoked before sysInitialize() has been invoked.
    */
-  IMessageSvc*      msgSvc() const;
+  SmartIF<IMessageSvc>&      msgSvc() const;
 
   /// Obsoleted name, kept due to the backwards compatibility
-  IMessageSvc*      messageService() const;
+  SmartIF<IMessageSvc>&      messageService() const;
 
   /** The standard N tuple service.
    *  Returns a pointer to the N tuple service if present.
    */
-  INTupleSvc* ntupleSvc() const;
+  SmartIF<INTupleSvc>& ntupleSvc() const;
 
   /// Obsoleted name, kept due to the backwards compatibility
-  INTupleSvc* ntupleService() const;
+  SmartIF<INTupleSvc>& ntupleService() const;
 
   /** AIDA-based NTuple service
    *  Returns a pointer to the AIDATuple service if present.
    */
-  // IAIDATupleSvc* atupleSvc() const;
+  // SmartIF<IAIDATupleSvc>& atupleSvc() const;
 
 
   /** The standard RandomGen service,
    *  Return a pointer to the service if present
    */
-  IRndmGenSvc* randSvc() const;
+  SmartIF<IRndmGenSvc>& randSvc() const;
 
   /// The standard ToolSvc service, Return a pointer to the service if present
-  IToolSvc* toolSvc() const;
+  SmartIF<IToolSvc>& toolSvc() const;
 
   /// Get the exception Service
-  IExceptionSvc* exceptionSvc() const;
+  SmartIF<IExceptionSvc>& exceptionSvc() const;
+
+  /// get Algorithm Context Service
+  SmartIF<IAlgContextSvc>& contextSvc() const ;
 
   /** The standard service locator.
    *  Returns a pointer to the service locator service.
    *  This service may be used by an algorithm to request
    *  any services it requires in addition to those provided by default.
    */
-  ISvcLocator* serviceLocator() const;
+  SmartIF<ISvcLocator>& serviceLocator() const;
   /// shortcut for method serviceLocator
-  ISvcLocator* svcLoc        () const { return serviceLocator() ; }
+  SmartIF<ISvcLocator>& svcLoc        () const { return serviceLocator() ; }
+
+  /// register for Algorithm Context Service?
+  bool registerContext() const { return m_registerContext ; }
 
   /** Create a sub algorithm.
    *  A call to this method creates a child algorithm object.
@@ -356,50 +364,50 @@ public:
    *
    *  @code
    *
-   *  MyAlg ( const std::string& name , 
-   *          ISvcLocator*       pSvc ) 
-   *     : Algorithm ( name , pSvc ) 
+   *  MyAlg ( const std::string& name ,
+   *          ISvcLocator*       pSvc )
+   *     : Algorithm ( name , pSvc )
    *     , m_property1   ( ... )
    *     , m_property2   ( ... )
    *   {
-   *     // declare the property 
-   *     declareProperty( "Property1" , m_property1 , "Doc fro property #1" ) ;
+   *     // declare the property
+   *     declareProperty( "Property1" , m_property1 , "Doc for property #1" ) ;
    *
-   *     // declare the property and attach the handler  to it
-   *     declareProperty( "Property2" , m_property2 , "Doc for property #2" ) 
+   *     // declare the property and attach the handler to it
+   *     declareProperty( "Property2" , m_property2 , "Doc for property #2" )
    *        -> declareUpdateHandler( &MyAlg::handler_2 ) ;
-   *  
+   *
    *   }
    *  @endcode
    *
-   *  @see PropertyMgr 
-   *  @see PropertyMgr::declareProperty 
-   *  
-   *  @param name the property name 
-   *  @param proeprty the property itself, 
+   *  @see PropertyMgr
+   *  @see PropertyMgr::declareProperty
+   *
+   *  @param name the property name
+   *  @param property the property itself,
    *  @param doc      the documentation string
-   *  @return the actual property objects 
+   *  @return the actual property objects
    */
   template <class T>
   Property* declareProperty
-  ( const std::string& name              , 
+  ( const std::string& name              ,
     T&                 property          ,
-    const std::string& doc      = "none" ) const 
+    const std::string& doc      = "none" ) const
   {
     return m_propertyMgr->declareProperty(name, property, doc);
   }
   // ==========================================================================
   /// Declare remote named properties
   Property* declareRemoteProperty
-  ( const std::string& name       , 
+  ( const std::string& name       ,
     IProperty*         rsvc       ,
-    const std::string& rname = "" ) const 
-  { 
+    const std::string& rname = "" ) const
+  {
     return m_propertyMgr -> declareRemoteProperty ( name , rsvc , rname );
   }
   // ==========================================================================
   /** @brief Access the monitor service
-   *   
+   *
    *   @attention Note that this method will return a NULL pointer if no monitor service is
    *              configured to be present. You must take this possibility into account when
    *              using the pointer
@@ -407,16 +415,15 @@ public:
    *   @retval NULL No monitor service is present
    *   @retval non-NULL A monitor service is present and available to be used
    */
-  inline IMonitorSvc* monitorSvc() const
+  inline SmartIF<IMonitorSvc>& monitorSvc() const
   {
     // If not already located try to locate it without forcing a creation
-    if ( !m_pMonitorSvc ){
-      service_i( m_monitorSvcName, false, 
-                 IMonitorSvc::interfaceID(), pp_cast<void>(&m_pMonitorSvc) );
+    if ( !m_pMonitorSvc.isValid() ){
+      m_pMonitorSvc = service(m_monitorSvcName, false, true); // do not create and be quiet
     }
     return m_pMonitorSvc;
   }
-  
+
   /** Declare monitoring information
       @param name Monitoring information name known to the external system
       @param var  Monitoring Listener address (the item to monitor...)
@@ -425,9 +432,9 @@ public:
   template <class T>
   void declareInfo( const std::string& name,
                     const T& var,
-                    const std::string& desc ) const 
+                    const std::string& desc ) const
   {
-    IMonitorSvc* mS = monitorSvc();
+    IMonitorSvc* mS = monitorSvc().get();
     if ( mS ) mS->declareInfo(name, var, desc, this);
   }
 
@@ -442,66 +449,60 @@ public:
                     const std::string& format,
                     const void* var,
                     int size,
-                    const std::string& desc ) const 
+                    const std::string& desc ) const
   {
-    IMonitorSvc* mS = monitorSvc();
+    IMonitorSvc* mS = monitorSvc().get();
     if ( mS ) mS->declareInfo(name, format, var, size, desc, this);
   }
 
-  /// Methods for IInterface::addRef()
-  unsigned long addRef();
-  /// Methods for IInterface::release()
-  unsigned long release();
-  /// Methods for IInterface::queryInterface()
-  StatusCode queryInterface(const InterfaceID& riid, void**);
   // ==========================================================================
 public:
-  // ==========================================================================  
-  /** set the property form the value 
-   *  
-   *  @code 
+  // ==========================================================================
+  /** set the property form the value
+   *
+   *  @code
    *
    *  std::vector<double> data = ... ;
-   * 
+   *
    *  setProperty( "Data" , data ) ;
-   * 
+   *
    *  std::map<std::string,double> cuts = ... ;
    *  setProperty( "Cuts" , cuts ) ;
    *
    *  std::map<std::string,std::string> dict = ... ;
    *  setProperty( "Dictionary" , dict ) ;
-   * 
-   *  @endcode 
    *
-   *  Note: the interface IProperty allows setting of the properties either 
+   *  @endcode
+   *
+   *  Note: the interface IProperty allows setting of the properties either
    *        directly from other properties or from strings only
    *
-   *  This is very convinient in resetting of the default 
+   *  This is very convenient in resetting of the default
    *  properties in the derived classes.
-   *  E.g. without this method one needs to convert 
+   *  E.g. without this method one needs to convert
    *  everything into strings to use IProperty::setProperty
    *
-   *  @code 
-   *  
+   *  @code
+   *
    *    setProperty ( "OutputLevel" , "1"    ) ;
    *    setProperty ( "Enable"      , "True" ) ;
    *    setProperty ( "ErrorMax"    , "10"   ) ;
    *
-   *  @endcode 
+   *  @endcode
    *
-   *  For simple cases it is more or less ok, but for complicated properties 
+   *  For simple cases it is more or less ok, but for complicated properties
    *  it is just ugly..
    *
-   *  @param name      name of the property 
+   *  @param name      name of the property
    *  @param value     value of the property
    *  @see Gaudi::Utils::setProperty
    *  @author Vanya BELYAEV ibelyaev@physics.syr.edu
-   *  @date 2007-05-13 
-   */ 
+   *  @date 2007-05-13
+   */
   template <class TYPE>
-  StatusCode setProperty 
-  ( const std::string& name  , 
-    const TYPE&        value ) 
+  StatusCode setProperty
+  ( const std::string& name  ,
+    const TYPE&        value )
   { return Gaudi::Utils::setProperty ( m_propertyMgr , name , value ) ; }
   // ==========================================================================
 protected:
@@ -511,40 +512,41 @@ protected:
 
   /// Has the Algorithm already been finalized?
   bool isFinalized( ) const { return Gaudi::StateMachine::CONFIGURED == m_state; }
-  
+
   /// retrieve the Algorithm output level
   int  outputLevel() const { return (int)m_outputLevel ; }
 
   /// Accessor for the Message level property
   IntegerProperty & outputLevelProperty() { return m_outputLevel; }
 
-  /// callback for output level property 
+  /// callback for output level property
   void initOutputLevel(Property& prop);
- 
+
 
 private:
 
-  long m_refCount;               ///< Counter for references to Algorithm
   std::string m_name;            ///< Algorithm's name for identification
   std::string m_version;         ///< Algorithm's version
   std::vector<Algorithm *>* m_subAlgms; ///< Sub algorithms
 
-  mutable IMessageSvc*      m_MS;       ///< Message service
-  mutable IDataProviderSvc* m_EDS;      ///< Event data service
-  mutable IConversionSvc*   m_ECS;      ///< Event conversion service
-  mutable IDataProviderSvc* m_DDS;      ///< Detector data service
-  mutable IConversionSvc*   m_DCS;      ///< Detector conversion service
-  mutable IHistogramSvc*    m_HDS;      ///< Histogram data service
-  mutable INTupleSvc*       m_NTS;      ///< N tuple service
-  //  mutable IAIDATupleSvc*    m_ATS;      ///< AIDA tuple service
-  mutable IChronoStatSvc*   m_CSS;      ///< Chrono & Stat Service
-  mutable IRndmGenSvc*      m_RGS;      ///< Random Number Generator Service
-  mutable IExceptionSvc*    m_EXS;      ///< Exception Handler Service
-  mutable IAuditorSvc*      m_pAuditorSvc; ///< Auditor Service
-  mutable IToolSvc*         m_ptoolSvc;    ///< ToolSvc Service
-  mutable IMonitorSvc*      m_pMonitorSvc; ///< Online Monitoring Service
+  mutable SmartIF<IMessageSvc>      m_MS;       ///< Message service
+  mutable SmartIF<IDataProviderSvc> m_EDS;      ///< Event data service
+  mutable SmartIF<IConversionSvc>   m_ECS;      ///< Event conversion service
+  mutable SmartIF<IDataProviderSvc> m_DDS;      ///< Detector data service
+  mutable SmartIF<IConversionSvc>   m_DCS;      ///< Detector conversion service
+  mutable SmartIF<IHistogramSvc>    m_HDS;      ///< Histogram data service
+  mutable SmartIF<INTupleSvc>       m_NTS;      ///< N tuple service
+  //  mutable SmartIF<IAIDATupleSvc>    m_ATS;      ///< AIDA tuple service
+  mutable SmartIF<IChronoStatSvc>   m_CSS;      ///< Chrono & Stat Service
+  mutable SmartIF<IRndmGenSvc>      m_RGS;      ///< Random Number Generator Service
+  mutable SmartIF<IExceptionSvc>    m_EXS;      ///< Exception Handler Service
+  mutable SmartIF<IAuditorSvc>      m_pAuditorSvc; ///< Auditor Service
+  mutable SmartIF<IToolSvc>         m_ptoolSvc;    ///< ToolSvc Service
+  mutable SmartIF<IMonitorSvc>      m_pMonitorSvc; ///< Online Monitoring Service
+  mutable SmartIF<IAlgContextSvc>   m_contextSvc ; ///< Algorithm Context Service
+  bool  m_registerContext ; ///< flag to register for Algorithm Context Service
   std::string               m_monitorSvcName; ///< Name to use for Monitor Service
-  ISvcLocator* m_pSvcLocator;      ///< Pointer to service locator service
+  SmartIF<ISvcLocator>  m_pSvcLocator;      ///< Pointer to service locator service
   PropertyMgr* m_propertyMgr;      ///< For management of properties
   IntegerProperty m_outputLevel;   ///< Algorithm output level
   int          m_errorMax;         ///< Algorithm Max number of errors
@@ -579,7 +581,7 @@ private:
   /// Private Copy constructor: NO COPY ALLOWED
   Algorithm(const Algorithm& a);
 
-  /// Private asignment operator: NO ASSIGNMENT ALLOWED
+  /// Private assignment operator: NO ASSIGNMENT ALLOWED
   Algorithm& operator=(const Algorithm& rhs);
 };
 

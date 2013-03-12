@@ -20,27 +20,24 @@ namespace AIDA
   class IHistogram1D;
   class IHistogram2D;
   class IHistogram3D;
-};
+}
 
 /** @class IHistoTool IHistoTool.h GaudiTools/IHistoTool.h
  *
- *  An abstract interaface for "histogramming tool"
+ *  An abstract interface for "histogramming tool"
  *
  *  @author Vanya BELYAEV Ivan.Belyaev@itep.ru
  *  @date   2004-06-28
  */
 
-class IHistoTool : virtual public IAlgTool
+class GAUDI_API IHistoTool: virtual public IAlgTool
 {
 public:
+  /// InterfaceID
+  DeclareInterfaceID(IHistoTool,2,0);
 
   /// the actual type for histogram identifier (HBOOK style)
   typedef Histos::HistoID       HistoID       ;
-
-public:
-
-  /// Return the unique interface ID
-  static const InterfaceID& interfaceID()  ;
 
 public:
 
@@ -769,7 +766,7 @@ public:  // non-virtual methods
     while ( first != last && 0 != h  )
     { h = fill ( h , func( *first ) , 1.0 , title  ) ; ++first ; }
     return h ;
-  };
+  }
 
   /** fill the 1D histogram with forced ID and information from
    *  [first,last) sequence
@@ -837,7 +834,7 @@ public:  // non-virtual methods
     while ( first != last && 0 != h )
     { h = fill( h , func( *first ) , 1.0 , title  ) ; ++first ; }
     return h ;
-  };
+  }
 
   /** book and fill the 1D histogram with information from
    *  [first,last) sequence with given weight
@@ -912,7 +909,7 @@ public:  // non-virtual methods
                  func   ( *first ) ,
                  weight ( *first ) , title  ) ; ++first ; }
     return h ;
-  };
+  }
 
   /** book and fill the 1D histogram with forced ID and information from
    *  [first,last) sequence with given weight
@@ -993,7 +990,7 @@ public:  // non-virtual methods
                   func   ( *first ) ,
                   weight ( *first ) , title  ) ; ++first ; }
     return h ;
-  };
+  }
 
 protected:
 

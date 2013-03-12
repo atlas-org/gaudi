@@ -15,20 +15,22 @@
 // ============================================================================
 #include "GaudiKernel/IInterface.h"
 // ============================================================================
-// Forward declarations 
+// Forward declarations
 // ============================================================================
 class IAlgorithm ;
 // ============================================================================
 /** @class IAlgContextSvc
- *  An abstract interface for Algorithm Context Service 
+ *  An abstract interface for Algorithm Context Service
  *  @author ATLAS Collaboration
  *  @author Vanya BELYAEV ibelyaev@physics.syr.edu
  *  @date 2007-03-07 (modified)
  */
-class IAlgContextSvc : virtual public IInterface 
+class GAUDI_API IAlgContextSvc: virtual public IInterface
 {
 public:
-  /// the actual type of algorithm' stack 
+  /// InterfaceID
+  DeclareInterfaceID(IAlgContextSvc,3,0);
+  /// the actual type of algorithm' stack
   typedef std::vector<IAlgorithm*>  Algorithms ;
 public:
   /// set     the currently executing algorithm  ("push_back")
@@ -37,94 +39,92 @@ public:
   virtual StatusCode   unSetCurrentAlg  ( IAlgorithm* a ) = 0 ;
   /// accessor to current algorithm:
   virtual IAlgorithm*       currentAlg  () const = 0 ;
-  /// get the stack of executed algorithms 
+  /// get the stack of executed algorithms
   virtual const Algorithms& algorithms  () const = 0 ;
-  /// unique algorithm identification
-  static const InterfaceID& interfaceID () ;
 protected:
-  /// virtual and protected desctructor 
+  /// virtual and protected desctructor
   virtual ~IAlgContextSvc() ;
 } ;
 // ============================================================================
 namespace Gaudi
 {
-  namespace Utils 
+  namespace Utils
   {
-    /** @class AlgContext 
-     *  Helper "sentry" class to automatize the safe register/unregister 
-     *  the algorithm's context 
+    /** @class AlgContext
+     *  Helper "sentry" class to automatize the safe register/unregister
+     *  the algorithm's context
      *
      *  Typical explicit usage:
      *
-     *  @code 
+     *  @code
      *
-     *   StatusCode MyAlg::execute() 
+     *   StatusCode MyAlg::execute()
      *    {
      *       IAlgContextSvc* acs = ... ;
      *       // define the context
      *       Gaudi::Utils::AlgContext sentry ( this , acs ) ;
-     *      
+     *
      *       ...
      *
      *       return StatusCode::SUCCESS ;
-     *    } 
+     *    }
      *
-     *  @endcode 
+     *  @endcode
      *
-     *  Note: for the regular job the context is properly 
+     *  Note: for the regular job the context is properly
      *  defined with the help of corresponding auditor
-     *  AlgContextAuditor. This helper class is needed only 
-     *  if one needs to ensure that the algorithm must register 
+     *  AlgContextAuditor. This helper class is needed only
+     *  if one needs to ensure that the algorithm must register
      *  its context independently on job/auditor configuration
      *
-     *  @see AlgContextAuditor 
+     *  @see AlgContextAuditor
      *  @author Vanya BELYAEV ibelyaev@phys.syr.edu
-     *  @date   2007-03-07 
+     *  @date   2007-03-07
      */
-    class AlgContext 
+    class GAUDI_API AlgContext
     {
     public:
-      /** constructor from the service and the algorithm 
+      /** constructor from the service and the algorithm
        *  Internally invokes IAlgContextSvc::setCurrentAlg
        *  @see IAlgorithm
-       *  @see IAlgContextSvc 
-       *  @param svc pointer to algorithm context service 
-       *  @param alg pointer to the current algorithm 
+       *  @see IAlgContextSvc
+       *  @param svc pointer to algorithm context service
+       *  @param alg pointer to the current algorithm
        */
       AlgContext
-      ( IAlgContextSvc* svc , 
+      ( IAlgContextSvc* svc ,
         IAlgorithm*     alg ) ;
-      /** constructor from the algorithm and the service 
+      /** constructor from the algorithm and the service
        *  Internally invokes IAlgContextSvc::setCurrentAlg
        *  @see IAlgorithm
-       *  @see IAlgContextSvc 
-       *  @param alg pointer to the current algorithm 
-       *  @param svc pointer to algorithm context service 
+       *  @see IAlgContextSvc
+       *  @param alg pointer to the current algorithm
+       *  @param svc pointer to algorithm context service
        */
       AlgContext
-      ( IAlgorithm*     alg , 
+      ( IAlgorithm*     alg ,
         IAlgContextSvc* svc ) ;
-      /** destructor 
+      /** destructor
        *  Internally invokes IAlgContextSvc::unSetCurrentAlg
        *  @see IAlgorithm
-       *  @see IAlgContextSvc 
+       *  @see IAlgContextSvc
        */
       ~AlgContext() ;
     private:
-      // default constructor is disabled 
+      // default constructor is disabled
       AlgContext()                                     ; ///< no default constructor!
-      // copy constructor is disabled 
+      // copy constructor is disabled
       AlgContext           ( const AlgContext& right ) ; ///< no copy!
       // assignement operator is disabled
       AlgContext& operator=( const AlgContext& right ) ; ///< no assignement!
     private:
       IAlgContextSvc* m_svc ;
       IAlgorithm*     m_alg ;
-    }; 
+    };
   }  // end of namespace Gaudi::Utils
 } // end of namespace Gaudi
 // ============================================================================
-// The END  
+// The END
 // ============================================================================
 #endif // GAUDIKERNEL_IALGCONTEXTSVC_H
 // ============================================================================

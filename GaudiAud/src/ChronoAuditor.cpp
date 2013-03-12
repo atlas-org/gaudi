@@ -1,99 +1,42 @@
 // ChronoAuditor:
-//  An auditor that monitors memory usage
+// An auditor that monitors time
+
+#ifdef __ICC
+// disable icc warning #654: overloaded virtual function "B::Y" is only partially overridden in class "C"
+//   TODO: there is only a partial overload of IAuditor::before and IAuditor::after
+#pragma warning(disable:654)
+#endif
 
 #include "ChronoAuditor.h"
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/INamedInterface.h"
 #include "GaudiKernel/AudFactory.h"
-#include "GaudiKernel/IChronoStatSvc.h"
-#include "GaudiKernel/Chrono.h"
 
-DECLARE_AUDITOR_FACTORY(ChronoAuditor);
+DECLARE_AUDITOR_FACTORY(ChronoAuditor)
 
 ChronoAuditor::ChronoAuditor(const std::string& name, ISvcLocator* pSvcLocator)
-: Auditor(name, pSvcLocator) {
-  service( "ChronoStatSvc", m_chronoSvc, true).ignore();
-  declareProperty("CustomEventTypes",m_types);
+: CommonAuditor(name, pSvcLocator) {
 }
 
-ChronoAuditor::~ChronoAuditor(){
-  m_chronoSvc->release();
-}
+ChronoAuditor::~ChronoAuditor() {}
 
-void ChronoAuditor::beforeInitialize(INamedInterface* alg) {
-  chronoSvc( )->chronoStart( alg->name() + ":initialize" ) ;
-}
-void ChronoAuditor:: afterInitialize(INamedInterface* alg){
-  chronoSvc( )->chronoStop( alg->name() + ":initialize" ) ;
-}
+StatusCode ChronoAuditor::initialize() {
+  StatusCode sc = CommonAuditor::initialize();
+  if (UNLIKELY(sc.isFailure())) return sc;
 
-void ChronoAuditor::beforeReinitialize(INamedInterface* alg) {
-  chronoSvc( )->chronoStart( alg->name() + ":reinitialize" ) ;
-}
-void ChronoAuditor:: afterReinitialize(INamedInterface* alg){
-  chronoSvc( )->chronoStop( alg->name() + ":reinitialize" ) ;
-}
-
-void ChronoAuditor:: beforeExecute(INamedInterface* alg){
-  chronoSvc( )->chronoStart( alg->name() + ":execute" ) ;
-}
-void ChronoAuditor:: afterExecute(INamedInterface* alg, const StatusCode& ) {
-  chronoSvc( )->chronoStop( alg->name() + ":execute" ) ;
-}
-
-void ChronoAuditor::beforeBeginRun(INamedInterface* alg) {
-  chronoSvc( )->chronoStart( alg->name() + ":beginRun" ) ;
-}
-void ChronoAuditor:: afterBeginRun(INamedInterface* alg){
-  chronoSvc( )->chronoStop( alg->name() + ":beginRun" ) ;
-}
-void ChronoAuditor::beforeEndRun(INamedInterface* alg) {
-  chronoSvc( )->chronoStart( alg->name() + ":endRun" ) ;
-}
-void ChronoAuditor:: afterEndRun(INamedInterface* alg){
-  chronoSvc( )->chronoStop( alg->name() + ":endRun" ) ;
-}
-
-
-void ChronoAuditor:: beforeFinalize(INamedInterface* alg) {
-  chronoSvc( )->chronoStart( alg->name() + ":finalize" ) ;
-}
-void ChronoAuditor:: afterFinalize(INamedInterface* alg){
-  chronoSvc( )->chronoStop( alg->name() + ":finalize" ) ;
-}
-
-void
-ChronoAuditor::before(CustomEventTypeRef evt, const std::string& caller) {
-
-  if (m_types.value().size() != 0) {
-    if ( (m_types.value())[0] == "none") {
-      return;
-    }
-
-    if ( find(m_types.value().begin(), m_types.value().end(), evt) ==
-	 m_types.value().end() ) {
-      return;
-    }
+  m_chronoSvc = serviceLocator()->service("ChronoStatSvc");
+  if (UNLIKELY(!m_chronoSvc.get())) {
+    MsgStream log(msgSvc(), name());
+    log << MSG::ERROR << "Cannot get ChronoStatSvc" << endmsg;
+    return StatusCode::FAILURE;
   }
-
-  chronoSvc( )->chronoStart( caller + ":" + evt ) ;
-
+  return StatusCode::SUCCESS;
 }
 
-void
-ChronoAuditor::after(CustomEventTypeRef evt, const std::string& caller, const StatusCode&) {
+void ChronoAuditor::i_before(CustomEventTypeRef evt, const std::string& caller)
+{
+  chronoSvc()->chronoStart(i_id(evt, caller));
+}
 
-  if (m_types.value().size() != 0) {
-    if ( (m_types.value())[0] == "none") {
-      return;
-    }
-
-    if ( find(m_types.value().begin(), m_types.value().end(), evt) ==
-	 m_types.value().end() ) {
-      return;
-    }
-  }
-
-  chronoSvc( )->chronoStop( caller + ":" + evt ) ;
-
+void ChronoAuditor::i_after(CustomEventTypeRef evt, const std::string& caller, const StatusCode&)
+{
+  chronoSvc()->chronoStop(i_id(evt, caller));
 }

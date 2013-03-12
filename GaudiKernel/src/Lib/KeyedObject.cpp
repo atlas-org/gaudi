@@ -27,28 +27,28 @@ namespace Objects    {
   }
 }
 
-bool Objects::access(const DataObject* from, DataObject** to)  
+bool Objects::access(const DataObject* from, DataObject** to)
 {
-  DataObject* src  = const_cast<DataObject*>(from);            
+  DataObject* src  = const_cast<DataObject*>(from);
   DataObject* tar = 0;
-  if ( src != 0 )  
+  if ( src != 0 )
   {
     LinkManager* mgr = src->linkMgr();
-    if ( 0 != mgr )  
+    if ( 0 != mgr )
     {
       LinkManager::Link* link = mgr->link(long(0));
-      if ( 0 != link ) 
+      if ( 0 != link )
       {
         tar = link->object();
-        if ( 0 == tar ) 
+        if ( 0 == tar )
         {
           IRegistry* reg = src->registry();
-          if ( 0 != reg )   
+          if ( 0 != reg )
           {
             IDataProviderSvc* ds = reg->dataSvc();
-            if ( 0 != ds )  
+            if ( 0 != ds )
             {
-              if ( ds->retrieveObject(link->path(), tar).isSuccess() )  
+              if ( ds->retrieveObject(link->path(), tar).isSuccess() )
               {
                 link->setObject(tar);
               }
@@ -63,16 +63,16 @@ bool Objects::access(const DataObject* from, DataObject** to)
 }
 
 // Load on demand: ContainedObject type references
-bool Objects::access(const ContainedObject* from, ContainedObject** to)   
+bool Objects::access(const ContainedObject* from, ContainedObject** to)
 {
   *to = 0;
-  if ( from )   
+  if ( from )
   {
     DataObject *tar = 0;
-    if ( access(from->parent(), &tar) )    
+    if ( access(from->parent(), &tar) )
     {
       ObjectContainerBase* cnt = dynamic_cast<ObjectContainerBase*>(tar);
-      if ( cnt )    
+      if ( cnt )
       {
         *to = cnt->containedObject(from->index());
       }
@@ -80,3 +80,4 @@ bool Objects::access(const ContainedObject* from, ContainedObject** to)
   }
   return (*to) != 0;
 }
+

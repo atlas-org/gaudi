@@ -14,8 +14,8 @@
 template <class TYPE> class SvcFactory;
 
 /** @class NTupleSvc NTupleSvc.h
- * 
- *  NTuple service. See the Interface definition files for more detailed 
+ *
+ *  NTuple service. See the Interface definition files for more detailed
  *  documentation of the implementing class.
  *  Base class:                        Gaudi/DataSvc/DataSvc.h
  *  Generic N tuple service interface: Gaudi/Interfaces/INTupleSvc.h
@@ -24,9 +24,7 @@ template <class TYPE> class SvcFactory;
  *
  *  @author M.Frank
  */
-class NTupleSvc : public DataSvc,
-                  virtual public INTupleSvc,
-                  virtual public IDataSourceMgr
+class NTupleSvc : public extends2<DataSvc, INTupleSvc, IDataSourceMgr>
 {
 private:
 protected:
@@ -48,8 +46,6 @@ public:
   virtual StatusCode reinitialize();
   /// DataSvc overrides: stop the service.
   virtual StatusCode finalize();
-  /// DataSvc overrides: Query interface
-  virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
   /// DataSvc overrides: Retrieve data loader
   virtual IConversionSvc* getDataLoader(IRegistry* pReg);
 
@@ -115,9 +111,9 @@ public:
 protected:
 
   /// Create conversion service
-  StatusCode createService( const std::string& nam, 
-                            const std::string& typ, 
-                            const std::vector<Prop>& props, 
+  StatusCode createService( const std::string& nam,
+                            const std::string& typ,
+                            const std::vector<Prop>& props,
                             IConversionSvc*& pSvc);
   /// Finalize single service
   void releaseConnection(Connection& c);

@@ -39,7 +39,7 @@ StatusCode RootHistCnv::RDirectoryCnv::createObj(IOpaqueAddress* /* pAddress */,
 
 
 //-----------------------------------------------------------------------------
-StatusCode RootHistCnv::RDirectoryCnv::createRep(DataObject* pObject, 
+StatusCode RootHistCnv::RDirectoryCnv::createRep(DataObject* pObject,
                                                  IOpaqueAddress*& refpAddress)
 //-----------------------------------------------------------------------------
 {
@@ -70,7 +70,7 @@ StatusCode RootHistCnv::RDirectoryCnv::updateRep(IOpaqueAddress* /* pAddress */,
 
 
 //-----------------------------------------------------------------------------
-StatusCode 
+StatusCode
 RootHistCnv::RDirectoryCnv::fillObjRefs(IOpaqueAddress* pAddr,DataObject* pObj)  {
   MsgStream log(msgSvc(), "RDirectoryCnv");
   IRegistry* pReg = pObj->registry();
@@ -98,8 +98,8 @@ RootHistCnv::RDirectoryCnv::fillObjRefs(IOpaqueAddress* pAddr,DataObject* pObj) 
       createAddress(full, CLID_ColumnWiseTuple, idh, obj, pA).ignore();
       TTree* tree = (TTree*) obj;
       tree->Print();
-      log << MSG::DEBUG << "Reg CWNT \"" << obj->GetTitle() 
-       	  << "\" as " << f2 << endreq;
+      log << MSG::DEBUG << "Reg CWNT \"" << obj->GetTitle()
+       	  << "\" as " << f2 << endmsg;
       title = "/" + sid;
     } else if (isa->InheritsFrom("TDirectory")) {
       createAddress(full,CLID_NTupleDirectory, title, obj, pA).ignore();
@@ -156,7 +156,7 @@ RootHistCnv::RDirectoryCnv::fillObjRefs(IOpaqueAddress* pAddr,DataObject* pObj) 
       title = sid;
     } else {
       log << MSG::ERROR << "Encountered an unknown object with key: "
-      	  << obj->GetName() << " in ROOT file " << fname << endreq;
+      	  << obj->GetName() << " in ROOT file " << fname << endmsg;
       return StatusCode::FAILURE;
     }
     if ( 0 != pA )    {
@@ -165,8 +165,8 @@ RootHistCnv::RDirectoryCnv::fillObjRefs(IOpaqueAddress* pAddr,DataObject* pObj) 
         log << MSG::ERROR << "Failed to register address for " << full  << endmsg;
         return sc;
       }
-      log << MSG::VERBOSE << "Created address for " << clnm 
-          << "'" << title << "' in " << full << endreq;
+      log << MSG::VERBOSE << "Created address for " << clnm
+          << "'" << title << "' in " << full << endmsg;
     }
   }
   return StatusCode::SUCCESS;

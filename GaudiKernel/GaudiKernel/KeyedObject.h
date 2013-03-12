@@ -1,4 +1,3 @@
-// $Id $
 #ifndef GAUDIKERNEL_KEYEDOBJECT_H
 #define GAUDIKERNEL_KEYEDOBJECT_H
 
@@ -16,9 +15,9 @@ namespace GaudiDict  {
  *  This object, which is of the basic containedObject
  *  type allows to be identified by key.
  *
- *  This implementation uses a reference count mechanism 
- *  for insertion into multiple containers; Once the 
- *  reference count is NULL, the object will automatically 
+ *  This implementation uses a reference count mechanism
+ *  for insertion into multiple containers; Once the
+ *  reference count is NULL, the object will automatically
  *  be deleted.
  *
  *  @author   M.Frank CERN/LHCb
@@ -26,7 +25,7 @@ namespace GaudiDict  {
  *
  */
 template < class KEY >
-class KeyedObject : public ContainedObject    {
+class GAUDI_API KeyedObject: public ContainedObject {
   friend struct GaudiDict::KeyedObjectDict<KEY>;
 public:
   /// Definition of the key-type to access object
@@ -52,15 +51,15 @@ protected:
   unsigned long addRef();
   /// Release reference. If the reference count is ZERO, delete the object.
   unsigned long release();
-  /** Set object key. The key for consistency reasons 
+  /** Set object key. The key for consistency reasons
       can be set only once for the object. Any attempt to
       redefine the key results in an exception.
   */
   void setKey(const key_type& key);
 public:
   /// Standard Constructor. The object key is preset to the invalid value.
-  KeyedObject() : m_refCount(0), m_hasKey(false) {                             }
-  /** Standard Constructor accepting the object's key. 
+  KeyedObject(): m_key(), m_refCount(0), m_hasKey(false) {                     }
+  /** Standard Constructor accepting the object's key.
       The key must be valid and cannot be changed later.
   */
   KeyedObject(const key_type& kval):m_key(kval),m_refCount(0),m_hasKey(true) { }
@@ -76,7 +75,7 @@ public:
   /// Serialize the object for reading
   virtual StreamBuffer& serialize( StreamBuffer& s );
 private:
-  /// NOBODY may copy these objects 
+  /// NOBODY may copy these objects
   KeyedObject(const KeyedObject& copy) : ContainedObject(copy) {               }
 };
 
@@ -89,7 +88,7 @@ private:
 
 // Standard destructor.
 template<class KEY> inline
-KeyedObject<KEY>::~KeyedObject() 
+KeyedObject<KEY>::~KeyedObject()
 {
   ObjectContainerBase* p = const_cast<ObjectContainerBase*>(parent());
   if ( p )  {
@@ -101,7 +100,7 @@ KeyedObject<KEY>::~KeyedObject()
 // Add reference to object (Increase reference counter).
 template<class KEY> inline
 unsigned long KeyedObject<KEY>::addRef() {
-  return ++m_refCount; 
+  return ++m_refCount;
 }
 
 // Release reference. If the reference count is ZERO, delete the object.
@@ -114,7 +113,7 @@ unsigned long KeyedObject<KEY>::release() {
   return cnt;
 }
 
-/*  Set object key. The key for consistency reasons 
+/*  Set object key. The key for consistency reasons
     can be set only once for the object. Any attempt to
     redefine the key results in an exception.
 */

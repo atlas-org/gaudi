@@ -4,6 +4,7 @@
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/IIncidentListener.h"
+#include "GaudiKernel/IIoComponent.h"
 #include "GaudiKernel/MsgStream.h"
 
 #include "TObject.h"
@@ -23,20 +24,14 @@
 // Forward declarations
 template <class TYPE> class SvcFactory;
 
-class THistSvc: public Service, virtual public ITHistSvc,
-		virtual public IIncidentListener
-{
+class THistSvc: public extends3<Service, ITHistSvc, IIncidentListener, 
+				IIoComponent> {
 
 public:
 
   virtual StatusCode initialize();
   virtual StatusCode reinitialize();
   virtual StatusCode finalize();
-
-  // Query the interfaces.
-  virtual StatusCode queryInterface( const InterfaceID& riid, 
-                                     void** ppvInterface );
-  
 
   virtual StatusCode regHist(const std::string& name);
   virtual StatusCode regHist(const std::string& name, TH1*);
@@ -88,6 +83,10 @@ public:
 
   void handle(const Incident&);
 
+  // From IIoComponent
+  virtual StatusCode io_reinit ();
+
+
 protected:
 
   virtual ~THistSvc();
@@ -103,7 +102,7 @@ private:
     TFile* m_gf;
     int m_ge;
   };
-    
+
 
   struct THistID {
     std::string id;
@@ -112,7 +111,7 @@ private:
     TFile*      file;
 
     THistID():id(""),temp(true),obj(0),file(0) {}
-    THistID(const THistID& rhs):id(rhs.id), temp(rhs.temp), 
+    THistID(const THistID& rhs):id(rhs.id), temp(rhs.temp),
                                 obj(rhs.obj), file(rhs.file) {}
     THistID(std::string& i, bool& t, TObject* o, TFile* f)
       : id(i), temp(t), obj(o), file(f){}
@@ -159,7 +158,7 @@ private:
 
   bool browseTDir(TDirectory* dir) const;
 
-  bool findStream(const std::string& name, std::string& root, 
+  bool findStream(const std::string& name, std::string& root,
                   std::string& rem, TFile*& file) const;
   void parseString(const std::string& id, std::string& root, std::string& rem)
     const;
@@ -172,16 +171,18 @@ private:
 
   void setupCompressionLevel( Property& cmp );
 
+  void copyFileLayout(TDirectory*, TDirectory*);
+
   StringArrayProperty m_inputfile, m_outputfile;
   std::vector<std::string> m_Rstream, m_Wstream;
-  IntegerProperty m_autoSave, m_compressionLevel, m_maxFileSize;
+  IntegerProperty m_autoSave, m_autoFlush, m_compressionLevel, m_maxFileSize;
   BooleanProperty m_print;
 
-  /// list of already connected files. This is to keep track of files 
+  /// list of already connected files. This is to keep track of files
   /// registered by the setupInputFile callback method
   std::set<std::string> m_alreadyConnectedInFiles;
 
-  /// list of already connected files. This is to keep track of files 
+  /// list of already connected files. This is to keep track of files
   /// registered by the setupOutputFile callback method
   std::set<std::string> m_alreadyConnectedOutFiles;
 

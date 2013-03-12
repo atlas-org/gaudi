@@ -12,7 +12,7 @@
 #include <sstream>
 
 // Static Factory declaration
-DECLARE_ALGORITHM_FACTORY(History);
+DECLARE_ALGORITHM_FACTORY(History)
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -29,14 +29,14 @@ StatusCode History::initialize() {
   MsgStream log(msgSvc(), name());
 
   if (service("HistorySvc",m_histSvc).isFailure()) {
-    log << MSG::ERROR << "Could not get historySvc" << endreq;
+    log << MSG::ERROR << "Could not get historySvc" << endmsg;
     return StatusCode::FAILURE;
   }
 
-  log << MSG::INFO << "got historySvc: " << m_histSvc->name() << endreq;
+  log << MSG::INFO << "got historySvc: " << m_histSvc->name() << endmsg;
 
   return StatusCode::SUCCESS;
-  
+
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

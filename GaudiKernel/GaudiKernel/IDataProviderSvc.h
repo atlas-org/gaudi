@@ -3,7 +3,6 @@
 #define GAUDIKERNEL_IDATAPROVIDERSVC_H
 
 // Framework include files
-#include "GaudiKernel/Kernel.h"
 #include "GaudiKernel/IInterface.h"
 
 // C/C++ include files
@@ -14,9 +13,6 @@ class DataObject;
 class IOpaqueAddress;
 class IRegistry;
 class DataStoreItem;
-
-// Declaration of the interface ID ( interface id, major version, minor version)
-static const InterfaceID IID_IDataProviderSvc("IDataProviderSvc", 2 , 0); 
 
 /** @class IDataProviderSvc IDataProviderSvc.h GaudiKernel/IDataProviderSvc.h
  *
@@ -32,8 +28,8 @@ static const InterfaceID IID_IDataProviderSvc("IDataProviderSvc", 2 , 0);
  *       itself - since the client claims back ownership. Note that this is a
  *       very delicate operation - any reference to the object will be invalid.
  *       Even worse: invalid references cannot be detected.
- *  <LI> Retrieve objects to the data store. Depending ont he 
- *       availibility of the requested object in the data store the 
+ *  <LI> Retrieve objects to the data store. Depending ont he
+ *       availibility of the requested object in the data store the
  *       represented object will be loaded if possible.
  *  <LI> Find objects beeing present in the store without actually creating
  *       the representation if the object is not present.
@@ -47,10 +43,10 @@ static const InterfaceID IID_IDataProviderSvc("IDataProviderSvc", 2 , 0);
  *  @author Sebastien Ponce
  *  @version 1.2
  */
-class IDataProviderSvc  : virtual public IInterface	    {
-  public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IDataProviderSvc; }
+class GAUDI_API IDataProviderSvc: virtual public IInterface {
+public:
+  /// InterfaceID
+  DeclareInterfaceID(IDataProviderSvc,3,0);
 
   enum { SEPARATOR = '/' };
 
@@ -113,7 +109,7 @@ class IDataProviderSvc  : virtual public IInterface	    {
                                     DataObject* pObject) = 0;
 
   /** Unregister object from the data store.
-   *  On registration the client gives up ownership of the object and may no 
+   *  On registration the client gives up ownership of the object and may no
    *  longer delete the object. unregistering the object is the opposite:
    *  ownership is claimed back by the user. But note:
    *  - All depending objects will be deleted, ie. all leaves "below" the
@@ -128,7 +124,7 @@ class IDataProviderSvc  : virtual public IInterface	    {
   virtual StatusCode unregisterObject(const std::string& fullPath) = 0;
 
   /** Unregister object from the data store.
-   *  On registration the client gives up ownership of the object and may no 
+   *  On registration the client gives up ownership of the object and may no
    *  longer delete the object. unregistering the object is the opposite:
    *  ownership is claimed back by the user. But note:
    *  - All depending objects will be deleted, ie. all leaves "below" the
@@ -145,14 +141,14 @@ class IDataProviderSvc  : virtual public IInterface	    {
                                       const std::string& objPath) = 0;
 
   /** Unregister object from the data store.
-   *  On registration the client gives up ownership of the object and may no 
+   *  On registration the client gives up ownership of the object and may no
    *  longer delete the object. unregistering the object is the opposite:
    *  ownership is claimed back by the user. But note:
    *  - All depending objects will be deleted, ie. all leaves "below" the
    *    entry in question; NOT the object itself, the object itself must be
    *    destroyed by the user.
    *
-   *  The object is identified by parent path name and 
+   *  The object is identified by parent path name and
    *  an integer identifier of the object itself.
    *  @param      parentPath  Path name of the parent object.
    *  @param      item        Integer identifier of the object item.
@@ -162,7 +158,7 @@ class IDataProviderSvc  : virtual public IInterface	    {
                                       int item) = 0;
 
   /** Unregister object from the data store.
-   *  On registration the client gives up ownership of the object and may no 
+   *  On registration the client gives up ownership of the object and may no
    *  longer delete the object. unregistering the object is the opposite:
    *  ownership is claimed back by the user. But note:
    *  - All depending objects will be deleted, ie. all leaves "below" the
@@ -177,7 +173,7 @@ class IDataProviderSvc  : virtual public IInterface	    {
   virtual StatusCode unregisterObject(DataObject* pObject) = 0;
 
   /** Unregister object from the data store.
-   *  On registration the client gives up ownership of the object and may no 
+   *  On registration the client gives up ownership of the object and may no
    *  longer delete the object. unregistering the object is the opposite:
    *  ownership is claimed back by the user. But note:
    *  - All depending objects will be deleted, ie. all leaves "below" the
@@ -194,14 +190,14 @@ class IDataProviderSvc  : virtual public IInterface	    {
                                       const std::string& objPath) = 0;
 
   /** Unregister object from the data store.
-   *  On registration the client gives up ownership of the object and may no 
+   *  On registration the client gives up ownership of the object and may no
    *  longer delete the object. unregistering the object is the opposite:
    *  ownership is claimed back by the user. But note:
    *  - All depending objects will be deleted, ie. all leaves "below" the
    *    entry in question; NOT the object itself, the object itself must be
    *    destroyed by the user.
    *
-   *  The object is identified by parent object and 
+   *  The object is identified by parent object and
    *  an integer identifier of the object itself.
    *  @param      pParent     Pointer to parent object.
    *  @param      item        Integer identifier of the object item.
@@ -210,7 +206,7 @@ class IDataProviderSvc  : virtual public IInterface	    {
   virtual StatusCode unregisterObject(DataObject* pParent, int item) = 0;
 
   /** Retrieve object identified by its directory entry.
-   *  The result will be returned in the second argument. 
+   *  The result will be returned in the second argument.
    *  In case the object is not present it will be loaded and converted
    *  if possible.
    *  ** FASTEST ACCESS TO THE DATA STORE **
@@ -224,7 +220,7 @@ class IDataProviderSvc  : virtual public IInterface	    {
                                     DataObject*& pObject) = 0;
 
   /** Retrieve object identified by its full path from the data store.
-   *  The result will be returned in the second argument. 
+   *  The result will be returned in the second argument.
    *  In case the object is not present it will be loaded and converted
    *  if possible.
    *  @param  fullPath    Path name of the object.
@@ -274,7 +270,7 @@ class IDataProviderSvc  : virtual public IInterface	    {
   virtual StatusCode retrieveObject(DataObject* parentObj,
                                     const std::string& objectPath,
                                     DataObject*& pObject) = 0;
- 
+
   /** Retrieve object from data store.
    *  The object to be retrieved is identified by the pointer to the parent
    *  object and an integer identifier.
@@ -290,7 +286,7 @@ class IDataProviderSvc  : virtual public IInterface	    {
                                     DataObject*& pObject) = 0;
 
   /** Find object identified by its directory entry.
-   *  The result will be returned in the second argument. 
+   *  The result will be returned in the second argument.
    *  In case the object is not present the pointer will be set to NULL.
    *  ** FASTEST ACCESS TO THE DATA STORE **
    *  @param  pDirectory  Pointer to the object.
@@ -303,7 +299,7 @@ class IDataProviderSvc  : virtual public IInterface	    {
                                 DataObject*& pObject) = 0;
 
   /** Find object identified by its full path in the data store.
-   *  The result will be returned in the second argument. 
+   *  The result will be returned in the second argument.
    *  In case the object is not present the pointer will be set to NULL.
    *  @param      fullPath    Path name of the object.
    *  @param      pObject     Pointer to the object to be connected.
@@ -311,10 +307,10 @@ class IDataProviderSvc  : virtual public IInterface	    {
    */
   virtual StatusCode findObject(const std::string& fullPath,
                                 DataObject*& pObject) = 0;
- 
+
   /** Find object identified by its parent object and the path to the object
    *  relative to the parent.
-   *  The result will be returned in the second argument. 
+   *  The result will be returned in the second argument.
    *  In case the object is not present the pointer will be set to NULL.
    *  @param  parentPath  Path to parent node of the object.
    *  @param  objectPath  Relative path name of the object.
@@ -339,7 +335,7 @@ class IDataProviderSvc  : virtual public IInterface	    {
 
   /** Find object identified by its parent object and the path to the object
    *  relative to the parent.
-   *  The result will be returned in the second argument. 
+   *  The result will be returned in the second argument.
    *  In case the object is not present the pointer will be set to NULL.
    *  @param  parentObj   Pointer to parent node of the object.
    *  @param  objectPath  Relative path name of the object.
@@ -533,7 +529,7 @@ class IDataProviderSvc  : virtual public IInterface	    {
   /// Status code definitions
   enum Status  {
     /// Success
-    IID_IDataProviderSvc_NO_ERROR = 1,
+    IDataProviderSvc_NO_ERROR = 1,
     /// The path for this objects is already in use
     DOUBL_OBJ_PATH,
     /// Invalid path from root to object request failed.
@@ -546,7 +542,7 @@ class IDataProviderSvc  : virtual public IInterface	    {
     INVALID_PARENT,
     /// Sorry, the requested object is not loaded
     OBJ_NOT_LOADED,
-    /// No data loader availible
+    /// No data loader available
     NO_DATA_LOADER,
     /// Invalid object address
     INVALID_OBJ_ADDR,

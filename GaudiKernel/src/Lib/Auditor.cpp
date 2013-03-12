@@ -10,12 +10,9 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/GaudiException.h"
 
-
 // Constructor
 Auditor::Auditor( const std::string& name, ISvcLocator *pSvcLocator )
-: m_refCount(0),
-  m_name(name),
-  m_MS (0),
+: m_name(name),
   m_pSvcLocator(pSvcLocator),
   m_isEnabled(true),
   m_isInitialized(false),
@@ -26,7 +23,6 @@ Auditor::Auditor( const std::string& name, ISvcLocator *pSvcLocator )
   // Declare common Auditor properties with their defaults
   declareProperty( "OutputLevel", m_outputLevel = MSG::NIL);
   declareProperty( "Enable", m_isEnabled = true);
-
 }
 
 // Default Destructor
@@ -43,25 +39,25 @@ StatusCode Auditor::sysInitialize() {
   if ( isEnabled( ) && ! m_isInitialized ) {
 
     // Setup the default service ... this should be upgraded so as to be configurable.
-    if( 0 == m_pSvcLocator )
+    if( m_pSvcLocator == 0 )
       return StatusCode::FAILURE;
 
     // Set up message service
-    sc = m_pSvcLocator->getService("MessageSvc", IID_IMessageSvc, *pp_cast<IInterface>(&m_MS));
-    if( !sc.isSuccess() )  return StatusCode::FAILURE;
+    m_MS = serviceLocator(); // get default message service
+    if( !m_MS.isValid() )  return StatusCode::FAILURE;
 
     // Set the Auditor's properties
     sc = setProperties();
     if( !sc.isSuccess() )  return StatusCode::FAILURE;
 
-    // Check current outputLevel to evetually inform the MessagsSvc
+    // Check current outputLevel to eventually inform the MessagsSvc
     if( m_outputLevel != MSG::NIL ) {
       setOutputLevel( m_outputLevel );
     }
 
     {
       try{
-        // Invoke the initialize() method of the derived class
+	// Invoke the initialize() method of the derived class
 	sc = initialize();
 	if( !sc.isSuccess() )  return StatusCode::FAILURE;
         m_isInitialized = true;
@@ -72,25 +68,25 @@ StatusCode Auditor::sysInitialize() {
         {
           /// (1) perform the printout of message
 	  MsgStream log ( msgSvc() , name() + ".sysInitialize()" );
-	  log << MSG::FATAL << " Exception with tag=" << Exception.tag() << " is catched " << endreq;
+	  log << MSG::FATAL << " Exception with tag=" << Exception.tag() << " is catched " << endmsg;
           /// (2) print  the exception itself (NB!  - GaudiException is a linked list of all "previous exceptions")
 	  MsgStream logEx ( msgSvc() , Exception.tag() );
-	  logEx << MSG::ERROR << Exception  << endreq;
+	  logEx << MSG::ERROR << Exception  << endmsg;
         }
       catch( const std::exception& Exception )                   /// catch std::exception
         {
 	  /// (1) perform the printout of message
 	  MsgStream log ( msgSvc() , name() + ".sysInitialize()" );
-	  log << MSG::FATAL << " Standard std::exception is catched " << endreq;
+	  log << MSG::FATAL << " Standard std::exception is catched " << endmsg;
 	  /// (2) print  the exception itself (NB!  - GaudiException is a linked list of all "previous exceptions")
 	  MsgStream logEx ( msgSvc() , name() + "*std::exception*" );
-	  logEx << MSG::ERROR << Exception.what()  << endreq;
+	  logEx << MSG::ERROR << Exception.what()  << endmsg;
         }
       catch(...)
         {
 	  /// (1) perform the printout
 	  MsgStream log ( msgSvc() , name() + ".sysInitialize()" );
-	  log << MSG::FATAL << " UNKNOWN Exception is  catched " << endreq;
+	  log << MSG::FATAL << " UNKNOWN Exception is  catched " << endmsg;
         }
     }
   }
@@ -114,7 +110,7 @@ void Auditor::before(StandardEventType evt, INamedInterface* obj){
   case Start:        break;
   case Stop:         break;
   case ReStart:      break;
-  default: ;// do nothing
+  default: break ;// do nothing
   }
 }
 void Auditor::before(StandardEventType, const std::string&) {}
@@ -134,7 +130,7 @@ void Auditor::after(StandardEventType evt, INamedInterface* obj, const StatusCod
   case Start:        break;
   case Stop:         break;
   case ReStart:      break;
-  default: ;// do nothing
+  default: break ;// do nothing
   }
 }
 void Auditor::after(StandardEventType, const std::string&, const StatusCode&) {}
@@ -171,7 +167,7 @@ StatusCode Auditor::sysFinalize() {
   try{
     //
     // Invoke the finalize() method of the derived class if
-    // it has been initilized.
+    // it has been initialized.
     if ( m_isInitialized && ! m_isFinalized ) {
       m_isFinalized = true;
       sc = finalize();
@@ -185,40 +181,37 @@ StatusCode Auditor::sysFinalize() {
       /// (1) perform the printout of message
       MsgStream log ( msgSvc() , name() + ".sysFinalize()" );
       log << MSG::FATAL
-	  << " Exception with tag=" << Exception.tag() << " is catched " << endreq;
+	  << " Exception with tag=" << Exception.tag() << " is catched " << endmsg;
       /// (2) print  the exception itself
       ///       (NB!  - GaudiException is a linked list of all "previous exceptions")
       MsgStream logEx ( msgSvc() , Exception.tag() );
       logEx << MSG::ERROR
-	    << Exception  << endreq;
+	    << Exception  << endmsg;
     }
   catch( const std::exception& Exception )                   /// catch std::exception
     {
       /// (1) perform the printout of message
       MsgStream log ( msgSvc() , name() + ".sysFinalize()" );
       log << MSG::FATAL
-	  << " Standard std::exception is catched " << endreq;
+	  << " Standard std::exception is caught " << endmsg;
       /// (2) print  the exception itself
       MsgStream logEx ( msgSvc() , name() + "*std::exception*" );
       logEx << MSG::ERROR
-	    << Exception.what()  << endreq;
+	    << Exception.what()  << endmsg;
     }
   catch( ... )                                                /// catch unknown exception
     {
       /// (1) perform the printout
       MsgStream log ( msgSvc() , name() + ".sysFinalize()" );
       log << MSG::FATAL
-	  << " UNKNOWN Exception is  catched " << endreq;
+	  << " UNKNOWN Exception is caught " << endmsg;
     }
   ///
   return StatusCode::FAILURE ;
 }
 
 StatusCode Auditor::finalize() {
-  if( m_MS ) {
-    m_MS->release();
-    m_MS = 0;
-  }
+  m_MS = 0; // release message service
   return StatusCode::SUCCESS;
 }
 
@@ -230,7 +223,7 @@ bool Auditor::isEnabled( ) const {
   return m_isEnabled;
 }
 
-IMessageSvc* Auditor::msgSvc() const {
+SmartIF<IMessageSvc>& Auditor::msgSvc() const {
   return m_MS;
 }
 
@@ -240,49 +233,13 @@ void Auditor::setOutputLevel( int level ) {
   }
 }
 
-ISvcLocator * Auditor::serviceLocator() const {
+SmartIF<ISvcLocator>& Auditor::serviceLocator() const {
   return m_pSvcLocator;
 }
 
-
-// IInterface implementation
-unsigned long Auditor::addRef() {
-  return ++m_refCount;
-}
-
-unsigned long Auditor::release() {
-  long count = --m_refCount;
-  if( count <= 0) {
-    delete this;
-  }
-  return count;
-}
-
-StatusCode Auditor::queryInterface
-( const InterfaceID& riid   ,
-  void**             ppISvc )
-{
-  if ( 0 == ppISvc ) { return StatusCode::FAILURE ; } // RETURN
-
-  if      ( IAuditor        ::interfaceID() . versionMatch ( riid ) )
-  { *ppISvc = static_cast<IAuditor*>         ( this ) ; }
-  else if ( IProperty       ::interfaceID() . versionMatch ( riid ) )
-  { *ppISvc = static_cast<IProperty*>        ( this ) ; }
-  else if ( INamedInterface ::interfaceID() . versionMatch ( riid ) )
-  { *ppISvc = static_cast<INamedInterface*>  ( this ) ; }
-  else if ( IInterface      ::interfaceID() . versionMatch ( riid ) )
-  { *ppISvc = static_cast<IInterface*>       ( this ) ; }
-  else { *ppISvc = 0 ; return StatusCode::FAILURE; } // RETURN
-  // increment the reference counter
-  addRef();
-  //
-  return StatusCode::SUCCESS;
-}
-
-
 // Use the job options service to set declared properties
 StatusCode Auditor::setProperties() {
-  if( 0 != m_pSvcLocator )    {
+  if( m_pSvcLocator != 0 )    {
     IJobOptionsSvc* jos;
     StatusCode sc = service("JobOptionsSvc", jos);
     if( sc.isSuccess() )    {
@@ -297,23 +254,23 @@ StatusCode Auditor::setProperties() {
 // IProperty implementation
 // Delegate to the Property manager
 StatusCode Auditor::setProperty(const Property& p) {
-	return m_PropertyMgr->setProperty(p);
+  return m_PropertyMgr->setProperty(p);
 }
 StatusCode Auditor::setProperty(const std::string& s) {
-	return m_PropertyMgr->setProperty(s);
+  return m_PropertyMgr->setProperty(s);
 }
 StatusCode Auditor::setProperty(const std::string& n, const std::string& v) {
-	return m_PropertyMgr->setProperty(n,v);
+  return m_PropertyMgr->setProperty(n,v);
 }
 StatusCode Auditor::getProperty(Property* p) const {
-	return m_PropertyMgr->getProperty(p);
+  return m_PropertyMgr->getProperty(p);
 }
 const Property& Auditor::getProperty( const std::string& name) const{
-	return m_PropertyMgr->getProperty(name);
+  return m_PropertyMgr->getProperty(name);
 }
 StatusCode Auditor::getProperty(const std::string& n, std::string& v ) const {
-	return m_PropertyMgr->getProperty(n,v);
+  return m_PropertyMgr->getProperty(n,v);
 }
 const std::vector<Property*>& Auditor::getProperties( ) const {
-	return m_PropertyMgr->getProperties();
+  return m_PropertyMgr->getProperties();
 }

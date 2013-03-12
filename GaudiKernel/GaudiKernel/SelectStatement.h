@@ -17,9 +17,9 @@
 #include "GaudiKernel/ISelectStatement.h"
 
 /** Class of a selection statement.
-  A select statement can either contain 
+  A select statement can either contain
   - a string e.g. for refining an SQL statement
-  - a function object, which will be called back 
+  - a function object, which will be called back
     in order to refine a selection.
     This happens in calling sequences like the following:
 
@@ -43,52 +43,25 @@
     Author:  M.Frank
     Version: 1.0
 */
-class SelectStatement  : virtual public ISelectStatement   {
+class GAUDI_API SelectStatement: public implements1<ISelectStatement> {
 public:
   /// Standard Constructor initializing select string
-  explicit SelectStatement(const std::string& s, long typ) 
-  : m_select(s), m_refCount(0), m_isActive(false), m_type(typ)
+  explicit SelectStatement(const std::string& s, long typ)
+  : m_select(s), m_isActive(false), m_type(typ)
   {
   }
   /// Standard Constructor initializing select string
-  explicit SelectStatement(const std::string& s) 
-  : m_select(s), m_refCount(0), m_isActive(false), m_type(STRING)
+  explicit SelectStatement(const std::string& s)
+  : m_select(s),m_isActive(false), m_type(STRING)
   {
   }
   /// Standard Constructor initializing function call
-  explicit SelectStatement() 
-  : m_refCount(0), m_isActive(false), m_type(FUNCTION)
+  explicit SelectStatement()
+  : m_isActive(false), m_type(FUNCTION)
   {
   }
   /// Standard Destructor
   virtual ~SelectStatement()  {
-  }
-  /// Increase reference count
-  virtual unsigned long addRef()    {
-    return ++m_refCount;
-  }
-  /// Decrease reference count (and eventually delete)
-  virtual unsigned long release()     {
-    long cnt = --m_refCount;
-    if ( cnt <= 0 )   {
-      delete this;
-    }
-    return cnt;
-  }
-  /// Query interface
-  virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface)    {
-    if ( riid == IID_IInterface )   {
-      *ppvInterface = (IInterface*)this;
-    }
-    if ( riid == IID_ISelectStatement )   {
-      *ppvInterface = (ISelectStatement*)this;
-    }
-    else    {
-      *ppvInterface = 0;
-      return NO_INTERFACE;
-    }
-    addRef();
-    return StatusCode::SUCCESS;
   }
   /// Access the type of the object
   long type()   const   {
@@ -118,8 +91,6 @@ public:
 protected:
   /// Select string
   std::string   m_select;
-  /// Reference counter
-  long m_refCount;
   /// Activation flag
   bool m_isActive;
   /// Type identifier

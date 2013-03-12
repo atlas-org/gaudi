@@ -9,8 +9,8 @@
 #include "GslErrorCount.h"
 
 // ============================================================================
-/** @file 
- * 
+/** @file
+ *
  *  Implementation file for class GslErrorCount
  *
  *  @author Vanya Belyaev Ivan.Belyaev@itep.ru
@@ -19,8 +19,7 @@
 // ============================================================================
 
 // ============================================================================
-/** @var GslErrorCountFactory
- *  Declaration of the Tool Factory
+/** Declaration of the Tool Factory
  *  @see  ToolFactory
  *  @see IToolFactory
  *  @see     IFactory
@@ -33,75 +32,75 @@ DECLARE_TOOL_FACTORY(GslErrorCount)
 /** Standard constructor
  *  @param type   tool type (?)
  *  @param name   tool name
- *  @param parent pointer to parent 
+ *  @param parent pointer to parent
  */
 // ============================================================================
 GslErrorCount::GslErrorCount
 ( const std::string& type   ,
   const std::string& name   ,
   const IInterface*  parent )
-  : AlgTool ( type, name , parent ) 
+  : base_class ( type, name , parent )
   , m_counters ()
-{ declareInterface<IGslErrorHandler> (this);};
+{}
 // ============================================================================
 
 // ============================================================================
-/// destructor (protetced and virtual)
+/// destructor (protected and virtual)
 // ============================================================================
-GslErrorCount::~GslErrorCount(){};
+GslErrorCount::~GslErrorCount(){}
 // ============================================================================
 
 // ============================================================================
 /** standard finalization of Tool
- *  @see  AlgTool 
+ *  @see  AlgTool
  *  @see IAlgTool
  *  @return status code
  */
 // ============================================================================
-StatusCode GslErrorCount::finalize   () 
+StatusCode GslErrorCount::finalize   ()
 {
-  // printout the Error table 
+  // printout the Error table
   MsgStream log( msgSvc() , name() );
   const std::string stars( 78 , '*' );
-  log << MSG::INFO  << stars << endreq ;
-  log << MSG::ERROR <<  m_counters.size() << " GSL errors handled" << endreq ; 
+  log << MSG::INFO  << stars << endmsg ;
+  log << MSG::ERROR <<  m_counters.size() << " GSL errors handled" << endmsg ;
   for( Counters::const_iterator error = m_counters.begin() ;
-       error != m_counters.end() ; ++error ) 
+       error != m_counters.end() ; ++error )
     {
       log << MSG::ERROR
-          << " #times "   << error->second 
-          << " GSL code " << error->first.code 
-          << " Message '" << error->first.reason << "'" 
+          << " #times "   << error->second
+          << " GSL code " << error->first.code
+          << " Message '" << error->first.reason << "'"
           << " File '"    << error->first.file   << "'"
-          << " Line "     << error->first.line   << endreq ;  
+          << " Line "     << error->first.line   << endmsg ;
     }
-  log << MSG::INFO << stars << endreq ;      
-  // clear the counters 
+  log << MSG::INFO << stars << endmsg ;
+  // clear the counters
   m_counters.clear();
-  // finalze the base class 
+  // finalize the base class
   return AlgTool::finalize ();
-};
+}
 // ============================================================================
 
 // ============================================================================
-/** handle the GSL error 
+/** handle the GSL error
  *  @see IGslErrorHandler
- *  @param error  error to be handled 
+ *  @param error  error to be handled
  *  @see GslError
- *  @return status code 
+ *  @return status code
  */
 // ============================================================================
-StatusCode GslErrorCount::handle 
-( const GslError& error  ) const 
+StatusCode GslErrorCount::handle
+( const GslError& error  ) const
 {
-  // increase the counter 
+  // increase the counter
   m_counters[ error ] += 1 ;
   //
   return StatusCode::SUCCESS ;
-};
+}
 // ============================================================================
 
 
 // ============================================================================
-// The END 
+// The END
 // ============================================================================

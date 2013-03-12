@@ -1,4 +1,3 @@
-// $Id: MsgStream.h,v 1.43 2008/10/30 23:38:46 marcocle Exp $
 #ifndef GAUDIKERNEL_MSGSTREAM_H
 #define GAUDIKERNEL_MSGSTREAM_H
 
@@ -22,7 +21,7 @@
  * @author M.Frank
  * @author Sebastien Ponce
  */
-class MsgStream     {
+class MsgStream {
 private:
   /** Error return code in case ios modification is requested for inactive
    *  streams
@@ -46,31 +45,50 @@ protected:
   MSG::Level      m_currLevel;
   /// use colors
   bool m_useColors;
+  /// Pointer to service counting messages prepared but not printed because of
+  /// wrong level.
+  IInactiveMessageCounter*    m_inactCounter;
+  /// Flag to state if the inactive messages has to be counted.
+  static bool m_countInactive;
+
 public:
   /// Standard constructor: Connect to message service for output
-  MsgStream(IMessageSvc* svc, int buffer_length=128);
+  GAUDI_API MsgStream(IMessageSvc* svc, int buffer_length=128);
   /// Standard constructor: Connect to message service for output
-  MsgStream(IMessageSvc* svc, const std::string& source, int buffer_length=128);
+  GAUDI_API MsgStream(IMessageSvc* svc, const std::string& source, int buffer_length=128);
   /// Copy constructor
   MsgStream(const MsgStream& msg)
     : m_service(msg.m_service),
-      m_source(msg.m_source),
       m_active(msg.m_active),
       m_level(msg.m_level),
-      m_useColors(msg.m_useColors)
+      m_useColors(msg.m_useColors),
+      m_inactCounter(msg.m_inactCounter)
   {
+    try { // ignore exception if we cannot copy the string
+      m_source = msg.m_source;
+    }
+    catch (...) {}
   }
   /// Standard destructor
-  virtual ~MsgStream();
+  GAUDI_API virtual ~MsgStream();
   /// Initialize report of new message: activate if print level is sufficient.
   MsgStream& report(int lvl)   {
     lvl = (lvl >= MSG::NUM_LEVELS) ?
       MSG::ALWAYS : (lvl<MSG::NIL) ? MSG::NIL : lvl;
-    ((m_currLevel=MSG::Level(lvl)) >= level()) ? activate() : deactivate();
+    if  ((m_currLevel=MSG::Level(lvl)) >= level()) {
+      activate();
+    } else {
+      deactivate();
+#ifndef NDEBUG
+      if (MsgStream::countInactive() && m_inactCounter) {
+        m_inactCounter->incrInactiveCount(MSG::Level(lvl),m_source);
+      }
+#endif
+    }
     return *this;
   }
   /// Output method
-  virtual MsgStream& doOutput();
+  virtual GAUDI_API MsgStream& doOutput();
   /// Access string buffer
   const std::string& buffer() const {
     return m_buffer;
@@ -139,17 +157,12 @@ public:
     return report(level);
   }
   MsgStream& operator<<(longlong arg) {
-    if(isActive()) {
-#ifdef _WIN32
-      int flg = m_stream.flags();
-      char buf[128];
-      (flg & std::ios::hex) ?
-        ::sprintf(buf,"%I64x",arg) : ::sprintf(buf,"%I64d",arg);
-      m_stream << buf;
-#else
-      m_stream << arg;
-#endif
-    }
+    try {
+      // this may throw, and we cannot afford it if the stream is used in a catch block
+      if(isActive()) {
+        m_stream << arg;
+      }
+    } catch (...) {}
     return *this;
   }
 
@@ -176,10 +189,10 @@ public:
     return isActive() ? m_stream.width(v)    : 0;
   }
   char fill() const {
-    return isActive() ? m_stream.fill()     : -1;
+    return isActive() ? m_stream.fill()     : (char)-1;
   }
   char fill(char v) {
-    return isActive() ? m_stream.fill(v)     : -1;
+    return isActive() ? m_stream.fill(v)     : (char)-1;
   }
   int precision() const  {
     return isActive() ? m_stream.precision(): 0;
@@ -210,26 +223,33 @@ public:
   }
 
   /// Set the text color
-  void setColor(MSG::Color col);
+  GAUDI_API void setColor(MSG::Color col);
   /// Set the foreground and background colors
-  void setColor(MSG::Color fg, MSG::Color bg);
+  GAUDI_API void setColor(MSG::Color fg, MSG::Color bg);
 
   /// Reset the colors to defaults
-  void resetColor();
+  GAUDI_API void resetColor();
+
+  /// Enable/disable the count of inactive messages.
+  /// Returns the previous state.
+  static GAUDI_API bool enableCountInactive(bool value = true);
+
+  /// Returns the state of the counting of inactive messages (enabled/disabled).
+  static GAUDI_API bool countInactive();
 
 };
 
-/// MsgStream Modifier: endreq. Calls the output method of the MsgStream
-inline MsgStream& endreq(MsgStream& s)   {
+/// MsgStream Modifier: endmsg. Calls the output method of the MsgStream
+inline MsgStream& endmsg(MsgStream& s) {
   return s.doOutput();
 }
-/// MsgStream Modifier: endreq. Calls the output method of the MsgStream
-inline MsgStream& endmsg(MsgStream& s)   {
-  return s.doOutput();
-}
+#if defined(GAUDI_V20_COMPAT) && !defined(G21_NO_ENDREQ)
+/// Macro provided for backward compatibility
+#define endreq endmsg
+#endif
 
 /// MsgStream format utility "a la sprintf(...)"
-std::string format(const char*, ... );
+GAUDI_API std::string format(const char*, ... );
 
 #ifdef _WIN32
 template<class _E> inline
@@ -253,27 +273,42 @@ MsgStream& operator << (MsgStream& s, const std::_Smanip<_Tm>& manip) {
 #elif defined (__GNUC__)
 inline MsgStream& operator << (MsgStream& s,
                                const std::_Setiosflags &manip) {
-  if ( s.isActive() ) s.stream() << manip;
+  try {
+    // this may throw, and we cannot afford it if the stream is used in a catch block
+    if ( s.isActive() ) s.stream() << manip;
+  } catch(...) {}
   return s;
 }
 inline MsgStream& operator << (MsgStream& s,
                                const std::_Resetiosflags &manip)      {
-  if ( s.isActive() ) s.stream() << manip;
+  try {
+    // this may throw, and we cannot afford it if the stream is used in a catch block
+    if ( s.isActive() ) s.stream() << manip;
+  } catch (...) {}
   return s;
 }
 inline MsgStream& operator << (MsgStream& s,
                                const std::_Setbase &manip)    {
-  if ( s.isActive() ) s.stream() << manip;
+  try {
+    // this may throw, and we cannot afford it if the stream is used in a catch block
+    if ( s.isActive() ) s.stream() << manip;
+  } catch (...) {}
   return s;
 }
 inline MsgStream& operator << (MsgStream& s,
                                const std::_Setprecision &manip)       {
-  if ( s.isActive() ) s.stream() << manip;
+  try {
+    // this may throw, and we cannot afford it if the stream is used in a catch block
+    if ( s.isActive() ) s.stream() << manip;
+  } catch (...) {}
   return s;
 }
 inline MsgStream& operator << (MsgStream& s,
                                const std::_Setw &manip)       {
-  if ( s.isActive() ) s.stream() << manip;
+  try {
+    // this may throw, and we cannot afford it if the stream is used in a catch block
+    if ( s.isActive() ) s.stream() << manip;
+  } catch (...) {}
   return s;
 }
 
@@ -294,32 +329,46 @@ namespace MSG {
 /// I/O Manipulator for setfill
 template<class _Tm> inline
 MsgStream& operator << (MsgStream& s, const std::smanip<_Tm>& manip)  {
-  if ( s.isActive() ) s.stream() << manip;
+  try {
+    // this may throw, and we cannot afford it if the stream is used in a catch block
+    if ( s.isActive() ) s.stream() << manip;
+  } catch (...) {}
   return s;
 }
 #endif    // WIN32 or (__GNUC__)
+
+/// Specialization to avoid the generation of implementations for char[].
+/// \see {<a href="https://savannah.cern.ch/bugs/?87340">bug #87340</a>}
+inline MsgStream& operator<< (MsgStream& s, const char *arg){
+  try {
+    // this may throw, and we cannot afford it if the stream is used in a catch block
+    if ( s.isActive() ) s.stream() << arg;
+  } catch (...) {}
+  return s;
+}
 
 /// General templated stream operator
 template <typename T>
 MsgStream& operator<< (MsgStream& lhs, const T& arg)  {
   using namespace GaudiUtils;
-  if(lhs.isActive()) lhs.stream() << arg;
+  if(lhs.isActive())
+    try {
+      // this may throw, and we cannot afford it if the stream is used in a catch block
+      lhs.stream() << arg;
+    }
+    catch (...) {}
   return lhs;
 }
-
-// /// Specialize const char* to optimize
-inline
-MsgStream& operator<< (MsgStream& lhs, const char* arg) {
-  if(lhs.isActive()) lhs.stream() << arg;
-  return lhs;
-} 
-
 
 #ifdef __GNUC__
 /// compiler is stupid. Must specialize
 template<typename T>
 MsgStream& operator << (MsgStream& lhs, const std::_Setfill<T> &manip) {
-  if ( lhs.isActive() ) lhs.stream() << manip;
+  if ( lhs.isActive() )
+    try {
+      // this may throw, and we cannot afford it if the stream is used in a catch block
+      lhs.stream() << manip;
+    } catch(...) {}
   return lhs;
 }
 #endif

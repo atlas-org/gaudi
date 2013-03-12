@@ -9,7 +9,7 @@
 //
 //	Author     : M.Frank
 //  Created    : 13/1/99
-//	Changes    : 
+//	Changes    :
 //====================================================================
 #ifndef GAUDIKERNEL_ENVIRONMENT_H
 #define GAUDIKERNEL_ENVIRONMENT_H
@@ -25,13 +25,13 @@
 /** Note: OS specific details for environment resolution
 
     Entrypoints:
-    
+
     @author:  M.Frank
     @version: 1.0
 */
 namespace System  {
-  std::string homeDirectory();
-  std::string tempDirectory();
-  StatusCode resolveEnv(const std::string& var, std::string& res, int recusions=124);
+  GAUDI_API std::string homeDirectory();
+  GAUDI_API std::string tempDirectory();
+  GAUDI_API StatusCode resolveEnv(const std::string& var, std::string& res, int recusions=124);
 }
 #endif    // GAUDIKERNEL_ENVIRONMENT_H

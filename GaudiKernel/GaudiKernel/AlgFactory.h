@@ -2,6 +2,7 @@
 #ifndef GAUDIKERNEL_ALGFACTORY_H
 #define GAUDIKERNEL_ALGFACTORY_H
 
+#include "GaudiKernel/Kernel.h"
 #include "Reflex/PluginService.h"
 #include "RVersion.h"
 

@@ -16,6 +16,7 @@ import Test_confDb # only the _merge_confDb.py in InstallArea/python/* are used 
 from Configurables import MyTestTool
 MyTestTool().PubToolHndl = "Public1"
 MyTestTool().PrivToolHndl = "Pivate1"
+MyTestTool().PrivEmptyToolHndl = ""
 #------------------------------------------------------------------------------/
 
 </text></argument>

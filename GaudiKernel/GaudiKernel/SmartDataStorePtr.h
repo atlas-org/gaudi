@@ -112,12 +112,12 @@ public:
     return *result;
   }
 
-  /// operator int for statements like: if ( SmartDataStorePtr<XXX>(...) ) {}
+  /// operator int for statements like: if ( SmartDataStorePtr&lt;XXX&gt;(...) ) {}
   operator int()   {
     return 0 != accessTypeSafeData();
   }
 
-  /// operator ! for statements like: if ( !SmartDataStorePtr<XXX>(...) ) {}
+  /// operator ! for statements like: if ( !SmartDataStorePtr&lt;XXX&gt;(...) ) {}
   bool operator !()   {
     return 0 == accessTypeSafeData();
   }

@@ -39,7 +39,7 @@ namespace NTuple    {
   template <class TYP> class _DataImp : virtual public _Data<TYP>  {
   private:
     /// Inhibit Copy Constructor
-    _DataImp(const _DataImp& copy)    {}
+    _DataImp(const _DataImp&)    {}
   protected:
     typedef const std::string& CSTR;
     typedef const std::type_info& CTYPE;
@@ -101,8 +101,8 @@ namespace NTuple    {
           long *ll = (long*)m_indexItem->buffer();
           len *= *ll;
         }
-        else if ( nd > 1 )   {
-          len *= dim(nd);
+        else if ( nd > 0 )   {
+          len *= dim(nd-1);
         }
       }
       return len;

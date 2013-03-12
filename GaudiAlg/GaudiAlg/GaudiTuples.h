@@ -1,7 +1,7 @@
 // $Id: GaudiTuples.h,v 1.7 2008/10/27 19:22:20 marcocle Exp $
+// ============================================================================
 #ifndef GAUDIALG_GAUDITUPLES_H
 #define GAUDIALG_GAUDITUPLES_H 1
-
 // ============================================================================
 /* @file GaudiTuples.h
  *
@@ -12,7 +12,6 @@
  *  @date   2005-08-08
  */
 // ============================================================================
-
 // Include files
 // ============================================================================
 // GaudiKernel
@@ -24,7 +23,6 @@
 #include "GaudiAlg/Maps.h"
 #include "GaudiAlg/Tuple.h"
 #include "GaudiAlg/TupleObj.h"
-
 // ============================================================================
 /** @class GaudiTuples GaudiTuples.h GaudiAlg/GaudiTuples.h
  *
@@ -35,30 +33,24 @@
  *  @date   2005-08-08
  */
 // ============================================================================
-
 template <class PBASE>
-class GaudiTuples : public PBASE
+class GAUDI_API GaudiTuples: public PBASE
 {
-
 public:
-
+  // ==========================================================================
   /// the actual type for histogram identifier
   typedef GaudiAlg::HistoID         HistoID;
-
   /// the actual type of the tuple
   typedef Tuples::Tuple             Tuple         ;
   /// the actual type of N-tuple ID
   typedef GaudiAlg::TupleID         TupleID       ;
-
   /// the actual type of (title) -> (tuple) mappping
-  typedef GaudiAlg::TupleMapTitle      TupleMapTitle ;
+  typedef GaudiAlg::TupleMapTitle   TupleMapTitle ;
   /// the actual type of    (Numeric ID) -> (tuple) mappping
-  typedef GaudiAlg::TupleMapNumericID  TupleMapNumID ;
-  /// the actual type of    (Literal ID) -> (tuple) mappping
-  typedef GaudiAlg::TupleMapLiteralID  TupleMapLitID ;
-
+  typedef GaudiAlg::TupleMapID      TupleMapID ;
+  // ==========================================================================
 public:
-
+  // ==========================================================================
   /** Access an N-Tuple object (book on-demand) with unique identifier
    *
    *  @code
@@ -118,7 +110,7 @@ public:
    *
    *  @attention
    *   If the N-Tuple with given ID is already booked
-   *   through automatic assignement of N-Tuple ID,
+   *   through automatic assignment of N-Tuple ID,
    *   the error will not be detected.
    *   Therefore it is recommended
    *   to use a non-trivial N-Tuple ID offset  (property "NTupleOffSet")
@@ -193,7 +185,7 @@ public:
    *
    *  @attention
    *   If the Event Tag Collection with given ID is already booked
-   *   through automatic assignement of Event Tag Collection ID,
+   *   through automatic assignment of Event Tag Collection ID,
    *   the error will not be detected.
    *   Therefore it is recommended
    *   to use a non-trivial Event Tag Collection ID offset  (property "EvtColOffSet")
@@ -209,9 +201,9 @@ public:
   Tuple  evtCol ( const TupleID&     ID                           ,
                   const std::string& title                        ,
                   const CLID&        clid  = CLID_ColumnWiseTuple ) const ;
-
+  // ==========================================================================
 public:  // trivial accessors
-
+  // ==========================================================================
   /// get the flag for N-Tuple production (property "NTupleProduce")
   bool               produceNTuples () const { return m_produceNTuples ; }
   /// get the flag for N-Tuple path split (property "NTupleSplitDir")
@@ -230,7 +222,6 @@ public:  // trivial accessors
     const std::string path = nTupleLUN() + "/" + nTupleTopDir() + nTupleDir();
     return ( splitNTupleDir() ? dirHbookName( path ) : path ) ;
   }
-
   /// get the flag for Event Tag Collection production (property "EvtColsProduce")
   bool               produceEvtCols () const { return m_produceEvtCols ; }
   /// get the flag for Event Tag Collection path split (property "EvtColsSplitDir")
@@ -249,49 +240,42 @@ public:  // trivial accessors
     std::string path = evtColLUN() + "/" + evtColTopDir() + evtColDir();
     return ( splitEvtColDir() ? dirHbookName( path ) : path );
   }
-
   /// print tuples at finalization
   bool tuplesPrint  () const { return m_tuplesPrint  ; }
   /// print event collections at finalization
   bool evtColsPrint () const { return m_evtColsPrint ; }
-
+  // ==========================================================================
 public :
-
+  // ==========================================================================
   /** perform the actual printout of N-tuples
    *  @return number of active N-Tuples
    */
   long printTuples  () const ;
-
-  /** perform the actual printout of Evt Tag Collections
+  /** perform the actual printout of Event Tag Collections
    *  @return number of active Event Tag Collections
    */
   long printEvtCols () const ;
-
+  // ==========================================================================
 public :
-
+  // ==========================================================================
   /// check the existence AND validity of the N-Tuple with the given ID
   bool nTupleExists ( const TupleID& ID ) const;
-
   /// check the existence AND validity of the Event Tag Collection with the given ID
   bool evtColExists ( const TupleID& ID ) const;
-
+  // ==========================================================================
 protected:
-
+  // ==========================================================================
   /// access to the all ntuples by title
   const TupleMapTitle& nTupleMapTitle () const { return m_nTupleMapTitle ; }
   /// access to the all evet tag collections by title
   const TupleMapTitle& evtColMapTitle () const { return m_evtColMapTitle ; }
   /// access to the all ntuples by numeric ID
-  const TupleMapNumID& nTupleMapNumID () const { return m_nTupleMapNumID ; }
+  const TupleMapID&    nTupleMapID    () const { return m_nTupleMapID    ; }
   /// access to the all evet tag collections by numeric ID
-  const TupleMapNumID& evtColMapNumID () const { return m_evtColMapNumID ; }
-  /// access to the all ntuples by literal ID
-  const TupleMapLitID& nTupleMapLitID () const { return m_nTupleMapLitID ; }
-  /// access to the all evet tag collections by literal ID
-  const TupleMapLitID& evtColMapLitID () const { return m_evtColMapLitID ; }
-
+  const TupleMapID&    evtColMapID    () const { return m_evtColMapID    ; }
+  // ==========================================================================
 protected:
-
+  // ==========================================================================
   /** create TupleObj
    *  @attention The method should never used directly by users
    *  @param name  name/title
@@ -303,7 +287,6 @@ protected:
   createNTuple ( const std::string& name  ,
                  NTuple::Tuple*     tuple ,
                  const CLID&        clid  ) const ;
-
   /** create TupleObj for event tag collection
    *  @attention The method should never used directly by users
    *  @param name  name/title
@@ -315,36 +298,43 @@ protected:
   createEvtCol ( const std::string& name  ,
                  NTuple::Tuple*     tuple ,
                  const CLID&        clid  ) const ;
-
+  // ==========================================================================
 public:
-
+  // ==========================================================================
   /// Algorithm constructor
   GaudiTuples ( const std::string & name,
                 ISvcLocator * pSvcLocator );
-
   /// Tool constructor
   GaudiTuples ( const std::string& type   ,
                 const std::string& name   ,
                 const IInterface*  parent );
-
   /// Destructor
   virtual ~GaudiTuples();
-
+  // ==========================================================================
 protected:
-
+  // ==========================================================================
   /** standard initialization method
    *  @return status code
    */
-  virtual StatusCode initialize ();
-
+  virtual StatusCode initialize()
+#ifdef __ICC
+    { return i_gtInitialize(); }
+  StatusCode i_gtInitialize()
+#endif
+  ;
   /** standard finalization method
    *  @return status code
    */
-  virtual StatusCode finalize   ();
-
+  virtual StatusCode finalize()
+#ifdef __ICC
+    { return i_gtFinalize(); }
+  StatusCode i_gtFinalize()
+#endif
+  ;
+  // ==========================================================================
 private:
-
-  /// Constructor initialisation and job options
+  // ==========================================================================
+  /// Constructor initialization and job options
   inline void initGaudiTuplesConstructor()
   {
     m_produceNTuples = true ;     // Switch ON/OFF ntuple production
@@ -364,25 +354,63 @@ private:
     m_tuplesPrint    = true  ;    // print tuples at end of job
     m_evtColsPrint   = false  ;   // print event collections at end of job
     //
-    this->declareProperty ( "NTupleProduce"  , m_produceNTuples ) ;
-    this->declareProperty ( "NTuplePrint"    , m_tuplesPrint    ) ;
-    this->declareProperty ( "NTupleSplitDir" , m_splitNTupleDir ) ;
-    this->declareProperty ( "NTupleOffSet"   , m_nTupleOffSet   ) ;
-    this->declareProperty ( "NTupleLUN"      , m_nTupleLUN      ) ;
-    this->declareProperty ( "NTupleTopDir"   , m_nTupleTopDir   ) ;
-    this->declareProperty ( "NTupleDir"      , m_nTupleDir      ) ;
-    //
-    this->declareProperty ( "EvtColsProduce" , m_produceEvtCols ) ;
-    this->declareProperty ( "EvtColsPrint"   , m_evtColsPrint   ) ;
-    this->declareProperty ( "EvtColSplitDir" , m_splitEvtColDir ) ;
-    this->declareProperty ( "EvtColOffSet"   , m_evtColOffSet   ) ;
-    this->declareProperty ( "EvtColLUN"      , m_evtColLUN      ) ;
-    this->declareProperty ( "EvtColTopDir"   , m_evtColTopDir   ) ;
-    this->declareProperty ( "EvtColDir"      , m_evtColDir      ) ;
+    this -> declareProperty
+      ( "NTupleProduce"  , m_produceNTuples         ,
+        "General switch to enable/disable N-tuples" ) ;
+    this -> declareProperty
+      ( "NTuplePrint"    , m_tuplesPrint    ,
+        "Print N-tuple statistics"        )
+      -> declareUpdateHandler ( &GaudiTuples<PBASE>::printNTupleHandler , this ) ;
+    this -> declareProperty
+      ( "NTupleSplitDir" , m_splitNTupleDir ,
+        "Split long directory names into short pieces (suitable for HBOOK)" ) ;
+    this -> declareProperty
+      ( "NTupleOffSet"   , m_nTupleOffSet   ,
+        "Offset for numerical N-tuple ID" ) ;
+    this -> declareProperty
+      ( "NTupleLUN"      , m_nTupleLUN      ,
+        "Logical File Unit for N-tuples"  ) ;
+    this -> declareProperty
+      ( "NTupleTopDir"   , m_nTupleTopDir   ,
+        "Top-level directory for N-Tuples") ;
+    this -> declareProperty
+      ( "NTupleDir"      , m_nTupleDir      ,
+        "Subdirectory for N-Tuples"       ) ;
+    // ========================================================================
+    this -> declareProperty
+      ( "EvtColsProduce" , m_produceEvtCols ,
+        "General switch to enable/disable Event Tag Collections" ) ;
+    this -> declareProperty
+      ( "EvtColsPrint"   , m_evtColsPrint   ,
+        "Print statistics for Event Tag Collections " )
+      -> declareUpdateHandler ( &GaudiTuples<PBASE>::printEvtColHandler , this ) ;
+    this -> declareProperty
+      ( "EvtColSplitDir" , m_splitEvtColDir ,
+        "Split long directory names into short pieces" ) ;
+    this -> declareProperty
+      ( "EvtColOffSet"   , m_evtColOffSet   ,
+        "Offset for numerical N-tuple ID" ) ;
+    this -> declareProperty
+      ( "EvtColLUN"      , m_evtColLUN      ,
+        "Logical File Unit for Event Tag Collections"   ) ;
+    this -> declareProperty
+      ( "EvtColTopDir"   , m_evtColTopDir   ,
+        "Top-level directory for Event Tag Collections" ) ;
+    this -> declareProperty
+      ( "EvtColDir"      , m_evtColDir      ,
+        "Subdirectory for Event Tag Collections"        ) ;
+    // ========================================================================
   }
-
+  // ==========================================================================
 private:
-
+  // ==========================================================================
+  /// handler for "NTuplePrint" property
+  void printNTupleHandler  ( Property& /* theProp */ ) ; //       "NTuplePrint"
+  /// handler for "EvtColsPrint" property
+  void printEvtColHandler  ( Property& /* theProp */ ) ; //      "EvtcolsPrint"
+  // ==========================================================================
+private:
+  // ==========================================================================
   /// flag to switch ON/OFF the ntuple filling and booking
   bool        m_produceNTuples ;
   /// flag to indicate splitting of tuple directories (useful for HBOOK)
@@ -395,7 +423,7 @@ private:
   std::string m_nTupleDir      ;
   /// the offset for ntuple numerical ID
   TupleID::NumericID     m_nTupleOffSet   ;
-
+  // ==========================================================================
   /// flag to switch ON/OFF the ntuple filling and booking
   bool        m_produceEvtCols ;
   /// flag to indicate splitting of tuple directories (useful for HBOOK)
@@ -408,26 +436,25 @@ private:
   std::string m_evtColDir      ;
   /// the offset for ntuple numerical ID
   TupleID::NumericID     m_evtColOffSet   ;
-
+  // ==========================================================================
   /// print tuples at finalization?
-  bool m_tuplesPrint    ; ///< print tuples at finalization?
+  bool m_tuplesPrint    ;                      // print tuples at finalization?
   /// print event collections at finalization
-  bool m_evtColsPrint   ; ///< print event collections at finalization
-
+  bool m_evtColsPrint   ;            // print event collections at finalization
+  // ==========================================================================
   /// the actual storage of ntuples by title
   mutable TupleMapTitle  m_nTupleMapTitle ;
-  /// the actual storage of ntuples by numeric ID
-  mutable TupleMapNumID  m_nTupleMapNumID    ;
-  /// the actual storage of ntuples by literal ID
-  mutable TupleMapLitID  m_nTupleMapLitID    ;
-
+  /// the actual storage of ntuples by ID
+  mutable TupleMapID     m_nTupleMapID    ;
+  // ==========================================================================
   /// the actual storage of event collections by title
   mutable TupleMapTitle  m_evtColMapTitle ;
-  /// the actual storage of event collections by numeric ID
-  mutable TupleMapNumID  m_evtColMapNumID    ;
-  /// the actual storage of event collections by literal ID
-  mutable TupleMapLitID  m_evtColMapLitID    ;
-
+  /// the actual storage of event collections by ID
+  mutable TupleMapID     m_evtColMapID    ;
+  // ==========================================================================
 };
-
+// ============================================================================
+// The END
+// ============================================================================
 #endif // GAUDIALG_GAUDITUPLES_H
+// ============================================================================

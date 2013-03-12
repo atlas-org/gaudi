@@ -2,16 +2,13 @@
 #define GAUDIKERNEL_IPARTPROPSVC_H
 
 // Include Files
-#include <string>
+#include <map>
 #include "GaudiKernel/IService.h"
 
 namespace HepPDT {
   class ParticleDataTable;
   class ProcessUnknownID;
 }
-
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IPartPropSvc(1070, 1 , 0); 
 
 /* @class IPartPropSvc IPartPropSvc.h GaudiKernel/IPartPropSvc.h
 
@@ -20,13 +17,11 @@ static const InterfaceID IID_IPartPropSvc(1070, 1 , 0);
     @author Charles Leggett
 
 */
-class IPartPropSvc : virtual public IService {
+class GAUDI_API IPartPropSvc: virtual public IService {
 
 public:
-  // Typedefs for container type
-
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IPartPropSvc; }
+  /// InterfaceID
+  DeclareInterfaceID(IPartPropSvc,2,0);
 
   virtual HepPDT::ParticleDataTable* PDT() = 0;
   virtual void setUnknownParticleHandler( HepPDT::ProcessUnknownID*,

@@ -33,6 +33,11 @@
 // ============================================================================
 // Boost
 // ============================================================================
+#ifdef __ICC
+// disable icc remark #2259: non-pointer conversion from "X" to "Y" may lose significant bits
+//   coming from boost/lexical_cast.hpp
+#pragma warning(disable:2259)
+#endif
 #include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 // ============================================================================
@@ -44,8 +49,7 @@
 // ============================================================================
 namespace
 {
-  /** @var s_InvalidLocation
-   *  local constant to indicate "invalid location"
+  /** local constant to indicate "invalid location"
    *  @author Vanya BELYAEV Ivan.Belyaev@lapp.in2p3.fr
    *  @date 2005-08-05
    */
@@ -67,7 +71,7 @@ void GaudiAlg::Print1D::print
 ( MsgStream & stream,
   const AIDA::IHistogram1D* aida ,
   const GaudiAlg::HistoID&  ID   )
-{ stream << toString  ( aida , ID )  << endreq ; }
+{ stream << toString  ( aida , ID )  << endmsg ; }
 // ============================================================================
 std::string GaudiAlg::Print1D::toString
 ( const AIDA::IHistogram1D* aida   ,
@@ -86,7 +90,7 @@ void GaudiAlg::Print2D::print
 ( MsgStream & stream,
   const AIDA::IHistogram2D* aida ,
   const GaudiAlg::HistoID&  ID   )
-{ stream << toString  ( aida , ID )  << endreq ; }
+{ stream << toString  ( aida , ID )  << endmsg ; }
 // ============================================================================
 std::string GaudiAlg::Print2D::toString
 ( const AIDA::IHistogram2D* aida   ,
@@ -106,7 +110,7 @@ void GaudiAlg::Print3D::print
 ( MsgStream & stream,
   const AIDA::IHistogram3D* aida ,
   const GaudiAlg::HistoID&  ID   )
-{ stream << toString  ( aida , ID )  << endreq ; }
+{ stream << toString  ( aida , ID )  << endmsg ; }
 // ============================================================================
 std::string GaudiAlg::Print3D::toString 
 ( const AIDA::IHistogram3D* aida ,
@@ -127,7 +131,7 @@ void GaudiAlg::Print1DProf::print
 ( MsgStream & stream,
   const AIDA::IProfile1D* aida ,
   const GaudiAlg::HistoID&  ID   )
-{ stream << toString  ( aida , ID )  << endreq ; }
+{ stream << toString  ( aida , ID )  << endmsg ; }
 // ============================================================================
 std::string GaudiAlg::Print1DProf::toString 
 ( const AIDA::IProfile1D*   aida   ,
@@ -146,7 +150,7 @@ void GaudiAlg::Print2DProf::print
 ( MsgStream & stream,
   const AIDA::IProfile2D* aida ,
   const GaudiAlg::HistoID&  ID   )
-{ stream << toString  ( aida , ID )  << endreq ; }
+{ stream << toString  ( aida , ID )  << endmsg ; }
 // ============================================================================
 std::string GaudiAlg::Print2DProf::toString
 ( const AIDA::IProfile2D* aida ,

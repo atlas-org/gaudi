@@ -5,12 +5,13 @@
 #include "GaudiKernel/DeclareFactoryEntries.h"
 #include "GaudiUtils/IFileCatalog.h"
 #include "IODataManager.h"
+#include "GaudiKernel/SmartIF.h"
 #include "GaudiKernel/Incident.h"
 #include "GaudiKernel/IIncidentSvc.h"
 
 #include <set>
 
-DECLARE_NAMESPACE_SERVICE_FACTORY(Gaudi,IODataManager);
+DECLARE_NAMESPACE_SERVICE_FACTORY(Gaudi,IODataManager)
 
 using namespace Gaudi;
 
@@ -19,22 +20,12 @@ enum { S_OK = StatusCode::SUCCESS, S_ERROR=StatusCode::FAILURE };
 static std::set<std::string>    s_badFiles;
 
 IODataManager::IODataManager(CSTR nam, ISvcLocator* svcloc)
-: Service( nam, svcloc), m_ageLimit(2), m_catalog(0)
+  : base_class(nam, svcloc), m_ageLimit(2)
 {
   declareProperty("CatalogType",     m_catalogSvcName="Gaudi::MultiFileCatalog/FileCatalog");
   declareProperty("UseGFAL",         m_useGFAL = true);
   declareProperty("QuarantineFiles", m_quarantine = true);
   declareProperty("AgeLimit",        m_ageLimit = 2);
-}
-
-// IInterface::queryInterface
-StatusCode IODataManager::queryInterface(const InterfaceID& riid, void** ppvIf) {
-  if ( riid == IID_IIODataManager )  {
-    *ppvIf = (IIODataManager*)this;
-    addRef();
-    return S_OK;
-  }
-  return Service::queryInterface(riid, ppvIf);
 }
 
 /// IService implementation: Db event selector override
@@ -43,35 +34,29 @@ StatusCode IODataManager::initialize()  {
   StatusCode status = Service::initialize();
   MsgStream log(msgSvc(), name());
   if ( !status.isSuccess() )    {
-    log << MSG::ERROR << "Error initializing base class Service!" << endreq;
+    log << MSG::ERROR << "Error initializing base class Service!" << endmsg;
     return status;
   }
   // Retrieve conversion service handling event iteration
-  status = serviceLocator()->service(m_catalogSvcName, m_catalog);
-  if( !status.isSuccess() ) {
-    log << MSG::ERROR 
-        << "Unable to localize interface IID_FileCatalog from service:" 
-        << m_catalogSvcName << endreq;
+  m_catalog = serviceLocator()->service(m_catalogSvcName);
+  if( !m_catalog.isValid() ) {
+    log << MSG::ERROR
+        << "Unable to localize interface IFileCatalog from service:"
+        << m_catalogSvcName << endmsg;
+    return StatusCode::FAILURE;
+  }
+  m_incSvc = serviceLocator()->service("IncidentSvc");
+  if( !m_incSvc.isValid() ) {
+    log << MSG::ERROR << "Error initializing IncidentSvc Service!" << endmsg;
     return status;
   }
-  status = serviceLocator()->service("IncidentSvc", m_incSvc);
-  if( !status.isSuccess() ) {
-    log << MSG::ERROR << "Error initializing IncidentSvc!" << endreq;
-    return status;
-  }
+
   return status;
 }
 
 /// IService implementation: finalize the service
 StatusCode IODataManager::finalize()  {
-  if ( m_catalog )  {
-    m_catalog->release();
-    m_catalog = 0;
-  }
-  if ( m_incSvc )  {
-    m_incSvc->release();
-    m_incSvc = 0;
-  }
+  m_catalog = 0; // release
   return Service::finalize();
 }
 
@@ -146,15 +131,15 @@ StatusCode IODataManager::disconnect(Connection* con)    {
       std::string gfal_name = "gfal:guid:" + fid;
       ConnectionMap::iterator i=m_connectionMap.find(fid);
       m_fidMap.erase(j);
-      if ( (j=m_fidMap.find(fid)) != m_fidMap.end() ) 
+      if ( (j=m_fidMap.find(fid)) != m_fidMap.end() )
         m_fidMap.erase(j);
-      if ( (j=m_fidMap.find(gfal_name)) != m_fidMap.end() ) 
+      if ( (j=m_fidMap.find(gfal_name)) != m_fidMap.end() )
         m_fidMap.erase(j);
       if ( i != m_connectionMap.end() ) {
         if ( (*i).second )  {
           IDataConnection* c = (*i).second->connection;
           std::string pfn = c->pfn();
-          if ( (j=m_fidMap.find(pfn)) != m_fidMap.end() ) 
+          if ( (j=m_fidMap.find(pfn)) != m_fidMap.end() )
             m_fidMap.erase(j);
           if ( c->isConnected() )  {
             MsgStream log(msgSvc(),name());
@@ -176,16 +161,16 @@ StatusCode IODataManager::reconnect(Entry* e)  {
   StatusCode sc = S_ERROR;
   if ( e && e->connection )  {
     switch(e->ioType)  {
-      case Connection::READ:
-        sc = e->connection->connectRead();
-        break;
-      case Connection::UPDATE:
-      case Connection::CREATE:
-      case Connection::RECREATE:
-        sc = e->connection->connectWrite(e->ioType);
-        break;
-      default:
-        return S_ERROR;
+    case Connection::READ:
+      sc = e->connection->connectRead();
+      break;
+    case Connection::UPDATE:
+    case Connection::CREATE:
+    case Connection::RECREATE:
+      sc = e->connection->connectWrite(e->ioType);
+      break;
+    default:
+      return S_ERROR;
     }
     if ( sc.isSuccess() && e->ioType == Connection::READ )  {
       std::vector<Entry*> to_retire;
@@ -196,7 +181,7 @@ StatusCode IODataManager::reconnect(Entry* e)  {
           c->ageFile();
           if ( c->age() > m_ageLimit ) {
             to_retire.push_back((*i).second);
-	  }
+          }
         }
       }
       if ( !to_retire.empty() )  {
@@ -229,7 +214,7 @@ StatusCode IODataManager::establishConnection(Connection* con)  {
       ConnectionMap::const_iterator i=m_connectionMap.find(con->name());
       if ( i != m_connectionMap.end() )  {
         Connection* c = (*i).second->connection;
-        if ( c != con )  { 
+        if ( c != con )  {
           m_incSvc->fireIncident(Incident(con->name(),IncidentType::FailInputFile));
           return error("Severe logic bug: Twice identical connection object for DSN:"+con->name(),true);
         }
@@ -245,7 +230,7 @@ StatusCode IODataManager::establishConnection(Connection* con)  {
   return error("Severe logic bug: No connection object avalible.",true);
 }
 
-StatusCode 
+StatusCode
 IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,bool keep_open,Connection* connection)  {
   MsgStream log(msgSvc(),name());
   std::string dsn = dataset;
@@ -259,7 +244,7 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
       dsn = dataset.substr(4), typ = PFN;
     else if ( typ == UNKNOWN )
       return connectDataIO(PFN, rw, dsn, technology, keep_open, connection);
-    
+
     if(std::find(s_badFiles.begin(),s_badFiles.end(),dsn) != s_badFiles.end())  {
       m_incSvc->fireIncident(Incident(dsn,IncidentType::FailInputFile));
       return IDataConnection::BAD_DATA_CONNECTION;
@@ -273,7 +258,7 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
           if ( !m_useGFAL )   {
             if ( m_quarantine ) s_badFiles.insert(dsn);
             m_incSvc->fireIncident(Incident(dsn,IncidentType::FailInputFile));
-            error("connectDataIO> failed to resolve FID:"+dsn,false);
+            error("connectDataIO> failed to resolve FID:"+dsn,false).ignore();
 	    return IDataConnection::BAD_DATA_CONNECTION;
           }
           else if ( dsn.length() == 36 && dsn[8]=='-' && dsn[13]=='-' )  {
@@ -285,8 +270,8 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
           }
           if ( m_quarantine ) s_badFiles.insert(dsn);
           m_incSvc->fireIncident(Incident(dsn,IncidentType::FailInputFile));
-          error("connectDataIO> Failed to resolve FID:"+dsn,false);
-	  return IDataConnection::BAD_DATA_CONNECTION;
+          error("connectDataIO> Failed to resolve FID:"+dsn,false).ignore();
+          return IDataConnection::BAD_DATA_CONNECTION;
         }
         std::string pfn = files[0].first;
         m_fidMap[dsn] = m_fidMap[dataset] = m_fidMap[pfn] = dsn;
@@ -296,7 +281,7 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
           m_incSvc->fireIncident(Incident(pfn,IncidentType::FailInputFile));
           return IDataConnection::BAD_DATA_CONNECTION;
         }
-        
+
         return sc;
       }
       return S_ERROR;
@@ -316,7 +301,7 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
           m_incSvc->fireIncident(Incident(dsn,IncidentType::FailInputFile));
           log << MSG::ERROR << "Failed to resolve LFN:" << dsn
               << " Cannot access this dataset." << endmsg;
-	  return IDataConnection::BAD_DATA_CONNECTION;
+          return IDataConnection::BAD_DATA_CONNECTION;
         }
         break;
       case PFN:
@@ -351,8 +336,8 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
           delete e;
           if ( m_quarantine ) s_badFiles.insert(dsn);
           m_incSvc->fireIncident(Incident(dsn,IncidentType::FailInputFile));
-          error("connectDataIO> Cannot connect to database: PFN="+dsn+" FID="+fid,false);
-	  return IDataConnection::BAD_DATA_CONNECTION;
+          error("connectDataIO> Cannot connect to database: PFN="+dsn+" FID="+fid,false).ignore();
+          return IDataConnection::BAD_DATA_CONNECTION;
         }
         fid = connection->fid();
         m_fidMap[dataset] = m_fidMap[dsn] = m_fidMap[fid] = fid;
@@ -364,15 +349,15 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
                 << " -- processing continues" << endmsg;
           }
         }
-        m_connectionMap.insert(std::make_pair(fid,e)).first;
+        m_connectionMap.insert(std::make_pair(fid,e));
         return S_OK;
       }
       // Here we open the file!
       if ( !reconnect((*fi).second).isSuccess() )   {
         if ( m_quarantine ) s_badFiles.insert(dsn);
         m_incSvc->fireIncident(Incident(dsn,IncidentType::FailInputFile));
-        error("connectDataIO> Cannot connect to database: PFN="+dsn+" FID="+fid,false);
-	return IDataConnection::BAD_DATA_CONNECTION;
+        error("connectDataIO> Cannot connect to database: PFN="+dsn+" FID="+fid,false).ignore();
+        return IDataConnection::BAD_DATA_CONNECTION;
       }
       return S_OK;
     }
@@ -386,9 +371,10 @@ IODataManager::connectDataIO(int typ, IoType rw, CSTR dataset, CSTR technology,b
     return sc;
   }
   catch (std::exception& e)  {
-    error(std::string("connectDataIO> Caught exception:")+e.what(), false);
+    error(std::string("connectDataIO> Caught exception:")+e.what(), false).ignore();
   }
-  catch(...)  {
+  catch(...) {
+    error(std::string("connectDataIO> Caught unknown exception"), false).ignore();
   }
   m_incSvc->fireIncident(Incident(dsn,IncidentType::FailInputFile));
   error("connectDataIO> The dataset "+dsn+" cannot be opened.",false).ignore();

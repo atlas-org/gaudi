@@ -28,7 +28,7 @@ class LogFilter(logging.Filter):
         """
         Decrease the printing_level of 'step' units. ( >0 means no print)
         The level cannot go below 0, unless the force flag is set to True.
-        A negative value of the treshold disables subsequent "PrintOff"s.
+        A negative value of the threshold disables subsequent "PrintOff"s.
         """
         if force:
             self.printing_level -= step
@@ -50,10 +50,10 @@ class LogFilter(logging.Filter):
         self.threshold = allowed
 
 class ConsoleHandler(logging.StreamHandler):
-    def __init__(self, strm = None, prefix = None):
-        if strm is None:
-            strm = sys.stdout
-        logging.StreamHandler.__init__(self, strm = strm)
+    def __init__(self, stream = None, prefix = None):
+        if stream is None:
+            stream = sys.stdout
+        logging.StreamHandler.__init__(self, stream)
         if prefix is None:
             prefix = "# "
         self._filter = LogFilter(_log.name)
@@ -66,7 +66,7 @@ class ConsoleHandler(logging.StreamHandler):
         """
         Decrease the printing_level of 'step' units. ( >0 means no print)
         The level cannot go below 0, unless the force flag is set to True.
-        A negative value of the treshold disables subsequent "PrintOff"s.
+        A negative value of the threshold disables subsequent "PrintOff"s.
         """
         self._filter.printOn(step, force)
     def printOff(self, step = 1):
@@ -80,18 +80,18 @@ class ConsoleHandler(logging.StreamHandler):
         self._filter.enable(allowed)
 
 _consoleHandler = None
-def GetConsoleHandler(prefix = None):
+def GetConsoleHandler(prefix = None, stream = None):
     global _consoleHandler
     if _consoleHandler is None:
-        _consoleHandler = ConsoleHandler(prefix = prefix)
+        _consoleHandler = ConsoleHandler(prefix = prefix, stream = stream)
     elif prefix is not None:
         _consoleHandler.setPrefix(prefix)
     return _consoleHandler
 
-def InstallRootLoggingHandler(prefix = None, level = None):
+def InstallRootLoggingHandler(prefix = None, level = None, stream = None):
     root_logger = logging.getLogger()
     if not root_logger.handlers:
-        root_logger.addHandler(GetConsoleHandler(prefix))
+        root_logger.addHandler(GetConsoleHandler(prefix, stream))
         root_logger.setLevel(logging.WARNING)
     if level is not None:
         root_logger.setLevel(level)
@@ -105,11 +105,11 @@ class ParserError(RuntimeError):
     pass
 
 def _find_file(f):
-    # expand environment variables in the filename 
+    # expand environment variables in the filename
     f = os.path.expandvars(f)
     if os.path.isfile(f):
         return os.path.realpath(f)
-    
+
     path = os.environ.get('JOBOPTSEARCHPATH','').split(os.pathsep)
     # find the full path to the option file
     candidates = [d for d in path if os.path.isfile(os.path.join(d,f))]
@@ -129,54 +129,54 @@ class JobOptsParser:
     comment = re.compile(r'(//.*)$')
     # non-perfect R-E to check if '//' is inside a string
     # (a tokenizer would be better)
-    comment_in_string = re.compile(r'(["\']).*//.*\1') 
+    comment_in_string = re.compile(r'(["\']).*//.*\1')
     directive = re.compile(r'^\s*#\s*([\w!]+)\s*(.*)\s*$')
     comment_ml = ( re.compile(r'/\*'), re.compile(r'\*/') )
     statement_sep = ";"
     reference = re.compile(r'^@([\w.]*)$')
-    
+
     def __init__(self):
         # parser level states
         self.units = {}
         self.defines = {}
         if sys.platform != 'win32':
             self.defines[ "WIN32" ] = True
-        
+
     def _include(self,file,function):
         file = _find_file(file)
         if _to_be_included(file):
             _log.info("--> Including file '%s'", file)
             function(file)
             _log.info("<-- End of file '%s'", file)
-        
+
     def parse(self,file):
         # states for the "translation unit"
         statement = ""
-        
+
         ifdef_level = 0
         ifdef_skipping = False
         ifdef_skipping_level = 0
-        
+
         f = open(_find_file(file))
         l = f.readline()
         if l.startswith("#!"):
             # Skip the first line if it starts with "#!".
             # It allows to use options files as scripts.
             l = f.readline()
-        
+
         while l:
             l = l.rstrip()+'\n' # normalize EOL chars (to avoid problems with DOS new-line on Unix)
-            
+
             # single line comment
             m = self.comment.search(l)
             if m:
                 # check if the '//' is part of a string
                 m2 = self.comment_in_string.search(l)
                 # the '//' is part of a string if we find the quotes around it
-                # and they are not part of the comment itself  
+                # and they are not part of the comment itself
                 if not ( m2 and m2.start() < m.start() ):
                     # if it is not the case, we can remove the comment from the
-                    # statement 
+                    # statement
                     l = l[:m.start()]+l[m.end():]
             # process directives
             m = self.directive.search(l)
@@ -217,11 +217,11 @@ class JobOptsParser:
                     _log.warning("unknown directive '%s'", directive_name)
                 l = f.readline()
                 continue
-            
+
             if ifdef_skipping:
                 l = f.readline()
                 continue
-        
+
             # multi-line comment
             m = self.comment_ml[0].search(l)
             if m:
@@ -235,7 +235,7 @@ class JobOptsParser:
                 if not l1 and not m:
                     raise ParserError("End Of File reached before end of multi-line comment")
                 l += l1[m.end():]
-            
+
             if self.statement_sep in l:
                 i = l.index(self.statement_sep)
                 statement += l[:i]
@@ -247,9 +247,9 @@ class JobOptsParser:
                     statement = ""
             else:
                 statement += l
-            
+
             l = f.readline()
-            
+
     def _parse_units(self,file):
         for line in open(file):
             if '//' in line:
@@ -268,17 +268,17 @@ class JobOptsParser:
                                                     PropertyReference)
         #statement = statement.replace("\n","").strip()
         _log.info("%s%s", statement, self.statement_sep)
-        
+
         property,value = statement.split("=",1)
-        
+
         inc = None
         if property[-1] in [ "+", "-" ]:
             inc = property[-1]
             property = property[:-1]
-        
+
         property = property.strip()
         value = value.strip()
-        
+
         ## find the configurable to apply the property to
         #parent_cfg = None
         #while '.' in property:
@@ -292,7 +292,7 @@ class JobOptsParser:
         #    else:
         #        cfg = ConfigurableGeneric(component)
         #    parent_cfg = cfg
-        
+
         # remove spaces around dots
         property = '.'.join([w.strip() for w in property.split('.')])
         component, property = property.rsplit('.',1)
@@ -300,7 +300,7 @@ class JobOptsParser:
             cfg = Configurable.allConfigurables[component]
         else:
             cfg = ConfigurableGeneric(component)
-        
+
         #value = os.path.expandvars(value)
         value = value.replace('true','True').replace('false','False')
         if value[0] == '{' :
@@ -310,10 +310,12 @@ class JobOptsParser:
                 value = '{'+value[1:-1].replace('{','[').replace('}',']')+'}'
             else : # otherwise replace all {} with []
                 value = value.replace('{','[').replace('}',']')
-        
-        # We must escape '\' because eval tends to interpret them 
+
+        # We must escape '\' because eval tends to interpret them
         value = value.replace('\\','\\\\')
-        
+        # Replace literal '\n' and '\t' with spaces (bug #47258)
+        value = value.replace("\\n", " ").replace("\\t", " ")
+
         # interprete the @ operator
         m = self.reference.match(value)
         if m:
@@ -321,10 +323,10 @@ class JobOptsParser:
             value = PropertyReference(m.group(1))
         else:
             value = eval(value,self.units)
-        
+
         #if type(value) is str    : value = os.path.expandvars(value)
         #elif type(value) is list : value = [ type(item) is str and os.path.expandvars(item) or item for item in value ]
-    
+
         if property not in cfg.__slots__ and not hasattr(cfg,property):
             # check if the case of the property is wrong (old options are case insensitive)
             lprop = property.lower()
@@ -333,7 +335,7 @@ class JobOptsParser:
                     _log.warning("property '%s' was requested for %s, but the correct spelling is '%s'", property, cfg.name(), p)
                     property = p
                     break
-        
+
         # consider the += and -=
         if inc == "+":
             if hasattr(cfg,property):
@@ -406,3 +408,14 @@ def importOptions( optsfile ) :
     else:
         raise ParserError("Unknown file type '%s' ('%s')" % (ext,optsfile))
 
+## Import a file containing declaration of units.
+#  It is equivalent to:
+#
+#  #units "unitsfile.opts"
+#
+def importUnits(unitsfile):
+    # expand environment variables
+    unitsfile = os.path.expandvars(unitsfile)
+    # we do not need to check the file type (extension) because it must be a
+    # units file
+    _parser._include(unitsfile, _parser._parse_units)

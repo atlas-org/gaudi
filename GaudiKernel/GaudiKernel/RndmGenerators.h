@@ -7,6 +7,7 @@
 
 // Framework include files
 #include "GaudiKernel/IRndmGen.h"
+#include "GaudiKernel/SmartIF.h"
 
 // Forward declarations
 class IRndmGen;
@@ -18,17 +19,17 @@ namespace Rndm   {
 
   /** Parameters for the Gauss random number generation
   */
-  class Gauss : public IRndmGen::Param        {
+  class GAUDI_API Gauss: public IRndmGen::Param {
   protected:
     /// Generator is the friend
     friend class Generator<Gauss>;
     /// Mean of the Gauss distribution
     double m_mean;
-    /// Sigma of the Gauss ditribution
+    /// Sigma of the Gauss distribution
     double m_sigma;
   public:
     /// Standard Constructor
-    Gauss(double m, double s) 
+    Gauss(double m, double s)
     : IRndmGen::Param(IID_IRndmGauss), m_mean(m), m_sigma(s)  { }
     /// Standard Destructor
     virtual ~Gauss()                          {  }
@@ -46,7 +47,7 @@ namespace Rndm   {
 
   /** Parameters for the Gauss random number generation
   */
-  class Exponential : public IRndmGen::Param  {
+  class GAUDI_API Exponential: public IRndmGen::Param  {
   protected:
     /// Mean value of the exponential distribution
     double m_mean;
@@ -66,10 +67,10 @@ namespace Rndm   {
 
   /** Parameters for the Chi2 distributed random number generation
   */
-  class Chi2 : public IRndmGen::Param         {
+  class GAUDI_API Chi2: public IRndmGen::Param {
     friend class Generator<Chi2>;
   protected:
-    /// Number of degress of freedom
+    /// Number of degrees of freedom
     long m_nDOF;
   public:
     /// Standard Constructor
@@ -86,14 +87,14 @@ namespace Rndm   {
 
   /** Parameters for the BreitWigner distributed random number generation
   */
-  class BreitWigner : public IRndmGen::Param  {
+  class GAUDI_API BreitWigner : public IRndmGen::Param {
     friend class Generator<BreitWigner>;
   protected:
     /// Mean and Gamma parameter of the Breit-Wigner distribution
     double m_mean, m_gamma;
   public:
     /// Standard Constructor
-    BreitWigner(double m, double g) 
+    BreitWigner(double m, double g)
     : IRndmGen::Param(IID_IRndmBreitWigner), m_mean(m), m_gamma(g) { }
     /// Standard Destructor
     virtual ~BreitWigner()                    { }
@@ -111,14 +112,14 @@ namespace Rndm   {
 
   /** Parameters for the Landau distributed random number generation
   */
-  class Landau : public IRndmGen::Param       {
+  class GAUDI_API Landau : public IRndmGen::Param {
     friend class Generator<Landau>;
   protected:
     /// Mean and Gamma parameter of the Breit-Wigner distribution
     double m_mean, m_sigma;
   public:
     /// Standard Constructor
-    Landau(double m, double s) 
+    Landau(double m, double s)
     : IRndmGen::Param(IID_IRndmLandau), m_mean(m), m_sigma(s) { }
     /// Standard Destructor
     virtual ~Landau()                         { }
@@ -137,14 +138,14 @@ namespace Rndm   {
   /** Parameters for the BreitWigner distributed random number generation
       with cut off;
   */
-  class BreitWignerCutOff : public IRndmGen::Param    {
+  class GAUDI_API BreitWignerCutOff : public IRndmGen::Param {
     friend class Generator<BreitWignerCutOff>;
   protected:
     /// Mean, Gamma and cut off parameter of the Breit-Wigner distribution
     double m_mean, m_gamma, m_cut;
   public:
     /// Standard Constructor
-    BreitWignerCutOff(double m, double g, double c) 
+    BreitWignerCutOff(double m, double g, double c)
     : IRndmGen::Param(IID_IRndmBreitWignerCutOff),
       m_mean(m),
       m_gamma(g),
@@ -167,7 +168,7 @@ namespace Rndm   {
 
   /** Parameters for the StudentT distributed random number generation
   */
-  class StudentT : public IRndmGen::Param     {
+  class GAUDI_API StudentT: public IRndmGen::Param {
     friend class Generator<StudentT>;
   protected:
     /// StudentT distribution parameter
@@ -187,7 +188,7 @@ namespace Rndm   {
 
   /** Parameters for the Gamma distributed  random number generation
   */
-  class Gamma : public IRndmGen::Param        {
+  class GAUDI_API Gamma: public IRndmGen::Param {
     friend class Generator<Gamma>;
   protected:
     /// k Value
@@ -215,7 +216,7 @@ namespace Rndm   {
   /** Parameters for the Poisson distributed random number generation with
    *  a given mean.
    */
-  class Poisson : public IRndmGen::Param      {
+  class GAUDI_API Poisson: public IRndmGen::Param {
     friend class Generator<Poisson>;
   protected:
     /// Mean value of the Poisson distribution
@@ -236,7 +237,7 @@ namespace Rndm   {
   /** Parameters for the Binomial distributed random number generation.
       The returned values are in fact integers
   */
-  class Binomial : public IRndmGen::Param    {
+  class GAUDI_API Binomial: public IRndmGen::Param {
   protected:
     /// Number of events the binomial destribution corresponds to
     long m_nEvent;
@@ -244,7 +245,7 @@ namespace Rndm   {
     double m_probability;
   public:
     /// Standard Constructor
-    Binomial(long n, double p) 
+    Binomial(long n, double p)
     : IRndmGen::Param(IID_IRndmBinomial), m_nEvent(n), m_probability(p) { }
     /// Standard Destructor
     virtual ~Binomial()                       {  }
@@ -263,7 +264,7 @@ namespace Rndm   {
   /** Parameters for the flat random number generation within boundaries
    *  [minimum, maximum]
    */
-  class Flat : public IRndmGen::Param         {
+  class GAUDI_API Flat: public IRndmGen::Param {
   protected:
     /// Lower boundary for random numbers
     double m_minimum;
@@ -271,7 +272,7 @@ namespace Rndm   {
     double m_maximum;
   public:
     /// Standard Constructor
-    Flat(double mi, double ma) 
+    Flat(double mi, double ma)
     : IRndmGen::Param(IID_IRndmFlat), m_minimum(mi), m_maximum(ma) { }
     /// Standard Destructor
     virtual ~Flat()                           {  }
@@ -289,7 +290,7 @@ namespace Rndm   {
 
   /** Parameters for the bit value generation: returns values 0 and 1
   */
-  class Bit : public IRndmGen::Param          {
+  class GAUDI_API Bit: public IRndmGen::Param {
   public:
     /// Standard Constructor
     Bit() : IRndmGen::Param(IID_IRndmBit)     {  }
@@ -306,7 +307,7 @@ namespace Rndm   {
 
       The probability distribution function (Pdf) must be provided by the user
       as an array of positive real number. The array size must also be
-      provided. The Pdf doesn't need to be normalized to 1. 
+      provided. The Pdf doesn't need to be normalized to 1.
       if IntType = 0 ( default value ) a uniform random number is
       generated. The uniform number is then transformed
       to the user's distribution using the cumulative probability
@@ -317,7 +318,7 @@ namespace Rndm   {
       if IntType = 1 no interpolation is performed and the result is a
       discrete distribution.
   */
-  class DefinedPdf : public IRndmGen::Param   {
+  class GAUDI_API DefinedPdf: public IRndmGen::Param {
   protected:
     /// Vector containing probability distribution function
     std::vector<double> m_pdf;
@@ -325,7 +326,7 @@ namespace Rndm   {
     long m_interpolation;
   public:
     /// Standard Constructor
-    DefinedPdf(const std::vector<double>& pdf, long intpol) 
+    DefinedPdf(const std::vector<double>& pdf, long intpol)
     : IRndmGen::Param(IID_IRndmDefinedPdf),
       m_pdf(pdf),
       m_interpolation(intpol)  {     }
@@ -345,7 +346,7 @@ namespace Rndm   {
 
   /** Parameters for the Gaussian tail number generation
   */
-  class GaussianTail : public IRndmGen::Param        {
+  class GAUDI_API GaussianTail: public IRndmGen::Param {
   protected:
     /// Cut on the Gaussian tail distribution
     double m_cut;
@@ -353,7 +354,7 @@ namespace Rndm   {
     double m_sigma;
   public:
     /// Standard Constructor
-    GaussianTail(double a, double s) 
+    GaussianTail(double a, double s)
       : IRndmGen::Param(IID_IRndmGaussianTail), m_cut(a), m_sigma(s)  { }
     /// Standard Destructor
     virtual ~GaussianTail() { }
@@ -372,8 +373,8 @@ namespace Rndm   {
 
   /** Random number accessor
       This small class encapsulates the use of the random number generator.
-      The sole pupose of this class is to hide the usage of the interface and 
-      make the whole thing more user friendly. The object is usable 
+      The sole pupose of this class is to hide the usage of the interface and
+      make the whole thing more user friendly. The object is usable
       directly after creation.
 
       The typical usage is:
@@ -385,7 +386,7 @@ namespace Rndm   {
         }
       }
   */
-  class Numbers   {
+  class GAUDI_API Numbers   {
   protected:
     /// Pointer to random number generator
     IRndmGen*           m_generator;
@@ -395,11 +396,17 @@ namespace Rndm   {
     /// Copy constructor
     Numbers(const Numbers& copy );
     /// Initializing constructor
-    Numbers(IRndmGenSvc* svc, const IRndmGen::Param& par);
+    Numbers(const SmartIF<IRndmGenSvc>& svc, const IRndmGen::Param& par);
     /// Standard destructor
     virtual ~Numbers();
     /// Initialization
+    virtual StatusCode initialize(const SmartIF<IRndmGenSvc>& svc, const IRndmGen::Param& par);
+#if !defined(GAUDI_V22_API) || defined(G22_NEW_SVCLOCATOR)
+    /// Initializing constructor
+    Numbers(IRndmGenSvc* svc, const IRndmGen::Param& par);
+    /// Initialization
     virtual StatusCode initialize(IRndmGenSvc* svc, const IRndmGen::Param& par);
+#endif
     /// Finalization
     virtual StatusCode finalize();
     /// Check if the number supply is possible

@@ -1,4 +1,3 @@
-
 #ifndef GAUDIKERNEL_ISTATUSCODESVC_H
 #define GAUDIKERNEL_ISTATUSCODESVC_H
 
@@ -6,13 +5,13 @@
 
 #include <string>
 
-class IStatusCodeSvc: virtual public IService {
+class GAUDI_API IStatusCodeSvc: virtual public IService {
 
 public:
+  /// InterfaceID
+  DeclareInterfaceID(IStatusCodeSvc,2,0);
 
-  static const InterfaceID& interfaceID();
-
-  virtual void regFnc(const std::string &fnc, 
+  virtual void regFnc(const std::string &fnc,
 		      const std::string &lib) = 0;
 
   virtual void list() const = 0;
@@ -20,12 +19,5 @@ public:
   virtual bool suppressCheck() const = 0;
 
 };
-
-inline
-const InterfaceID& 
-IStatusCodeSvc::interfaceID() {
-    static const InterfaceID m_IID("StatusCodeSvc", 1, 0);
-    return m_IID;
-}
 
 #endif

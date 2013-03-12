@@ -1,5 +1,5 @@
 // $Id: MyTool.h,v 1.2 2001/12/10 22:43:04 mato Exp $
-#ifndef GAUDIEXANMPLES_MYTOOL_H 
+#ifndef GAUDIEXANMPLES_MYTOOL_H
 #define GAUDIEXANMPLES_MYTOOL_H 1
 
 // Include files
@@ -12,12 +12,11 @@
  *  @author Pere Mato
  *  @date   14/10/2001
  */
-class MyTool : public AlgTool,
-               virtual public IMyTool {
+class MyTool : public extends1<AlgTool, IMyTool> {
 public:
-  
+
   /// Standard Constructor
-  MyTool(const std::string& type, 
+  MyTool(const std::string& type,
                 const std::string& name,
                 const IInterface* parent);
 

@@ -2,6 +2,9 @@
 // ============================================================================
 // CVS tag $Name:  $, version $Revision: 1.37 $
 // ============================================================================
+// Python must always be the first.
+#include "Python.h"
+
 #include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/ParticleProperty.h"
 #include "GaudiKernel/Property.h"
@@ -11,7 +14,29 @@
 #include "GaudiKernel/Stat.h"
 #include "GaudiKernel/StatEntity.h"
 #include "GaudiKernel/SerializeSTL.h"
+#include "GaudiKernel/StringKey.h"
+#include "GaudiKernel/MapBase.h"
+#include "GaudiKernel/Map.h"
+#include "GaudiKernel/HashMap.h"
+#include "GaudiKernel/VectorMap.h"
+#include "GaudiKernel/Range.h"
 
+#ifdef _WIN32
+#include "GaudiKernel/GaudiHandle.h"
+#endif
+
+#ifdef __ICC
+// disable icc remark #177: declared but never referenced
+#pragma warning(disable:177)
+// disable icc warning #1125: function "C::X()" is hidden by "Y::X" -- virtual function override intended?
+#pragma warning(disable:1125)
+#endif
+
+// Force visibility of the classes
+#define class class GAUDI_API
+#ifdef _WIN32
+#include "AIDA/IAnnotation.h"
+#endif
 #include "AIDA/IHistogram.h"
 #include "AIDA/IHistogram1D.h"
 #include "AIDA/IHistogram2D.h"
@@ -19,6 +44,7 @@
 #include "AIDA/IProfile1D.h"
 #include "AIDA/IProfile2D.h"
 #include "AIDA/IAxis.h"
+#undef class
 
 #include "GaudiPython/Helpers.h"
 
@@ -50,11 +76,16 @@
 #include "GaudiUtils/IFileCatalog.h"
 #include "GaudiUtils/IFileCatalogMgr.h"
 #include "GaudiUtils/IIODataManager.h"
+#include "GaudiUtils/HistoStats.h"
+#include "GaudiUtils/HistoDump.h"
+#include "GaudiUtils/HistoStrings.h"
 
-#include "GaudiPython/PyROOTPickle.h"
-#include "GaudiPython/TESSerializer.h"
 #include <iostream>
 #include <istream>
+#include <sstream>
+
+
+template class std::basic_stringstream<char>;
 
 // needed to find operator<< implemented in GaudiUtils.
 using namespace GaudiUtils;
@@ -91,6 +122,16 @@ namespace GaudiPython
     std::list<IAlgorithm*>              i01     ;
     std::list<IService*>                i02     ;
     std::list<const IFactory*>          i023    ;
+
+    std::vector<IService*>              i05_1   ;
+    std::vector<IAlgTool*>              i05_2   ;
+    std::vector<const StatEntity*>      i05_3   ;
+    std::vector<GaudiAlg::ID>           i05_4   ;
+    std::vector<AIDA::IHistogram1D*>    i05_5   ;
+    std::vector<AIDA::IHistogram2D*>    i05_6   ;
+    std::vector<AIDA::IHistogram3D*>    i05_7   ;
+    std::vector<AIDA::IProfile1D*>      i05_8   ;
+    std::vector<AIDA::IProfile2D*>      i05_9   ;
 
     //Gaudi::IIODataManager              *gu_i1000;
 
@@ -157,9 +198,10 @@ namespace GaudiPython
 
     __Instantiations  () ;
     ~__Instantiations () ;
+
   };
 
-}; // end of namespace GaudiPython
+} // end of namespace GaudiPython
 
 namespace __gnu_cxx { struct dummy {}; }  // hack to please CINT
 
@@ -168,10 +210,12 @@ namespace __gnu_cxx { struct dummy {}; }  // hack to please CINT
 #pragma warning ( disable : 4624 )
 #endif
 
+#ifdef __ICC
+// disable icc warning #191: type qualifier is meaningless on cast type
+// ... a lot of noise produced by the dictionary
+#pragma warning(disable:191)
+#endif
+
 // ============================================================================
 // The END
 // ============================================================================
-
-
-
-

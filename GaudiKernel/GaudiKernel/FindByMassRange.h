@@ -9,7 +9,7 @@
 
 
 /** @class FindByMassRange FindByMassRange.h GaudiKernel/FindByMassRange.h
-    The function object must be derived from 
+    The function object must be derived from
     std::unary_function< IParticlePropertySvc::value_type ,bool >
     IParticlePropertySvc::value_type is a typedef that defines the
     internal service storage type that is returned when an iterator
@@ -28,14 +28,14 @@
 
     @author Ian Last
 */
-class FindByMassRange : public std::unary_function< ParticleProperty* ,bool > {
+class GAUDI_API FindByMassRange: public std::unary_function< ParticleProperty* ,bool > {
 
 public:
 
   /// Constructor - sets the mass range in Gev.
   FindByMassRange( double low, double high ) : m_low( low ), m_high( high ) { }
 
-  /** This routine check to see if the mass of a particle lies within the 
+  /** This routine check to see if the mass of a particle lies within the
       given mass range and returns true if it does.
   */
   bool operator() ( const ParticleProperty* pp ) const                        {
@@ -47,7 +47,7 @@ public:
     }
     return in_range;
   }
-  
+
 private:
 
   /// Low and high mass range (GeV)

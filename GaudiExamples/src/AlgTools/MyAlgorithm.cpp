@@ -10,10 +10,9 @@
 #include "IMyTool.h"
 #include "MyAlgorithm.h"
 
-
 // Static Factory declaration
 
-DECLARE_ALGORITHM_FACTORY(MyAlgorithm);
+DECLARE_ALGORITHM_FACTORY(MyAlgorithm)
 
 // Constructor
 //------------------------------------------------------------------------------
@@ -30,43 +29,43 @@ StatusCode MyAlgorithm::initialize() {
 
   MsgStream log(msgSvc(), name());
   StatusCode sc;
-  log << MSG::INFO << "initializing...." << endreq;
+  log << MSG::INFO << "initializing...." << endmsg;
 
   sc = toolSvc()->retrieveTool("MyTool", m_publicTool );
   if( sc.isFailure() ) {
-    log << MSG::ERROR<< "Error retrieving the public tool" << endreq;
+    log << MSG::ERROR<< "Error retrieving the public tool" << endmsg;
     return sc;
   }
   sc = toolSvc()->retrieveTool("MyTool", m_privateTool, this );
   if( sc.isFailure() ) {
-    log << MSG::ERROR<< "Error retrieving the private tool" << endreq;
+    log << MSG::ERROR<< "Error retrieving the private tool" << endmsg;
     return sc;
   }
   sc = toolSvc()->retrieveTool("MyGaudiTool", m_publicGTool );
   if( sc.isFailure() ) {
-    log << MSG::ERROR<< "Error retrieving the Gaudi public tool" << endreq;
+    log << MSG::ERROR<< "Error retrieving the Gaudi public tool" << endmsg;
     return sc;
   }
   sc = toolSvc()->retrieveTool("MyGaudiTool", m_privateGTool, this );
   if( sc.isFailure() ) {
-    log << MSG::ERROR<< "Error retrieving the Gaudi private tool" << endreq;
+    log << MSG::ERROR<< "Error retrieving the Gaudi private tool" << endmsg;
     return sc;
   }
-  
+
   sc = toolSvc()->retrieveTool(m_privateToolType, "ToolWithName",
                                m_privateToolWithName, this );
   if( sc.isFailure() ) {
-    log << MSG::ERROR<< "Error retrieving the private tool with name" << endreq;
+    log << MSG::ERROR<< "Error retrieving the private tool with name" << endmsg;
     return sc;
   }
 
   sc = toolSvc()->retrieveTool("MyGaudiTool", m_privateOtherInterface, this );
   if( sc.isFailure() ) {
-    log << MSG::ERROR << "Error retrieving the Gaudi private tool with second interface" << endreq;
+    log << MSG::ERROR << "Error retrieving the Gaudi private tool with second interface" << endmsg;
     return sc;
   }
-  
-  log << MSG::INFO << "....initialization done" << endreq;
+
+  log << MSG::INFO << "....initialization done" << endmsg;
 
   return StatusCode::SUCCESS;
 }
@@ -76,7 +75,7 @@ StatusCode MyAlgorithm::initialize() {
 StatusCode MyAlgorithm::execute() {
 //------------------------------------------------------------------------------
   MsgStream         log( msgSvc(), name() );
-  log << MSG::INFO << "executing...." << endreq;
+  log << MSG::INFO << "executing...." << endmsg;
 
   m_publicTool->doIt();
   m_privateTool->doIt();
@@ -93,7 +92,7 @@ StatusCode MyAlgorithm::execute() {
 StatusCode MyAlgorithm::finalize() {
 //------------------------------------------------------------------------------
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "finalizing...." << endreq;
+  log << MSG::INFO << "finalizing...." << endmsg;
 
   toolSvc()->releaseTool( m_publicTool ).ignore();
   toolSvc()->releaseTool( m_privateTool ).ignore();

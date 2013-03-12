@@ -10,8 +10,8 @@
 #include "GslErrorPrint.h"
 
 // ============================================================================
-/** @file 
- * 
+/** @file
+ *
  *  Implementation file for class GslErrorPrint
  *
  *  @author Vanya Belyaev Ivan.Belyaev@itep.ru
@@ -20,8 +20,7 @@
 // ============================================================================
 
 // ============================================================================
-/** @var GslErrorPrintFactory
- *  Declaration of the Tool Factory
+/** Declaration of the Tool Factory
  *  @see  ToolFactory
  *  @see IToolFactory
  *  @see     IFactory
@@ -34,46 +33,46 @@ DECLARE_TOOL_FACTORY(GslErrorPrint)
 /** Standard constructor
  *  @param type   tool type (?)
  *  @param name   tool name
- *  @param parent pointer to parent 
+ *  @param parent pointer to parent
  */
 // ============================================================================
 GslErrorPrint::GslErrorPrint
 ( const std::string& type   ,
   const std::string& name   ,
   const IInterface*  parent )
-  : AlgTool ( type, name , parent ) 
-{ declareInterface<IGslErrorHandler> (this);};
+  : base_class ( type, name , parent )
+{}
 // ============================================================================
 
 // ============================================================================
 /// destructor (protetced and virtual)
 // ============================================================================
-GslErrorPrint::~GslErrorPrint(){};
+GslErrorPrint::~GslErrorPrint(){}
 // ============================================================================
 
 // ============================================================================
-/** handle the GSL error 
+/** handle the GSL error
  *  @see IGslErrorHandler
- *  @param error  error to be handled 
+ *  @param error  error to be handled
  *  @see GslError
- *  @return status code 
+ *  @return status code
  */
 // ============================================================================
-StatusCode GslErrorPrint::handle 
-( const GslError& error  ) const 
+StatusCode GslErrorPrint::handle
+( const GslError& error  ) const
 {
   MsgStream log( msgSvc() , name() );
   log << MSG::ERROR
-      << " GSL code " << error.code 
-      << " Message '" << error.reason << "'" 
+      << " GSL code " << error.code
+      << " Message '" << error.reason << "'"
       << " File '"    << error.file   << "'"
-      << " Line "     << error.line   << endreq ;  
+      << " Line "     << error.line   << endmsg ;
   //
   return StatusCode::SUCCESS ;
-};
+}
 // ============================================================================
 
 
 // ============================================================================
-// The END 
+// The END
 // ============================================================================

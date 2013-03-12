@@ -20,13 +20,13 @@ namespace Gaudi  {
 
   /** @class IIODataManager
     *
-    *  @authot  M.Frank
+    *  @author  M.Frank
     *  @version 1.0
     *  @date    20/10/2007
     *  @author  R. Lambert
     *  @date    03/09/2009
     */
-  class IODataManager : virtual public IIODataManager, public Service  {
+  class IODataManager : public extends1<Service, IIODataManager> {
   protected:
     typedef const std::string& CSTR;
     struct Entry  {
@@ -53,7 +53,7 @@ namespace Gaudi  {
     /// Map with I/O descriptors
     ConnectionMap        m_connectionMap;
     /// Reference to file catalog
-    IFileCatalog*        m_catalog;
+    SmartIF<IFileCatalog> m_catalog;
     /// Map of FID to PFN
     FidMap               m_fidMap;
     StatusCode connectDataIO(int typ, IoType rw, CSTR fn, CSTR technology, bool keep,Connection* con);
@@ -61,7 +61,7 @@ namespace Gaudi  {
     StatusCode error(CSTR msg, bool rethrow);
     StatusCode establishConnection(Connection* con);
     
-    IIncidentSvc *m_incSvc; ///the incident service
+    SmartIF<IIncidentSvc> m_incSvc; ///the incident service
 
   public:
 
@@ -72,7 +72,7 @@ namespace Gaudi  {
       */
     IODataManager(CSTR nam, ISvcLocator* loc);
 
-    /// Standard destructor      
+    /// Standard destructor
     virtual ~IODataManager()  {}
 
     /// IService implementation: initialize the service
@@ -80,9 +80,6 @@ namespace Gaudi  {
 
     /// IService implementation: finalize the service
     virtual StatusCode finalize();
-
-    // IInterface implementation: query interfaces
-    virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
 
     /// Open data stream in read mode
     virtual StatusCode connectRead(bool keep_open, Connection* ioDesc);

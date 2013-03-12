@@ -2,6 +2,7 @@
 #define GAUDI_INCIDENT_H
 
 // Include files
+#include "GaudiKernel/Kernel.h"
 #include <string>
 
 /** @class Incident Incident.h GaudiKernel/Incident.h
@@ -12,15 +13,15 @@
  *  @date   2001/01/19
  */
 
-class Incident {
+class GAUDI_API Incident {
 
 public:
 
   /// Default Constructor
   Incident ( const std::string& source, ///< Incident source (service or algorithm name)
              const std::string& type    ///< Incident type
-             ) 
-    : m_source ( source ), 
+             )
+    : m_source ( source ),
       m_type   ( type   ) { }
 
   /// Destructor
@@ -46,13 +47,15 @@ private:
 };
 
 /** @namespace IncidentType
- *  
+ *
  *  Namespace for pre-defined common incident types
  *
  *  @author P. Mato
  *  @date   2001/01/19
+ *  @author R. Lambert
+ *  @date   2009/09/03
  */
-namespace IncidentType 
+namespace IncidentType
 {
   const std::string BeginEvent = "BeginEvent"; ///< Processing of a new event has started
   const std::string EndEvent   = "EndEvent";   ///< Processing of the last event has finished
@@ -61,7 +64,7 @@ namespace IncidentType
   const std::string EndStream  = "EndStream";  ///< Processing of the stream has finished
 
   const std::string AbortEvent = "AbortEvent"; ///< Stop processing the current event and pass to te next one
-  
+
   //Added by R. Lambert 2009-09-03, for summary services
   //define a preprocessor macro to allow backward-compatibility
 #define GAUDI_FILE_INCIDENTS
@@ -70,12 +73,17 @@ namespace IncidentType
   const std::string FailOutputFile = "FailOutputFile"; ///< could not create or write to this file
   const std::string WroteToOutputFile = "WroteToOutputFile"; ///< the output file was written to in this event
   const std::string EndOutputFile   = "EndOutputFile";   ///< an output file has been finished
-  
+
   const std::string BeginInputFile = "BeginInputFile"; ///< a new input file has been started
   const std::string FailInputFile = "FailInputFile"; ///< could not open or read from this file
   const std::string EndInputFile   = "EndInputFile";   ///< an input file has been finished
-  
 
+  const std::string CorruptedInputFile = "CorruptedInputFile"; ///< the input file has shown a corruption
+
+  /// Incident raised just before entering loop over the algorithms.
+  const std::string BeginProcessing = "BeginProcessing";
+  /// Incident raised just after the loop over the algorithms (note: before the execution of OutputStreams).
+  const std::string EndProcessing = "EndProcessing";
 }
 
 #endif //GAUDI_INCIDENT_H

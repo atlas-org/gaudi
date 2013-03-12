@@ -18,9 +18,18 @@ class SubModule3(ConfigurableUser):
         print "Applying", self.getName()
         print self
 
+class MultiInstance(ConfigurableUser):
+    __slots__ = { "Property": 0 }
+    __used_configurables__ = [ (SubModule1, None) ]
+    def __apply_configuration__(self):
+        print "Applying", self.getName()
+        print self
+        SubModule1(self._instanceName(SubModule1))
+
 class Application(ConfigurableUser):
     __slots__ = { "Property1": 10 }
-    __used_configurables__ = [ SubModule1, SubModule2, SubModule3 ]
+    __used_configurables__ = [ SubModule1, SubModule2, SubModule3,
+                               (MultiInstance, None), (MultiInstance, "TestInstance") ]
     def __apply_configuration__(self):
         print "Applying", self.getName()
         print self
@@ -31,6 +40,9 @@ class Application(ConfigurableUser):
         SubModule1(Property1 = val)
         SubModule2(Property1 = val)
         # SubModule3 is not instantiated explicitly, so not enabled
+        MultiInstance(self._instanceName(MultiInstance))
+        ti = self.getUsedInstance("TestInstance")
+        ti.Property = 1
 
 class Action(object):
     def __init__(self, msg):

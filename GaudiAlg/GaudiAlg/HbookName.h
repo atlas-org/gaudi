@@ -17,9 +17,7 @@
 
 namespace 
 {
-  /** @fn dirHbookName
-   *  
-   *  simple function to convert any valid Gaudi address
+  /** Simple function to convert any valid Gaudi address
    *  (name in Transient Store)
    *  to address, which is simultaneously valid for Hbook directory
    *
@@ -63,9 +61,7 @@ namespace
     return old;
   }
   
-  /** @fn histoHbookName
-   *  
-   *  simple function to convert any valid 
+  /** Simple function to convert any valid 
    *   Gaudi address(name in Transient Store)
    *  to address, which is simultaneously valid for Hbook histogram
    *
@@ -124,7 +120,7 @@ namespace
     return old;
   }
   
-} // end of anynous namespace 
+} // end of anonymous namespace
 
 // ============================================================================
 // The END 

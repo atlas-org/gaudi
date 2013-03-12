@@ -1,10 +1,10 @@
 // $Id: EqSolverIAlg.cpp,v 1.5 2006/01/10 19:58:26 hmd Exp $
 
-// Include files 
+// Include files
 
 // from Gaudi
 #include "GaudiKernel/AlgFactory.h"
-#include "GaudiKernel/MsgStream.h" 
+#include "GaudiKernel/MsgStream.h"
 #include "GaudiGSL/IEqSolver.h"
 #include "GaudiMath/Adapters.h"
 // from CLHEP
@@ -13,6 +13,12 @@
 #include "AIDA/IFunction.h"
 // local
 #include "EqSolverIAlg.h"
+
+#ifdef __ICC
+// disable icc warning #327: NULL reference is not allowed
+//   It's a real problem, but here it is used for test purposes
+#pragma warning(disable:327)
+#endif
 
 //-----------------------------------------------------------------------------
 /** @file Implementation file for class : EqSolverIAlg
@@ -24,8 +30,9 @@
 
 using namespace Genfun;
 
-// Declaration of the Algorithm Factory
-DECLARE_ALGORITHM_FACTORY(EqSolverIAlg)
+// Handle CLHEP 2.0.x move to CLHEP namespace
+namespace CLHEP { }
+using namespace CLHEP;
 
 //=============================================================================
 // Standard constructor, initializes variables
@@ -33,18 +40,18 @@ DECLARE_ALGORITHM_FACTORY(EqSolverIAlg)
 EqSolverIAlg::EqSolverIAlg( const std::string& name,
 			ISvcLocator* pSvcLocator)
   : Algorithm ( name , pSvcLocator ) {
-  
+
 }
 
 //=============================================================================
 // Destructor
 //=============================================================================
-EqSolverIAlg::~EqSolverIAlg() {}; 
+EqSolverIAlg::~EqSolverIAlg() {}
 
 typedef Genfun::AbsFunction GenFunc;
 
 // Class for the function "IFunction"
-// @see AIDA/IFunction.h 
+// @see AIDA/IFunction.h
 class Function1 : virtual public AIDA::IFunction
 {
 public:
@@ -79,7 +86,7 @@ private:
   std::vector<double>      m_values  ;
 };
 
-// Class for the function "IFunction" 
+// Class for the function "IFunction"
 class Function2 : virtual public AIDA::IFunction
 {
 public:
@@ -114,7 +121,7 @@ private:
   std::vector<double>      m_values  ;
 };
 
-// Class for the function "IFunction" 
+// Class for the function "IFunction"
 class Function3 : virtual public AIDA::IFunction
 {
 public:
@@ -155,23 +162,23 @@ private:
 StatusCode EqSolverIAlg::initialize() {
 
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "==> Initialise" << endreq;
+  log << MSG::INFO << "==> Initialise" << endmsg;
 
   StatusCode sc;
   sc = toolSvc()->retrieveTool("EqSolver", m_publicTool );
-  if( sc.isFailure() ) 
+  if( sc.isFailure() )
     {
-      log << MSG::ERROR<< "Error retrieving the public tool" << endreq;  
+      log << MSG::ERROR<< "Error retrieving the public tool" << endmsg;
     }
   sc = toolSvc()->retrieveTool("EqSolver", m_privateTool, this );
-  if( sc.isFailure() ) 
+  if( sc.isFailure() )
     {
-      log << MSG::ERROR<< "Error retrieving the private tool" << endreq;  
+      log << MSG::ERROR<< "Error retrieving the private tool" << endmsg;
     }
-  log << MSG::INFO << "....initialization done" << endreq;
-  
+  log << MSG::INFO << "....initialization done" << endmsg;
+
   return StatusCode::SUCCESS;
-};
+}
 
 //=============================================================================
 // Main execution
@@ -179,49 +186,49 @@ StatusCode EqSolverIAlg::initialize() {
 StatusCode EqSolverIAlg::execute() {
 
   MsgStream  log( msgSvc(), name() );
-  log << MSG::INFO << "==> Execute" << endreq;
-     
-  //the objects of IFunction's classes 
+  log << MSG::INFO << "==> Execute" << endmsg;
+
+  //the objects of IFunction's classes
   const Function1* fun1 = new Function1();
   const Function2* fun2 = new Function2();
   const Function3* fun3 = new Function3();
-  
+
   // the objects of the class AdapterIFunction
   // @see Adapter.h
   const GaudiMath::AIDAFunction& adap1 = GaudiMath::adapter(*fun1);
   const GaudiMath::AIDAFunction& adap2 = GaudiMath::adapter(*fun2);
   const GaudiMath::AIDAFunction& adap3 = GaudiMath::adapter(*fun3);
-  
+
   std::vector<const GenFunc*> function;
-  
+
   function.push_back(&adap1);
   function.push_back(&adap2);
   function.push_back(&adap3);
- 
+
 //=============================================================================
 
   // Input number and value of the arguments of the function "GenFunc"
   IEqSolver::Arg arg (function.size ());
-  
+
   arg[0] = 10;
   arg[1] = 5;
   arg[2] = 29;
-  
+
   // Call of the method
   m_publicTool->solver( function ,
                         arg      );
-  log << endreq;
-  log << "START OF THE METHOD" << endreq;
-  log << "SOLUTION FOUND AT: " << endreq;
-  
+  log << endmsg;
+  log << "START OF THE METHOD" << endmsg;
+  log << "SOLUTION FOUND AT: " << endmsg;
+
   for (unsigned int i = 0; i < arg.dimension(); i++)
     {
-      log << "Value of argument " << i <<" is " << arg[i] << endreq;
+      log << "Value of argument " << i <<" is " << arg[i] << endmsg;
     }
-  log << endreq;
+  log << endmsg;
 
   return StatusCode::SUCCESS;
-};
+}
 
 //=============================================================================
 //  Finalize
@@ -229,7 +236,7 @@ StatusCode EqSolverIAlg::execute() {
 StatusCode EqSolverIAlg::finalize() {
 
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "==> Finalize" << endreq;
+  log << MSG::INFO << "==> Finalize" << endmsg;
 
   toolSvc()->releaseTool( m_publicTool  );
   toolSvc()->releaseTool( m_privateTool );
@@ -238,3 +245,5 @@ StatusCode EqSolverIAlg::finalize() {
 }
 
 //=============================================================================
+// Declaration of the Algorithm Factory
+DECLARE_ALGORITHM_FACTORY(EqSolverIAlg)

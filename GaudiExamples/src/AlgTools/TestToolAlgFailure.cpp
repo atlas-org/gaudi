@@ -1,4 +1,3 @@
-// $Id: TestToolAlgFailure.cpp,v 1.1 2008/10/22 14:49:17 marcocle Exp $
 // Include files
 
 // from Gaudi
@@ -39,17 +38,17 @@ TestToolAlgFailure::~TestToolAlgFailure() {}
 //=============================================================================
 StatusCode TestToolAlgFailure::initialize() {
 
-  debug() << "Initialize" << endreq;
+  debug() << "Initialize" << endmsg;
 
   if ( !GaudiAlgorithm::initialize() ) return StatusCode::FAILURE;
 
   // setup tool registry
-  IAlgTool * mytool;
+  //IAlgTool * mytool;
   for ( ToolList::iterator it = m_tools.begin();
         it != m_tools.end(); ++it ) {
     info() << "Loading tool " << *it << endmsg;
     try {
-      mytool = tool<IAlgTool>( *it );
+      /* mytool = */ tool<IAlgTool>( *it );
       info() << "Tool loaded successfully" << endmsg;
     } catch (GaudiException &e) {
       if ( m_ignoreFailure ) {
@@ -69,7 +68,7 @@ StatusCode TestToolAlgFailure::initialize() {
 //=============================================================================
 StatusCode TestToolAlgFailure::execute() {
 
-  info() << "Execute" << endreq;
+  info() << "Execute" << endmsg;
 
   return StatusCode::SUCCESS;
 }
@@ -79,7 +78,7 @@ StatusCode TestToolAlgFailure::execute() {
 //=============================================================================
 StatusCode TestToolAlgFailure::finalize() {
 
-  info() << "Finalize" << endreq;
+  info() << "Finalize" << endmsg;
 
   return GaudiAlgorithm::finalize();
 }

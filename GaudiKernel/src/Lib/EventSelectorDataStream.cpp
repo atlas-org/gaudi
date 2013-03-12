@@ -36,9 +36,8 @@ std::ostream& operator<<(std::ostream& s, const EventSelectorDataStream& obj)   
 }
 
 // Standard Constructor
-EventSelectorDataStream::EventSelectorDataStream(const std::string& nam, const std::string& def, ISvcLocator* svcloc) 
-: m_refCount(0),
-  m_pSelector(0),
+EventSelectorDataStream::EventSelectorDataStream(const std::string& nam, const std::string& def, ISvcLocator* svcloc)
+: m_pSelector(0),
   m_pSvcLocator(svcloc)
 {
   m_name = nam;
@@ -51,33 +50,6 @@ EventSelectorDataStream::EventSelectorDataStream(const std::string& nam, const s
 EventSelectorDataStream::~EventSelectorDataStream()   {
   setSelector(0);
   delete m_properties;
-}
-
-//--- IInterface::addRef
-unsigned long EventSelectorDataStream::addRef()   {
-  m_refCount++;
-  return m_refCount;
-}
-
-//--- IInterface::release
-unsigned long EventSelectorDataStream::release()   {
-  unsigned long count = --m_refCount;
-  if( count <= 0) {
-    delete this;
-  }
-  return count;
-}
-
-//--- IInterface::queryInterface
-StatusCode EventSelectorDataStream::queryInterface(const InterfaceID& riid, void** ppvInterface)  {
-  if ( riid == IID_IInterface )   {
-    *ppvInterface = (IInterface*)this;
-  }
-  else   {
-     return NO_INTERFACE;
-  }
-  addRef();
-  return SUCCESS;
 }
 
 // Set selector
@@ -110,22 +82,20 @@ const StringProperty* EventSelectorDataStream::property(const std::string& nam) 
 // Parse input criteria
 StatusCode EventSelectorDataStream::initialize()   {
   bool isData = true;
-  std::string auth, dbtyp, item, crit, sel, svc, stmt;
+  std::string auth, dbtyp, collsvc, item, crit, sel, svc, stmt;
   std::string cnt    = "/Event";
   std::string db     = "<Unknown>";
   Tokenizer tok(true);
 
-  IDataManagerSvc* eds;
-  StatusCode sc = m_pSvcLocator->service("EventDataSvc", eds);
-  if( !sc.isSuccess() ) {
-    std::cout << "ERROR: Unable to localize interface IID_IDataManagerSvc from service EventDataSvc"
+  SmartIF<IDataManagerSvc> eds(m_pSvcLocator->service("EventDataSvc"));
+  if( !eds.isValid() ) {
+    std::cout << "ERROR: Unable to localize interface IDataManagerSvc from service EventDataSvc"
               << std::endl;
-    return sc;
+    return StatusCode::FAILURE;
   }
   else {
     cnt = eds->rootName();
   }
-  eds->release();
   m_selectorType = m_criteria = m_dbName= "";
   m_properties->erase(m_properties->begin(), m_properties->end());
 
@@ -159,7 +129,6 @@ StatusCode EventSelectorDataStream::initialize()   {
     case 'F':
       switch( ::toupper(tag[1]) )    {
       case 'I':
-        dbtyp        = "SICB";
         m_criteria   = "FILE " + val;
 	m_dbName=val;
         break;
@@ -180,11 +149,6 @@ StatusCode EventSelectorDataStream::initialize()   {
       case 'Y':
         dbtyp = val;
         break;
-      case 'A':
-        m_criteria   = "TAPE " + val;
-	m_dbName=val;
-        dbtyp        = "SICB";
-        break;
       default:
         break;
       }
@@ -196,6 +160,7 @@ StatusCode EventSelectorDataStream::initialize()   {
         break;
       case 'V':
         svc = val;
+	collsvc = val;
         break;
       default:
         break;
@@ -208,9 +173,7 @@ StatusCode EventSelectorDataStream::initialize()   {
   }
   if ( !isData )    { // Unfortunately options do not come in order...
     m_selectorType = "EventCollectionSelector";
-  }
-  else if ( dbtyp == "SICB" )    {
-    m_selectorType = "SicbEventSelector";
+    svc  = "EvtTupleSvc";
   }
   else if ( dbtyp.substr(0,4) == "POOL" )    {
     m_selectorType = "PoolDbEvtSelector";
@@ -223,9 +186,8 @@ StatusCode EventSelectorDataStream::initialize()   {
   }
   StatusCode status = StatusCode::SUCCESS;
   if ( svc.length() == 0 && dbtyp.length() != 0 )    {
-    IPersistencySvc* ipers = 0;
-    status = m_pSvcLocator->getService("EventPersistencySvc", IID_IPersistencySvc, *pp_cast<IInterface>(&ipers));
-    if ( status.isSuccess() )   {
+    SmartIF<IPersistencySvc> ipers(m_pSvcLocator->service("EventPersistencySvc"));
+    if ( ipers.isValid() )   {
       IConversionSvc* icnvSvc = 0;
       status = ipers->getService(dbtyp, icnvSvc);
       if ( status.isSuccess() )   {
@@ -246,6 +208,10 @@ StatusCode EventSelectorDataStream::initialize()   {
   m_properties->push_back( StringProperty("Criteria",      sel));
   m_properties->push_back( StringProperty("DbType",        dbtyp));
   m_properties->push_back( StringProperty("DB",            m_criteria));
+  if ( !isData && !collsvc.empty() )    {
+    m_properties->push_back( StringProperty("DbService",   collsvc));
+  }
+
   m_initialized = status.isSuccess();
   return status;
 }

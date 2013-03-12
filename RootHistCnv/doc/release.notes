@@ -1,6 +1,97 @@
 Package: RootHistCnv
 Package manager : David Quarrie
 
+============================= RootHistCnv v11r2 ==============================
+! 2012-11-14 - Marco Clemencic
+ - Updated CMakeLists.txt.
+
+============================= RootHistCnv v11r1 ==============================
+! 2012-06-08 - Marco Clemencic
+ - Added CMake configuration files.
+
+! 2012-05-03 - Marco Clemencic
+ - Fixed some "pedantic" warnings.
+
+========================== RootHistCnv v11r0 ===========================
+! 2011-12-01 - Chris Jones
+ - Fixed bug #85377: GaudiTuple tuple does not understand ulonglong
+   Add support for additional data types long long and unsigned long long
+
+============================= RootHistCnv v10r7 ==============================
+! 2011-03-23 - Marco Clemencic
+ - Fixed VC9 warnings.
+   - Replaced C-style string manipulation and formatting with C++ (and Boost)
+     implementations.
+   - Disabled some warnings.
+
+============================= RootHistCnv v10r6 ==============================
+! 2011-01-11 - Marco Clemencic
+ - Fixed some ICC remarks.
+
+============================= RootHistCnv v10r5 ==============================
+! 2010-09-22 - Marco Clemencic
+ - Fixed bug #71216: Gaudi crashes when output nTuple file cannot be written
+
+============================= RootHistCnv v10r4 ==============================
+! 2010-01-29 - Marco Clemencic
+ - Fixed icc remark #1599: declaration hides variable
+
+! 2010-01-28 - Marco Clemencic
+ - Fixed icc remark #424: extra ";" ignored
+ - Fixed icc remark #111: statement is unreachable
+ - Fixed icc remark #593: variable "X" was set but never used
+
+============================= RootHistCnv v10r3 ==============================
+! 2009-11-19 - Marco Clemencic
+ - Removed run-time dependency on PCRE (which has been removed from LCGCMT).
+
+================ RootHistCnv v10r2 ====================================
+! 2009-07-30 - Marco Clemencic
+ - Fixed some doxygen warnings.
+
+! 2009-07-21 - Hubert Degaudenzi
+ - Fixed typo in the -no_static usage.
+
+! 2009-07-20 - Marco Clemencic
+ - Added '-no_static' to the declaration of the libraries (implemented since CMT
+   v1r20p20081118).
+
+================ RootHistCnv v10r1 ====================================
+! 2009-06-26 - Marco Clemencic
+ - Fixed bug #52316: Silence WARNINGS from RootHistSvc
+   Added the boolean property OutputEnabled to be able to disable the output of
+   histograms on ROOT files without warnings.
+
+! 2009-06-15 - Hubert Degaudenzi
+ - use the new LCG tag convention.
+
+! 2009-06-10 - Marco Clemencic
+ - Removed _dll.cpp and _load.cpp files (not needed anymore).
+
+================ RootHistCnv v10r0 ====================================
+! 2009-04-07 - Marco Clemencic
+ - Moved back the namespace MSG to the global namespace.
+
+! 2009-04-06 - Marco Clemencic
+ - Renamed back the namespace Msg to MSG and moved it into the namespace Gaudi.
+
+! 2009-03-13 - Marco Clemencic
+ - Task #9061: Introduction of component managers
+   - Adapted to use the changes in the ISvcLocator, ISvcManager and IAlgManager
+     interfaces.
+
+! 2009-02-19 - Marco Clemencic
+ - Patch #2790: Rename the namespace MSG to Msg
+
+! 2009-02-07 - Marco Clemencic
+ - Fixed uninitialized variable (RootHistCnv::PersSvc::m_hfile).
+
+! 2009-01-30 - Marco Clemencic
+ - Replaced all the occurrences of endreq with endmsg.
+
+! 2009-01-22 - Marco Clemencic
+ - Adapted to the new IInterface functionalities (see GaudiKernel release.notes)
+
 ================ RootHistCnv v9r17 ====================================
 ! 2008-01-29 - Marco Clemencic
  - Modified the fix for libNet on OSX to be compatible with LCGCMT 53.
@@ -12,12 +103,12 @@ Package manager : David Quarrie
 
 ================= RootHistCnv v9r15 =====================================
 ! 2007-07-16 - Marco Clemencic
- - changed the syntax for specialization of templated function in namespace 
+ - changed the syntax for specialization of templated function in namespace
    for gcc 4.1 future use
 
 ================= RootHistCnv v9r14 =====================================
 ! 2007-05-15 - Pere Mato
- - Added extra argument needed in constructor of TBranch. 
+ - Added extra argument needed in constructor of TBranch.
    This is new in version 5.15.06 of ROOT.
 
 ================= RootHistCnv v9r13 =====================================
@@ -30,7 +121,7 @@ Package manager : David Quarrie
 ! 2007-01-08 Markus Frank
   - Fix histogram converters to automatically convert THxF to THxD
     when reading from file.
- 
+
 ! 2006-11-30 - Pere Mato
   Adpated package to the new PluginSvc
   - Removed protected from constructor/destructors and fiendship of
@@ -69,7 +160,7 @@ Package manager : David Quarrie
    createPersistent) was creating wrong values for weights in some
    cases. This patch removes all the implementation code and calls the
    Aida Root histogram converter (from pi) instead (Stephan Roiser).
-	Remarks:	
+	Remarks:
 	-> this fix adds a dependency on PI in RootHistConv
 	-> it also calls the conversion routine for H1D (to be consistent)
 
@@ -91,7 +182,7 @@ Package manager : David Quarrie
 ================= RootHistCnv v9r2 =====================================
 ! 2004-07-05 - Pere Mato
  - requirements: changed to use the new LCGCMT interface packages
- 
+
 ================= RootHistCnv v9r1p1 =====================================
 ! 2004-05-07 - Pere Mato
  - RConverter.cpp: Fixed a problem that affected reading histogram
@@ -170,7 +261,7 @@ Package manager : David Quarrie
 ! 2002-10-10 - Pere Mato
  - Corrected bug reported by Thomas Ruf concerning the filling of
    underflow and overflow contents for 2D and 3D histograms.
-  
+
 ================= v8r1 =========================================
 
 ================= v8r0p1 =======================================
@@ -181,7 +272,7 @@ Package manager : David Quarrie
 ! 20020717 - Pere Mato
  - Change of the ROOT version to v3.03 (3.03/06)
 
-! 20020703 - Paolo Calafiura 
+! 20020703 - Paolo Calafiura
  - PersSvc.cpp: disambiguate method overload for SmartDataPtr
  - RCWNtupleCnv.cpp: removed static parseName qualifier
 
@@ -239,7 +330,7 @@ Package manager : David Quarrie
   and fixes to compilation problems in Windows
 
 !20001013 David Quarrie
-- New package developed by Charles Leggett to support Histogram 
+- New package developed by Charles Leggett to support Histogram
   Persistency based on ROOTsupport. As far as the user is concerned,
   They need to add to their jobOptions.txt file the following lines:
 

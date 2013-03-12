@@ -11,8 +11,7 @@
 #include "ITestTool.h"
 
 
-class TestToolFailing: public GaudiTool,
-                       virtual public ITestTool {
+class TestToolFailing: public extends1<GaudiTool, ITestTool> {
 
 public:
   TestToolFailing(const std::string& type,
@@ -33,12 +32,11 @@ DECLARE_TOOL_FACTORY(TestToolFailing)
 TestToolFailing::TestToolFailing(const std::string& type,
                                  const std::string& name,
                                  const IInterface* parent):
-  GaudiTool(type, name, parent) {
-  declareInterface<ITestTool>(this);
+  base_class(type, name, parent) {
 }
 
 StatusCode TestToolFailing::initialize(){
-  debug() << "Initialize" << endreq;
+  debug() << "Initialize" << endmsg;
   if ( !GaudiTool::initialize() ) return StatusCode::FAILURE;
 
   return Error("Initialization failure");

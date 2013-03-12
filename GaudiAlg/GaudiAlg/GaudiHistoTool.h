@@ -21,7 +21,7 @@
 // ============================================================================
 
 // forward declarations
-class   IHistogramSvc;
+class IHistogramSvc;
 
 // ============================================================================
 /** @class GaudiHistoTool GaudiHistoTool.h GaudiTools/GaudiHistoTool.h
@@ -41,7 +41,7 @@ class   IHistogramSvc;
  */
 // ============================================================================
 
-class GaudiHistoTool : public GaudiHistos<GaudiTool>
+class GAUDI_API GaudiHistoTool: public GaudiHistos<GaudiTool>
 {
 
 protected:

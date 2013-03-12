@@ -1,22 +1,27 @@
-
+// $Id: 
 // ============================================================================
-/*  @file gaudiHistoID.h
+#ifndef GAUDIALG_GAUDIHISTOID_H
+#define GAUDIALG_GAUDIHISTOID_H 1
+// ============================================================================
+// Include files 
+// ============================================================================
+// STD&STL
+// ============================================================================
+#include <string>
+// ============================================================================
+// GaudiKernel
+// ============================================================================
+#include "GaudiKernel/Kernel.h"
+#include "GaudiKernel/Hash.h"
+// ============================================================================
+/*  @file 
  *
  *  Header file for class GaudiAlg::ID
- *
- *  $Id: GaudiHistoID.h,v 1.7 2007/09/19 08:17:54 marcocle Exp $
  *
  *  @author Chris Jones   Christopher.Rob.Jones@cern.ch
  *  @author Vanya BELYAEV Ivan.Belyaev@itep.ru
  *  @date   2004-01-23
  */
-// ============================================================================
-
-#ifndef GAUDIALG_GAUDIHISTOID_H
-#define GAUDIALG_GAUDIHISTOID_H 1
-// STD
-#include <string>
-
 // ============================================================================
 /** @namespace GaudiAlg
  *
@@ -27,10 +32,9 @@
  *  @date   2004-01-23
  */
 // ============================================================================
-
 namespace GaudiAlg
 {
-  // ============================================================================
+  // ==========================================================================
   /** @class ID GaudiHistoID.h GaudiAlg/GaudiHistoID.h
    *
    *  ID class for Histogram and Ntuples. Internally handles both
@@ -39,22 +43,25 @@ namespace GaudiAlg
    *  @author Chris Jones  Christopher.Rob.Jones@cern.ch
    *  @date   2005-08-12
    */
-  class ID
+  class GAUDI_API ID
   {
   public:
+    // ========================================================================
     /// type for internal numeric ID
     typedef int         NumericID;
     /// type for internal literal ID
     typedef std::string LiteralID;
+    // ========================================================================
   public:
+    // ========================================================================
     /// Implicit constructor from a numeric ID
-    ID( const NumericID    id = -1 ) : m_nID ( id ) , m_aID( "" ) { }
+    ID  ( const NumericID    id = -1 ) ; 
     /// Implicit constructor from a literal ID
-    ID( const LiteralID&   id      ) : m_nID ( -1 ) , m_aID( id ) { }
-    /// Implicit constructor from a char *
-    ID( const char*        id      ) : m_nID ( -1 ) , m_aID( id ) { }
+    ID  ( const LiteralID&   id      ) ; 
+    /// Implicit constructor from a literal ID
+    ID  ( const char*        id      ) ; 
     /// Destructor
-    ~ID( ) { }
+    ~ID ( ) {} ;
     /// Is this ID numeric
     inline bool numeric   () const { return -1 != m_nID ;    }
     /// Is this ID numeric
@@ -65,43 +72,9 @@ namespace GaudiAlg
     inline const LiteralID& literalID() const { return m_aID; }
     /// Returns the numerical ID
     inline NumericID        numericID() const { return m_nID; }
-    /** Operator ++   (prefix)
-     *  @attention Only valid for numeric IDs. Has NO effect on literal IDs
-     */
-    inline ID& operator++() 
-    { 
-      if ( numeric() ) { ++m_nID; } ; 
-      return *this ; 
-    }
-    /** Operator ++(int)  (postfix)
-     *  @attention Only valid for numeric IDs. Has NO effect on literal IDs
-     */
-    inline ID operator++( int ) 
-    { 
-      const ID retID = *this;
-      this->operator++();
-      return retID;
-    }
-    /** Operator --   (prefix)
-     *  @attention Only valid for numeric IDs. Has NO effect on literal IDs
-     */
-    inline ID& operator--() 
-    { 
-      if ( numeric() ) { --m_nID; } ; 
-      return *this ; 
-    }
-    /** Operator --(int)  (postfix)
-     *  @attention Only valid for numeric IDs. Has NO effect on literal IDs
-     */
-    inline ID operator--( int ) 
-    { 
-      const ID retID = *this;
-      this->operator--();
-      return retID;
-    }
     /// Return ID as string, for both numeric and literal IDs
-    LiteralID idAsString() const ;
-    /// cast operator to std::striqng
+    GAUDI_API LiteralID idAsString() const ;
+    /// cast operator to std::string
     operator std::string () const { return idAsString () ; }
     /** @brief Implement the operator ==
      *  Implementation depends on type of ID
@@ -109,38 +82,73 @@ namespace GaudiAlg
      */
     inline bool operator==( const ID& id ) const
     {
-      return ( numeric() && id.numeric()   ? id.numericID() == numericID() :
-               ( literal() && id.literal() ? id.literalID() == literalID() :
-                 id.idAsString() == idAsString() ) );
+      return 
+        hash    () != id.hash    () ? false                           :  
+        numeric () && id.numeric () ? id.numericID () == numericID () :
+        literal () && id.literal () ? id.literalID () == literalID () :
+        idAsString () == id.idAsString() ; 
     }
     /// Implement the != operator, using the == operator
-    inline bool operator!=( const ID& id ) const
-    {
-      return ! this->operator==(id);
-    }
+    inline bool operator!=( const ID& id ) const { return ! ( *this == id ) ; }
     /** @brief Implement the operator <
      *  Implementation depends on type of ID
      *  @return boolean indicating the order of the IDs
      */
     inline bool operator<( const ID& id ) const
     {
-      return ( numeric() && id.numeric()   ? this->numericID() < id.numericID() :
-               ( literal() && id.literal() ? this->literalID() < id.literalID() :
-                 this->idAsString() < id.idAsString() ) );
+      return
+        //hash () < id.hash () ? true  :
+        //hash () > id.hash () ? false :      
+        numeric    () && id.numeric() ? numericID() < id.numericID() :
+        literal    () && id.literal() ? literalID() < id.literalID() :
+        idAsString () < id.idAsString() ;
     }
+    // ========================================================================
+    GAUDI_API std::ostream& fillStream ( std::ostream& s ) const ;
+    // ========================================================================
+  public:
+    // ========================================================================
+    /// good ID?
+    bool operator!() const { return undefined() ; }
+    // ========================================================================
+  public:
+    // ========================================================================
+    /// return hash value (for python)
+    inline size_t   hash   () const { return m_hash    ; }
+    /// return hash value (for python)
+    inline size_t __hash__ () const { return   hash () ; }
+    // ========================================================================
   private:
+    // ========================================================================
     /// Internal numeric ID
-    NumericID   m_nID ;
+    NumericID   m_nID ;                            //       Internal numeric ID
     /// Internal alpha-numeric ID
-    LiteralID   m_aID ;
+    LiteralID   m_aID ;                            // Internal alpha-numeric ID
+    // ========================================================================
+  private:
+    // ========================================================================
+    /// the hash value of ID
+    size_t m_hash  ;                                    // the hash value of ID
+    // ========================================================================
   };
-}
-/// Operator overloading for ostream
-inline std::ostream& operator << ( std::ostream& str , const GaudiAlg::ID& id )
+  // ==========================================================================
+  /// Operator overloading for ostream
+  inline std::ostream& operator << ( std::ostream& str , const GaudiAlg::ID& id )
+  { return id.fillStream ( str ) ; }
+  // ==========================================================================
+} //                                                  end of namespace GaudiAlg 
+// ============================================================================
+namespace GaudiUtils
 {
-  if      ( id.numeric() ) { str << id.numericID(); }
-  else if ( id.literal() ) { str << id.literalID(); }
-  else                     { str << "UNDEFINED";    }
-  return str;
-}
+  // ==========================================================================
+  /// Hash-function for class GaudiAlg::ID
+  template <>
+  inline size_t Hash<GaudiAlg::ID>::operator() 
+    ( const GaudiAlg::ID& key ) const { return key.hash () ; }   
+  // ==========================================================================
+} //                                                end of namespace GaudiUtils 
+// ============================================================================
+// The END 
+// ============================================================================
 #endif // GAUDIALG_GAUDIHISTOID_H
+// ============================================================================

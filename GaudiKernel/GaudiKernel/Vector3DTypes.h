@@ -39,5 +39,5 @@ namespace Gaudi
   typedef ROOT::Math::RhoEtaPhiVectorF     RhoEtaPhiVectorF; ///<  RhoEtaPhi 3D vector (float)
   typedef ROOT::Math::RhoZPhiVectorF       RhoZPhiVectorF;   ///<  RhoZPhi 3D vector (float)
 
-};
+}
 #endif // EVENT_VECTOR3DTYPES_H

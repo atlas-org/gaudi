@@ -19,9 +19,9 @@
 #include "RndmGen.h"
 
 /// Standard Constructor
-RndmGen::RndmGen(IInterface* engine) : m_refCount(0), m_params(0), m_engine(0)   {
+RndmGen::RndmGen(IInterface* engine) : m_params(0), m_engine(0)   {
   if ( 0 != engine )  {
-    engine->queryInterface(IID_IRndmEngine, pp_cast<void>(&m_engine)).ignore();
+    engine->queryInterface(IRndmEngine::interfaceID(), pp_cast<void>(&m_engine)).ignore();
   }
 }
 
@@ -31,21 +31,6 @@ RndmGen::~RndmGen()   {
   m_engine = 0;
   if ( m_params ) delete m_params;
   m_params = 0;
-}
-
-/// Query interface
-StatusCode RndmGen::queryInterface(const InterfaceID& riid, void** ppvInterface)  {
-  if ( IID_IRndmGen == riid )   {
-    *ppvInterface = (IRndmGen*)this;
-  }
-  else if ( IID_IInterface == riid )   {
-    *ppvInterface = (IInterface*)this;
-  }
-  else  {
-    return StatusCode::FAILURE;
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
 
 /// Initialize the generator

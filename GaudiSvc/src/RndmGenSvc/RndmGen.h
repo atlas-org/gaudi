@@ -36,11 +36,7 @@ class IRndmEngine;
     Author:  M.Frank
     Version: 1.0
 */
-class RndmGen : virtual public IRndmGen   {
-
-private:
-  /// Reference count
-  unsigned long     m_refCount;
+class RndmGen : public implements1<IRndmGen> {
 
 protected:
   /// Generation parameters
@@ -54,22 +50,6 @@ protected:
   virtual ~RndmGen();
 
 public:
-  /** IInterface implementation */
-  /// Increase reference count
-  unsigned long addRef()    {
-    return ++m_refCount;
-  }
-
-  /// Decrease reference count
-  unsigned long release()   {
-    unsigned long cnt = --m_refCount;
-    if ( cnt <= 0 )   {
-      delete this;
-    }
-    return cnt;
-  }
-  /// Query interface
-  StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
 
   /** IRndmGen implementation    */
   /// Initialize the generator

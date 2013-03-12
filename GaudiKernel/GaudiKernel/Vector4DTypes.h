@@ -36,7 +36,7 @@ namespace Gaudi
   typedef ROOT::Math::XYZTVectorF       LorentzVectorF; ///< Cartesian 4 Vector (float)
   typedef ROOT::Math::PtEtaPhiEVector   PtEtaPhiEVector; ///< Polar 4 Vector
 
-};
+}
 #endif // EVENT_VECTOR4DTYPES_H
 
 

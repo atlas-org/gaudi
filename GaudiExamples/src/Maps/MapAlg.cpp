@@ -53,13 +53,13 @@ public:
   virtual StatusCode finalize  () 
   {
     always() 
-      << endreq 
-      << " FINALIZE "                                           << endreq 
-      << " \tTested maps : "                                    << endreq 
-      << " \t1) " << System::typeinfoName ( typeid ( m_map1 ) ) << endreq 
-      << " \t2) " << System::typeinfoName ( typeid ( m_map2 ) ) << endreq 
-      << " \t3) " << System::typeinfoName ( typeid ( m_map3 ) ) << endreq 
-      << " \t4) " << System::typeinfoName ( typeid ( m_map4 ) ) << endreq ;
+      << endmsg 
+      << " FINALIZE "                                           << endmsg 
+      << " \tTested maps : "                                    << endmsg 
+      << " \t1) " << System::typeinfoName ( typeid ( m_map1 ) ) << endmsg 
+      << " \t2) " << System::typeinfoName ( typeid ( m_map2 ) ) << endmsg 
+      << " \t3) " << System::typeinfoName ( typeid ( m_map3 ) ) << endmsg 
+      << " \t4) " << System::typeinfoName ( typeid ( m_map4 ) ) << endmsg ;
     // finalize the base class 
     return GaudiAlgorithm::finalize () ; ///< finalize the base class 
   } ;
@@ -105,7 +105,7 @@ private:
 // ==========================================================================
 /// Declaration of the Algorithm Factory
 // ==========================================================================
-DECLARE_ALGORITHM_FACTORY( MapAlg );
+DECLARE_ALGORITHM_FACTORY( MapAlg )
 
 // ==========================================================================
 /// Main execution
@@ -126,26 +126,26 @@ StatusCode MapAlg::execute()
     << " " << toString ( m_map2.insert ( std::make_pair ( key , value1 ) ).second ) 
     << " " << toString ( m_map3.insert ( std::make_pair ( key , value1 ) ).second ) 
     << " " << toString ( m_map4.insert ( std::make_pair ( key , value1 ) ).second ) 
-    << endreq ;
+    << endmsg ;
   
-  always() << "1 Map1: " << toString ( m_map1 ) << endreq ;
-  always() << "1 Map2: " << toString ( m_map2 ) << endreq ;
-  always() << "1 Map3: " << toString ( m_map3 ) << endreq ;
-  always() << "1 Map4: " << toString ( m_map4 ) << endreq ;
+  always() << "1 Map1: " << toString ( m_map1 ) << endmsg ;
+  always() << "1 Map2: " << toString ( m_map2 ) << endmsg ;
+  always() << "1 Map3: " << toString ( m_map3 ) << endmsg ;
+  always() << "1 Map4: " << toString ( m_map4 ) << endmsg ;
   
   print1 ( (Key) 1 ) ;
   
-  always() << "2 Map1: " << toString ( m_map1 ) << endreq ;
-  always() << "2 Map2: " << toString ( m_map2 ) << endreq ;
-  always() << "2 Map3: " << toString ( m_map3 ) << endreq ;
-  always() << "2 Map4: " << toString ( m_map4 ) << endreq ;
+  always() << "2 Map1: " << toString ( m_map1 ) << endmsg ;
+  always() << "2 Map2: " << toString ( m_map2 ) << endmsg ;
+  always() << "2 Map3: " << toString ( m_map3 ) << endmsg ;
+  always() << "2 Map4: " << toString ( m_map4 ) << endmsg ;
   
   print2 ( (Key) 7  ) ;
   
-  always() << "3 Map1: " << toString ( m_map1 ) << endreq ;
-  always() << "3 Map2: " << toString ( m_map2 ) << endreq ;
-  always() << "3 Map3: " << toString ( m_map3 ) << endreq ;
-  always() << "3 Map4: " << toString ( m_map4 ) << endreq ;
+  always() << "3 Map1: " << toString ( m_map1 ) << endmsg ;
+  always() << "3 Map2: " << toString ( m_map2 ) << endmsg ;
+  always() << "3 Map3: " << toString ( m_map3 ) << endmsg ;
+  always() << "3 Map4: " << toString ( m_map4 ) << endmsg ;
   
   const Value value2 =       gauss   () ;
   
@@ -155,12 +155,12 @@ StatusCode MapAlg::execute()
     << " " << toString ( m_map2.insert ( std::make_pair ( key , value2 ) ).second ) 
     << " " << toString ( m_map3.insert ( std::make_pair ( key , value2 ) ).second ) 
     << " " << toString ( m_map4.insert ( std::make_pair ( key , value2 ) ).second ) 
-    << endreq ;
+    << endmsg ;
   
-  always() << "4 Map1: " << toString ( m_map1 ) << endreq ;
-  always() << "4 Map2: " << toString ( m_map2 ) << endreq ;
-  always() << "4 Map3: " << toString ( m_map3 ) << endreq ;
-  always() << "4 Map4: " << toString ( m_map4 ) << endreq ;
+  always() << "4 Map1: " << toString ( m_map1 ) << endmsg ;
+  always() << "4 Map2: " << toString ( m_map2 ) << endmsg ;
+  always() << "4 Map3: " << toString ( m_map3 ) << endmsg ;
+  always() << "4 Map4: " << toString ( m_map4 ) << endmsg ;
   
   if ( 0 == ::labs(key)%2 ) 
   {
@@ -170,13 +170,13 @@ StatusCode MapAlg::execute()
       << " " << toString ( 0 != m_map2.erase ( key ) ) 
       << " " << toString ( 0 != m_map3.erase ( key ) ) 
       << " " << toString ( 0 != m_map4.erase ( key ) ) 
-      << endreq ;    
+      << endmsg ;    
   }
 
-  always() << "5 Map1: " << toString ( m_map1 ) << endreq ;
-  always() << "5 Map2: " << toString ( m_map2 ) << endreq ;
-  always() << "5 Map3: " << toString ( m_map3 ) << endreq ;
-  always() << "5 Map4: " << toString ( m_map4 ) << endreq ;
+  always() << "5 Map1: " << toString ( m_map1 ) << endmsg ;
+  always() << "5 Map2: " << toString ( m_map2 ) << endmsg ;
+  always() << "5 Map3: " << toString ( m_map3 ) << endmsg ;
+  always() << "5 Map4: " << toString ( m_map4 ) << endmsg ;
   
   always() 
     << " Count key    0 : " 
@@ -184,28 +184,28 @@ StatusCode MapAlg::execute()
     << " " << m_map2.count ( 0 ) 
     << " " << m_map3.count ( 0 ) 
     << " " << m_map4.count ( 0 ) 
-    << endreq ;    
+    << endmsg ;    
   always() 
     << " Count key    1 : " 
     << " " << m_map1.count ( 1 ) 
     << " " << m_map2.count ( 1 ) 
     << " " << m_map3.count ( 1 ) 
     << " " << m_map4.count ( 1 ) 
-    << endreq ;    
+    << endmsg ;    
   always() 
     << " Count key    7 : " 
     << " " << m_map1.count ( 7 ) 
     << " " << m_map2.count ( 7 ) 
     << " " << m_map3.count ( 7 ) 
     << " " << m_map4.count ( 7 ) 
-    << endreq ;    
+    << endmsg ;    
   always() 
     << " Count key -100 : " 
     << " " << m_map1.count ( -100 ) 
     << " " << m_map2.count ( -100 ) 
     << " " << m_map3.count ( -100 ) 
     << " " << m_map4.count ( -100 ) 
-    << endreq ;    
+    << endmsg ;    
   
 
   return StatusCode::SUCCESS;
@@ -218,7 +218,7 @@ void MapAlg::print1( MapAlg::Key key ) const
     << "  map2['"<<key<< "']: " << m_map2[key]
     << ", map3['"<<key<< "']: " << m_map3[key]
     << ", map4['"<<key<< "']: " << m_map4[key]
-    << endreq ;
+    << endmsg ;
 }
 // ============================================================================
 void MapAlg::print2( MapAlg::Key key )  
@@ -229,8 +229,8 @@ void MapAlg::print2( MapAlg::Key key )
     << ", map2['"<<key<< "']: " << m_map2[key]
     << ", map3['"<<key<< "']: " << m_map3[key]
     << ", map4['"<<key<< "']: " << m_map4[key]
-    << endreq ;
-} ;
+    << endmsg ;
+}
 // ============================================================================
 
 // ==========================================================================

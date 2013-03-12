@@ -5,20 +5,18 @@
 // Framework include files
 #include "GaudiKernel/IInterface.h"
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IDataSourceMgr(121, 1 , 0); 
-
 /** @class IDataSourceMgr IDataSourceMgr.h GaudiKernel/IDataSourceMgr.h
 
     IDataSourceMgr interface definition.
- 
+
     @author Markus Frank
     @version 1.0
 */
-class IDataSourceMgr : virtual public IInterface	    {
-  public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IDataSourceMgr; }
+class GAUDI_API IDataSourceMgr: virtual public IInterface {
+public:
+  /// InterfaceID
+  DeclareInterfaceID(IDataSourceMgr,2,0);
+
   /** Check if a datasource is connected
       @param    identifier  Connection string
       @return               Status code indicating success or failure.

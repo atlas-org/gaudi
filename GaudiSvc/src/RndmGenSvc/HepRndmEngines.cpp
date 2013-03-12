@@ -6,13 +6,13 @@
 //	Author     : M.Frank
 //  History    :
 // +---------+----------------------------------------------+---------
-// |    Date |                 Comment                      | Who     
+// |    Date |                 Comment                      | Who
 // +---------+----------------------------------------------+---------
 // | 29/10/99| Initial version                              | MF
 // +---------+----------------------------------------------+---------
 //
 //  Note: Currently all engines require only ONE seed
-//        We aill return only the first number, because 
+//        We aill return only the first number, because
 //        the implementation in CLHEP does not allow to
 //        determine the proper number of seeds used.
 #define NUMBER_OF_SEEDS    1
@@ -30,6 +30,7 @@
 #include "GaudiKernel/SvcFactory.h"
 #include "GaudiKernel/System.h"
 #include "GaudiKernel/MsgStream.h"
+#include "GaudiKernel/IIncidentSvc.h"
 
 #include "RndmGenSvc.h"
 #include "HepRndmEngine.h"
@@ -47,6 +48,10 @@
 #include "CLHEP/Random/RanluxEngine.h"
 #include "CLHEP/Random/RanshiEngine.h"
 
+// Handle CLHEP 2.0.x move to CLHEP namespace
+namespace CLHEP { }
+using namespace CLHEP;
+
 namespace HepRndm  {
 
   // Standard constructor
@@ -61,11 +66,11 @@ namespace HepRndm  {
   }
 
   // Standard destructor
-  template <class TYPE> Engine<TYPE>::~Engine()          {  
+  template <class TYPE> Engine<TYPE>::~Engine()          {
   }
 
   // Initialize engine
-  template <class TYPE> StatusCode Engine<TYPE>::initialize()          {  
+  template <class TYPE> StatusCode Engine<TYPE>::initialize()          {
     m_seeds.erase(m_seeds.begin(), m_seeds.end());
     StatusCode status = RndmEngine::initialize();
     if ( m_seeds.size() == 0 )  {
@@ -74,12 +79,12 @@ namespace HepRndm  {
       m_seeds.push_back(theSeed);
       m_seeds.push_back(0);
     }
-    MsgStream log(messageService(), name());
+    MsgStream log(msgSvc(), name());
     if ( status.isSuccess() )   {
       status = initializeEngine();
       if ( status.isSuccess() )   {
-        log << MSG::INFO << "Generator engine type:" 
-        	  << System::typeinfoName(typeid(TYPE)) 
+        log << MSG::INFO << "Generator engine type:"
+        	  << System::typeinfoName(typeid(TYPE))
 	          << endmsg;
         if ( m_useTable )   {
           if ( m_row > 214 || m_col > 1 )   {
@@ -97,20 +102,20 @@ namespace HepRndm  {
         log << endmsg;
         // Use the default static engine if required (e.g. for GEANT4)
         if ( m_setSingleton )   {
-          HepRandom::setTheEngine(m_hepEngine);
+            HepRandom::setTheEngine(m_hepEngine);
           log << "This is the GEANT4 engine!" << endmsg;
         }
         return status;
       }
     }
-    log << MSG::ERROR << "Cannot initialze random engine of type:" 
-    	  << System::typeinfoName(typeid(TYPE)) 
+    log << MSG::ERROR << "Cannot initialze random engine of type:"
+    	  << System::typeinfoName(typeid(TYPE))
         << endmsg;
     return status;
   }
 
   // Finalize engine
-  template <class TYPE> StatusCode Engine<TYPE>::finalize()          {  
+  template <class TYPE> StatusCode Engine<TYPE>::finalize()          {
     if ( m_hepEngine )   {
       HepRandom::setTheEngine(0);
       delete m_hepEngine;
@@ -126,7 +131,7 @@ namespace HepRndm  {
   }
 
   // Retrieve seeds
-  template <class TYPE> StatusCode Engine<TYPE>::setSeeds(const std::vector<long>& seed)   {  
+  template <class TYPE> StatusCode Engine<TYPE>::setSeeds(const std::vector<long>& seed)   {
     typedef std::vector<long> seed_t;
     m_seeds.clear();
     for ( seed_t::const_iterator i = seed.begin(); i < seed.end(); i++ )   {
@@ -143,14 +148,14 @@ namespace HepRndm  {
   }
 
   // Retrieve seeds
-  template <class TYPE> StatusCode Engine<TYPE>::seeds(std::vector<long>& seed)  const  {  
-    /* 
+  template <class TYPE> StatusCode Engine<TYPE>::seeds(std::vector<long>& seed)  const  {
+    /*
     const long *s = m_hepEngine->getSeeds();
     for ( size_t i = 0; i < NUMBER_OF_SEEDS; i++ )   {
       seed.push_back(s[i]);
-      if ( m_seeds.size() > i )  
+      if ( m_seeds.size() > i )
         m_seeds[i] = s[i];
-      else 
+      else
         m_seeds.push_back(s[i]);
     }
     */

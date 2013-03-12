@@ -5,81 +5,81 @@
 // ============================================================================
 // Include files
 // ============================================================================
-// STD& STL 
+// STD& STL
 // ============================================================================
 #include <string>
 // ============================================================================
 // GaudiKernel
 // ============================================================================
-#include "GaudiKernel/Kernel.h" 
-#include "GaudiKernel/IChronoSvc.h" 
-#include "GaudiKernel/ChronoEntity.h" 
+#include "GaudiKernel/Kernel.h"
+#include "GaudiKernel/IChronoSvc.h"
+#include "GaudiKernel/ChronoEntity.h"
 // ============================================================================
 /** @class Chrono GaudiKernel/Chrono.h
- *  
+ *
  * A small utility class for chronometry of user codes
- * @see  ChronoEntity 
+ * @see  ChronoEntity
  * @see IChronoSvc
  *
  * @author Vanya Belyaev
- * @date    Nov 26, 1999   
+ * @date    Nov 26, 1999
  */
-class Chrono 
+class GAUDI_API Chrono
 {
-public: 
+public:
   // =========================================================================
-  /** Constructor from Chrono Service and the tag 
+  /** Constructor from Chrono Service and the tag
    *
-   *  @code 
-   * 
+   *  @code
+   *
    *  IChronoSvc* svc = ... ;
-   *  
-   *  { // start the scope 
+   *
+   *  { // start the scope
    *    Chrono chrono ( svc , "some unique tag here" ) ;
-   *   
-   *    for ( long i = 0 ; i < 10000000 ; ++i ) 
+   *
+   *    for ( long i = 0 ; i < 10000000 ; ++i )
    *     {
-   *        .. put some CPU-intensive computations here 
-   *     } 
+   *        .. put some CPU-intensive computations here
+   *     }
    *
    *  } // end of the scope, destroy chrono
-   * 
+   *
    *  @endcode
-   * 
-   *  @param svc pointer to Chrono Service 
-   *  @param tag the unique tag 
+   *
+   *  @param svc pointer to Chrono Service
+   *  @param tag the unique tag
    */
-  Chrono 
-  ( IChronoSvc*        svc = 0 ,                  // the service 
-    const std::string& tag = "CHRONO::UNNAMED" )  // the unique tag/name 
-    : m_chrono ( 0 ) 
+  Chrono
+  ( IChronoSvc*        svc = 0 ,                  // the service
+    const std::string& tag = "CHRONO::UNNAMED" )  // the unique tag/name
+    : m_chrono ( 0 )
   { if ( 0 != svc ) { m_chrono = svc -> chronoStart ( tag ) ; } }
   // =========================================================================
-  /** Constructor from Chrono Service and the tag 
+  /** Constructor from Chrono Service and the tag
    *
-   *  @code 
-   * 
+   *  @code
+   *
    *  IChronoSvc* svc = ... ;
-   *  
-   *  { // start the scope 
+   *
+   *  { // start the scope
    *    Chrono chrono ( "some unique tag here" , svc ) ;
-   *   
-   *    for ( long i = 0 ; i < 10000000 ; ++i ) 
+   *
+   *    for ( long i = 0 ; i < 10000000 ; ++i )
    *     {
-   *        .. put some CPU-intensive computations here 
-   *     } 
+   *        .. put some CPU-intensive computations here
+   *     }
    *
    *  } // end of the scope, destroy chrono
-   * 
+   *
    *  @endcode
-   * 
-   *  @param tag the unique tag 
-   *  @param svc pointer to Chrono Service 
+   *
+   *  @param tag the unique tag
+   *  @param svc pointer to Chrono Service
    */
-  Chrono 
-  ( const std::string& tag ,   // the unique tag/name 
-    IChronoSvc*        svc )   // the service 
-    : m_chrono ( 0 ) 
+  Chrono
+  ( const std::string& tag ,   // the unique tag/name
+    IChronoSvc*        svc )   // the service
+    : m_chrono ( 0 )
   { if ( 0 != svc ) { m_chrono = svc -> chronoStart ( tag ) ; } }
   // =========================================================================
   /** Constructor from Chrono Object/Entity
@@ -87,22 +87,22 @@ public:
    *  @code
    *
    *  ChronoEntity* chronometer = ... ;
-   *  
-   *  { // start the scope 
+   *
+   *  { // start the scope
    *    Chrono chrono ( chronometer ) ;
-   *   
-   *    for ( long i = 0 ; i < 10000000 ; ++i ) 
+   *
+   *    for ( long i = 0 ; i < 10000000 ; ++i )
    *     {
-   *        .. put some CPU-intensive computations here 
-   *     } 
+   *        .. put some CPU-intensive computations here
+   *     }
    *
    *  } // end of the scope, destroy chrono
-   * 
+   *
    *  @endcode
-   * 
+   *
    *  @param c the pointer to Chrono Object/Entity
    */
-  Chrono ( ChronoEntity* c ) : m_chrono ( c ) 
+  Chrono ( ChronoEntity* c ) : m_chrono ( c )
   { if ( 0 != m_chrono ) { m_chrono -> start () ; } }
   // =========================================================================
   /** Constructor from Chrono Object/Entity
@@ -110,41 +110,41 @@ public:
    *  @code
    *
    *  ChronoEntity m_chrono = ... ;
-   *  
-   *  { // start the scope 
+   *
+   *  { // start the scope
    *    Chrono chrono ( m_chrono ) ;
-   *   
-   *    for ( long i = 0 ; i < 10000000 ; ++i ) 
+   *
+   *    for ( long i = 0 ; i < 10000000 ; ++i )
    *     {
-   *        .. put some CPU-intensive computations here 
-   *     } 
+   *        .. put some CPU-intensive computations here
+   *     }
    *
    *  } // end of the scope, destroy chrono
-   * 
+   *
    *  @endcode
-   * 
+   *
    *  @param c the reference to Chrono Object/Entity
    */
   Chrono ( ChronoEntity& c ) : m_chrono ( &c ) { m_chrono -> start () ; }
   // =========================================================================
-  /// Destructor , stop the chrono 
-  ~Chrono () { if ( 0 != m_chrono ) { m_chrono->stop() ; } }  
+  /// Destructor , stop the chrono
+  ~Chrono () { if ( 0 != m_chrono ) { m_chrono->stop() ; } }
   // =========================================================================
 private:
   // =========================================================================
-  /// the copy constructor is disabled 
+  /// the copy constructor is disabled
   Chrono           ( const Chrono& ) ;  // no copy constructor
-  /// the assignemet operator is disabled 
-  Chrono& operator=( const Chrono& ) ;  // no assignement  
+  /// the assignment operator is disabled
+  Chrono& operator=( const Chrono& ) ;  // no assignment
   // =========================================================================
 private:
   // ==========================================================================
-  /// The actual chronometer 
-  ChronoEntity* m_chrono; // The actual chronometer 
+  /// The actual chronometer
+  ChronoEntity* m_chrono; // The actual chronometer
   // ==========================================================================
 };
 // ============================================================================
-// The END 
+// The END
 // ============================================================================
 #endif  //  GAUDIKERNEL_CHRONO_H
 // ============================================================================

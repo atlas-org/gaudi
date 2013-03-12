@@ -3,30 +3,26 @@
 #define GAUDIKERNEL_IAPPMGRUI_H 1
 
 // Include files
-#include "GaudiKernel/Kernel.h"
 #include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/StateMachine.h"
 
 #include <string>
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IAppMgrUI(12, 2 , 1);
-
 /** @class IAppMgrUI IAppMgrUI.h GaudiKernel/IAppMgrUI.h
 
-    Application Manager User Interface. This is the interface 
+    Application Manager User Interface. This is the interface
     offered to the UI to control the JOB or Application.
 
     @author Pere Mato
     @date   30/10/98
 */
 
-class IAppMgrUI : virtual public  IInterface  {
+class GAUDI_API IAppMgrUI: virtual public IInterface {
 public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IAppMgrUI; }
-  /// Run the complete job (from intialize to terminate)
+  /// InterfaceID
+  DeclareInterfaceID(IAppMgrUI,3,0);
+  /// Run the complete job (from initialize to terminate)
   virtual StatusCode run() = 0;
   /// Configure the job
   virtual StatusCode configure() = 0;
@@ -42,16 +38,16 @@ public:
   /// The identifying name of the AppMgrUI object.
   virtual const std::string& name() const = 0;
 
-  /// Start (from INITIALIZED to RUNNING). 
+  /// Start (from INITIALIZED to RUNNING).
   virtual StatusCode start() = 0;
 
-  /// Stop (from RUNNING to INITIALIZED). 
+  /// Stop (from RUNNING to INITIALIZED).
   virtual StatusCode stop() = 0;
-  
+
   /// Initialization (from INITIALIZED or RUNNING to INITIALIZED, via CONFIGURED).
   virtual StatusCode reinitialize() = 0;
 
-  /// Initialization (from RUNNING to RUNNING, via INITIALIZED). 
+  /// Initialization (from RUNNING to RUNNING, via INITIALIZED).
   virtual StatusCode restart() = 0;
 
   /// Get the current state.

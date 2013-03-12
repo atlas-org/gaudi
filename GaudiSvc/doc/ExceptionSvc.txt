@@ -5,7 +5,7 @@ When an Algorithm throws an exception, or fails to return a
 StatusCode::SUCCESS (ie returns a FAILURE or RECOVERABLE), control of
 the execution is passed to the ExceptionSvc.
 
-The ExceptionSvc allows the user to configure the behaviour of the
+The ExceptionSvc allows the user to configure the behavior of the
 event processing on a global and on a per-Algorithm basis, allowing
 exceptions to be translated into status codes, or rethrown, or
 allowing the value of the return code to be modified.
@@ -33,7 +33,7 @@ RECOVERABLE: Return code set to StatusCode::RECOVERABLE. Processing of
   event. Processing of the job will continue.
 
 
-For execptions:
+For exceptions:
 
 RETHROW: The exception will be rethrown. This will most likely cause
   the termination of the job, and a seg fault to occur.
@@ -61,9 +61,9 @@ for changing return codes:
         exceptions, otherwise don't modify the return code
 
 The optional list of [ALG=MODE] is a sequence of Algorithm Names, with
-their associated behaviour, where MODE is one of
-SUCCESS/FAILURE/RECOVERABLE/RETHROW/DEFAULT. The behaviour of
-Algorithms listed here will override the default behaviour. Examples are:
+their associated behavior, where MODE is one of
+SUCCESS/FAILURE/RECOVERABLE/RETHROW/DEFAULT. The behavior of
+Algorithms listed here will override the default behavior. Examples are:
 
 ExceptionSvc.Catch = "ALL Alg1=SUCCESS Alg2=DEFAULT"
 
@@ -90,10 +90,10 @@ ExceptionSvc.Errors = "ALL Alg4=SUCCESS Alg5=RECOVERABLE"
     return a RECOVERABLE 
 
 
-Default Behaviour
+Default Behavior
 -----------------
 
-The default behaviour is:
+The default behavior is:
 
   ExceptionSvc.Catch = "ALL"
   ExceptionSvc.Errors = "NONE"

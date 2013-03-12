@@ -25,9 +25,9 @@
 #include "MyTrack.h"
 #include "Counter.h"
 
-using namespace Gaudi::Examples ;
+using namespace Gaudi::Examples;
 
-DECLARE_ALGORITHM_FACTORY(WriteAlg);
+DECLARE_ALGORITHM_FACTORY(WriteAlg)
 
 //--------------------------------------------------------------------
 // Register data leaf
@@ -36,7 +36,7 @@ StatusCode WriteAlg::put(IDataProviderSvc* s, const std::string& path, DataObjec
   StatusCode sc = s->registerObject(path,pObj);
   if( sc.isFailure() ) {
     MsgStream log(msgSvc(), name());
-    log << MSG::ERROR << "Unable to register object " << path << endreq;
+    log << MSG::ERROR << "Unable to register object " << path << endmsg;
   }
   return sc;
 }
@@ -46,12 +46,12 @@ StatusCode WriteAlg::put(IDataProviderSvc* s, const std::string& path, DataObjec
 //--------------------------------------------------------------------
 StatusCode WriteAlg::initialize() {
   MsgStream log(msgSvc(), name());
-  StatusCode sc = service("RunRecordDataSvc",m_runRecordSvc,true);
+  StatusCode sc = service("FileRecordDataSvc",m_recordSvc,true);
   if( sc.isFailure() ) {
-    log << MSG::ERROR << "Unable to retrieve run records service" << endreq;
+    log << MSG::ERROR << "Unable to retrieve run records service" << endmsg;
     return sc;
   }
-  return put(m_runRecordSvc,"/RunRecords/SOR/EvtCount",m_evtCount=new Counter());
+  return put(m_recordSvc,"/FileRecords/EvtCount",m_evtCount=new Counter());
 }
 
 //--------------------------------------------------------------------
@@ -60,10 +60,10 @@ StatusCode WriteAlg::initialize() {
 StatusCode WriteAlg::finalize() {
   MsgStream log(msgSvc(), name());
   Counter* pObj = new Counter();
-  pObj->increment();
-  put(m_runRecordSvc,"/RunRecords/EOR",pObj);
-  if ( m_runRecordSvc ) m_runRecordSvc->release();
-  m_runRecordSvc = 0;
+  pObj->set(123456);
+  put(m_recordSvc,"/FileRecords/SumCount",pObj);
+  if ( m_recordSvc ) m_recordSvc->release();
+  m_recordSvc = 0;
   m_evtCount = 0;
   return StatusCode::SUCCESS;
 }
@@ -91,7 +91,7 @@ StatusCode WriteAlg::execute() {
 
   sc = eventSvc()->registerObject("/Event","Header",evt);
   if( sc.isFailure() ) {
-    log << MSG::ERROR << "Unable to register Event Header" << endreq;
+    log << MSG::ERROR << "Unable to register Event Header" << endmsg;
     return sc;
   }
 
@@ -101,7 +101,7 @@ StatusCode WriteAlg::execute() {
 
   sc = eventSvc()->registerObject("/Event","Collision_0",coll0);
   if( sc.isFailure() ) {
-    log << MSG::ERROR << "Unable to register Collision 0" << endreq;
+    log << MSG::ERROR << "Unable to register Collision 0" << endmsg;
     return sc;
   }
   sc = put(eventSvc(),"/Event/Collision_1",coll1);

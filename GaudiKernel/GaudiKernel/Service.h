@@ -7,15 +7,18 @@
 // ============================================================================
 #include "GaudiKernel/IService.h"
 #include "GaudiKernel/ISvcLocator.h"
+#include "GaudiKernel/ServiceLocatorHelper.h"
 #include "GaudiKernel/IProperty.h"
 #include "GaudiKernel/IStateful.h"
 #include "GaudiKernel/PropertyMgr.h"
 #include "GaudiKernel/Property.h"
 #include "GaudiKernel/IAuditorSvc.h"
+#include "GaudiKernel/CommonMessaging.h"
+#include "GaudiKernel/SmartIF.h"
 // ============================================================================
 #include <vector>
 // ============================================================================
-// Forward delarations
+// Forward declarations
 // ============================================================================
 class IMessageSvc;
 class ISvcManager;
@@ -26,28 +29,18 @@ class ServiceManager;
  *  Base class for all services. It implements the IService and IProperty interfaces.
  *
  *  @author Pere Mato
+ *  @author Marco Clemencic
  */
-class Service : public virtual IService,
-                public virtual IProperty,
-                public virtual IStateful {
+class GAUDI_API Service: public CommonMessaging<implements3<IService, IProperty, IStateful> > {
 public:
   friend class ServiceManager;
-  /** Query interfaces of Interface
-      @param riid       ID of Interface to be retrieved
-      @param ppvUnknown Pointer to Location for interface pointer
-  */
-  virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvUnknown);
 
-  /** Reference Interface instance               */
-  virtual unsigned long addRef();
-
-  /** Release Interface instance                 */
+  /// Release Interface instance.
+  /// Specialized implementation because the default one is not enough.
   virtual unsigned long release();
 
   /** Retrieve name of the service               */
   virtual const std::string& name() const;
-  /** Retrieve ID of the Service                 */
-  virtual const InterfaceID& type() const;
 
   // State machine implementation
   virtual StatusCode configure() { return StatusCode::SUCCESS; }
@@ -60,18 +53,18 @@ public:
   virtual Gaudi::StateMachine::State targetFSMState() const { return m_targetState; }
   virtual StatusCode reinitialize();
   virtual StatusCode restart();
-  
-  /** Initilize Service                          */
+
+  /** Initialize Service                          */
   virtual StatusCode sysInitialize();
-  /** Initilize Service                          */
+  /** Initialize Service                          */
   virtual StatusCode sysStart();
-  /** Initilize Service                          */
+  /** Initialize Service                          */
   virtual StatusCode sysStop();
   /** Finalize Service                           */
   virtual StatusCode sysFinalize();
-  /// Re-initialize the Service 
+  /// Re-initialize the Service
   virtual StatusCode sysReinitialize();
-  /// Re-initialize the Service 
+  /// Re-initialize the Service
   virtual StatusCode sysRestart();
 
   // Default implementations for ISetProperty
@@ -83,74 +76,94 @@ public:
   virtual StatusCode getProperty( const std::string& n, std::string& v ) const;
   virtual const std::vector<Property*>& getProperties( ) const;
 
-  /** set the property form the value 
-   *  
-   *  @code 
+  /** set the property form the value
+   *
+   *  @code
    *
    *  std::vector<double> data = ... ;
    *  setProperty( "Data" , data ) ;
-   *  
+   *
    *  std::map<std::string,double> cuts = ... ;
    *  setProperty( "Cuts" , cuts ) ;
    *
    *  std::map<std::string,std::string> dict = ... ;
    *  setProperty( "Dictionary" , dict ) ;
-   * 
-   *  @endcode 
    *
-   *  Note: the interface IProperty allows setting of the properties either 
+   *  @endcode
+   *
+   *  Note: the interface IProperty allows setting of the properties either
    *        directly from other properties or from strings only
    *
-   *  This is very convinient in resetting of the default 
+   *  This is very convinient in resetting of the default
    *  properties in the derived classes.
-   *  E.g. without this method one needs to convert 
+   *  E.g. without this method one needs to convert
    *  everything into strings to use IProperty::setProperty
    *
-   *  @code 
-   *  
+   *  @code
+   *
    *    setProperty ( "OutputLevel" , "1"    ) ;
    *    setProperty ( "Enable"      , "True" ) ;
    *    setProperty ( "ErrorMax"    , "10"   ) ;
    *
-   *  @endcode 
+   *  @endcode
    *
-   *  For simple cases it is more or less ok, but for complicated properties 
+   *  For simple cases it is more or less ok, but for complicated properties
    *  it is just ugly..
    *
-   *  @param name      name of the property 
+   *  @param name      name of the property
    *  @param value     value of the property
    *  @see Gaudi::Utils::setProperty
    *  @author Vanya BELYAEV ibelyaev@physics.syr.edu
-   *  @date 2007-05-13 
-   */ 
+   *  @date 2007-05-13
+   */
   template <class TYPE>
-  StatusCode setProperty 
-  ( const std::string& name  , 
-    const TYPE&        value ) 
+  StatusCode setProperty
+  ( const std::string& name  ,
+    const TYPE&        value )
   { return Gaudi::Utils::setProperty ( m_propertyMgr , name , value ) ; }
 
   /** Standard Constructor                       */
   Service( const std::string& name, ISvcLocator* svcloc);
   /** Retrieve pointer to service locator        */
-  ISvcLocator* serviceLocator() const;
-  /** Retrieve pointer to message service        */
-  IMessageSvc* msgSvc();
-  IMessageSvc* msgSvc() const;
-  // Obsoleted name, kept due to the backwards compatibility
-  IMessageSvc* messageService();
-  IMessageSvc* messageService() const;
-
+  SmartIF<ISvcLocator>& serviceLocator() const;
 
   /** Method for setting declared properties to the values
-      specifed for the job.
+      specified for the job.
   */
   StatusCode setProperties();
 
   /** Access a service by name, creating it if it doesn't already exist.
   */
   template <class T>
+  StatusCode service( const std::string& name, const T*& psvc, bool createIf = true ) const {
+    ISvcLocator& svcLoc = *serviceLocator();
+    SmartIF<T> ptr(
+      ServiceLocatorHelper(svcLoc, *this).service(name, !createIf, // quiet
+                                                  createIf));
+    if (ptr.isValid()) {
+      psvc = ptr.get();
+      const_cast<T*>(psvc)->addRef();
+      return StatusCode::SUCCESS;
+    }
+    // else
+    psvc = 0;
+    return StatusCode::FAILURE;
+  }
+
+  template <class T>
   StatusCode service( const std::string& name, T*& psvc, bool createIf = true ) const {
-    return service_i(name, createIf, T::interfaceID(), (void**)&psvc);
+    ISvcLocator& svcLoc = *serviceLocator();
+    SmartIF<T> ptr(
+      ServiceLocatorHelper(svcLoc, *this).service(name, !createIf, // quiet
+                                                  createIf));
+    if (ptr.isValid()) {
+      psvc = ptr.get();
+      psvc->addRef();
+      return StatusCode::SUCCESS;
+    }
+    // else
+    psvc = 0;
+    return StatusCode::FAILURE;
   }
 
   /** Access a service by name and type, creating it if it doesn't already exist.
@@ -158,43 +171,43 @@ public:
   template <class T>
   StatusCode service( const std::string& svcType, const std::string& svcName,
 		      T*& psvc) const {
-    return service_i(svcType, svcName, T::interfaceID(), (void**)&psvc);
+    return service(svcType + "/" + svcName, psvc);
   }
   // ==========================================================================
   /** Declare the named property
    *
    *  @code
    *
-   *  MySvc ( const std::string& name , 
-   *          ISvcLocator*       pSvc ) 
-   *     : Service ( name , pSvc ) 
+   *  MySvc ( const std::string& name ,
+   *          ISvcLocator*       pSvc )
+   *     : Service ( name , pSvc )
    *     , m_property1   ( ... )
    *     , m_property2   ( ... )
    *   {
-   *     // declare the property 
-   *     declareProperty( "Property1" , m_property1 , "Doc fro property #1" ) ;
+   *     // declare the property
+   *     declareProperty( "Property1" , m_property1 , "Doc for property #1" ) ;
    *
-   *     // declare the property and attach the handler  to it
-   *     declareProperty( "Property2" , m_property2 , "Doc for property #2" ) 
-   *        -> declareUpdateHandler( &MyAlg::handler_2 ) ;
-   *  
+   *     // declare the property and attach the handler to it
+   *     declareProperty( "Property2" , m_property2 , "Doc for property #2" )
+   *        -> declareUpdateHandler( &MySvc::handler_2 ) ;
+   *
    *   }
    *  @endcode
-   *  
-   *  @see PropertyMgr 
-   *  @see PropertyMgr::declareProperty 
-   *  
-   *  @param name the property name 
-   *  @param proeprty the property itself, 
+   *
+   *  @see PropertyMgr
+   *  @see PropertyMgr::declareProperty
+   *
+   *  @param name the property name
+   *  @param property the property itself,
    *  @param doc      the documentation string
-   *  @return the actual property objects 
+   *  @return the actual property objects
    */
   template <class T>
   Property* declareProperty
-  ( const std::string& name              , 
+  ( const std::string& name              ,
     T&                 property          ,
-    const std::string& doc      = "none" ) const 
-  { 
+    const std::string& doc      = "none" ) const
+  {
     return m_propertyMgr -> declareProperty ( name , property , doc ) ;
   }
   // ==========================================================================
@@ -207,9 +220,9 @@ public:
       @param rname      Name of the property at remote service
   */
   Property* declareRemoteProperty
-  ( const std::string& name       , 
-    IProperty*         rsvc       , 
-    const std::string& rname = "" ) const 
+  ( const std::string& name       ,
+    IProperty*         rsvc       ,
+    const std::string& rname = "" ) const
   {
   	return m_propertyMgr -> declareRemoteProperty ( name , rsvc , rname ) ;
   }
@@ -217,7 +230,7 @@ public:
   /** The standard auditor service.May not be invoked before sysInitialize()
    *  has been invoked.
    */
-  IAuditorSvc* auditorSvc() const;
+  SmartIF<IAuditorSvc>& auditorSvc() const;
 
 protected:
   /** Standard Destructor                        */
@@ -228,8 +241,6 @@ protected:
   Gaudi::StateMachine::State    m_state;
   /** Service state                              */
   Gaudi::StateMachine::State    m_targetState;
-  /** MessageSvc reference                       */
-  mutable IMessageSvc*  m_messageSvc;
 
   /// get the @c Service's output level
   int  outputLevel() const { return m_outputLevel.value(); }
@@ -237,26 +248,16 @@ protected:
 private:
   /** Service Name  */
   std::string   m_name;
-  /** Reference counter                          */
-  unsigned long m_refCount;
   /** Service Locator reference                  */
-  ISvcLocator*  m_svcLocator;
-  ISvcManager*  m_svcManager;
+  mutable SmartIF<ISvcLocator> m_svcLocator;
+  SmartIF<ISvcManager>  m_svcManager;
   /** Property Manager                           */
   PropertyMgr*  m_propertyMgr;
-  /** implementation of service method */
-  StatusCode service_i(const std::string& svcName,
-		       bool createIf,
-		       const InterfaceID& iid,
-		       void** ppSvc) const;
-  StatusCode service_i(const std::string& svcType,
-		       const std::string& svcName,
-		       const InterfaceID& iid,
-		       void** ppSvc) const;
-  void setServiceManager(ISvcManager*);
+
+  void setServiceManager(ISvcManager* ism);
 
   /** Auditor Service                            */
-  mutable IAuditorSvc*  m_pAuditorSvc;
+  mutable SmartIF<IAuditorSvc>  m_pAuditorSvc;
   BooleanProperty       m_auditInit;
   bool                  m_auditorInitialize;
   bool                  m_auditorStart;

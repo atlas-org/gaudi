@@ -1,20 +1,31 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/PropertyVerifier.h,v 1.3 2006/06/06 16:16:23 hmd Exp $
+// $Id:$
+// ============================================================================
 #ifndef GAUDIKERNEL_PROPERTYVERIFIER_H
 #define GAUDIKERNEL_PROPERTYVERIFIER_H
+// ============================================================================
+// Include files
+// ============================================================================
+// STD& STL
+// ============================================================================
+#include <algorithm>
+// ============================================================================
+// GaudiKernel
+// ============================================================================
+#include "GaudiKernel/PropertyTypeTraits.h"
+// ============================================================================
 /**********************************************************
- * Verifier Classes are used with Property Classes to 
+ * Verifier Classes are used with Property Classes to
  * provide validation criteria for Property values.
  *
  **********************************************************/
-
-/** @class PropertyVerifier PropertyVerifier.h GaudiKernel/PropertyVerifier.h
-
-    Templated Verifier base class
-
-    @author CTDay
-*/
+/** @class PropertyVerifier GaudiKernel/PropertyVerifier.h
+ *
+ *  Templated Verifier base class
+ *  @author CTDay
+ */
 template< class T >
-class PropertyVerifier {
+class PropertyVerifier
+{
 public:
   // Data and Function Members for Collaborators.
   // Constructors - compiler generated default is ok
@@ -24,33 +35,56 @@ public:
   // Copy Constructor - compiler generated default is ok
   // Assignment Operator - compiler generated default is ok
   // Accessor members (const)
-  virtual bool isValid( const T* value ) const = 0;
+  virtual bool isValid ( const typename Gaudi::Utils::PropertyTypeTraits<T>::CVal value ) const = 0;
 };
-
-/** @class BoundedVerifier PropertyVerifier.h GaudiKernel/PropertyVerifier.h
-
-    Default, always true verifier
-
-    @author CTDay
-*/
-
+// ============================================================================
+/** @class NullVerifier GaudiKernel/PropertyVerifier.h
+ *
+ *  Default, always true verifier
+ *
+ *  @author CTDay
+ */
 template< class T >
-class BoundedVerifier : PropertyVerifier< T > {     // Abstract derived class
+class NullVerifier : public PropertyVerifier< T >
+{
+public:
+  // Data and Function Members for Collaborators.
+  // Constructors - compiler generated default is ok
+  // Destructor
+  virtual ~NullVerifier() { }
+
+  // Copy Constructor - compiler generated default is ok
+  // Assignment Operator - compiler generated default is ok
+
+  // Accessor members (const)
+  virtual bool isValid
+  ( const typename Gaudi::Utils::PropertyTypeTraits<T>::CVal /* val */ ) const
+  { return true; }
+
+};
+// ============================================================================
+/** @class BoundedVerifier PropertyVerifier.h GaudiKernel/PropertyVerifier.h
+ *  @author CTDay
+ */
+template< class T >
+class BoundedVerifier : public PropertyVerifier< T > {     // Abstract derived class
 public:
   /// Constructors
   BoundedVerifier()
-      : m_hasLowerBound( false ), 
-        m_hasUpperBound( false ), 
-        m_lowerBound( T() ),
-        m_upperBound( T() ) { }
+    : m_hasLowerBound( false ),
+      m_hasUpperBound( false ),
+      m_lowerBound( T() ),
+      m_upperBound( T() ) { }
 
   /// Destructor
   virtual ~BoundedVerifier() { }
 
   /// Check if the value is within bounds
-  bool isValid( const T* value ) const { 
-    return   (( m_hasLowerBound && ( *value < m_lowerBound ) ) ? false : true ) 
-          && (( m_hasUpperBound && ( *value > m_upperBound ) ) ? false : true );
+  bool isValid( const typename Gaudi::Utils::PropertyTypeTraits<T>::CVal value ) const
+  {
+    return
+      (( m_hasLowerBound && ( *value < m_lowerBound ) ) ? false : true ) &&
+      (( m_hasUpperBound && ( *value > m_upperBound ) ) ? false : true )  ;
   }
 
   /// Return if it has a lower bound
@@ -72,15 +106,17 @@ public:
   void clearUpper()  { m_hasUpperBound = false; m_upperBound = T(); }
 
   /// Set both bounds (lower and upper) at the same time
-  void setBounds( const T& lower, const T& upper) {
-    setLower( lower ); 
-    setUpper( upper ); 
+  void setBounds( const T& lower, const T& upper)
+  {
+    setLower( lower );
+    setUpper( upper );
   }
 
   /// Clear both bounds (lower and upper) at the same time
-  void clearBounds() {
-     clearLower(); 
-     clearUpper(); 
+  void clearBounds()
+  {
+    clearLower();
+    clearUpper();
   }
 
 private:
@@ -91,28 +127,11 @@ private:
   T     m_lowerBound;
   T     m_upperBound;
 };
+// ============================================================================
 
-/** @class NullVerifier PropertyVerifier.h GaudiKernel/PropertyVerifier.h
-
-    Default, always true verifier
-
-    @author CTDay
-*/
-template< class T >
-class NullVerifier : public PropertyVerifier< T > {
-public:
-  
-  // Data and Function Members for Collaborators.
-  // Constructors - compiler generated default is ok
-  // Destructor
-  virtual ~NullVerifier() { };
-
-  // Copy Constructor - compiler generated default is ok
-  // Assignment Operator - compiler generated default is ok
-
-  // Accessor members (const)
-  virtual bool isValid( const T* ) const { return true; }
-};
-
+// =======================================================================
+// The END
+// =======================================================================
 #endif    // GAUDIKERNEL_PROPERTYVERIFIER_H
+// =======================================================================
 

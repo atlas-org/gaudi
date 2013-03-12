@@ -8,7 +8,6 @@
 #include "GaudiKernel/SmartRefVector.h"
 #include "GaudiKernel/KeyedObject.h"
 #include "GaudiKernel/ContainedObject.h"
-#include "GaudiKernel/TimePoint.h"
 #include "GaudiKernel/Time.h"
 #include "GaudiKernel/NTuple.h"
 #include "GaudiKernel/ObjectVector.h"
@@ -23,7 +22,6 @@
 #include "GaudiKernel/SmartDataPtr.h"
 #include "GaudiKernel/Property.h"
 #include "GaudiKernel/Bootstrap.h"
-//#include "GaudiKernel/FactoryTable.h"
 #include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/AlgTool.h"
@@ -32,35 +30,31 @@
 #include "GaudiKernel/EventSelectorDataStream.h"
 
 #include "GaudiKernel/IAddressCreator.h"
-// #include "GaudiKernel/IAIDATupleSvc.h"
 #include "GaudiKernel/IAlgContextSvc.h"
-//#include "GaudiKernel/IAlgFactory.h"
 #include "GaudiKernel/IAlgManager.h"
 #include "GaudiKernel/IAlgorithm.h"
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/IAppMgrUI.h"
-//#include "GaudiKernel/IAuditorFactory.h"
 #include "GaudiKernel/IAuditor.h"
 #include "GaudiKernel/IAuditorSvc.h"
 #include "GaudiKernel/IChronoStatSvc.h"
 #include "GaudiKernel/IClassInfo.h"
 #include "GaudiKernel/IClassManager.h"
-//#include "GaudiKernel/ICnvFactory.h"
-//#include "GaudiKernel/ICnvManager.h"
 #include "GaudiKernel/IConversionSvc.h"
 #include "GaudiKernel/IConverter.h"
+#include "GaudiKernel/ICounterSummarySvc.h"
 #include "GaudiKernel/ICounterSvc.h"
 #include "GaudiKernel/IDataManagerSvc.h"
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/IDataSelector.h"
 #include "GaudiKernel/IDataSourceMgr.h"
 #include "GaudiKernel/IDataStoreAgent.h"
+#include "GaudiKernel/IDataStoreLeaves.h"
 #include "GaudiKernel/IDetDataSvc.h"
 #include "GaudiKernel/IEventProcessor.h"
 #include "GaudiKernel/IEventTimeDecoder.h"
 #include "GaudiKernel/IEvtSelector.h"
 #include "GaudiKernel/IExceptionSvc.h"
-//#include "GaudiKernel/IFactory.h"
 #include "GaudiKernel/IHistogramSvc.h"
 #include "GaudiKernel/IHistorySvc.h"
 #include "GaudiKernel/IIncidentListener.h"
@@ -77,7 +71,6 @@
 #include "GaudiKernel/INamedInterface.h"
 #include "GaudiKernel/INTuple.h"
 #include "GaudiKernel/INTupleSvc.h"
-//#include "GaudiKernel/IObjManager.h"
 #include "GaudiKernel/IOpaqueAddress.h"
 #include "GaudiKernel/IParticlePropertySvc.h"
 #include "GaudiKernel/IPartPropSvc.h"
@@ -86,7 +79,6 @@
 #include "GaudiKernel/IProperty.h"
 #include "GaudiKernel/IRegistry.h"
 #include "GaudiKernel/IRndmEngine.h"
-//#include "GaudiKernel/IRndmGenFactory.h"
 #include "GaudiKernel/IRndmGen.h"
 #include "GaudiKernel/IRndmGenSvc.h"
 #include "GaudiKernel/IRunable.h"
@@ -95,12 +87,9 @@
 #include "GaudiKernel/IService.h"
 #include "GaudiKernel/IStagerSvc.h"
 #include "GaudiKernel/IStatusCodeSvc.h"
-//#include "GaudiKernel/ISvcFactory.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/ISvcManager.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/ITime.h"
-//#include "GaudiKernel/IToolFactory.h"
 #include "GaudiKernel/IToolSvc.h"
 #include "GaudiKernel/IUpdateable.h"
 #include "GaudiKernel/IUpdateManagerSvc.h"
@@ -140,7 +129,9 @@ namespace {
       NTuple::Item<short>             ShortItem;
       NTuple::Item<unsigned short>    UShortItem;
       NTuple::Item<long>              LongItem;
+      NTuple::Item<long long>         LongLongItem;
       NTuple::Item<unsigned long>     ULongItem;
+      NTuple::Item<unsigned long long> ULongLongItem;
       NTuple::Item<int>               IntItem;
       NTuple::Item<unsigned int>      UIntItem;
       NTuple::Item<float>             FloatItem;
@@ -167,6 +158,7 @@ namespace {
       NTuple::Matrix<unsigned int>    UIntMatrix;
       NTuple::Matrix<float>           FloatMatrix;
       NTuple::Matrix<double>          DoubleMatrix;
+
       SmartDataPtr<DataObject> p1;
       SmartDataPtr<ObjectContainerBase> p2;
       __Instantiations() : p1(0,""), p2(0,"") {}
@@ -191,6 +183,19 @@ public:
   // FIXME: (MCl) The generated dictionary produce a few warnings C4345, since I
   //              cannot fix them, I just disable them.
 
-  // Disable warning C4345: behavior change: an object of POD type constructed with an initializer of the form () will be default-initialized
+  // Disable warning C4345: behavior change: an object of POD type constructed with an initializer of the
+  //                        form () will be default-initialized
   #pragma warning ( disable : 4345 )
+#endif
+
+#ifdef __ICC
+// disable icc warning #858: type qualifier on return type is meaningless
+// ... a lot of noise produced by the dictionary
+#pragma warning(disable:858)
+// disable icc remark #2259: non-pointer conversion from "int" to "const char &" may lose significant bits
+//    Strange, things like NTuple::Item<char> produce this warning, as if the operation between chars are done
+//    converting them to integers first.
+#pragma warning(disable:2259)
+// disable icc remark #177: variable "X" was declared but never referenced
+#pragma warning(disable:177)
 #endif

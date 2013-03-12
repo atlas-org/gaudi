@@ -31,14 +31,10 @@ class HistoryObj;
     @author Charles Leggett
 */
 
-class IHistorySvc : virtual public IService {
-
+class GAUDI_API IHistorySvc : virtual public IService {
 public:
-  // Typedefs for container type
-
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID();
-
+  /// InterfaceID
+  DeclareInterfaceID(IHistorySvc,2,0);
 
   // Job level objects
   virtual StatusCode registerJob() = 0;
@@ -64,21 +60,12 @@ public:
   virtual void getAlgToolHistory(std::set<AlgToolHistory*>&) const = 0;
 
   // DataObj level objects
-  virtual DataHistory* createDataHistoryObj(const CLID& id, 
-					    const std::string& key, 
+  virtual DataHistory* createDataHistoryObj(const CLID& id,
+					    const std::string& key,
 					    const std::string& storeName) = 0;
   virtual DataHistory* getDataHistory(const CLID& id, const std::string& key,
 				      const std::string& storeName) const = 0;
 
-
-
 };
-
-inline
-const InterfaceID& 
-IHistorySvc::interfaceID() {
-    static const InterfaceID m_IID("HistorySvc", 1, 0);
-    return m_IID;
-}
 
 #endif // GAUDIKERNEL_IHISTORYSVC_H

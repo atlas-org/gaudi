@@ -45,7 +45,7 @@ public:
     StatusCode sc = GaudiTupleAlg::initialize() ;
     if ( sc.isFailure() ) { return sc ; }
     // check for random numbers service 
-    Assert ( 0 != randSvc() , "Random Service is not available!");
+    Assert (randSvc() != 0, "Random Service is not available!");
     //
     return StatusCode::SUCCESS ;
   };
@@ -135,7 +135,7 @@ StatusCode TupleAlg2::execute()
   
   return StatusCode::SUCCESS ;
   
-};
+}
 // ============================================================================
 
 // ============================================================================

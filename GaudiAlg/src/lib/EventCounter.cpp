@@ -26,7 +26,7 @@ StatusCode
 EventCounter::initialize()
 {
     MsgStream log(msgSvc(), name());
-    log << MSG::INFO << name( ) << ":EventCounter::initialize - Frequency: " << m_frequency << endreq;
+    log << MSG::INFO << name( ) << ":EventCounter::initialize - Frequency: " << m_frequency << endmsg;
     return StatusCode::SUCCESS;
 }
 
@@ -39,7 +39,7 @@ EventCounter::execute()
      if ( freq > 0 ) {
          m_skip++;
          if ( m_skip >= freq ) {
-             log << MSG::INFO << name( ) << ":EventCounter::execute - seen events: " << m_total << endreq;
+             log << MSG::INFO << name( ) << ":EventCounter::execute - seen events: " << m_total << endmsg;
              m_skip = 0;
          }
      }
@@ -50,6 +50,6 @@ StatusCode
 EventCounter::finalize()
 {
     MsgStream log(msgSvc(), name());
-    log << MSG::INFO << name( ) << ":EventCounter::finalize - total events: " << m_total << endreq;
+    log << MSG::INFO << name( ) << ":EventCounter::finalize - total events: " << m_total << endmsg;
     return StatusCode::SUCCESS;
 }

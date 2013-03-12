@@ -44,7 +44,7 @@ class DataObject;
     Author:  M.Frank
     Version: 1.0
 */
-class SmartRefBase    {
+class GAUDI_API SmartRefBase {
 public:
   /// Object data: ID of the link hint to the identifiable object
   mutable long                    m_hintID;
@@ -70,7 +70,7 @@ public:
   bool isEqualEx(const ContainedObject* pObj, const SmartRefBase& c)  const;
   /// Equality operator for ContainedObject like references
   bool isEqual          (const ContainedObject* /* pObj */, const SmartRefBase& c)  const  {
-    return (m_hintID == c.m_hintID && m_linkID == c.m_linkID && 
+    return (m_hintID == c.m_hintID && m_linkID == c.m_linkID &&
             m_data   == c.m_data   && m_contd  == c.m_contd);
   }
   /// Equality operator for DataObject like references

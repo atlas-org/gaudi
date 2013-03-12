@@ -15,8 +15,8 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/LinkManager.h"
 #include "GaudiKernel/IRegistry.h"
+#include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/IOpaqueAddress.h"
-
 #include "GaudiKernel/IDataProviderSvc.h"
 
 // Example related include files
@@ -29,20 +29,29 @@
 
 #include "GaudiKernel/System.h"
 
+using namespace Gaudi::Examples;
 
-using namespace Gaudi::Examples ;
-
-DECLARE_ALGORITHM_FACTORY(ReadAlg);
+DECLARE_ALGORITHM_FACTORY(ReadAlg)
 
 //--------------------------------------------------------------------
 // Initialize
 //--------------------------------------------------------------------
 StatusCode ReadAlg::initialize() {
   MsgStream log(msgSvc(), name());
-  StatusCode sc = service("RunRecordDataSvc",m_runRecordSvc,true);
+  StatusCode sc = service("FileRecordDataSvc",m_recordSvc,true);
   if( sc.isFailure() ) {
-    log << MSG::ERROR << "Unable to retrieve run records service" << endreq;
+    log << MSG::ERROR << "Unable to retrieve run records service" << endmsg;
     return sc;
+  }
+  if ( !m_incidentName.empty() ) {
+    SmartIF<IProperty> prp(m_recordSvc);
+    setProperty("IncidentName",prp->getProperty("IncidentName"));
+    sc = service("IncidentSvc", m_incidentSvc, true);
+    if ( !sc.isSuccess() ) {
+      log << MSG::ERROR << "Failed to access IncidentSvc." << endmsg;
+      return sc;
+    }
+    m_incidentSvc->addListener(this,m_incidentName);
   }
   return StatusCode::SUCCESS;
 }
@@ -52,9 +61,37 @@ StatusCode ReadAlg::initialize() {
 //--------------------------------------------------------------------
 StatusCode ReadAlg::finalize() {
   MsgStream log(msgSvc(), name());
-  if ( m_runRecordSvc ) m_runRecordSvc->release();
-  m_runRecordSvc = 0;
+  if ( m_recordSvc ) m_recordSvc->release();
+  if ( m_incidentSvc ) {
+    m_incidentSvc->removeListener(this);
+    m_incidentSvc->release();
+    m_incidentSvc = 0;
+  }
+  m_recordSvc = 0;
   return StatusCode::SUCCESS;
+}
+
+//--------------------------------------------------------------------
+// IIncidentListener override: Inform that a new incident has occured
+//--------------------------------------------------------------------
+void ReadAlg::handle(const Incident& incident) {
+  MsgStream log(msgSvc(),name());
+  log << MSG::ALWAYS << "Got incident: " << incident.type() << " Source:" << incident.source() << endmsg;
+  if ( incident.type() == m_incidentName ) {
+    std::string n = incident.source();
+    log << MSG::ALWAYS << "Received incident:" << incident.type() << ": " << n << endmsg;
+    SmartDataPtr<Counter> evt_cnt(m_recordSvc,n+"/EvtCount");
+    if ( evt_cnt != 0 )
+      log << MSG::ALWAYS << "Incident: FileInfo record: " << n << "/EvtCount=" << evt_cnt->value() << endmsg;
+    else
+      log << MSG::ALWAYS << "Incident: NO FileInfo record EvtCounter for " << n << "/EvtCount" << endmsg;
+
+    SmartDataPtr<Counter> sum_cnt(m_recordSvc,n+"/SumCount");
+    if ( sum_cnt != 0 )
+      log << MSG::ALWAYS << "Incident: FileInfo record: " << n << "/SumCount=" << sum_cnt->value() << endmsg;
+    else
+      log << MSG::ALWAYS << "Incident: NO FileInfo record SumCounter for " << n << "/SumCount" << endmsg;
+  }
 }
 
 //--------------------------------------------------------------------
@@ -91,11 +128,17 @@ StatusCode ReadAlg::execute() {
         std::string new_fname = pAddr->par()[0];
         if ( fname != new_fname ) {
           fname = new_fname;
-          SmartDataPtr<Counter> evt_cnt(m_runRecordSvc,new_fname+"/EOR");
+          SmartDataPtr<Counter> evt_cnt(m_recordSvc,new_fname+"/EvtCount");
           if ( evt_cnt != 0 )
-            log << MSG::ALWAYS << "RunInfo record: Counter=" << evt_cnt->value() << endmsg;
+            log << MSG::ALWAYS << "FileInfo record: " << new_fname << "/EvtCount=" << evt_cnt->value() << endmsg;
           else
-            log << MSG::ALWAYS << "NO RunInfo record for " << fname << endmsg;
+            log << MSG::ALWAYS << "NO FileInfo record EvtCounter for " << fname << endmsg;
+
+          SmartDataPtr<Counter> sum_cnt(m_recordSvc,new_fname+"/SumCount");
+          if ( sum_cnt != 0 )
+            log << MSG::ALWAYS << "FileInfo record: " << new_fname << "/SumCount=" << sum_cnt->value() << endmsg;
+          else
+            log << MSG::ALWAYS << "NO FileInfo record SumCounter for " << fname << endmsg;
         }
       }
 
@@ -125,7 +168,7 @@ StatusCode ReadAlg::execute() {
             }
             log << endmsg << "   Decays:";
             log.width(4);           log << (*i)->decayVertices().size();
-            log << endreq;
+            log << endmsg;
             for (size_t id = 0; id < (*i)->decayVertices().size(); ++id) {
               const MyVertex* v = (*i)->decayVertices()[id];
               if ( v )  {
@@ -153,7 +196,7 @@ StatusCode ReadAlg::execute() {
           }
         }
         catch(...)    {
-          log << MSG::ERROR << "Exception occurred!" << endreq;
+          log << MSG::ERROR << "Exception occurred!" << endmsg;
         }
       }
     }
@@ -161,6 +204,6 @@ StatusCode ReadAlg::execute() {
       log << MSG::WARNING << "No tracks found, Event " << evt->event() << endmsg;
     return StatusCode::SUCCESS;
   }
-  log << MSG::ERROR << "Unable to retrieve Event Header object" << endreq;
+  log << MSG::ERROR << "Unable to retrieve Event Header object" << endmsg;
   return StatusCode::FAILURE;
 }

@@ -4,6 +4,7 @@
 #define GAUDIKERNEL_ALGTOOLHISTORY_H
 
 #include "GaudiKernel/HistoryObj.h"
+#include "GaudiKernel/IVersHistoryObj.h"
 
 class Property;
 class AlgTool;
@@ -13,19 +14,14 @@ class JobHistory;
 #include <vector>
 
 /** @class AlgToolHistory AlgToolHistory.h
- * 
+ *
  *  AlgToolHistory class definition
  *
  *  @author: Charles Leggett
  *
  */
 
-class AlgToolHistory: public HistoryObj {
-
-public:  // typedefs
-
-  // List of properties. This may change.
-  typedef std::vector<Property*> PropertyList;
+class GAUDI_API AlgToolHistory: public HistoryObj, virtual public IVersHistoryObj {
 
 private:  // data
 
@@ -80,10 +76,17 @@ public:
   // Return the algorithm properties.
   const PropertyList& properties() const { return m_properties; }
 
+  void dump(std::ostream &, const bool isXML=false, int indent=0) const;
+
+  const std::string& name() const { return algtool_name(); }
+  const std::string& type() const { return algtool_type(); }
+  const std::string& version() const { return algtool_version(); }
+
+
 };
 
 // Output stream.
-std::ostream& operator<<(std::ostream& lhs, const AlgToolHistory& rhs);
+GAUDI_API std::ostream& operator<<(std::ostream& lhs, const AlgToolHistory& rhs);
 
 #endif
-         
+

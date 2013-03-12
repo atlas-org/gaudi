@@ -14,18 +14,15 @@
  */
 namespace Gaudi  {
 
-  // Declaration of the interface ID ( interface id, major version, minor version) 
-  static const InterfaceID IID_IIODataManager("IIODataManager", 1, 0); 
-
   /** @class IDataConnection
     *
     *  ABC describing basic data connection
     *
-    *  @authot  M.Frank
+    *  @author  M.Frank
     *  @version 1.0
     *  @date    20/10/2007
     */
-  class IDataConnection  {
+  class GAUDI_API IDataConnection  {
   protected:
     /// Connection name/identifier
     std::string              m_name;
@@ -84,20 +81,21 @@ namespace Gaudi  {
 
   /** @class IIODataManager
     *
-    *  @authot  M.Frank
+    *  @author  M.Frank
     *  @version 1.0
     *  @date    20/10/2007
     */
-  class IIODataManager : virtual public IInterface  {
+  class GAUDI_API IIODataManager : virtual public IInterface {
   public:
+    /// InterfaceID
+    DeclareInterfaceID(IIODataManager,2,0);
+
     /// Connection type definition
     typedef IDataConnection           Connection;
     typedef std::vector<Connection*>  Connections;
     typedef Connection::IoType        IoType;
     enum FileType { UNKNOWN=1, PFN, LFN, FID };
-  public:
-    /// Retrieve interface ID
-    static const InterfaceID& interfaceID() { return IID_IIODataManager; }
+
     /// Open data stream in read mode
     virtual StatusCode connectRead(bool keep_open, IDataConnection* con) = 0;
     /// Open data stream in write mode

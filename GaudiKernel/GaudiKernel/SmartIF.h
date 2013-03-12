@@ -5,284 +5,142 @@
 // Framework include files
 #include "GaudiKernel/IInterface.h"
 
-// Forward declarations
-template <class TYPE> class SmartIF;
-template <> class SmartIF<IInterface>;
-template <class TYPE> class SmartIFBase;
-
-/**
- * @class SmartIF SmartIF.h GaudiKernel/SmartIF.h
+/** @class SmartIF SmartIF.h GaudiKernel/SmartIF.h
  *
- * Smart pointer base class to handle easily interfaces
+ * Small smart pointer class with automatic reference counting for IInterface.
  *
- * Description:
- * A small class to easy the use of Gaudi interfaces. This class acts as
- * a base class for the specific instances SmartIF<TYPE>.
- * The base class only defines operations on the valid smart pointer.
+ * SmartIF simplifies the interaction with components in Gaudi by implementing
+ * an automatic reference counting and the casting (via IInterface::queryInterface).
  *
- * Dependencies:
- * <UL>
- * <LI> Gaudi Interface definition:        Gaudi/Interfaces/IInterface.h
- * </UL>
- *
- * Author:  M.Frank
+ * @author Markus Frank
  * @author Sebastien Ponce
+ * @author Marco Clemencic
  */
-template <class TYPE> class SmartIFBase   {
-protected:
-  const InterfaceID  m_iid;
-  TYPE*              m_interface;
-  /// Release interface
-  void releaseInterface()   {
-    if ( m_interface ) m_interface->release();
-    m_interface = 0;
-  }
-  /// Standard constructor
-  SmartIFBase(const InterfaceID& iid)  :  m_iid(iid), m_interface(0)      {
-  }
-  /// Standard Destructor
-  virtual ~SmartIFBase()    {
-    releaseInterface();
-  }
-public:
-  /// Allow for check if smart pointer is valid
-  bool isValid()   const   {
-    return ( 0 != m_interface );
-  }
-  /// Automatic conversion to constined interface type
-  operator TYPE* ()   {
-    return m_interface;
-  }
-  /// Automatic conversion to constined interface type (CONST)
-  operator const TYPE* ()  const  {
-    return m_interface;
-  }
-  /// Check for non-equality
-  bool operator !=(const TYPE* test)   const   {
-    return test != m_interface;
-  }
-  /// Check for equality
-  bool operator ==(const TYPE* test)   const   {
-    return test == m_interface;
-  }
-  /// Dereference operator
-  TYPE* operator->()    {
-    return m_interface;
-  }
-  /// Dereference operator (CONST)
-  const TYPE* operator->()  const  {
-    return m_interface;
-  }
-  /// Allow for use as void pointer
-  void** operator & ()   {
-    return (void**) &m_interface;
-  }
-  /// Get reference to interface pointer
-  const TYPE* get() {
-    return m_interface;
-  }
-  /// Get reference to interface pointer
-  TYPE*& pRef() {
-    return this->m_interface;
-  }
-  /// Get reference to interface pointer (CONST)
-  const TYPE* const & pRef() const  {
-    return this->m_interface;
-  }
-  /// check the validity of the interface
-  bool operator!() const { return !(this->isValid()) ; }
+template <class TYPE> class SmartIF {
 private:
-  // disable copy
-  SmartIFBase( const SmartIFBase& copy ); ///< disable copy
-  // disable assignement
-  SmartIFBase& operator=( const SmartIFBase& right ) ; ///< disable assignement
-};
-
-/** Smart pointer to handle easily interfaces
-
-    Description:
-    A small class to easy the use of Gaudi interfaces.
-
-    Base Class:
-    SmartIFBase<TYPE>
-
-    <P> History    :
-    <PRE>
-    +---------+----------------------------------------------+--------+
-    |    Date |                 Comment                      | Who    |
-    +---------+----------------------------------------------+--------+
-    | 30/10/99| Initial version.                             | MF     |
-    +---------+----------------------------------------------+--------+
-    </PRE>
-    Author:  M.Frank
-    Version: 1.0
-*/
-template <class TYPE> class SmartIF : public SmartIFBase<TYPE>  {
+  /// Pointer to the instance
+  TYPE* m_interface;
 public:
-  /// Standard constructor with initialisation
-  SmartIF(const InterfaceID& iid, IInterface* iface) : SmartIFBase<TYPE>(iid)   {
-    SmartIF<TYPE>::operator=(iface);
+  // ---------- Construction and destruction ----------
+  /// Default constructor.
+  inline SmartIF(): m_interface(0) {}
+  /// Standard constructor from pointer.
+  inline SmartIF(TYPE* ptr): m_interface(ptr) {
+    if (m_interface) m_interface->addRef();
   }
-  /// Standard constructor with initialisation
-  SmartIF(const InterfaceID& iid, TYPE* iface) : SmartIFBase<TYPE>(iid)    {
-    SmartIF<TYPE>::operator=(iface);
+  /// Standard constructor from any (IInterface-derived) pointer.
+  template <class OTHER>
+  inline SmartIF(OTHER* ptr): m_interface(0) {
+    if (ptr) reset(ptr);
   }
-  /// Standard constructor with initialisation
-  SmartIF(const InterfaceID& iid) : SmartIFBase<TYPE>(iid)    {
+  /// Copy constructor.
+  inline SmartIF(const SmartIF& rhs): m_interface(rhs.get()) {
+    if (m_interface) m_interface->addRef();
   }
-  /// Standard constructor with initialisation
-  SmartIF ( TYPE* iface ) : SmartIFBase<TYPE>(TYPE::interfaceID())    {
-    SmartIF<TYPE>::operator=(iface);
-  }
-  /// Standard constructor with initialisation
-  SmartIF(IInterface* iface = 0) : SmartIFBase<TYPE>(TYPE::interfaceID())    {
-    SmartIF<TYPE>::operator=(iface);
-  }
-  /// Copy constructor
-  SmartIF( const SmartIF<TYPE>& copy) : SmartIFBase<TYPE>(copy.m_iid)  {
-    SmartIF<TYPE>::operator=(copy.m_interface);
-  }
-  /// Standard destructor
-  virtual ~SmartIF()    {
-  }
-  /// Simple assignment operator
-  SmartIF<TYPE>& operator = (int /* iface = 0*/)   {
-    this->releaseInterface();
-    this->m_interface = 0;
-    return *this;
-  }
-  /// Copy assignment operator with conversion to requested interface type
+  /// Constructor from another SmartIF, with a different type.
+  /// @note it cannot replace the copy constructor.
   template <class T>
-  SmartIF<TYPE>& operator = ( const SmartIF<T>& iface )
-  {
-    T* ptr = iface.m_interface ;
-    if ( (void*)ptr != (void*)this->m_interface )
-    {
-      TYPE* newIF = 0;
-      if ( ptr != 0 )   {
-        ptr->queryInterface(this->m_iid, pp_cast<void>(&newIF)).ignore();
-      }
-      this->releaseInterface();
-      this->m_interface = newIF;
+  inline explicit SmartIF(const SmartIF<T>& rhs): m_interface(0) {
+    reset(rhs.get());
+  }
+  /// Standard Destructor.
+  inline ~SmartIF() { reset(); }
+
+  // ---------- Boolean and comparison methods ----------
+  /// Allow for check if smart pointer is valid.
+  inline bool isValid() const { return m_interface != 0; }
+
+  // ---------- Pointer access methods ----------
+  /// Automatic conversion to pointer.
+  /// It is also used by the compiler for automatic conversion to boolean.
+  inline operator TYPE* () const { return m_interface; }
+  /// Dereference operator
+  inline TYPE* operator->() const { return m_interface; }
+  /// Dereference operator
+  inline TYPE& operator *() const { return *m_interface; }
+  /// Get interface pointer
+  inline TYPE* get() const { return m_interface; }
+#if !defined(GAUDI_V22_API) && !defined(NEW_SMARTIF)
+  /// Get reference to the pointer
+  inline TYPE*& pRef() {
+    return m_interface;
+  }
+#endif
+
+  // ---------- Cast methods ----------
+  /// Set the internal pointer to the passed one disposing of the old one.
+  /// Version for pointers of the same type of the managed ones (no call to
+  /// queryInterface needed).
+  inline void reset(TYPE* ptr = 0) {
+    if (ptr == m_interface) return;
+    if (m_interface) m_interface->release();
+    if (ptr) {
+      m_interface = ptr;
+      m_interface->addRef();
+    } else {
+      m_interface = 0;
     }
+  }
+  /// Set the internal pointer to the passed one disposing of the old one.
+  /// Version for pointers of types inheriting from IInterface.
+  template <class OTHER>
+  inline void reset(OTHER* ptr) {
+    if (static_cast<IInterface*>(ptr) == static_cast<IInterface*>(m_interface)) return;
+    if (m_interface) m_interface->release();
+    if (ptr) {
+      ptr->queryInterface(TYPE::interfaceID(), pp_cast<void>(&m_interface)).ignore();
+    } else {
+      m_interface = 0;
+    }
+  }
+
+  // ---------- Special hacks ----------
+  /// Assignment operator from IInterface pointer.
+  /// It allows things like
+  /// <code>
+  /// SmartIF<T> x;
+  /// x = 0;
+  /// </code>
+  inline SmartIF& operator = (IInterface* ptr) {
+    reset(ptr);
     return *this;
   }
-  /// Copy assignment operator
-  SmartIF<TYPE>& operator = ( const SmartIF<TYPE>& iface)
-  {
-    TYPE* newIF = iface.m_interface ;
-    return (*this)=newIF ;
-  }
-  /// Assignment operator with conversion to requested interface type
-  SmartIF& operator = (IInterface* iface)
-  {
-    if ( iface != this->m_interface )
-    {
-      TYPE* newIF = 0;
-      if ( iface != 0 )   {
-        iface->queryInterface(this->m_iid, pp_cast<void>(&newIF)).ignore();
-      }
-      this->releaseInterface();
-      this->m_interface = newIF;
-    }
+  /// Assignment operator.
+  inline SmartIF& operator = (const SmartIF& rhs) {
+    reset(rhs.get());
     return *this;
   }
-  /// Simple assignment operator
-  SmartIF<TYPE>& operator = (TYPE* iface)
-  {
-    if ( iface != this->m_interface )   {
-      if ( iface != 0 )   {
-        iface->addRef();
-      }
-      this->releaseInterface();
-      this->m_interface = iface;
-    }
+  /// Assignment operator from a different SmartIF.
+  /// @note it cannot replace the assignment operator.
+  template <class T>
+  inline SmartIF& operator = (const SmartIF<T>& rhs) {
+    reset(rhs.get());
     return *this;
   }
-  /// check the validity of the interface
-  bool operator!() const { return !(this->isValid()) ; }
 };
 
-/** Smart pointer to handle IInterface interfaces
-
-    Description:
-    The smart pointer to IInterface is a little bit special,
-    mainly because the IInterface is contained in any other interface.
-    Hence, the exported methodes are only a subset of the
-    generic template.
-
-    Base Class:
-    SmartIFBase<TYPE>
-
-    <P> History    :
-    <PRE>
-    +---------+----------------------------------------------+--------+
-    |    Date |                 Comment                      | Who    |
-    +---------+----------------------------------------------+--------+
-    | 30/10/99| Initial version.                             | MF     |
-    +---------+----------------------------------------------+--------+
-    </PRE>
-    Author:  M.Frank
-    Version: 1.0
-*/
-template <> class SmartIF<IInterface> : public SmartIFBase<IInterface>  {
-public:
-  typedef IInterface TYPE;
-  /// Copy constructor
-  SmartIF( const SmartIF<IInterface>& copy)
-    : SmartIFBase<IInterface>(copy.m_iid)
-  {
-    SmartIF<TYPE>::operator=(copy.m_interface);
-  }
-  /// Standard constructor with initialisation
-  SmartIF(IInterface* iface = 0)
-  : SmartIFBase<IInterface>(IID_IInterface)
-  {
-    SmartIF<TYPE>::operator=(iface);
-  }
-  /// Constructor from other SmartIF
-  template <class T>
-  SmartIF( const SmartIF<T>& right )
-    : SmartIFBase<IInterface>(IID_IInterface)
-  {
-    SmartIF<TYPE>::operator=(right.m_interface);
-  }
-  /// Standard Destructor
-  virtual ~SmartIF()    {
-  }
-  /// Copy assignment operator with conversion to requested interface type
-  template <class T>
-  SmartIF<TYPE>& operator = ( const SmartIF<T>& iface)
-  {
-    T* ptr = iface.m_interface ;
-    if ( (void*)ptr != (void*)this->m_interface )   {
-      TYPE* newIF = 0;
-      if ( ptr != 0 )   {
-        ptr->queryInterface(this->m_iid, (void**)&newIF).ignore();
-      }
-      this->releaseInterface();
-      this->m_interface = newIF;
-    }
-    return *this;
-  }
-  /// Copy assignment operator
-  SmartIF<TYPE>& operator = ( const SmartIF<TYPE>& iface)   {
-    TYPE* newIF = iface.m_interface ;
-    return (*this)=newIF ;
-  }
-  /// Assignment operator
-  SmartIF<TYPE>& operator = (TYPE* iface)   {
-    if ( iface != m_interface )   {
-      if ( iface != 0 )   {
-        iface->addRef();
-      }
-      releaseInterface();
-      m_interface = iface;
-    }
-    return *this;
-  }
-  /// check the validity of the interface
-  bool operator!() const { return !(this->isValid()) ; }
-};
-
+#if defined(_MSC_VER) && (_MSC_VER < 1500)
+/// Ugly hack to allow a check like
+/// <code>
+///  0 == smartIf;
+/// </code>
+/// To work on Windows (VisualC 7.1).
+/// Actually, VC7 will user operator==(TYPE*,TYPE*) when the left operand is a pointer,
+/// but it does not understands that 0 should be interpreted as (TYPE*)0.
+template <class TYPE>
+inline bool operator == (long lhs, const SmartIF<TYPE> &rhs) {
+  return rhs == reinterpret_cast<TYPE*>(lhs);
+}
+/// Ugly hack to allow a check like
+/// <code>
+///  0 != smartIf;
+/// </code>
+/// To work on Windows (VisualC 7.1).
+/// Actually, VC7 will user operator!=(TYPE*,TYPE*) when the left operand is a pointer,
+/// but it does not understands that 0 should be interpreted as (TYPE*)0.
+template <class TYPE>
+inline bool operator != (long lhs, const SmartIF<TYPE> &rhs) {
+  return rhs != reinterpret_cast<TYPE*>(lhs);
+}
+#endif
 #endif // GAUDI_SMARTIF_H

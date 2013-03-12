@@ -15,9 +15,9 @@ ApplicationMgr.TopAlg = { "SCSAlg"};
 
 StatusCodeSvc.OutputLevel = 1;
 StatusCodeSvc.SuppressCheck=false;
-StatusCodeSvc.Filter = { "FNC=SCSAlg::fncUnchecked2()" };
+// StatusCodeSvc.Filter = { "FNC=SCSAlg::fncUnchecked2()" };
 // StatusCodeSvc.Filter = { "SCSAlg::fncUnchecked2()" };
-// StatusCodeSvc.Filter = { "LIB=libGaudiExamples.so" };
+StatusCodeSvc.Filter = { "LIB=libGaudiExamples.so" };
 
 
 //--------------------------------------------------------------

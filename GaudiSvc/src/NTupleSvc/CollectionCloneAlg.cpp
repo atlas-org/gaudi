@@ -27,9 +27,9 @@ namespace {
   }
 
   template<class TYP> static
-  StatusCode createItem (MsgStream& log, 
+  StatusCode createItem (MsgStream& log,
                         INTuple* tuple,
-                        INTupleItem* src, 
+                        INTupleItem* src,
                         const TYP& null)
   {
     NTuple::_Data<TYP>* source = dynamic_cast<NTuple::_Data<TYP>*>(src);
@@ -42,7 +42,7 @@ namespace {
     long dim[4], idxLen = 0;
     long dim1 = 1, dim2 = 1;
     INTupleItem* it = 0;
-    for ( int i = 0; i < ndim; i++ ) 
+    for ( int i = 0; i < ndim; i++ )
       dim[i] = source->dim(i);
     /// Type information of the item
     if ( hasIdx )  {
@@ -74,8 +74,8 @@ namespace {
         idxLen = upper<long>(index);
         break;
       default:
-        log << MSG::ERROR << "Column " << idxName 
-            << " is not a valid index column!" << endreq;
+        log << MSG::ERROR << "Column " << idxName
+            << " is not a valid index column!" << endmsg;
         return StatusCode::FAILURE;
       }
     }
@@ -85,38 +85,38 @@ namespace {
       break;
     case 1:
       dim1 = (hasIdx) ? idxLen : dim[0];
-      it = NTuple::_Array<TYP>::create (tuple, 
-                                        name, 
+      it = NTuple::_Array<TYP>::create (tuple,
+                                        name,
                                         typeid(TYP),
-                                        idxName, 
-                                        dim1, 
-                                        low, 
-                                        high, 
+                                        idxName,
+                                        dim1,
+                                        low,
+                                        high,
                                         null);
       break;
     case 2:
       dim1 = (hasIdx) ? idxLen : dim[0];
       dim2 = (hasIdx) ? dim[0] : dim[1];
-      it = NTuple::_Matrix<TYP>::create ( tuple, 
-                                          name, 
+      it = NTuple::_Matrix<TYP>::create ( tuple,
+                                          name,
                                           typeid(TYP),
-                                          idxName, 
-                                          dim1, 
-                                          dim2, 
-                                          low, 
-                                          high, 
+                                          idxName,
+                                          dim1,
+                                          dim2,
+                                          low,
+                                          high,
                                           null);
       break;
-    default:  
+    default:
       return StatusCode::FAILURE;
     }
     return tuple->add(it);
   }
 }
 
-/**@class CollectionCloneAlg 
+/**@class CollectionCloneAlg
   *
-  * Small algorithm, which allows to merge N-tuples in 
+  * Small algorithm, which allows to merge N-tuples in
   * a generic way. In the options directory an python
   * interface is presented, which shows how to steer this
   * algorithm in a standaqlone program.
@@ -146,7 +146,7 @@ public:
   /// Standard algorithm constructor
   CollectionCloneAlg(const std::string& name, ISvcLocator* pSvcLocator)
   :	Algorithm(name, pSvcLocator),  m_dataSvc(0)
-  { 
+  {
     declareProperty("EvtTupleSvc", m_tupleSvc="EvtTupleSvc");
     declareProperty("Input",       m_inputs);
     declareProperty("Output",      m_output);
@@ -179,6 +179,7 @@ public:
           break;
         case 'F':
           fun = val;
+          break ;
         default:
           break;
         }
@@ -236,7 +237,7 @@ public:
         break;
       case DataTypeInfo::ULONG:
         status = createItem(log, tuple, *i, (unsigned long)0);
-        break; 
+        break;
       case DataTypeInfo::CHAR:
         status = createItem(log, tuple, *i, char(0));
         break;
@@ -298,34 +299,34 @@ public:
           return StatusCode::FAILURE;
         }
         if ( itm->type() != src_itm->type() )  {
-          log << "Tuple item " << nam << " are of different types in " 
+          log << "Tuple item " << nam << " are of different types in "
             << src_id   << ":" << src_itm->typeName() << " <-> "
             << clone_id << ":" << itm->typeName() << endmsg;
           return StatusCode::FAILURE;
         }
         if ( itm->ndim() != src_itm->ndim() )  {
-          log << "Tuple item " << nam << " have different dimensions in " 
+          log << "Tuple item " << nam << " have different dimensions in "
             << src_id   << ":" << src_itm->ndim() << " <-> "
             << clone_id << ":" << itm->ndim() << endmsg;
           return StatusCode::FAILURE;
         }
         for (int j=0; j<itm->ndim(); ++j)  {
           if ( src_itm->dim(j) != itm->dim(j) )  {
-            log << "Tuple item " << nam << " have different dimensions in " 
+            log << "Tuple item " << nam << " have different dimensions in "
               << src_id   << "[" << j << "]:" << src_itm->dim(j) << " <-> "
               << clone_id << "[" << j << "]:" << itm->dim(j) << endmsg;
             return StatusCode::FAILURE;
           }
         }
         if ( itm->hasIndex() != src_itm->hasIndex() )  {
-          log << "Tuple item " << nam << " has different index colums " 
+          log << "Tuple item " << nam << " has different index colums "
             << src_id   << ":" << src_itm->hasIndex() << " <-> "
             << clone_id << ":" << itm->hasIndex() << endmsg;
           return StatusCode::FAILURE;
         }
         if ( itm->hasIndex() )  {
           if ( itm->index() != src_itm->index() )  {
-            log << "Tuple item " << nam << " has different index colums " 
+            log << "Tuple item " << nam << " has different index colums "
               << src_id   << ":" << src_itm->index() << " <-> "
               << clone_id << ":" << itm->index() << endmsg;
             return StatusCode::FAILURE;
@@ -375,7 +376,7 @@ public:
                 break;
               case DataTypeInfo::ULONG:
                 size = sizeof(unsigned long);
-                break; 
+                break;
               case DataTypeInfo::CHAR:
                 size = sizeof(char);
                 break;
@@ -429,11 +430,11 @@ public:
             }
             status = m_dataSvc->writeRecord(out.ptr());
             if ( !status.isSuccess() )  {
-              log << MSG::ERROR << "Failed to write record " << nentry 
+              log << MSG::ERROR << "Failed to write record " << nentry
                   << " from " << input << " to " << m_outName << endmsg;
             }
           }
-        } 
+        }
         log << MSG::INFO << "End of reading tuple " << input
             << " after " << nentry << " entries." << endmsg;
 

@@ -43,7 +43,7 @@ GaudiCommon<PBASE>::fullTESLocation( const std::string & location,
            :
              0 == location.find("/Event/") ?
                rootInTES() + location.substr(7)
-             : 
+             :
                rootInTES() + location );
 }
 // ============================================================================
@@ -59,9 +59,29 @@ GaudiCommon<PBASE>::get( IDataProviderSvc*  service ,
   // check the environment
   Assert( 0 != service ,    "get():: IDataProvider* points to NULL!"      ) ;
   // get the helper object:
-  Gaudi::Utils::GetData<TYPE> helper ;
-  return helper ( *this , service , 
+  Gaudi::Utils::GetData<TYPE> getter ;
+  return getter ( *this    ,
+                  service  ,
                   fullTESLocation ( location , useRootInTES ) ) ;
+}
+// ============================================================================
+// Templated access to the data in Gaudi Transient Store, no check on the content
+// ============================================================================
+template < class PBASE >
+template < class TYPE  >
+inline typename Gaudi::Utils::GetData<TYPE>::return_type
+GaudiCommon<PBASE>::getIfExists( IDataProviderSvc*  service ,
+                                 const std::string& location,
+                                 const bool useRootInTES ) const
+{
+  // check the environment
+  Assert( 0 != service ,    "get():: IDataProvider* points to NULL!"      ) ;
+  // get the helper object:
+  Gaudi::Utils::GetData<TYPE> getter ;
+  return getter ( *this    ,
+                  service  ,
+                  fullTESLocation ( location , useRootInTES ),
+                  false) ;
 }
 // ============================================================================
 // check the existence of objects in Gaudi Transient Store
@@ -75,12 +95,10 @@ inline bool GaudiCommon<PBASE>::exist( IDataProviderSvc*  service  ,
   // check the environment
   Assert( 0 != service , "exist():: IDataProvider* points to NULL!"      ) ;
   // check the data object
-  const std::string & fullLoc = fullTESLocation( location, useRootInTES );
-  SmartDataPtr<TYPE> obj( service , fullLoc ) ;
-  return obj ? true : false ;
+  Gaudi::Utils::CheckData<TYPE> checker ;
+  return checker ( service,
+                   fullTESLocation ( location , useRootInTES ) ) ;
 }
-// ============================================================================
-
 // ============================================================================
 // get the existing object from Gaudi Event Transient store
 // or create new object register in in TES and return if object
@@ -88,28 +106,20 @@ inline bool GaudiCommon<PBASE>::exist( IDataProviderSvc*  service  ,
 // ============================================================================
 template <class PBASE>
 template <class TYPE,class TYPE2>
-inline TYPE* GaudiCommon<PBASE>::getOrCreate( IDataProviderSvc* svc ,
-                                              const std::string& location ,
-                                              const bool useRootInTES  ) const
+inline typename Gaudi::Utils::GetData<TYPE>::return_type
+GaudiCommon<PBASE>::getOrCreate( IDataProviderSvc*  service  ,
+                                 const std::string& location ,
+                                 const bool useRootInTES  ) const
 {
   // check the environment
-  Assert( 0 != svc , "getOrCreate():: svc points to NULL!" ) ;
-  const std::string & fullLoc = fullTESLocation( location, useRootInTES );
-  SmartDataPtr<TYPE> obj ( svc , fullLoc ) ;
-  if ( !obj )
-  {
-    TYPE2* o = new TYPE2() ;
-    put ( svc , o , location ) ; // do not use fullLoc here as put recreates it
-    return o ;
-  }
-  TYPE* aux = obj ;
-  if( !aux )
-  { Exception ( "getOrCreate():: No valid data at '" + fullLoc + "'" ) ; }
-  // return located *VALID* data
-  return aux ;
+  Assert ( 0 != service , "getOrCreate():: svc points to NULL!" ) ;
+  // get the helper object
+  Gaudi::Utils::GetOrCreateData<TYPE,TYPE2> getter ;
+  return getter ( *this                                     ,
+                  service                                   ,
+                  fullTESLocation( location, useRootInTES ) ,
+                  location                                  ) ;
 }
-// ============================================================================
-
 // ============================================================================
 // the useful method for location of tools.
 // ============================================================================
@@ -128,7 +138,7 @@ inline TOOL* GaudiCommon<PBASE>::tool( const std::string& type           ,
   }
   else
   {
-    Assert( 0 != this->toolSvc() , "tool():: IToolSvc* points to NULL!" ) ;
+    Assert( this->toolSvc() != 0, "tool():: IToolSvc* points to NULL!" ) ;
     // get the tool from Tool Service
     const StatusCode sc =
       this->toolSvc()->retrieveTool ( type , name , Tool , parent , create ) ;
@@ -143,8 +153,6 @@ inline TOOL* GaudiCommon<PBASE>::tool( const std::string& type           ,
   return Tool ;
 }
 // ============================================================================
-
-// ============================================================================
 // the useful method for location of tools.
 // ============================================================================
 template < class PBASE >
@@ -154,7 +162,7 @@ inline TOOL* GaudiCommon<PBASE>::tool( const std::string& type   ,
                                        bool               create ) const
 {
   // check the environment
-  Assert ( 0 != PBASE::toolSvc() , "IToolSvc* points to NULL!" );
+  Assert ( PBASE::toolSvc() != 0, "IToolSvc* points to NULL!" );
   // retrieve the tool from Tool Service
   TOOL* Tool = 0 ;
   const StatusCode sc =
@@ -169,31 +177,38 @@ inline TOOL* GaudiCommon<PBASE>::tool( const std::string& type   ,
   return Tool ;
 }
 // ============================================================================
-
-// ============================================================================
 // the useful method for location of services
 // ============================================================================
 template < class PBASE   >
 template < class SERVICE >
-inline SERVICE* GaudiCommon<PBASE>::svc( const std::string& name   ,
-                                         const bool         create ) const
+inline SmartIF<SERVICE> GaudiCommon<PBASE>::svc( const std::string& name   ,
+                                                  const bool         create ) const
 {
-  SERVICE* s = 0 ;
-  Assert ( 0 != this->svcLoc() , "ISvcLocator* points to NULL!" );
-  // retrieve the service using templated method Algorithm::service
-  StatusCode sc = this->svcLoc() -> service( name , s , create ) ;
-  // check the results
-  if ( sc.isFailure() )
-  { Exception ( "svc():: Could not retrieve Svc '" + name + "'", sc ) ; }
-  if ( 0 == s         )
-  { Exception ( "svc():: Could not retrieve Svc '" + name + "'"     ) ; }
-  // add the tool into list of known tools, to be properly released
-  addToServiceList( s, name  ) ;
+  Assert ( this->svcLoc() != 0, "ISvcLocator* points to NULL!" );
+  SmartIF<SERVICE> s;
+  // check if we already have this service
+  Services::iterator it = m_services.find(name);
+  if (it != m_services.end()) {
+    // Try to get the requested interface
+    s = it->second;
+    // check the results
+    if ( !s.isValid() ) {
+      Exception ("svc():: Could not retrieve Svc '" + name + "'", StatusCode::FAILURE);
+    }
+  } else {
+    SmartIF<IService>& baseSvc = this->svcLoc()->service(name, create);
+    // Try to get the requested interface
+    s = baseSvc;
+    // check the results
+    if ( !baseSvc.isValid() || !s.isValid() ) {
+      Exception ("svc():: Could not retrieve Svc '" + name + "'", StatusCode::FAILURE);
+    }
+    // add the tool into list of known tools, to be properly released
+    addToServiceList(baseSvc);
+  }
   // return *VALID* located service
-  return s ;
+  return s;
 }
-// ============================================================================
-
 // ============================================================================
 // Short-cut  to get a pointer to the UpdateManagerSvc
 // ============================================================================
@@ -206,55 +221,6 @@ GaudiCommon<PBASE>::updMgrSvc() const
   return m_updMgrSvc ;
 }
 // ============================================================================
-
-// ============================================================================
-// Short-cut  to get a pointer to the
-// ============================================================================
-template <class PBASE>
-inline IDataProviderSvc *
-GaudiCommon<PBASE>::fastContainersSvc() const
-{
-  if ( !m_fastContainersSvc )
-  { m_fastContainersSvc = svc<IDataProviderSvc>("FastContainersSvc",true); }
-  return m_fastContainersSvc ;
-}
-
-// ============================================================================
-// Get a fast container
-// ============================================================================
-template < class PBASE   >
-template < class T >
-inline TransientFastContainer<T> *
-GaudiCommon<PBASE>::getFastContainer( const std::string &location,
-                                      typename TransientFastContainer<T>::size_type initial )
-{
-  typedef TransientFastContainer<T> container_type;
-
-  IDataProviderSvc* svc = fastContainersSvc();
-  Assert( 0 != svc , "getFastContainer(): cannot get FastContainersSvc" );
-
-  container_type *ptr = NULL;
-  SmartDataPtr<container_type> obj( svc, location );
-  if (!obj){
-    ptr = new container_type(initial);
-    StatusCode status = svc->registerObject(location,ptr);
-    if ( !status.isSuccess() ){
-      Exception("getFastContainer(): cannot register '" +
-                System::typeinfoName( typeid( *ptr ) ) +
-                "' at address '" + location + "'"  , status );
-    }
-  } else {
-    ptr = obj;
-    if ( !ptr ){
-      Exception("getFastContainer(): No valid container at '" + location + "'");
-    }
-  }
-
-  return ptr;
-}
-// ============================================================================
-
-// ============================================================================
 // predefined configurable message stream for the effective printouts
 // ============================================================================
 template <class PBASE>
@@ -266,19 +232,15 @@ GaudiCommon<PBASE>::msgStream ( const MSG::Level level ) const
   return *m_msgStream << level ;
 }
 // ============================================================================
-
-// ============================================================================
 // Assertion - throw exception, if condition is not fulfilled
 // ============================================================================
 template <class PBASE>
-inline StatusCode GaudiCommon<PBASE>::Assert( const bool         OK  ,
-                                              const std::string& msg ,
-                                              const StatusCode   sc  ) const
+inline void GaudiCommon<PBASE>::Assert( const bool         ok  ,
+                                        const std::string& msg ,
+                                        const StatusCode   sc  ) const
 {
-  return ( OK ? StatusCode(StatusCode::SUCCESS, true) : Exception( msg , sc ) ) ;
+  if (!ok) Exception( msg , sc );
 }
-// ============================================================================
-
 // ============================================================================
 // Delete the current message stream object
 // ============================================================================
@@ -288,20 +250,15 @@ inline void GaudiCommon<PBASE>::resetMsgStream() const
   if ( 0 != m_msgStream ) { delete m_msgStream; m_msgStream = 0; }
 }
 // ============================================================================
-
-// ============================================================================
 // Assertion - throw exception, if condition is not fulfilled
 // ============================================================================
 template <class PBASE>
-inline StatusCode
-GaudiCommon<PBASE>::Assert( const bool        OK  ,
-                            const char*       msg ,
-                            const StatusCode  sc  ) const
+inline void GaudiCommon<PBASE>::Assert( const bool        ok  ,
+                                        const char*       msg ,
+                                        const StatusCode  sc  ) const
 {
-  return OK ? StatusCode(StatusCode::SUCCESS, true) : Exception( msg , sc ) ;
+  if (!ok) Exception( msg , sc );
 }
-// ============================================================================
-
 // ============================================================================
 /** @def ALG_ERROR
  *  Small and simple macro to add into error message the file name
@@ -325,5 +282,6 @@ GaudiCommon<PBASE>::Assert( const bool        OK  ,
            std::string             (   __FILE__    ) + "']" , code ) )
 
 // ============================================================================
-
+// The END
+// ============================================================================
 #endif // GAUDIALG_GAUDICOMMONIMP_H

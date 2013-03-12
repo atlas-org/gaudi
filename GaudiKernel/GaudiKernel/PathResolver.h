@@ -2,10 +2,13 @@
 #define GAUDIKERNEL_PATHRESOLVER_H
 
 #include <string>
+#include "GaudiKernel/Kernel.h"
+
 
 namespace System {
 
-class PathResolver
+class GAUDI_API PathResolver
+
 {
 public:
   typedef enum
@@ -37,7 +40,7 @@ public:
   /**
 
     @arg @c logical_file_name the name of the file to locate in the search path
-    @arg @c search_list the prioritized list of possible locations separated by the usual path separator 
+    @arg @c search_list the prioritized list of possible locations separated by the usual path separator
     @arg @c search_type characterizes the type of search. Can be either @c LocalSearch or @c RecursiveSearch
 
     @return the physical name of the located file or empty string if not found
@@ -46,6 +49,7 @@ public:
   static std::string find_file_from_list (const std::string& logical_file_name,
 					  const std::string& search_list,
 					  SearchType search_type = LocalSearch);
+
 
   /**
 
@@ -63,7 +67,7 @@ public:
   /**
 
     @arg @c logical_file_name the name of the directory to locate in the search path
-    @arg @c search_list the prioritized list of possible locations separated by the usual path separator 
+    @arg @c search_list the prioritized list of possible locations separated by the usual path separator
     @arg @c search_type characterizes the type of search. Can be either LocalSearch or RecursiveSearch
 
     @return the physical name of the located directory or empty string if not found
@@ -73,6 +77,7 @@ public:
 					       const std::string& search_list,
 					       SearchType search_type = LocalSearch);
 
+
   /**
 
   @arg @c search_path the name of a path-like environment variable
@@ -81,19 +86,12 @@ public:
 
    */
   static SearchPathStatus check_search_path (const std::string& search_path);
+
+
 };
 
-PathResolver::SearchPathStatus PathResolverCheckSearchPath (const std::string& search_path);
-std::string PathResolverFindDirectory (const std::string& logical_file_name,
-			 const std::string& search_path);
-std::string PathResolverFindDirectoryFromList (const std::string& logical_file_name,
-				 const std::string& search_list);
-std::string PathResolverFindFile (const std::string& logical_file_name,
-		    const std::string& search_path);
-std::string PathResolverFindFileFromList (const std::string& logical_file_name,
-			    const std::string& search_list);
-std::string PathResolverFindXMLFile (const std::string& logical_file_name);
-std::string PathResolverFindDataFile (const std::string& logical_file_name);
+GAUDI_API std::string PathResolverFindXMLFile (const std::string& logical_file_name);
+GAUDI_API std::string PathResolverFindDataFile (const std::string& logical_file_name);
 
 }
 

@@ -11,14 +11,14 @@ class IRegistry;
 /** @class IDataStoreAgent IDataStoreAgent.h GaudiKernel/IDataStoreAgent.h
 
     Generic data agent interface
-    
+
     @author Markus Frank
 */
-class IDataStoreAgent   {
+class GAUDI_API IDataStoreAgent {
 public:
   /// destructor
   virtual ~IDataStoreAgent() { }
-  
+
   /** Analyse the data object.
   @return Boolean indicating wether the tree below should be analysed
   */

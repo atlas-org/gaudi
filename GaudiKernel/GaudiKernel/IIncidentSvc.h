@@ -10,22 +10,19 @@
 class IIncidentListener;
 class Incident;
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IIncidentSvc(310, 1 , 0); 
-
 /** @class IIncidentSvc IIncidentSvc.h GaudiKernel/IIncidentSvc.h
 
-    The interface implemented by the IncidentSvc service. It is used by 
+    The interface implemented by the IncidentSvc service. It is used by
     Listeners to declare themselves that they are interested by Incidents
     of a certain type and by Incident originators.
-              
-    @author Pere Mato
-*/  
-class IIncidentSvc : virtual public IInterface {
-  public:
 
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IIncidentSvc; }
+    @author Pere Mato
+*/
+class GAUDI_API IIncidentSvc: virtual public IInterface {
+public:
+  /// InterfaceID
+  DeclareInterfaceID(IIncidentSvc,2,0);
+
   /** Add listener
       @param lis Listener address
       @param type Incident type

@@ -1,4 +1,4 @@
-// Include files 
+// Include files
 #include "LoopAlg.h"
 
 #include "GaudiKernel/MsgStream.h"
@@ -30,8 +30,7 @@ StatusCode LoopAlg::execute()
 //------------------------------------------------------------------------------
 {
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "Execute..." << endreq;
-
+  log << MSG::INFO << "Execute..." << endmsg;
 
   return StatusCode::SUCCESS;
 }
@@ -40,8 +39,7 @@ StatusCode LoopAlg::finalize()
 //------------------------------------------------------------------------------
 {
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "Finalizing..." << endreq;
-
+  log << MSG::INFO << "Finalizing..." << endmsg;
 
   return StatusCode::SUCCESS;
 }

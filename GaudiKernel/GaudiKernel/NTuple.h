@@ -109,7 +109,7 @@ namespace NTuple
   // ==========================================================================
   /** Abstract class describing basic data in an Ntuple.
    */
-  template <class TYP> class _Data : virtual public INTupleItem  {
+  template <class TYP> class GAUDI_API _Data : virtual public INTupleItem  {
   protected:
     /// Pointer to data buffer
     TYP* m_buffer;
@@ -124,8 +124,10 @@ namespace NTuple
   // ==========================================================================
   /** Abstract class describing a column in a N tuple.
    */
-  template <class TYP> class _Item : virtual public _Data<TYP>  {
+  template <class TYP> class GAUDI_API _Item : virtual public _Data<TYP>  {
   public:
+    /// Destructor.
+    virtual ~_Item() {}
     /// Create instance
     static _Item* create(INTuple* tup,
                          const std::string& name,
@@ -145,9 +147,9 @@ namespace NTuple
     virtual TYP get() const   { return *this->m_buffer;             }
   };
   // ==========================================================================
-  /** Abstract class discribing a column-array in a N tuple.
+  /** Abstract class describing a column-array in a N tuple.
    */
-  template <class TYP> class _Array : virtual public _Data<TYP>  {
+  template <class TYP> class GAUDI_API _Array : virtual public _Data<TYP>  {
   public:
     /// Create instance
     static _Array* create(INTuple* tup,
@@ -179,9 +181,9 @@ namespace NTuple
     TYP&       data(long i)         { return *(this->m_buffer + i);        }
   };
   // ==========================================================================
-  /** Abstract class discribing a matrix column in a N tuple.
+  /** Abstract class describing a matrix column in a N tuple.
    */
-  template <class TYP> class _Matrix : virtual public _Data<TYP>    {
+  template <class TYP> class GAUDI_API _Matrix : virtual public _Data<TYP>    {
   protected:
     /// Number of rows per column
     long  m_rows;
@@ -222,7 +224,7 @@ namespace NTuple
   template <class TYP> class _Accessor  {
     friend class Tuple;
   private:
-    _Accessor<TYP>& operator=(const _Accessor<TYP>& copy)   {
+    _Accessor<TYP>& operator=(const _Accessor<TYP>&)   {
       return *this;
     }
   protected:
@@ -1074,7 +1076,7 @@ namespace NTuple
     }
     /// class ID of the object
     virtual const CLID& clID()    const   {
-      return Directory::classID();
+      return classID();
     }
   };
 
@@ -1106,7 +1108,7 @@ namespace NTuple
     }
     /// class ID of the object
     virtual const CLID& clID()    const   {
-      return File::classID();
+      return classID();
     }
     /// Set access type
     void setType(const long typ)   {
@@ -1171,7 +1173,9 @@ namespace NTuple
   typedef Item<short>             ShortItem;
   typedef Item<unsigned short>    UShortItem;
   typedef Item<long>              LongItem;
+  typedef Item<long long>         LongLongItem;
   typedef Item<unsigned long>     ULongItem;
+  typedef Item<unsigned long long> ULongLongItem;
   typedef Item<int>               IntItem;
   typedef Item<unsigned int>      UIntItem;
   typedef Item<float>             FloatItem;
@@ -1199,17 +1203,17 @@ namespace NTuple
   typedef Matrix<float>           FloatMatrix;
   typedef Matrix<double>          DoubleMatrix;
 #endif
+
+  template <class T>
+  inline std::ostream& operator<<(std::ostream& s, const Item<T>& obj)
+  {
+    return s << T(obj);
+  }
 } // end of namespace NTuple
 
 // Useful:
 typedef SmartDataPtr<NTuple::Tuple>     NTuplePtr;
 typedef SmartDataPtr<NTuple::Directory> NTupleDirPtr;
 typedef SmartDataPtr<NTuple::File>      NTupleFilePtr;
-
-template <class T>
-std::ostream& operator<<(std::ostream& s, const NTuple::Item<T>& obj)
-{
-  return s << T(obj);
-}
 
 #endif // GAUDIKERNEL_NTUPLE_H

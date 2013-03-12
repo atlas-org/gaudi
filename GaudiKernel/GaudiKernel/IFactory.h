@@ -7,10 +7,6 @@
 #include <string>
 #include <vector>
 
-
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IFactory(104, 1 , 0); 
-
 /** @class IFactory IFactory.h GaudiKernel/IFactory.h
 
     The IFactory is the interface used to create contrete instances of
@@ -18,10 +14,11 @@ static const InterfaceID IID_IFactory(104, 1 , 0);
 
     @author Pere Mato
 */
-class IFactory : virtual public  IInterface  {
+class GAUDI_API IFactory: virtual public IInterface {
 public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IFactory; }
+  /// InterfaceID
+  DeclareInterfaceID(IFactory,2,0);
+
   /// Instantiate an instance of a Gaudi class
   virtual IInterface* instantiate( IInterface *parent ) const = 0;
   virtual unsigned long addRef()   const = 0;

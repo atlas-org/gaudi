@@ -31,7 +31,7 @@ namespace Containers   {
 
   /** KeyedObjectManager
    *  Class to manage keyed objects. This class is instantiated for two
-   *  container types: map and hashmap. Other typeas are possible,
+   *  container types: map and hashmap. Other types are possible,
    *  but currently not supported. Other implementations may be achieved
    *  by specializing the SETUP class.
    *
@@ -43,7 +43,7 @@ namespace Containers   {
    *
    */
   template <class SETUP>
-  class KeyedObjectManager    {
+  class GAUDI_API KeyedObjectManager    {
   private:
     typedef std::vector<void*> seq_type;
     /// Container holding array like container
@@ -57,7 +57,7 @@ namespace Containers   {
       SETUP*        s;
     } m_setup;
 
-    /// Callbck when the container becomes dirty
+    /// Callback when the container becomes dirty
     void onDirty()  const;
 
   public:

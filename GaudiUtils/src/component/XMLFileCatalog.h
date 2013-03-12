@@ -17,28 +17,20 @@ namespace Gaudi {
 
   /** @class XMLFileCatalog
     *
-    *  This class constitutes the core of the 
-    *  XML based FileCatalog API for POOL. It uses the DOM model and 
-    *  the external XercesC library for parsing. 
+    *  This class constitutes the core of the
+    *  XML based FileCatalog API for POOL. It uses the DOM model and
+    *  the external XercesC library for parsing.
     *
     */
-  class XMLFileCatalog : virtual public IFileCatalog  {
+  class XMLFileCatalog : public implements1<IFileCatalog> {
   protected:
     typedef const std::string& CSTR;
 
   public:
     /// Create a catalog file, initialization of XercesC.
     XMLFileCatalog(CSTR url, IMessageSvc* m);
-    /// Destructor, 
+    /// Destructor,
     virtual ~XMLFileCatalog();
-
-    /** IInterface implementation                                       */
-    /// Increase reference count on catalog
-    virtual unsigned long addRef();
-    /// release catalog
-    virtual unsigned long release();
-    /// Query interface
-    virtual StatusCode queryInterface(const InterfaceID& id, void** ppv);
 
     /** Catalog interface                                               */
     /// Create file identifier using UUID mechanism
@@ -53,7 +45,7 @@ namespace Gaudi {
     virtual void rollback()                       { if ( dirty() )  init();        }
     /// Check if the catalog is read-only
     virtual bool readOnly() const                 { return m_rdOnly;                }
-    /// Check if the catalog should be updated 
+    /// Check if the catalog should be updated
     virtual bool dirty() const                    { return m_update;                }
     /// Return the status of a physical file name
     virtual bool existsPFN(CSTR pfn)  const       { return element(pfn,false) != 0; }
@@ -62,7 +54,7 @@ namespace Gaudi {
     /// Return the status of a logical file name
     virtual bool existsLFN(CSTR lfn)  const       { return element(lfn,false) != 0; }
     /// Lookup file identifier by logical file name
-    virtual std::string lookupLFN(CSTR lfn) const { return lookupFID(lfn);          } 
+    virtual std::string lookupLFN(CSTR lfn) const { return lookupFID(lfn);          }
     /// Return the status of a FileID
     virtual bool existsFID(CSTR fid)  const       { return element(fid,false) != 0; }
     /// Dump all physical file names of the catalog and their attributes associate to the FileID
@@ -71,18 +63,18 @@ namespace Gaudi {
     virtual void getLFN(CSTR fid, Files& files) const;
     /// Dump all file Identifiers
     virtual void getFID(Strings& fids)  const;
-    /// Delete FileID Node from the catalog 
+    /// Delete FileID Node from the catalog
     virtual void deleteFID(CSTR FileID)  const;
-    /// Create a FileID and Node of the physical file name with all the attributes 
+    /// Create a FileID and Node of the physical file name with all the attributes
     virtual void registerPFN(CSTR fid, CSTR pfn, CSTR ftype) const;
-    /// Create a FileID and Node of the logical file name with all the attributes 
+    /// Create a FileID and Node of the logical file name with all the attributes
     virtual void registerLFN(CSTR fid, CSTR lfn) const;
     /// Create a FileID and Node
     virtual void registerFID(CSTR fid) const;
     /// Dump all MetaData of the catalog for a given file ID
     virtual void getMetaData(CSTR fid, Attributes& attr) const;
     /// Access metadata item
-    virtual std::string getMetaDataItem(CSTR fid, CSTR name) const; 
+    virtual std::string getMetaDataItem(CSTR fid, CSTR name) const;
     /// Insert/update metadata item
     virtual void setMetaData(CSTR fid, CSTR name, CSTR value) const;
     /// Drop all metadata of one FID
@@ -103,7 +95,6 @@ namespace Gaudi {
     xercesc::XercesDOMParser *m_parser;
     xercesc::ErrorHandler    *m_errHdlr;
     std::string               m_file;
-    unsigned long             m_refCount;
     IMessageSvc*              m_msgSvc;
   };
   /// Create file identifier using UUID mechanism

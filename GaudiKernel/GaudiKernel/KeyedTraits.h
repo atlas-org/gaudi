@@ -24,7 +24,7 @@ namespace Containers    {
     OBJ_INSERTED,     /**< Object was inserted into the container.           */
     OBJ_CANNOT_INSERT /**< Cannot insert object into container.              */
   };
-  
+
   // Forward declarations
 
   /// Container traits class
@@ -34,21 +34,21 @@ namespace Containers    {
   /// Object manager class
   template <class SETUP>                      class  KeyedObjectManager;
 
-  /** Function to be called to indicate that an object cannot be inserted 
+  /** Function to be called to indicate that an object cannot be inserted
       to the container. Internally an exception is thrown.                    */
-  void cannotInsertToContainer();
+  GAUDI_API void cannotInsertToContainer();
 
   /** Function to be called to indicate that the container is found to be
       inconsistent. Internally an exception is thrown.                        */
-  void containerIsInconsistent();
+  GAUDI_API void containerIsInconsistent();
 
-  /** Function to be called to indicate that an operation should be 
+  /** Function to be called to indicate that an operation should be
       performed on the container or it's contained data, which is not
       allowed. Internally an exception is thrown.                             */
-  void invalidContainerOperation();
+  GAUDI_API void invalidContainerOperation();
 
   /** Function to be called when an object key cannot be assigned.            */
-  void cannotAssignObjectKey();
+  GAUDI_API void cannotAssignObjectKey();
 
   /** Definition of the key traits class.
 
@@ -66,8 +66,8 @@ namespace Containers    {
     typedef KEY                   key_type;
     /// Declaration of keyed object type
     typedef KeyedObject<key_type> obj_type;
-    /** Create key from its full integer representation. 
-        Not implementing on specialization may inhibit the creation 
+    /** Create key from its full integer representation.
+        Not implementing on specialization may inhibit the creation
         of keys, i.e. then a key must be supplied at insertion time.
     */
     static key_type makeKey(long k)                    {return key_type(k); }
@@ -79,7 +79,7 @@ namespace Containers    {
     /// Set object key when inserted into the container
     static void setKey(obj_type* v, const key_type& k) {if(v)v->setKey(k);  }
     /** Check the validity of the object's key.
-      Select if key-checks should be performed by 
+      Select if key-checks should be performed by
       switching on/off the macro CHECK_KEYED_CONTAINER.
     */
     static bool checkKey(obj_type* v,const key_type& k) {
@@ -94,20 +94,20 @@ namespace Containers    {
     /// Release reference to object
     static long release(obj_type* v)     {   return (v) ? v->release() : 0; }
   };
-  
+
   /** Definition of the container traits class.
 
-      Select if container-checks should be performed by 
+      Select if container-checks should be performed by
       switching on/off the macro CHECK_KEYED_CONTAINER.
 
       @author   M.Frank CERN/LHCb
       @version  1.0
   */
-  template < class CONTAINER, class DATATYPE > 
-  struct traits : public key_traits < typename DATATYPE::key_type >   
+  template < class CONTAINER, class DATATYPE >
+  struct traits : public key_traits < typename DATATYPE::key_type >
   {
     /// Allow to check the access to container elements for consistency
-    static bool checkBounds(const std::vector<DATATYPE*>* cnt, 
+    static bool checkBounds(const std::vector<DATATYPE*>* cnt,
                             const typename DATATYPE::key_type& k) {
 #ifdef CHECK_KEYED_CONTAINER
       return size_t(cnt->size()) > size_t(traits::hash(k));

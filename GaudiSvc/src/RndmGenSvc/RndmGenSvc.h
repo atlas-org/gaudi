@@ -30,7 +30,7 @@ class IFactory;
 /** Random Generator service definition
 
     Description:
-    Definition of a interface for a service to access 
+    Definition of a interface for a service to access
     random generators according to predefined distributions.
     For more detailed explanations please see the interface definition.
 
@@ -51,7 +51,7 @@ class IFactory;
     Author:  M.Frank
     Version: 1.0
 */
-class RndmGenSvc : public Service, virtual public IRndmGenSvc, virtual public IRndmEngine, virtual public ISerialize  {
+class RndmGenSvc : public extends3<Service, IRndmGenSvc, IRndmEngine, ISerialize> {
 private:
   friend class Factory<RndmGenSvc,IService* (std::string,ISvcLocator *)>;
   /// Random number engine
@@ -66,16 +66,14 @@ public:
   /// Standard Service destructor
   virtual ~RndmGenSvc();
 public:
-  /// Query interface
-  StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
-  /// Service override: initialisation
+  /// Service override: initialization
   virtual StatusCode initialize();
-  /// Service override: finalisation
+  /// Service override: finalization
   virtual StatusCode finalize();
   /** IRndmGenSvc interface implementation  */
-  /// Input serialisation from stream buffer. Restores the status of the generator engine.
+  /// Input serialization from stream buffer. Restores the status of the generator engine.
   virtual StreamBuffer& serialize(StreamBuffer& str);
-  /// Output serialisation to stream buffer. Saves the status of the generator engine.
+  /// Output serialization to stream buffer. Saves the status of the generator engine.
   virtual StreamBuffer& serialize(StreamBuffer& str) const;
   /// Retrieve engine
   virtual IRndmEngine* engine();
@@ -84,7 +82,7 @@ public:
   /// Single shot returning single random number
   virtual double rndm() const;
   /** Multiple shots returning vector with flat random numbers.
-      @param  array    Array containing random numbers 
+      @param  array    Array containing random numbers
       @param  howmany  fill 'howmany' random numbers into array
       @param  start    ... starting at position start
       @return StatusCode indicating failure or success.
@@ -95,5 +93,5 @@ public:
   /// Allow to get seeds
   virtual StatusCode seeds(std::vector<long>& seeds)  const;
 };
- 
+
 #endif // GAUDI_RANDOMGENSVC_RNDMGENSVC_H

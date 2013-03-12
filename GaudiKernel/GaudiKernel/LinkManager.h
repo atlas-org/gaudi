@@ -4,6 +4,8 @@
 // STL includes
 #include <vector>
 #include <string>
+// Gaudi
+#include "GaudiKernel/Kernel.h"
 
 class DataObject;
 class IOpaqueAddress;
@@ -15,13 +17,13 @@ class IOpaqueAddress;
   *
   *  @author M.Frank
   */
-class LinkManager   {
+class GAUDI_API LinkManager {
 
 public:
   /// Directory link types
   enum DirLinkType {INVALID, VALID};
 
-  /** Embeeded class defining a symbolic link
+  /** Embedded class defining a symbolic link
     * Note: No copy constructor; bitwise copy (done by the compiler)
     *       is just fine.
     */
@@ -37,7 +39,7 @@ public:
     long        m_id;
   public:
     /// Standard constructor
-    Link(long id, const std::string& path, const DataObject* pObject=0) 
+    Link(long id, const std::string& path, const DataObject* pObject=0)
     : m_path(path), m_id(id) {
       setObject(pObject);
     }
@@ -60,7 +62,7 @@ public:
       m_path = path;
       m_id   = id;
     }
-    /// Equality operator: check pathes only
+    /// Equality operator: check paths only
     bool operator==(const Link& link)  const  {
       return link.m_path == m_path;
     }

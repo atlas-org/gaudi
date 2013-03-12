@@ -32,16 +32,15 @@ public:
   //
   // Constructors etc.
   //
-  /** Create a handle ('smart pointer') to a service. 
+  /** Create a handle ('smart pointer') to a service.
       The arguments are passed on to ServiceSvc, and have the same meaning:
       @param serviceName name of the service
       @param parentName name of the parent Algorithm, AlgTool or Service.
              It is used for log printout at retrieve(), and for retrieving
-	     a thread-dependent service (if applicable)
+             a thread-dependent service (if applicable)
   */
   ServiceHandle( const std::string& serviceName, const std::string& theParentName )
-    : GaudiHandle<T>(serviceName, "Service", theParentName), 
-      m_pSvcLocator(0), m_pMessageSvc(0)
+    : GaudiHandle<T>(serviceName, "Service", theParentName)
   {}
 
   /** Retrieve the Service. Release existing Service if needed.
@@ -49,7 +48,7 @@ public:
   StatusCode retrieve() const { // not really const, because it updates m_pObject
     return GaudiHandle<T>::retrieve();
   }
-  
+
 //  /** Release the Service.
 //    Function must be repeated here to avoid hiding the function release( T*& ) */
 //   StatusCode release() const { // not really const, because it updates m_pObject
@@ -59,8 +58,7 @@ public:
 protected:
  /** Do the real retrieval of the Service. */
   StatusCode retrieve( T*& service ) const {
-    MsgStream log(messageSvc(), GaudiHandleBase::messageName());
-    ServiceLocatorHelper helper(*serviceLocator(), log, this->parentName());
+    const ServiceLocatorHelper helper(*serviceLocator(), GaudiHandleBase::messageName(), this->parentName());
     return helper.getService(GaudiHandleBase::typeAndName(), true, T::interfaceID(), (void**)&service);
   }
 
@@ -73,22 +71,22 @@ private:
   //
   // Private helper functions
   //
-  ISvcLocator* serviceLocator() const { // not really const, because it may change m_pSvcLocator
-    if ( !m_pSvcLocator ) {
+  SmartIF<ISvcLocator>& serviceLocator() const { // not really const, because it may change m_pSvcLocator
+    if ( !m_pSvcLocator.isValid() ) {
       m_pSvcLocator = Gaudi::svcLocator();
-      if ( !m_pSvcLocator ) {
-	throw GaudiException("SvcLocator not found", "Core component not found", StatusCode::FAILURE);
+      if ( !m_pSvcLocator.isValid() ) {
+        throw GaudiException("SvcLocator not found", "Core component not found", StatusCode::FAILURE);
       }
     }
     return m_pSvcLocator;
   }
 
-  IMessageSvc* messageSvc() const { // not really const, because it may change m_pMessageSvc
-    if ( !m_pMessageSvc ) {
-      StatusCode sc = serviceLocator()->service( "MessageSvc", m_pMessageSvc, true );
-      if( sc.isFailure() ) {
-	throw GaudiException("Service [MessageSvc] not found", 
-			     this->parentName(), sc);
+  SmartIF<IMessageSvc>& messageSvc() const { // not really const, because it may change m_pMessageSvc
+    if ( !m_pMessageSvc.isValid() ) {
+      m_pMessageSvc = serviceLocator(); // default message service
+      if( !m_pMessageSvc.isValid() ) {
+        throw GaudiException("Service [MessageSvc] not found",
+                             this->parentName(), StatusCode::FAILURE);
       }
     }
     return m_pMessageSvc;
@@ -96,8 +94,8 @@ private:
   //
   // private data members
   //
-  mutable ISvcLocator* m_pSvcLocator;
-  mutable IMessageSvc* m_pMessageSvc;
+  mutable SmartIF<ISvcLocator> m_pSvcLocator;
+  mutable SmartIF<IMessageSvc> m_pMessageSvc;
 };
 
 /** @class ServiceHandleArray ServiceHandle.h GaudiKernel/ServiceHandle.h

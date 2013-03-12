@@ -31,6 +31,8 @@ namespace GaudiAlg
 {
   /// The actual type for histogram identifier
   typedef Histos::HistoID HistoID ;
+  /// Type for bin edges for variable binning histograms
+  typedef std::vector<double> HistoBinEdges;
 }
 // ============================================================================
 

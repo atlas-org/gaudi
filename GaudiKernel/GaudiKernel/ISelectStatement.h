@@ -8,15 +8,11 @@
 // Framework include files
 #include "GaudiKernel/IInterface.h"
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_ISelectStatement(109, 1 , 0); 
-
-
 /** @class ISelectStatement ISelectStatement.h GaudiKernel/ISelectStatement.h
 
-  A select statement can either contain 
+  A select statement can either contain
   - a string e.g. for refining an SQL statement
-  - a function object, which will be called back 
+  - a function object, which will be called back
     in order to refine a selection.
     This happens in calling sequences like the following:
 
@@ -34,14 +30,15 @@ static const InterfaceID IID_ISelectStatement(109, 1 , 0);
     @author  M.Frank
     @version 1.0
 */
-class ISelectStatement  : virtual public IInterface   {
+class GAUDI_API ISelectStatement: virtual public IInterface {
 public:
+  /// InterfaceID
+  DeclareInterfaceID(ISelectStatement,2,0);
+
   /// Statement type definition
   enum SelectType { FUNCTION=1<<1, STRING=1<<2, FULL=1<<3, OTHER=1<<4 };
 
 public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_ISelectStatement; }
   /// Access the type of the object
   virtual long type()   const  = 0;
   /// Access the selection string

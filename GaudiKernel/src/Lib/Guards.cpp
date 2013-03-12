@@ -28,9 +28,9 @@ void Gaudi::Guards::ExceptionGuard::handle
   // the general printout
   log << MSG::FATAL
       << System::typeinfoName( typeid ( exc ) )
-      << "('" << exc.tag() << "') is caught!" << endreq ;
+      << "('" << exc.tag() << "') is caught!" << endmsg ;
   // print the detailes about the exception:
-  log << MSG::ERROR << exc << endreq ;
+  log << MSG::ERROR << exc << endmsg ;
   // get the status code form the exception:
   m_sc = exc.code() ;
 }
@@ -42,9 +42,9 @@ void Gaudi::Guards::ExceptionGuard::handle
 {
   // the general printout
   log << MSG::FATAL
-      << System::typeinfoName( typeid ( exc ) ) << " is caught!" << endreq ;
+      << System::typeinfoName( typeid ( exc ) ) << " is caught!" << endmsg ;
   // print the detailes abotu the exception:
-  log << MSG::ERROR << exc.what() << endreq ;
+  log << MSG::ERROR << exc.what() << endmsg ;
 }
 // ============================================================================
 // Local handle (print) of unknown exception
@@ -53,7 +53,7 @@ void Gaudi::Guards::ExceptionGuard::handle
 ( MsgStream& log )
 {
   // the general printout
-  log << MSG::FATAL << "UNKNOWN exception is caught!" << endreq ;
+  log << MSG::FATAL << "UNKNOWN exception is caught!" << endmsg ;
 }
 // ============================================================================
 // dectructor

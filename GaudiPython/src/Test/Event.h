@@ -4,7 +4,7 @@
 
 // Include files
 #include "GaudiKernel/Kernel.h"
-#include "GaudiKernel/TimePoint.h"
+#include "GaudiKernel/Time.h"
 #include "GaudiKernel/StreamBuffer.h"
 #include "GaudiKernel/DataObject.h"
 #include <iostream>
@@ -15,7 +15,7 @@
     Essential information of the event used in examples
     It can be identified by "/Event"
 
-  
+
     @author Pavel Binko
 */
 
@@ -30,35 +30,30 @@ public:
   virtual ~Event() { }
 
   /// Retrieve reference to class definition structure
-  virtual const CLID& clID() const  { return Event::classID(); }
+  virtual const CLID& clID() const  { return classID(); }
   static const CLID& classID() { return CLID_Event; }
 
   /// Retrieve event number
   long event () const { return m_event; }
   /// Update event number
   void setEvent (long value) { m_event = value; }
-  
+
   /// Retrieve run number
   long run () const { return m_run; }
   /// Update run number
   void setRun (long value) { m_run = value; }
-   
-  /// Retrieve reference to event time stamp
-  const TimePoint& time () const { return m_time; }
-  /// Update reference to event time stamp
-  void setTime (const TimePoint& value) { m_time = value; }
 
-  /// Serialize the object for writing
-  virtual StreamBuffer& serialize( StreamBuffer& s ) const;
-  /// Serialize the object for reading
-  virtual StreamBuffer& serialize( StreamBuffer& s );
+  /// Retrieve reference to event time stamp
+  const Gaudi::Time& time () const { return m_time; }
+  /// Update reference to event time stamp
+  void setTime (const Gaudi::Time& value) { m_time = value; }
 
   /// Output operator (ASCII)
   friend std::ostream& operator<< ( std::ostream& s, const Event& obj ) {
     return obj.fillStream(s);
   }
   /// Fill the output stream (ASCII)
-  virtual std::ostream& fillStream( std::ostream& s ) const;
+  virtual inline std::ostream& fillStream( std::ostream& s ) const;
 
 private:
   /// Event number
@@ -66,23 +61,8 @@ private:
   /// Run number
   long                m_run;
   /// Time stamp
-  TimePoint           m_time;
+  Gaudi::Time         m_time;
 };
-
-
-/// Serialize the object for writing
-inline StreamBuffer& Event::serialize( StreamBuffer& s ) const {
-  DataObject::serialize(s);
-  return s << m_event << m_run << m_time;
-}
-
-
-/// Serialize the object for reading
-inline StreamBuffer& Event::serialize( StreamBuffer& s ) {
-  DataObject::serialize(s);
-  return s >> m_event >> m_run >> m_time;
-}
-
 
 /// Fill the output stream (ASCII)
 inline std::ostream& Event::fillStream( std::ostream& s ) const {

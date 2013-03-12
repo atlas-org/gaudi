@@ -1,5 +1,7 @@
 // $Id: PythonScriptingSvc.cpp,v 1.18 2008/10/27 21:12:08 marcocle Exp $
 
+#include "Python.h"
+
 // Include Files
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -7,10 +9,7 @@
 #include "GaudiKernel/SmartIF.h"
 
 #include "PythonScriptingSvc.h"
-#ifdef _POSIX_C_SOURCE
-#undef _POSIX_C_SOURCE
-#endif
-#include "Python.h"
+
 #include <fstream>
 #include <sstream>
 
@@ -26,7 +25,7 @@ DECLARE_SERVICE_FACTORY(PythonScriptingSvc)
 //----------------------------------------------------------------------------------
 PythonScriptingSvc::PythonScriptingSvc( const std::string& name, ISvcLocator* svc )
 //----------------------------------------------------------------------------------
-: Service(name, svc) {
+: base_class(name, svc) {
   // Declare the startup script Property
   declareProperty( "StartupScript", m_startupScript = "" );
 }
@@ -45,11 +44,11 @@ StatusCode PythonScriptingSvc::initialize()
 
   MsgStream log( msgSvc(), name() );
 
-  // Setup startup script. If none is explicitiy specified, then
+  // Setup startup script. If none is explicitly specified, then
   // use the ApplicationMgr JobOptionsPath property as long as
   // the JobOptionsType property is set to "NONE".
   if( m_startupScript == "" ) {
-    SmartIF<IProperty> prpMgr(IID_IProperty, serviceLocator());
+    SmartIF<IProperty> prpMgr(serviceLocator());
     if ( prpMgr.isValid() )   {
       StringProperty tmp;
       tmp.assign(prpMgr->getProperty("JobOptionsType"));
@@ -110,18 +109,6 @@ StatusCode PythonScriptingSvc::finalize()
   // Shutdown the Python interpreter
   Py_Finalize();
   return StatusCode::SUCCESS;
-}
-
-//----------------------------------------------------------------------------------
-StatusCode PythonScriptingSvc::queryInterface( const InterfaceID& riid, void** ppvInterface )
-//----------------------------------------------------------------------------------
-{
-  if ( IID_IRunable == riid ) {
-    *ppvInterface = (IRunable*)this;
-    addRef();
-    return StatusCode::SUCCESS;
-  }
-  else return Service::queryInterface(riid, ppvInterface);
 }
 
 //----------------------------------------------------------------------------------

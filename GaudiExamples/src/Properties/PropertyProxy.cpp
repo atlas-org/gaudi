@@ -10,10 +10,9 @@
 #include "GaudiKernel/SmartIF.h"
 #include "PropertyProxy.h"
 
-
 // Static Factory declaration
 
-DECLARE_ALGORITHM_FACTORY(PropertyProxy);
+DECLARE_ALGORITHM_FACTORY(PropertyProxy)
 
 // Constructor
 //------------------------------------------------------------------------------
@@ -21,13 +20,10 @@ PropertyProxy::PropertyProxy(const std::string& name, ISvcLocator* ploc)
            : Algorithm(name, ploc) {
 //------------------------------------------------------------------------------
   MsgStream log(msgSvc(), name);
-  StatusCode sc;
   // Declare remote properties at this moment
-  SmartIF<IAlgManager> algMgr ( IID_IAlgManager, serviceLocator());
-  IAlgorithm*  rAlg;
-  sc = algMgr->getAlgorithm("PropertyAlg", rAlg);
-  if( sc.isSuccess() ) {
-    SmartIF<IProperty> rAlgP ( IID_IProperty, rAlg);
+  SmartIF<IAlgManager> algMgr (serviceLocator());
+  SmartIF<IProperty> rAlgP(algMgr->algorithm("PropertyAlg"));
+  if( rAlgP.isValid() ) {
     m_remAlg = rAlgP; // remember it for later
     declareRemoteProperty("RInt", rAlgP, "Int");
     declareRemoteProperty("String", rAlgP );
@@ -41,7 +37,7 @@ PropertyProxy::PropertyProxy(const std::string& name, ISvcLocator* ploc)
 StatusCode PropertyProxy::initialize() {
 //------------------------------------------------------------------------------
   MsgStream log(msgSvc(), name());
-  
+
   std::string value("empty");
   std::string value1("empty");
 
@@ -54,7 +50,7 @@ StatusCode PropertyProxy::initialize() {
   this->getProperty("RInt", value).ignore();
   log << MSG::INFO << " Got property this.RInt = " << value << ";" << endmsg;
 
-  
+
   this->getProperty("String", value).ignore();
   m_remAlg->getProperty("String", value1).ignore();
   if( value == value1 ) {

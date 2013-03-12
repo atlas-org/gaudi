@@ -6,7 +6,7 @@
 //	Author     : M.Frank
 //  History    :
 // +---------+----------------------------------------------+---------
-// |    Date |                 Comment                      | Who     
+// |    Date |                 Comment                      | Who
 // +---------+----------------------------------------------+---------
 // | 29/10/99| Initial version                              | MF
 // +---------+----------------------------------------------+---------
@@ -36,7 +36,7 @@ DECLARE_SERVICE_FACTORY(RndmGenSvc)
 
 /// Standard Service constructor
 RndmGenSvc::RndmGenSvc(const std::string& nam, ISvcLocator* svc)
-: Service(nam, svc), m_engine(0), m_serialize(0)
+: base_class(nam, svc), m_engine(0), m_serialize(0)
 {
   declareProperty("Engine", m_engineName = "HepRndm::Engine<CLHEP::RanluxEngine>");
 }
@@ -45,49 +45,27 @@ RndmGenSvc::RndmGenSvc(const std::string& nam, ISvcLocator* svc)
 RndmGenSvc::~RndmGenSvc()   {
 }
 
-/// Query interface
-StatusCode RndmGenSvc::queryInterface(const InterfaceID& riid, void** ppvInterface)  {
-  if ( IID_IRndmGenSvc == riid )   {
-    *ppvInterface = (IRndmGenSvc*)this;
-  }
-  else if ( IID_IRndmEngine == riid )   {
-    *ppvInterface = (IRndmEngine*)this;
-  }
-  else if ( IID_ISerialize == riid )   {
-    *ppvInterface = (ISerialize*)this;
-  }
-  else  {
-    return Service::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
-}
-
-/// Service override: initialisation
+/// Service override: initialization
 StatusCode RndmGenSvc::initialize()   {
   StatusCode status = Service::initialize();
   MsgStream log(msgSvc(), name());
   std::string machName = name()+".Engine";
-  SmartIF<IRndmEngine> engine(IID_IRndmEngine);
-  SmartIF<ISvcManager> mgr(IID_ISvcManager, serviceLocator());
+  SmartIF<IRndmEngine> engine;
+  SmartIF<ISvcManager> mgr(serviceLocator());
 
   if ( status.isSuccess() )   {
     status = setProperties();
     if ( status.isSuccess() )   {  // Check if the Engine service exists:
-      // FIXME: (MCl) why RndmGenSvc cannot create the engine service in a standard way?  
-      status = serviceLocator()->getService(machName, IID_IRndmEngine, (IInterface*&)engine.pRef());
-      if ( !status.isSuccess() && mgr.isValid( ) )   {
-        IService* service = 0;
-        // Engine does not exist: We have to create one!
-        status = mgr->createService(m_engineName,machName,service);
-        if (status.isSuccess()) {
-          engine = service;
-          service->release();
-        }
+      // FIXME: (MCl) why RndmGenSvc cannot create the engine service in a standard way?
+      const bool CREATE = false;
+      engine = serviceLocator()->service(machName, CREATE);
+      if ( !engine.isValid() && mgr.isValid() )   {
+        using Gaudi::Utils::TypeNameString;
+        engine = mgr->createService(TypeNameString(machName, m_engineName));
       }
-      if ( status.isSuccess() )   {
-        SmartIF<ISerialize> serial(IID_ISerialize, engine);
-        SmartIF<IService>   service(IID_IService,  engine);
+      if ( engine.isValid() )   {
+        SmartIF<ISerialize> serial(engine);
+        SmartIF<IService>   service(engine);
         if ( serial.isValid( ) && service.isValid( ) )  {
           status = service->sysInitialize();
           if ( status.isSuccess() )   {
@@ -95,7 +73,7 @@ StatusCode RndmGenSvc::initialize()   {
             m_serialize = serial;
             m_engine->addRef();
             m_serialize->addRef();
-            log << MSG::INFO << "Using Random engine:" << m_engineName << endreq;
+            log << MSG::INFO << "Using Random engine:" << m_engineName << endmsg;
             return status;
           }
         }
@@ -105,13 +83,13 @@ StatusCode RndmGenSvc::initialize()   {
   return status;
 }
 
-/// Service override: finalisation
+/// Service override: finalization
 StatusCode RndmGenSvc::finalize()   {
   StatusCode status = Service::finalize();
   if ( m_serialize ) m_serialize->release();
   m_serialize = 0;
   if ( m_engine ) {
-    SmartIF<IService> service(IID_IService, m_engine);
+    SmartIF<IService> service(m_engine);
     service->finalize().ignore();
     m_engine->release();
   }
@@ -120,23 +98,23 @@ StatusCode RndmGenSvc::finalize()   {
 }
 
 /** IRndmGenSvc interface implementation  */
-/// Input serialisation from stream buffer. Restores the status of the generator engine.
+/// Input serialization from stream buffer. Restores the status of the generator engine.
 StreamBuffer& RndmGenSvc::serialize(StreamBuffer& str)    {
   if ( 0 != m_serialize )    {
     return m_serialize->serialize(str);
   }
   MsgStream log(msgSvc(), name());
-  log << MSG::ERROR << "Cannot input serialize Generator settings!" << endreq;
+  log << MSG::ERROR << "Cannot input serialize Generator settings!" << endmsg;
   return str;
 }
 
-/// Output serialisation to stream buffer. Saves the status of the generator engine.
+/// Output serialization to stream buffer. Saves the status of the generator engine.
 StreamBuffer& RndmGenSvc::serialize(StreamBuffer& str) const    {
   if ( 0 != m_serialize )    {
     return m_serialize->serialize(str);
   }
   MsgStream log(msgSvc(), name());
-  log << MSG::ERROR << "Cannot output serialize Generator settings!" << endreq;
+  log << MSG::ERROR << "Cannot output serialize Generator settings!" << endmsg;
   return str;
 }
 
@@ -151,7 +129,7 @@ StatusCode RndmGenSvc::generator(const IRndmGen::Param& par, IRndmGen*& refpGen)
   IInterface* iface = PluginService::CreateWithId<IInterface*>(par.type(),(IInterface*)m_engine);
   if ( iface ) {
     // query requested interface (adds ref count)
-    status = iface->queryInterface(IID_IRndmGen, (void**)& refpGen);
+    status = iface->queryInterface(IRndmGen::interfaceID(), (void**)& refpGen);
     if ( status.isSuccess() )   {
       status = refpGen->initialize(par);
     }
@@ -172,7 +150,7 @@ double RndmGenSvc::rndm() const   {
 }
 
 /*  Multiple shots returning vector with flat random numbers.
-    @param  array    Array containing random numbers 
+    @param  array    Array containing random numbers
     @param  howmany  fill 'howmany' random numbers into array
     @param  start    ... starting at position start
     @return StatusCode indicating failure or success.

@@ -1,9 +1,9 @@
 // $Id: FuncMinimumIAlg.cpp,v 1.4 2006/01/10 19:58:26 hmd Exp $
 
-// Include files 
+// Include files
 // from Gaudi
 #include "GaudiKernel/AlgFactory.h"
-#include "GaudiKernel/MsgStream.h" 
+#include "GaudiKernel/MsgStream.h"
 #include "GaudiGSL/IFuncMinimum.h"
 #include "GaudiMath/Adapters.h"
 // from CLHEP
@@ -14,6 +14,16 @@
 // local
 #include "FuncMinimumIAlg.h"
 
+#ifdef __ICC
+// disable icc warning #327: NULL reference is not allowed
+//   It's a real problem, but here it is used for test purposes
+#pragma warning(disable:327)
+#endif
+
+// Handle CLHEP 2.0.x move to CLHEP namespace
+namespace CLHEP { }
+using namespace CLHEP;
+
 //-----------------------------------------------------------------------------
 /** @file Implementation file for class : FuncMinimumIAlg
  *  @see FuncMinimumIAlg.h
@@ -21,9 +31,6 @@
  *  @date 2002-09-14
  */
 //-----------------------------------------------------------------------------
-
-// Declaration of the Algorithm Factory
-DECLARE_ALGORITHM_FACTORY(FuncMinimumIAlg)
 
 //=============================================================================
 // Standard constructor, initializes variables
@@ -37,7 +44,7 @@ FuncMinimumIAlg::FuncMinimumIAlg( const std::string& name,
 //=============================================================================
 // Destructor
 //=============================================================================
-FuncMinimumIAlg::~FuncMinimumIAlg() {}; 
+FuncMinimumIAlg::~FuncMinimumIAlg() {}
 
 //=============================================================================
 // Class for the function "IFunction"
@@ -51,8 +58,8 @@ public:
   Function () { m_gradient.resize(2); }
   virtual ~Function () {}
   virtual double value ( const std::vector<double>& x ) const
-  { 
-    return 10 * x[0] * x[0] + 20 * x[1] * x[1]; 
+  {
+    return 10 * x[0] * x[0] + 20 * x[1] * x[1];
   }
   virtual int dimension () const {return 2;}
   bool setTitle(const std::string& ) { return false; }
@@ -88,28 +95,28 @@ private:
 //=============================================================================
 
 //=============================================================================
-// Initialisation. Check parameters
+// Initialization. Check parameters
 //=============================================================================
 StatusCode FuncMinimumIAlg::initialize() {
-  
+
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "==> Initialise" << endreq;
+  log << MSG::INFO << "==> Initialize" << endmsg;
 
   StatusCode sc;
   sc = toolSvc()->retrieveTool("FuncMinimum", m_publicTool );
-  if( sc.isFailure() ) 
+  if( sc.isFailure() )
     {
-      log << MSG::ERROR<< "Error retrieving the public tool" << endreq;  
+      log << MSG::ERROR<< "Error retrieving the public tool" << endmsg;
     }
   sc = toolSvc()->retrieveTool("FuncMinimum", m_privateTool, this );
-  if( sc.isFailure() ) 
+  if( sc.isFailure() )
     {
-      log << MSG::ERROR<< "Error retrieving the private tool" << endreq;  
+      log << MSG::ERROR<< "Error retrieving the private tool" << endmsg;
     }
-  log << MSG::INFO << "....initialization done" << endreq;
-  
+  log << MSG::INFO << "....initialization done" << endmsg;
+
   return StatusCode::SUCCESS;
-};
+}
 
 //=============================================================================
 // Main execution
@@ -117,13 +124,13 @@ StatusCode FuncMinimumIAlg::initialize() {
 StatusCode FuncMinimumIAlg::execute() {
 
   MsgStream  log( msgSvc(), name() );
-  log << MSG::INFO << "==> Execute" << endreq;
-  
+  log << MSG::INFO << "==> Execute" << endmsg;
+
   // the object of the class Function
   const Function* fun = new Function();
   // the object of the class AdapterIFunction
   // @see Adapters.h
-  const GaudiMath::AIDAFunction& func = GaudiMath::adapter(*fun);
+  const GaudiMath::AIDAFunction func = GaudiMath::adapter(*fun);
 
 //=============================================================================
   // Input number and value of the arguments of the function "GenFunc"
@@ -134,56 +141,56 @@ StatusCode FuncMinimumIAlg::execute() {
 
   // Matrix of error
   IFuncMinimum::Covariance matrix_error (arg.dimension(), 0);
-  
+
   // Call of the method
   m_publicTool->minimum( func ,
                          arg  );
-  log << endreq;
-  log << "START OF THR METHOD" << endreq;
-  log << "MINIMUM FOUND AT: " << endreq;
-  
+  log << endmsg;
+  log << "START OF THR METHOD" << endmsg;
+  log << "MINIMUM FOUND AT: " << endmsg;
+
   for (unsigned int i = 0; i < arg.dimension(); i++)
     {
-      
-      log << "Value of argument " << i <<" is " << arg[i] << endreq;
+
+      log << "Value of argument " << i <<" is " << arg[i] << endmsg;
     }
-  
-  log << endreq;
+
+  log << endmsg;
 //=============================================================================
-  // With Covariance matrix (matrix of error)  
+  // With Covariance matrix (matrix of error)
   arg[0] = 5;
   arg[1] = 10;
-  
+
   // Call of the method(with covariance matrix (matrix of error))
   m_publicTool->minimum( func        ,
                          arg         ,
                          matrix_error);
-  log << endreq;
-  log << "THE METHOD WITH MATRIX OF ERROR" << endreq;
-  log << "MINIMUM FOUND AT: " << endreq;
+  log << endmsg;
+  log << "THE METHOD WITH MATRIX OF ERROR" << endmsg;
+  log << "MINIMUM FOUND AT: " << endmsg;
 
   for (unsigned int i = 0; i < arg.dimension(); i++)
     {
 
-      log << "Value of argument " << i <<" is " << arg[i] << endreq;
+      log << "Value of argument " << i <<" is " << arg[i] << endmsg;
     }
 
-  log << endreq;
+  log << endmsg;
   log << "MATRIX OF ERROR";
 
   for (unsigned int i = 0; i < arg.dimension(); i++)
     {
-      log << endreq;
+      log << endmsg;
 
       for (unsigned int j = 0; j < arg.dimension(); j++)
         {
           log << matrix_error (i+1, j+1) << " ";
         }
     }
-  log << endreq;
+  log << endmsg;
 
   return StatusCode::SUCCESS;
-};
+}
 
 //=============================================================================
 //  Finalize
@@ -191,12 +198,14 @@ StatusCode FuncMinimumIAlg::execute() {
 StatusCode FuncMinimumIAlg::finalize() {
 
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "==> Finalize" << endreq;
-  
+  log << MSG::INFO << "==> Finalize" << endmsg;
+
   toolSvc()->releaseTool( m_publicTool  );
   toolSvc()->releaseTool( m_privateTool );
-  
+
   return StatusCode::SUCCESS;
 }
 
 //=============================================================================
+// Declaration of the Algorithm Factory
+DECLARE_ALGORITHM_FACTORY(FuncMinimumIAlg)

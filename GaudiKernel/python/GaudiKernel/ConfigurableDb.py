@@ -13,7 +13,7 @@ import string
 _transtable = string.maketrans('<>&*,: ().', '__rp__s___')
 
 import logging
-log = logging.getLogger( 'ConfigurableDb' ) 
+log = logging.getLogger( 'ConfigurableDb' )
 
 class _CfgDb( dict ):
     """
@@ -28,7 +28,7 @@ class _CfgDb( dict ):
     __slots__ = {
         '_duplicates' : { },
         }
-    
+
     def __init__(self):
         object.__init__(self)
         self._duplicates = {}
@@ -57,7 +57,7 @@ class _CfgDb( dict ):
                     self._duplicates[configurable]  = [ cfg ]
                     pass
         else:
-            log.debug( "added [%s] p=%s m=%s lib=%s", 
+            log.debug( "added [%s] p=%s m=%s lib=%s",
                        configurable, package, module, lib )
             self[configurable] = cfg
             pass
@@ -65,7 +65,7 @@ class _CfgDb( dict ):
 
     def duplicates(self):
         return self._duplicates
-    
+
     pass # class _CfgDb
 
 class _Singleton( object ):
@@ -87,7 +87,7 @@ del _CfgDb
 
 ## default name for CfgDb instance
 cfgDb = CfgDb()
-    
+
 ## Helper function to load all ConfigurableDb files holding informations
 def loadConfigurableDb():
     """Helper function to load all ConfigurableDb files (modules) holding
@@ -95,25 +95,27 @@ def loadConfigurableDb():
     """
     import os
     import sys
+    from zipfile import is_zipfile, ZipFile
     from glob import glob
     from os.path import join as path_join
     log.debug( "importing confDb packages..." )
-    nFiles = 0
+    nFiles = 0 # counter of imported files
     for path in sys.path:
         log.debug( "walking in [%s]..." % path )
         if not os.path.exists(path):
             continue
-        # speed-up: <project>_merged_confDb.py files are installed as :
-        # "/some/path/InstallArea/python/<project>_merged_confDb.py
-        # so why bother wandering in other directories ?
-        if not path.endswith("InstallArea"+os.sep+"python"):
-            continue
-        confDbFiles = [ f for f in glob(path_join(path, "*_merged_confDb.py"))
-                        if os.path.isfile(f) ]
-        for confDb in confDbFiles:
-            nFiles += 1
+        if is_zipfile(path):
             # turn filename syntax into module syntax: remove path+extension and replace / with . (dot)
-            confDbModule = os.path.splitext(confDb[len(path)+1:])[0].replace(os.sep,'.')
+            confDbModules = [ os.path.splitext(f)[0].replace('/','.')
+                              for f in ZipFile(path).namelist()
+                              if f.endswith("_merged_confDb.py") or f.endswith("_merged_confDb.pyc") ]
+        else:
+            # turn filename syntax into module syntax: remove path+extension and replace / with . (dot)
+            confDbModules = [ os.path.splitext( f[len(path)+1:] )[0].replace(os.sep,'.')
+                              for f in glob(path_join(path, "*_merged_confDb.py"))
+                              if os.path.isfile(f) ]
+        for confDbModule in confDbModules:
+            nFiles += 1
             log.debug( "\t-importing [%s]..." % confDbModule )
             try:
                 mod = __import__( confDbModule )

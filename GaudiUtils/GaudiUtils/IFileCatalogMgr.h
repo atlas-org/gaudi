@@ -6,9 +6,6 @@
 #include <string>
 #include <vector>
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IFileCatalogMgr("IFileCatalogMgr", 1, 0); 
-
 /*
  *   Gaudi namespace declaration
  */
@@ -26,13 +23,14 @@ namespace Gaudi {
     *  @version 1.0
     *  @date    20/10/2007
     */
-  class IFileCatalogMgr : virtual public IInterface {
+  class GAUDI_API IFileCatalogMgr : virtual public IInterface {
   public:
+    /// InterfaceID
+    DeclareInterfaceID(IFileCatalogMgr,2,0);
+
     /// Public type definitions
     typedef std::vector<IFileCatalog*> Catalogs;
-  public:
-    /// Retrieve interface ID
-    static const InterfaceID& interfaceID() { return IID_IFileCatalogMgr; }
+
     /** Catalog management                                                    */
     /// Find catalog by connect string
     virtual IFileCatalog* findCatalog(const std::string& connect, bool must_be_writable) const = 0;
@@ -52,7 +50,7 @@ namespace Gaudi {
     virtual IFileCatalog* writeCatalog(const std::string& fid="") const = 0;
     /// Define the writable catalog identified by reference
     virtual void setWriteCatalog(IFileCatalog* cat) = 0;
-    /// Define the writable catalog identified by name 
+    /// Define the writable catalog identified by name
     virtual void setWriteCatalog(const std::string& connect) = 0;
   };
 }         /* End namespace Gaudi             */

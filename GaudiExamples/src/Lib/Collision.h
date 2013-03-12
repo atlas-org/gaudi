@@ -18,7 +18,7 @@ namespace Gaudi {
     /** @class Collision
      */
 
-    class Collision : public DataObject {
+    class GAUDI_API Collision : public DataObject {
     public:
       /// Constructors
       Collision() : DataObject() { }
@@ -27,7 +27,7 @@ namespace Gaudi {
       virtual ~Collision() { }
 
       /// Retrieve reference to class definition structure
-      virtual const CLID& clID() const  { return Collision::classID(); }
+      virtual const CLID& clID() const  { return classID(); }
       static const CLID& classID() { return CLID_Collision; }
 
       void setCollision(int num) {
@@ -52,14 +52,12 @@ namespace Gaudi {
 
     /// Serialize the object for writing
     inline StreamBuffer& Collision::serialize( StreamBuffer& s ) const {
-      DataObject::serialize(s);
       return s << m_collision;
     }
 
 
     /// Serialize the object for reading
     inline StreamBuffer& Collision::serialize( StreamBuffer& s ) {
-      DataObject::serialize(s);
       return s >> m_collision;
     }
 

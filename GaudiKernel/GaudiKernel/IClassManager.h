@@ -10,10 +10,6 @@
 class IFactory;
 class ISvcLocator;
 
-
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IClassManager(16, 1 , 0); 
-
 /** @class IClassManager IClassManager.h GaudiKernel/IClassManager.h
 
     The IClassManager is the interface implemented by the generic Factory in the
@@ -21,15 +17,13 @@ static const InterfaceID IID_IClassManager(16, 1 , 0);
 
     @author Pere Mato
 */
-class IClassManager : virtual public  IInterface  {
+class GAUDI_API IClassManager: virtual public IInterface  {
 public:
+  DeclareInterfaceID(IClassManager,2,0);
 
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IClassManager; }
-
-  /// Declare a shareable library to be used for creating instances of a given algorithm type.
+  /// Declare a sharable library to be used for creating instances of a given algorithm type.
   virtual StatusCode loadModule( const std::string& module,
-				 bool fireIncident=true ) = 0;  // Shareable library name
+				 bool fireIncident=true ) = 0;  // Sharable library name
 };
 
 #endif  // GAUDIKERNEL_ICLASSMANAGER_H

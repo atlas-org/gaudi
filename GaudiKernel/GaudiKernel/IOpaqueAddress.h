@@ -21,7 +21,7 @@ class IRegistry;
     @author M.Frank
     @version 1.0
 */
-class IOpaqueAddress {
+class GAUDI_API IOpaqueAddress {
 public:
 
   /// destructor

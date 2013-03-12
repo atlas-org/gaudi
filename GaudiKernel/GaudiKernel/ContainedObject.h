@@ -16,7 +16,7 @@ template <class TYPE> class ObjectList;
 typedef ObjectVector<ContainedObject> ContainedObjectVector;
 typedef ObjectList<ContainedObject> ContainedObjectList;
 
-// Definition of the CLID for this class  
+// Definition of the CLID for this class
 static const CLID CLID_ContainedObject = 190;
 
 /** @class ContainedObject ContainedObject.h GaudiKernel/ContainedObject.h
@@ -27,12 +27,12 @@ static const CLID CLID_ContainedObject = 190;
     the navigability from the contained object back to its container.
     @author Pavel Binko
 */
-class ContainedObject {
-  
+class GAUDI_API ContainedObject {
+
   /// Allow the container classes access to protected members
   friend class ObjectVector<ContainedObject>;
   friend class ObjectList<ContainedObject>;
-  
+
 protected:
   /// Constructors
   ContainedObject() : m_parent(0)  { }
@@ -40,21 +40,21 @@ protected:
   ContainedObject(const ContainedObject&) : m_parent(0)  { }
   /// Destructor
   virtual ~ContainedObject();
-  
+
 public:
   /// Retrieve pointer to class identifier
-  virtual const CLID& clID() const { return ContainedObject::classID(); }
+  virtual const CLID& clID() const { return classID(); }
   static const CLID& classID()     { return CLID_ContainedObject; }
-  
+
   /// Access to parent object
   const ObjectContainerBase* parent () const  { return m_parent;        }
   /// Update parent member
   void setParent (ObjectContainerBase* value) { m_parent = value;       }
-  
+
   /// Distance in the parent container
-  virtual long index() const 
-  { 
-    return (m_parent) ? m_parent->index(this) : -1;  
+  virtual long index() const
+  {
+    return (m_parent) ? m_parent->index(this) : -1;
   }
   /// Serialize the object for writing
   virtual StreamBuffer& serialize( StreamBuffer& s ) const  { return s; }
@@ -66,8 +66,8 @@ public:
   friend std::ostream& operator<< ( std::ostream& s, const ContainedObject& obj ) {
     return obj.fillStream(s);
   }
-  
-private: 
+
+private:
   /// Pointer to the parent
   ObjectContainerBase*   m_parent;
 };

@@ -12,15 +12,12 @@
 // Forward declarations
 class IOpaqueAddress;
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IAddressCreator(9, 2 , 0); 
-
 /** @class IAddressCreator IAddressCreator.h GaudiKernel/IAddressCreator.h
 
     IAddressCreator interface definition.
     The address creator allows to:
     <UL>
-    <LI> Create persistent address representations for a given 
+    <LI> Create persistent address representations for a given
          conversion service using this service itself. The aim is to
          allow address creation without coupling directly to the service.
     </UL>
@@ -29,21 +26,20 @@ static const InterfaceID IID_IAddressCreator(9, 2 , 0);
     @author Markus Frank
     @version 1.0
 */
-class IAddressCreator  : virtual public IInterface 	{
+class GAUDI_API IAddressCreator: virtual public IInterface {
 public:
+  /// InterfaceID
+  DeclareInterfaceID(IAddressCreator,3,0);
 
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IAddressCreator; }
-
-  /** Create a Generic address using explicit arguments to 
+  /** Create a Generic address using explicit arguments to
       identify a single object.
-      @param      svc_type    Technology identifier encapsulated 
+      @param      svc_type    Technology identifier encapsulated
                               in this address.
-      @param      clid        Class identifier of the DataObject 
+      @param      clid        Class identifier of the DataObject
                               represented by the opaque address
-      @param      par         Array of strings needed to 
+      @param      par         Array of strings needed to
                               construct the opaque address.
-      @param      ipar        Array of integers needed to 
+      @param      ipar        Array of integers needed to
                               construct the opaque address.
       @param      refpAddress Reference to pointer to the address where the created
                               Address should be stored.
@@ -51,7 +47,7 @@ public:
   */
   virtual StatusCode createAddress( long svc_type,
                                     const CLID& clid,
-                                    const std::string* par, 
+                                    const std::string* par,
                                     const unsigned long* ipar,
                                     IOpaqueAddress*& refpAddress) = 0;
 
@@ -64,16 +60,16 @@ public:
                                      std::string& refAddress) = 0;
 
   /** Creates an address in string form to object form
-      @param      svc_type    Technology identifier encapsulated 
+      @param      svc_type    Technology identifier encapsulated
                               in this address.
-      @param      clid        Class identifier of the DataObject 
+      @param      clid        Class identifier of the DataObject
                               represented by the opaque address
       @param      address     Input address.
       @param      refpAddress Output address in string form.
       @return     Status code indicating success or failure.
   */
-  virtual StatusCode createAddress( long svc_type, 
-                                    const CLID& clid, 
+  virtual StatusCode createAddress( long svc_type,
+                                    const CLID& clid,
                                     const std::string& refAddress,
                                     IOpaqueAddress*& refpAddress) = 0;
 };

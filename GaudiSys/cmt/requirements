@@ -1,14 +1,14 @@
-# $Id: requirements,v 1.81 2008/11/10 18:54:02 marcocle Exp $
 package GaudiSys
-version v20r4
+version v23r6
 
-branches doc cmt 
+branches doc cmt
 
 #---Gaudi libraries - generic
 
-use GaudiKernel    v*
-use GaudiSvc       v*
-use GaudiAud       v*
-use GaudiAlg       v*
+use GaudiKernel    *
+use GaudiCoreSvc   * -no_auto_imports
+use GaudiCommonSvc * -no_auto_imports
+use GaudiAud       * -no_auto_imports
+use GaudiAlg       * -no_auto_imports
 # Needed by gaudirun.py
-use GaudiPython    v* -no_auto_imports
+use GaudiPython    * -no_auto_imports

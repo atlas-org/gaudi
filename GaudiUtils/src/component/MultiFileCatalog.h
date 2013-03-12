@@ -17,10 +17,7 @@ namespace Gaudi {
     *  This class manages multiple file catalogs.
     *
     */
-  class MultiFileCatalog
-    : public Service,
-      virtual public IFileCatalog,
-      virtual public IFileCatalogMgr
+  class MultiFileCatalog: public extends2<Service, IFileCatalog, IFileCatalogMgr>
   {
   protected:
     typedef const std::string&         CSTR;
@@ -56,9 +53,6 @@ namespace Gaudi {
     MultiFileCatalog(const std::string& nam, ISvcLocator* svc);
     /// Destructor,
     virtual ~MultiFileCatalog();
-
-    /** IInterface implementation                                             */
-    virtual StatusCode queryInterface(const InterfaceID& id, void** ppv);
 
     /** IService implementation                                               */
     /// Finalize service object

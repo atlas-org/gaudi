@@ -1,6 +1,6 @@
 // $Id: EqSolver.h,v 1.3 2006/11/30 10:40:53 mato Exp $
 // ============================================================================
-#ifndef ALGTOOLS_EQSOLVER_H 
+#ifndef ALGTOOLS_EQSOLVER_H
 #define ALGTOOLS_EQSOLVER_H 1
 // Include files
 // from CLHEP
@@ -25,39 +25,36 @@ template <class TOOL> class ToolFactory;
  *  @date   2003-07-07
  */
 
-class EqSolver : public GaudiTool,
-                 virtual public IEqSolver
-
-{
+class EqSolver : public extends1<GaudiTool, IEqSolver> {
   // friend factory for instantiation
   friend class ToolFactory<EqSolver> ;
-public: 
+public:
   typedef std::vector<Equations>   Jacobi ;
 public:
-  
-  /** Solving nonlinear systemwith N equations in N unknowns 
+
+  /** Solving nonlinear system with N equations in N unknowns
    *  of the function "GenFunc"
    *  @see IEqSolver.h
    *  @return StatusCode
    */
   virtual StatusCode solver( const Equations& funcs ,
                              Arg&             arg   ) const;
-  
-  /// Overriding initialize 
+
+  /// Overriding initialize
   virtual StatusCode initialize ();
   virtual StatusCode finalize   ();
 
   virtual ~EqSolver( ); ///< Destructor
-  
+
   class  EqSolverMisc
   {
   public:
-    /** standard construictor 
-     *  
+    /** standard constructor
+     *
      */
     EqSolverMisc ( const Equations& funcs ,
                    Arg&             arg   ) ;
-    // destructor 
+    // destructor
     ~EqSolverMisc ();
   public:
     inline const Arg&       argument  () const { return m_argum   ; }
@@ -65,40 +62,40 @@ public:
     inline const Equations* equations () const { return m_eqs     ; }
     inline const Jacobi&    jacobi    () const { return m_jac     ; }
   private:
-    // default constructor is disabled 
+    // default constructor is disabled
     EqSolverMisc () ;
-    // copy constructor is disabled 
+    // copy constructor is disabled
     EqSolverMisc           ( const EqSolverMisc& );
-    // assignement operator is disabled 
+    // assignment operator is disabled
     EqSolverMisc& operator=( const EqSolverMisc& );
   private:
     Arg              m_argum ;
     const Equations* m_eqs   ;
     Jacobi           m_jac   ;
   };
-  
-  
+
+
   /** Standard constructor
-   *  @see GaudiTool 
-   *  @param type    tool type 
-   *  @param name    tool name 
+   *  @see GaudiTool
+   *  @param type    tool type
+   *  @param name    tool name
    *  @param parent  parent of the tool
    */
-  EqSolver( const std::string& type, 
+  EqSolver( const std::string& type,
             const std::string& name,
             const IInterface* parent);
-  
-private: 
-  
-  /// default constructor is private 
+
+private:
+
+  /// default constructor is private
   EqSolver();
-  /// copy constructor is private 
+  /// copy constructor is private
   EqSolver           ( const EqSolver& );
-  /// assignement operator is  
+  /// assignment operator is
   EqSolver& operator=( const EqSolver& );
 
 private:
-  
+
   std::string m_algType         ;
   double      m_max_iter        ;
   double      m_norm_residual   ;
@@ -107,7 +104,7 @@ private:
 };
 
 // ============================================================================
-// The END 
+// The END
 // ============================================================================
 #endif // ALGTOOLS_EQSOLVER_H
 // ============================================================================

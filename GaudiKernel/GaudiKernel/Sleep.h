@@ -1,15 +1,17 @@
 #ifndef GAUDIKERNEL_SLEEP_H_
 #define GAUDIKERNEL_SLEEP_H_
 
+#include "GaudiKernel/Kernel.h"
+
 namespace Gaudi {
 
-/// Simple sleep function.
-/// @author Marco Clemencic
-void Sleep(int sec);
+  /// Simple sleep function.
+  /// @author Marco Clemencic
+  GAUDI_API void Sleep(int sec);
 
-/// Small variation on the sleep function for nanoseconds sleep.
-/// @author Marco Clemencic
-void NanoSleep(long long nsec);
+  /// Small variation on the sleep function for nanoseconds sleep.
+  /// @author Marco Clemencic
+  GAUDI_API void NanoSleep(long long nsec);
 
 }
 

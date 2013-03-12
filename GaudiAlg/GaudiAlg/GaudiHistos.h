@@ -17,6 +17,7 @@
 // STD& STL
 // ============================================================================
 #include <limits>
+#include <vector>
 // ============================================================================
 // GaudiKernel
 // ============================================================================
@@ -47,51 +48,45 @@ namespace AIDA
  *  @date   2005-08-08
  */
 template <class PBASE>
-class GaudiHistos : public PBASE
+class GAUDI_API GaudiHistos: public PBASE
 {
 public:
   // ==========================================================================
   /// the actual type for histogram identifier
   typedef GaudiAlg::HistoID                HistoID;
   // ==========================================================================
-  /// the actual type for (Numeric ID)->(1D histogram) mapping
-  typedef GaudiAlg::Histo1DMapNumericID    Histo1DMapNumID;
-  /// the actual type for (Literal ID)->(1D histogram) mapping
-  typedef GaudiAlg::Histo1DMapLiteralID    Histo1DMapLitID;
+  /// the actual type for (ID)->(1D histogram) mapping
+  typedef GaudiAlg::Histo1DMapID           Histo1DMapID;
   /// the actual type for title->(1D histogram) mapping
   typedef GaudiAlg::Histo1DMapTitle        Histo1DMapTitle;
   // ==========================================================================
-  /// the actual type for (Numeric ID)->(2D histogram) mapping
-  typedef GaudiAlg::Histo2DMapNumericID    Histo2DMapNumID;
-  /// the actual type for (Literal ID)->(2D histogram) mapping
-  typedef GaudiAlg::Histo2DMapLiteralID    Histo2DMapLitID;
+  /// the actual type for (ID)->(2D histogram) mapping
+  typedef GaudiAlg::Histo2DMapID           Histo2DMapID;
   /// the actual type for title->(2D  histogram) mapping
   typedef GaudiAlg::Histo2DMapTitle        Histo2DMapTitle;
   // ==========================================================================
-  /// the actual type for (Numeric ID)->(3D histogram) mapping
-  typedef GaudiAlg::Histo3DMapNumericID    Histo3DMapNumID;
-  /// the actual type for (Literal ID)->(3D histogram) mapping
-  typedef GaudiAlg::Histo3DMapLiteralID    Histo3DMapLitID;
+  /// the actual type for (ID)->(3D histogram) mapping
+  typedef GaudiAlg::Histo3DMapID           Histo3DMapID;
   /// the actual type for title->(3D histogram) mapping
   typedef GaudiAlg::Histo3DMapTitle        Histo3DMapTitle;
   // ==========================================================================
-  /// the actual type for (Numeric ID)->(1D profile histogram) mapping
-  typedef GaudiAlg::Profile1DMapNumericID  Profile1DMapNumID;
-  /// the actual type for (Literal ID)->(1D profile histogram) mapping
-  typedef GaudiAlg::Profile1DMapLiteralID  Profile1DMapLitID;
+  /// the actual type for (ID)->(1D profile histogram) mapping
+  typedef GaudiAlg::Profile1DMapID         Profile1DMapID;
   /// the actual type for title->(1D profile histogram) mapping
   typedef GaudiAlg::Profile1DMapTitle      Profile1DMapTitle;
   // ==========================================================================
-  /// the actual type for (Numeric ID)->(2D profile histogram) mapping
-  typedef GaudiAlg::Profile2DMapNumericID  Profile2DMapNumID;
-  /// the actual type for (Literal ID)->(2D profile histogram) mapping
-  typedef GaudiAlg::Profile2DMapLiteralID  Profile2DMapLitID;
+  /// the actual type for (ID)->(2D profile histogram) mapping
+  typedef GaudiAlg::Profile2DMapID         Profile2DMapID;
   /// the actual type for title->(2D profile histogram) mapping
   typedef GaudiAlg::Profile2DMapTitle      Profile2DMapTitle;
+  // ==========================================================================
+  /// Edges for variable binning
+  typedef GaudiAlg::HistoBinEdges          HistoBinEdges;
   // ==========================================================================
 public:
   // ==========================================================================
   // ================================= 1D Histograms ==========================
+  // ================================= Fixed Binning ==========================
   // ==========================================================================
   /** fill the 1D histogram (book on demand)
    *
@@ -175,7 +170,7 @@ public:
    *     const Gaudi::Histo1DDef& hdef = ... ;
    *
    *     const double mass = ... ;
-   *     plot ( mass , hdef ) ;
+   *     plot1D ( mass , hdef ) ;
    *
    *  @endcode
    *
@@ -188,16 +183,31 @@ public:
    *
    *  @param value value to be filled
    *  @param hdef histogram descriptor
-   *  @param low   low limit for histogram
-   *  @param high  high limit for histogram
-   *  @param bins  number of bins
    *  @param weight weight
    *  @return pointer to AIDA 1D histogram
    */
-  AIDA::IHistogram1D*  plot
+  AIDA::IHistogram1D*  plot1D
   ( const double             value        ,
     const Gaudi::Histo1DDef& hdef         ,
     const double             weight = 1.0 ) const ;
+  // ==========================================================================
+  /** fill the 1D histogram (book on demand)
+   *
+   *  Wrapper method for the equivalent plot1D method.
+   *  Retained for backwards compatibility, please use plot1D instead.
+   *
+   *  @param value value to be filled
+   *  @param hdef histogram descriptor
+   *  @param weight weight
+   *  @return pointer to AIDA 1D histogram
+   */
+  inline AIDA::IHistogram1D*  plot
+  ( const double             value        ,
+    const Gaudi::Histo1DDef& hdef         ,
+    const double             weight = 1.0 ) const
+  {
+    return plot1D ( value, hdef, weight );
+  }
   // ==========================================================================
   /** fill the 1D histogram with forced ID assignment (book on demand)
    *
@@ -310,7 +320,7 @@ public:
    *     const HistoID ID = ... ;
    *
    *     const double mass = ... ;
-   *     plot ( mass , ID , hdef  )
+   *     plot1D ( mass , ID , hdef  )
    *
    *  @endcode
    *
@@ -321,14 +331,34 @@ public:
    *  @param value value to be filled
    *  @param ID histogram identifier
    *  @param hdef histogram descriptor
+   *  @param weight weight
    *  @return pointer to AIDA 1D histogram
    */
-  AIDA::IHistogram1D*  plot
+  AIDA::IHistogram1D*  plot1D
   ( const double             value        ,
     const HistoID&           ID           ,
     const Gaudi::Histo1DDef& hdef         ,
     const double             weight = 1.0 ) const ;
   // ==========================================================================
+ /** fill the 1D histogram (book on demand)
+   *
+   *  Wrapper method for the equivalent plot1D method.
+   *  Retained for backwards compatibility, please use plot1D instead.
+   *
+   *  @param value value to be filled
+   *  @param ID histogram identifier
+   *  @param hdef histogram descriptor
+   *  @param weight weight
+   *  @return pointer to AIDA 1D histogram
+   */
+  inline AIDA::IHistogram1D*  plot
+  ( const double             value        ,
+    const HistoID&           ID           ,
+    const Gaudi::Histo1DDef& hdef         ,
+    const double             weight = 1.0 ) const
+  {
+    return plot1D ( value, ID, hdef, weight );
+  }
   /** fill the 1D histogram with information from
    *  [first,last) sequence
    *
@@ -681,6 +711,125 @@ public:
     return h ;
   }
   // ==========================================================================
+  // ================================= 1D Histograms ==========================
+  // =============================== Variable Binning =========================
+  // ==========================================================================
+  /** Fill the 1D variable binning histogram (book on demand)
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edges = ...;
+   *     const double mass = ... ;
+   *     plot1D( mass , "Invariant Mass" , edges )
+   *
+   *  @endcode
+   *
+   *  This example illustrates the filling of the histogram
+   *  titled <tt>"InvariantMass"</tt> with value @c mass.
+   *
+   *  If the histogram with given title does not exist yet
+   *  it will be automatically booked with the given histogram bin edges.
+   *
+   *  @attention
+   *  The histogram will get a unique identifier automatically assigned which by
+   *  default will be equal to the histogram title. An option exists to instead
+   *  use numerical IDs. In this case the first histogram booked will be ID=1 the
+   *  next ID=2 and so on. Note though this scheme is not recommended as it does
+   *  NOT guarantee predictability of the ID a given histogram will be given when
+   *  filled under conditional statements, since in these circumstances the order
+   *  in which the histograms are first filled, and thus booked, will depend on the
+   *  nature of the first few events read. This is particularly problematic when
+   *  users submit many parallel 'sub-jobs' and then attempt to merge the final
+   *  output ROOT (or HBOOK) files, since a given histogram could have different IDs
+   *  in each of the sub-jobs. Consequently it is strongly recommended that users do
+   *  not use numerical automatic IDs unless they are sure they understand what they
+   *  are doing.
+   *
+   *  @see AIDA::IHistogram1D
+   *
+   *  @param value value to be filled
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edges The histogram bin edges
+   *  @param weight weight
+   *  @return pointer to AIDA 1D histogram
+   */
+  AIDA::IHistogram1D*  plot1D
+  ( const double         value        ,
+    const std::string&   title        ,
+    const HistoBinEdges& edges        ,
+    const double         weight = 1.0 ) const ;
+  // ==========================================================================
+  /** fill the 1D variable binning histogram with forced ID assignment (book on demand)
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edges = ...;
+   *     const double mass = ... ;
+   *     plot1D( mass , 15 , "Invariant Mass" , edges )
+   *
+   *  @endcode
+   *
+   *  This example illustrates the filling of the 1D histogram ID=15
+   *  titled <tt>"Invariant Mass"</tt> with value @c mass.
+   *
+   *  If the histogram with given ID does not exist yet
+   *  it will be automatically booked with the given histogram bin edges.
+   *
+   *  It is also possible to use literal IDs. For example :-
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edges = ...;
+   *     const double mass = ... ;
+   *     plot1D( mass , "mass" , "Invariant Mass" , edges )
+   *
+   *  @endcode
+   *
+   *  Will book the same histogram, using the id "mass".
+   *
+   *  It is also possible using literal IDs, to place histograms in
+   *  sub-directories from the main histogram directory, using for
+   *  example :-
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edges = ...;
+   *     const double mass = ... ;
+   *     plot1D( mass , "subdir/mass" , "Invariant Mass" , edges )
+   *
+   *  @endcode
+   *
+   *  Which will create the histogram "mass" in the sub-directory "subdir".
+   *  Histograms can also be created in sub-directories with numeric IDs if
+   *  IDs such as "subdir/1" are used.
+   *
+   *  @attention
+   *  If the histogram with given ID is already booked
+   *  through automatic assignment of histogram ID,
+   *  the error will not be detected.
+   *  Therefore it is recommended
+   *  to use non-trivial histogram ID offset (property "HistoOffSet")
+   *  if one need to combine these techniques together.
+   *  It is still desirable to use the unique histogram title
+   *  to avoid a bad interference.
+   *
+   *  @see AIDA::IHistogram1D
+   *
+   *  @param value value to be filled
+   *  @param ID histogram identifier
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edges The histogram bin edges
+   *  @param weight weight
+   *  @return pointer to AIDA 1D histogram
+   */
+  // ==========================================================================
+  AIDA::IHistogram1D*  plot1D
+  ( const double         value        ,
+    const HistoID&       ID           ,
+    const std::string&   title        ,
+    const HistoBinEdges& edges        ,
+    const double         weight = 1.0 ) const ;
+  // ==========================================================================
   // ================================= 2D Histograms ==========================
   // ==========================================================================
   /** fill the 2D histogram (book on demand)
@@ -833,6 +982,146 @@ public:
     const unsigned long binsX  = 50  ,
     const unsigned long binsY  = 50  ,
     const double        weight = 1.0 ) const;
+  // ==========================================================================
+  // ================================= 2D Histograms ==========================
+  // =============================== Variable Binning =========================
+  // ==========================================================================
+  /** Fill the 2D variable binning histogram (book on demand)
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edgesX = ...;
+   *     const GaudiAlg::HistoBinEdges edgesY = ...;
+   *     const double mass1 = ... ;
+   *     const double mass2 = ... ;
+   *     plot2D( mass1, mass2,
+   *            "Invariant Mass2 versus Mass1" , edgesX, edgesY );
+   *
+   *  @endcode
+   *
+   *  This example illustrates the filling of the 2D histogram
+   *  titled <tt>"Invariant Mass2 versus Mass1"</tt>
+   *  with values @c mass1 and @c mass2 .
+   *
+   *  If the histogram with given title does not exist yet
+   *  it will be automatically booked with the given histogram bin edges.
+   *
+   *  @attention
+   *  The histogram will get a unique identifier automatically assigned which by
+   *  default will be equal to the histogram title. An option exists to instead
+   *  use numerical IDs. In this case the first histogram booked will be ID=1 the
+   *  next ID=2 and so on. Note though this scheme is not recommended as it does
+   *  NOT guarantee predictability of the ID a given histogram will be given when
+   *  filled under conditional statements, since in these circumstances the order
+   *  in which the histograms are first filled, and thus booked, will depend on the
+   *  nature of the first few events read. This is particularly problematic when
+   *  users submit many parallel 'sub-jobs' and then attempt to merge the final
+   *  output ROOT (or HBOOK) files, since a given histogram could have different IDs
+   *  in each of the sub-jobs. Consequently it is strongly recommended that users do
+   *  not use numerical automatic IDs unless they are sure they understand what they
+   *  are doing.
+   *
+   *  @see AIDA::IHistogram2D
+   *
+   *  @param valueX x value to be filled
+   *  @param valueY y value to be filled
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edgesX The histogram x bin edges
+   *  @param edgesY The histogram y bin edges
+   *  @param weight weight
+   *  @return pointer to AIDA 2D histogram
+   */
+  AIDA::IHistogram2D*  plot2D
+  ( const double         valueX       ,
+    const double         valueY       ,
+    const std::string&   title        ,
+    const HistoBinEdges& edgesX       ,
+    const HistoBinEdges& edgesY       ,
+    const double         weight = 1.0 ) const ;
+  // ==========================================================================
+  /** fill the 2D variable histogram with forced ID assignment (book on demand)
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edgesX = ...;
+   *     const GaudiAlg::HistoBinEdges edgesY = ...;
+   *     const double mass1 = ... ;
+   *     const double mass2 = ... ;
+   *     plot2D( mass1, mass2, 15,
+   *             "Invariant Mass2 versus Mass1", edgesX, edgesY );
+   *
+   *  @endcode
+   *
+   *  This example illustrates the filling of the 2D histogram ID=15
+   *  titled <tt>"Invariant Mass2 versus Mass1"</tt>
+   *  with values @c mass1 and @c mass2 .
+   *
+   *  If the histogram with given title does not exist yet
+   *  it will be automatically booked with the given histogram bin edges.
+   *
+   *  It is also possible to use literal IDs. For example :-
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edgesX = ...;
+   *     const GaudiAlg::HistoBinEdges edgesY = ...;
+   *     const double mass1 = ... ;
+   *     const double mass2 = ... ;
+   *     plot2D( mass1, mass2, "mass",
+   *             "Invariant Mass2 versus Mass1", edgesX, edgesY );
+   *
+   *  @endcode
+   *
+   *  Will book the same histogram, using the id "mass".
+   *
+   *  It is also possible using literal IDs, to place histograms in
+   *  sub-directories from the main histogram directory, using for
+   *  example :-
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edgesX = ...;
+   *     const GaudiAlg::HistoBinEdges edgesY = ...;
+   *     const double mass1 = ... ;
+   *     const double mass2 = ... ;
+   *     plot2D( mass1, mass2, "subdir/mass",
+   *             "Invariant Mass2 versus Mass1", edgesX, edgesY );
+   *
+   *  @endcode
+   *
+   *  Which will create the histogram "mass" in the sub-directory "subdir".
+   *  Histograms can also be created in sub-directories with numeric IDs if
+   *  IDs such as "subdir/1" are used.
+   *
+   *  @attention
+   *  If the histogram with given ID is already booked
+   *  through automatic assignment of histogram ID,
+   *  the error will not be detected.
+   *  Therefore it is recommended
+   *  to use non-trivial histogram ID offset  (property "HistoOffSet")
+   *  if one need to combine these techniques together
+   *  It is still desirable to use the unique histogram title
+   *  to avoid a bad interference
+   *
+   *  @see AIDA::IHistogram2D
+   *
+   *  @param valueX x value to be filled
+   *  @param valueY y value to be filled
+   *  @param ID     Histogram ID to use
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edgesX The histogram x bin edges
+   *  @param edgesY The histogram y bin edges
+   *  @param weight weight
+   *  @return pointer to AIDA 2D histogram
+   */
+  AIDA::IHistogram2D*  plot2D
+  ( const double         valueX       ,
+    const double         valueY       ,
+    const HistoID&       ID           ,
+    const std::string&   title        ,
+    const HistoBinEdges& edgesX       ,
+    const HistoBinEdges& edgesY       ,
+    const double         weight = 1.0 ) const ;
   // ==========================================================================
   // ================================= 3D Histograms ==========================
   // ==========================================================================
@@ -1013,7 +1302,164 @@ public:
     const unsigned long binsZ  = 10  ,
     const double        weight = 1.0 ) const;
   // ==========================================================================
+  // ================================= 3D Histograms ==========================
+  // =============================== Variable Binning =========================
+  // ==========================================================================
+  /** Fill the 3D variable binning histogram (book on demand)
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edgesX = ...;
+   *     const GaudiAlg::HistoBinEdges edgesY = ...;
+   *     const GaudiAlg::HistoBinEdges edgesZ = ...;
+   *     const double X = ... ;
+   *     const double Y = ... ;
+   *     const double Z = ... ;
+   *     plot3D( X, Y, Z, "Space Points", edgesX, edgesY, edgesZ );
+   *
+   *  @endcode
+   *
+   *  This example illustrates the filling of the 3D histogram
+   *  titled <tt>"Space Points"</tt> with values @c X, @c Y and @c Z.
+   *
+   *  If the histogram with given title does not exist yet
+   *  it will be automatically booked with the given histogram bin edges.
+   *
+   *  @attention
+   *  The histogram will get a unique identifier automatically assigned which by
+   *  default will be equal to the histogram title. An option exists to instead
+   *  use numerical IDs. In this case the first histogram booked will be ID=1 the
+   *  next ID=2 and so on. Note though this scheme is not recommended as it does
+   *  NOT guarantee predictability of the ID a given histogram will be given when
+   *  filled under conditional statements, since in these circumstances the order
+   *  in which the histograms are first filled, and thus booked, will depend on the
+   *  nature of the first few events read. This is particularly problematic when
+   *  users submit many parallel 'sub-jobs' and then attempt to merge the final
+   *  output ROOT (or HBOOK) files, since a given histogram could have different IDs
+   *  in each of the sub-jobs. Consequently it is strongly recommended that users do
+   *  not use numerical automatic IDs unless they are sure they understand what they
+   *  are doing.
+   *
+   *  @see AIDA::IHistogram3D
+   *
+   *  @param valueX x value to be filled
+   *  @param valueY y value to be filled
+   *  @param valueZ z value to be filled
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edgesX The histogram x bin edges
+   *  @param edgesY The histogram y bin edges
+   *  @param edgesZ The histogram z bin edges
+   *  @param weight weight
+   *  @return pointer to AIDA 3D histogram
+   */
+  AIDA::IHistogram3D*  plot3D
+  ( const double         valueX       ,
+    const double         valueY       ,
+    const double         valueZ       ,
+    const std::string&   title        ,
+    const HistoBinEdges& edgesX       ,
+    const HistoBinEdges& edgesY       ,
+    const HistoBinEdges& edgesZ       ,
+    const double         weight = 1.0 ) const ;
+  // ==========================================================================
+  // ==========================================================================
+  /** fill the 3D histogram with forced ID assignment (book on demand)
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edgesX = ...;
+   *     const GaudiAlg::HistoBinEdges edgesY = ...;
+   *     const GaudiAlg::HistoBinEdges edgesZ = ...;
+   *     const double X = ... ;
+   *     const double Y = ... ;
+   *     const double Z = ... ;
+   *     plot3D( X, Y, Z, "Space Points", edgesX, edgesY, edgesZ );
+   *
+   *  @endcode
+   *
+   *  This example illustrates the filling of the 3D histogram ID=15
+   *  titled <tt>"Space Points"</tt> with values @c X, @c Y and @c Z.
+   *
+   *  If the histogram with given title does not exist yet
+   *  it will be automatically booked with the given histogram bin edges and
+   *  histogram ID.
+   *
+   *  It is also possible to use literal IDs. For example :-
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edgesX = ...;
+   *     const GaudiAlg::HistoBinEdges edgesY = ...;
+   *     const GaudiAlg::HistoBinEdges edgesZ = ...;
+   *     const double X = ... ;
+   *     const double Y = ... ;
+   *     const double Z = ... ;
+   *     plot3D( X, Y, Z,
+   *             "space", "Space Points" ,
+   *             edgesX, edgesY, edgesZ );
+   *
+   *  @endcode
+   *
+   *  Will book the same histogram, using the id "space".
+   *
+   *  It is also possible using literal IDs, to place histograms in
+   *  sub-directories from the main histogram directory, using for
+   *  example :-
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edgesX = ...;
+   *     const GaudiAlg::HistoBinEdges edgesY = ...;
+   *     const GaudiAlg::HistoBinEdges edgesZ = ...;
+   *     const double X = ... ;
+   *     const double Y = ... ;
+   *     const double Z = ... ;
+   *     plot3D( X, Y, Z,
+   *             "subdir/space", "Space Points" ,
+   *             edgesX, edgesY, edgesZ );
+   *
+   *  @endcode
+   *
+   *  Which will create the histogram "space" in the sub-directory "subdir".
+   *  Histograms can also be created in sub-directories with numeric IDs if
+   *  IDs such as "subdir/1" are used.
+   *
+   *  @attention
+   *  If the histogram with given ID is already booked
+   *  through automatic assignment of histogram ID,
+   *  the error will not be detected.
+   *  Therefore it is recommended
+   *  to use non-trivial histogram ID offset  (property "HistoOffSet")
+   *  if one need to combine these techniques together
+   *  It is still desirable to use the unique histogram title
+   *  to avoid a bad interference
+   *
+   *  @see AIDA::IHistogram3D
+   *
+   *  @param valueX x value to be filled
+   *  @param valueY y value to be filled
+   *  @param valueZ z value to be filled
+   *  @param ID     Histogram ID to use
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edgesX The histogram x bin edges
+   *  @param edgesY The histogram y bin edges
+   *  @param edgesZ The histogram z bin edges
+   *  @param weight weight
+   *  @return pointer to AIDA 3D histogram
+   */
+  AIDA::IHistogram3D*  plot3D
+  ( const double         valueX       ,
+    const double         valueY       ,
+    const double         valueZ       ,
+    const HistoID&       ID           ,
+    const std::string&   title        ,
+    const HistoBinEdges& edgesX       ,
+    const HistoBinEdges& edgesY       ,
+    const HistoBinEdges& edgesZ       ,
+    const double         weight = 1.0 ) const ;
+  // ==========================================================================
   // ================================= 1D Profile =============================
+  // ================================= Fixed binning ==========================
   // ==========================================================================
   /** fill the 1D profile histogram (book on demand)
    *
@@ -1153,6 +1599,127 @@ public:
     const double        highY  =  std::numeric_limits<double>::max() ,
     const double        weight = 1.0 ) const;
   // ==========================================================================
+  // ================================= 1D Profile =============================
+  // ============================== Variable binning ==========================
+  // ==========================================================================
+  /** fill the 1D variable binning profile histogram (book on demand)
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edges = ...;
+   *     const double mass1 = ... ;
+   *     const double mass2 = ... ;
+   *     profile1D( mass1, mass2, "Invariant Mass2 versus Mass1", edges );
+   *
+   *  @endcode
+   *
+   *  This example illustrates the filling of the 1D profile histogram
+   *  titled <tt>"Invariant Mass2 versus Mass1"</tt>
+   *   with values @c mass1 and @c mass2 .
+   *
+   *  If the histogram with given title does not exist yet
+   *  it will be automatically booked with the given histogram bin edges.
+   *
+   *  @attention
+   *  The histogram will get a unique identifier automatically assigned which by
+   *  default will be equal to the histogram title. An option exists to instead
+   *  use numerical IDs. In this case the first histogram booked will be ID=1 the
+   *  next ID=2 and so on. Note though this scheme is not recommended as it does
+   *  NOT guarantee predictability of the ID a given histogram will be given when
+   *  filled under conditional statements, since in these circumstances the order
+   *  in which the histograms are first filled, and thus booked, will depend on the
+   *  nature of the first few events read. This is particularly problematic when
+   *  users submit many parallel 'sub-jobs' and then attempt to merge the final
+   *  output ROOT (or HBOOK) files, since a given histogram could have different IDs
+   *  in each of the sub-jobs. Consequently it is strongly recommended that users do
+   *  not use numerical automatic IDs unless they are sure they understand what they
+   *  are doing.
+   *
+   *  @see AIDA::IProfile1D
+   *
+   *  @param valueX x value to be filled
+   *  @param valueY y value to be filled
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edges The histogram bin edges
+   *  @param weight weight
+   *  @return pointer to AIDA 1D profile histogram
+   */
+  AIDA::IProfile1D* profile1D
+  ( const double         valueX       ,
+    const double         valueY       ,
+    const std::string&   title        ,
+    const HistoBinEdges& edges        ,
+    const double         weight = 1.0 ) const ;
+  // ==========================================================================
+  /** fill the 1D variable binning profile histogram with forced ID assignment (book on demand)
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edges = ...;
+   *     const double mass1 = ... ;
+   *     const double mass2 = ... ;
+   *     profile1D( mass1, mass2,
+   *             15, "Invariant Mass2 versus Mass1", edges );
+   *
+   *  @endcode
+   *
+   *  This example illustrates the filling of the 1D profile histogram with ID=15
+   *  titled <tt>"Invariant Mass2 versus Mass1"</tt> with
+   *  values @c mass1 and @c mass2 .
+   *
+   *  If the histogram with given ID does not exist yet
+   *  it will be automatically booked with the given histogram bin edges.
+   *
+   *  It is also possible to use literal IDs. For example :-
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edges = ...;
+   *     const double mass1 = ... ;
+   *     const double mass2 = ... ;
+   *     profile1D( mass1, mass2,
+   *             "mass", "Invariant Mass2 versus Mass1", edges );
+   *
+   *  @endcode
+   *
+   *  Will book the same histogram, using the id "mass".
+   *
+   *  It is also possible using literal IDs, to place histograms in
+   *  sub-directories from the main histogram directory, using for
+   *  example :-
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edges = ...;
+   *     const double mass1 = ... ;
+   *     const double mass2 = ... ;
+   *     profile1D( mass1, mass2,
+   *        "subdir/mass", "Invariant Mass2 versus Mass1", edges );
+   *
+   *  @endcode
+   *
+   *  Which will create the histogram "mass" in the sub-directory "subdir".
+   *  Histograms can also be created in sub-directories with numeric IDs if
+   *  IDs such as "subdir/1" are used.
+   *
+   *  @see AIDA::IProfile1D
+   *
+   *  @param valueX x value to be filled
+   *  @param valueY y value to be filled
+   *  @param ID histogram identifier
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edges The histogram bin edges
+   *  @param weight weight
+   *  @return pointer to AIDA 1D profile histogram
+   */
+  AIDA::IProfile1D* profile1D
+  ( const double         valueX       ,
+    const double         valueY       ,
+    const HistoID&       ID           ,
+    const std::string&   title        ,
+    const HistoBinEdges& edges        ,
+    const double         weight = 1.0 ) const;
+  // ==========================================================================
   // ================================= 2D Profile =============================
   // ==========================================================================
   /** fill the 2D profile histogram (book on demand)
@@ -1162,7 +1729,7 @@ public:
    *     const double X = ... ;
    *     const double Y = ... ;
    *     const double Z = ... ;
-   *     profile2D( X, Y, Z, "Space Points" ,2.5 ,3.5, 4.5, 5.5, 10, 20 );
+   *     profile2( X, Y, Z, "Space Points" ,2.5 ,3.5, 4.5, 5.5, 10, 20 );
    *
    *  @endcode
    *
@@ -1299,7 +1866,138 @@ public:
     const unsigned long binsY  = 50  ,
     const double        weight = 1.0 ) const;
   // ==========================================================================
-public:
+  // ================================= 2D Profile =============================
+  // ============================== Variable binning ==========================
+  // ==========================================================================
+  /** fill the 2D variable binning profile histogram (book on demand)
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edgesX = ...;
+   *     const GaudiAlg::HistoBinEdges edgesY = ...;
+   *     const double X = ... ;
+   *     const double Y = ... ;
+   *     const double Z = ... ;
+   *     profile2D( X, Y, Z, "Space Points", edgesX, edgesY );
+   *
+   *  @endcode
+   *
+   *  This example illustrates the filling of the 2D profile histogram
+   *  titled <tt>"Space Points"</tt> with values @c X, @c Y and @c Z.
+   *
+   *  If the histogram with given title does not exist yet
+   *  it will be automatically booked with the given histogram bin edges.
+   *
+   *  @attention
+   *  The histogram will get a unique identifier automatically assigned which by
+   *  default will be equal to the histogram title. An option exists to instead
+   *  use numerical IDs. In this case the first histogram booked will be ID=1 the
+   *  next ID=2 and so on. Note though this scheme is not recommended as it does
+   *  NOT guarantee predictability of the ID a given histogram will be given when
+   *  filled under conditional statements, since in these circumstances the order
+   *  in which the histograms are first filled, and thus booked, will depend on the
+   *  nature of the first few events read. This is particularly problematic when
+   *  users submit many parallel 'sub-jobs' and then attempt to merge the final
+   *  output ROOT (or HBOOK) files, since a given histogram could have different IDs
+   *  in each of the sub-jobs. Consequently it is strongly recommended that users do
+   *  not use numerical automatic IDs unless they are sure they understand what they
+   *  are doing.
+   *
+   *  @see AIDA::IProfile2D
+   *
+   *  @param valueX x value to be filled
+   *  @param valueY y value to be filled
+   *  @param valueZ z value to be filled
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edgesX The histogram x bin edges
+   *  @param edgesY The histogram x bin edges
+   *  @param weight weight
+   *  @return pointer to AIDA 1D profile histogram
+   */
+  AIDA::IProfile2D* profile2D
+  ( const double         valueX       ,
+    const double         valueY       ,
+    const double         valueZ       ,
+    const std::string&   title        ,
+    const HistoBinEdges& edgesX       ,
+    const HistoBinEdges& edgesY       ,
+    const double         weight = 1.0 ) const ;
+  // ==========================================================================
+  /** fill the 2D variable binning profile histogram with forced ID assignment (book on demand)
+   *
+   *  @code
+   *
+   *     const GaudiAlg::HistoBinEdges edgesX = ...;
+   *     const GaudiAlg::HistoBinEdges edgesY = ...;
+   *     const double X = ... ;
+   *     const double Y = ... ;
+   *     const double Z = ... ;
+   *     profile2( X, Y, Z, "Space Points", edgesX, edgesY );
+   *
+   *  @endcode
+   *
+   *  This example illustrates the filling of the 2D profile histogram
+   *  titled <tt>"Space Points"</tt> with values @c X, @c Y and @c Z.
+   *
+   *  If the histogram with given ID does not exist yet
+   *  it will be automatically booked with the given histogram bin edges.
+   *
+   *  It is also possible to use literal IDs. For example :-
+   *
+   *  @code
+   *
+   *     const double X = ... ;
+   *     const double Y = ... ;
+   *     const double Z = ... ;
+   *     profile2D( X, Y, Z, "space", "Space Points", edgesX, edgesY );
+   *
+   *  @endcode
+   *
+   *  Will book the same histogram, using the id "mass".
+   *
+   *  It is also possible using literal IDs, to place histograms in
+   *  sub-directories from the main histogram directory, using for
+   *  example :-
+   *
+   *  @code
+   *
+   *     const double X = ... ;
+   *     const double Y = ... ;
+   *     const double Z = ... ;
+   *     profile2D( X, Y, Z,
+   *                "subdir/space", "Space Points", edgesX, edgesY );
+   *
+   *  @endcode
+   *
+   *  Which will create the histogram "mass" in the sub-directory "subdir".
+   *  Histograms can also be created in sub-directories with numeric IDs if
+   *  IDs such as "subdir/1" are used.
+   *
+   *  @see AIDA::IProfile2D
+   *
+   *  @param valueX x value to be filled
+   *  @param valueY y value to be filled
+   *  @param valueZ z value to be filled
+   *  @param ID histogram identifier
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edgesX The histogram x bin edges
+   *  @param edgesY The histogram y bin edges
+   *  @param weight weight
+   *  @return pointer to AIDA 1D profile histogram
+   */
+  AIDA::IProfile2D* profile2D
+  ( const double         valueX       ,
+    const double         valueY       ,
+    const double         valueZ       ,
+    const HistoID&       ID           ,
+    const std::string&   title        ,
+    const HistoBinEdges& edgesX       ,
+    const HistoBinEdges& edgesY       ,
+    const double         weight = 1.0 ) const;
+  // ==========================================================================
+
+public: // 1D Fixed
+
   // ==========================================================================
   /** book the 1D histogram
    *
@@ -1347,60 +2045,8 @@ public:
    *  @param hdef histogram description/definition
    *  @return pointer to AIDA 1D histogram
    */
-   AIDA::IHistogram1D*  book
+  AIDA::IHistogram1D*  book
   ( const Gaudi::Histo1DDef& hdef ) const ;
-  // ==========================================================================
-  /** book the 2D histogram
-   *
-   *  The histogram will be assigned a unique identifier
-   *
-   *  @see IHistogram2D
-   *  @param title histogram title (must be unique within the algorithm)
-   *  @param lowX   low x limit for histogram
-   *  @param highX  high x limit for histogram
-   *  @param binsX  number of bins in x
-   *  @param lowY   low y limit for histogram
-   *  @param highY  high y limit for histogram
-   *  @param binsY  number of bins in y
-   *  @return pointer to AIDA 2D histogram
-   */
-  AIDA::IHistogram2D*  book2D
-  ( const std::string&  title         ,
-    const double        lowX    =   0 ,
-    const double        highX   = 100 ,
-    const unsigned long binsX   =  50 ,
-    const double        lowY    =   0 ,
-    const double        highY   = 100 ,
-    const unsigned long binsY   =  50 ) const ;
-  // ==========================================================================
-  /** book the 3D histogram
-   *
-   *  The histogram will be assigned a unique identifier
-   *
-   *  @see IHistogram3D
-   *  @param title histogram title (must be unique within the algorithm)
-   *  @param lowX   low x limit for histogram
-   *  @param highX  high x limit for histogram
-   *  @param binsX  number of bins in x
-   *  @param lowY   low y limit for histogram
-   *  @param highY  high y limit for histogram
-   *  @param binsY  number of bins in y
-   *  @param lowZ   low y limit for histogram
-   *  @param highZ  high y limit for histogram
-   *  @param binsZ  number of bins in y
-   *  @return pointer to AIDA 3D histogram
-   */
-  AIDA::IHistogram3D*  book3D
-  ( const std::string&  title         ,
-    const double        lowX    =   0 ,
-    const double        highX   = 100 ,
-    const unsigned long binsX   =  10 ,
-    const double        lowY    =   0 ,
-    const double        highY   = 100 ,
-    const unsigned long binsY   =  10 ,
-    const double        lowZ    =   0 ,
-    const double        highZ   = 100 ,
-    const unsigned long binsZ   =  10 ) const ;
   // ==========================================================================
   /** book the 1D histogram with forced ID
    *
@@ -1453,6 +2099,65 @@ public:
   ( const HistoID&           ID   ,
     const Gaudi::Histo1DDef& hdef ) const ;
   // ==========================================================================
+
+public: // 1D Variable
+
+  // ==========================================================================
+  /** book the 1D variable binning histogram
+   *
+   *  The histogram will be assigned a unique identifier
+   *
+   *  @see AIDA::IHistogram1D
+   *
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edges The histogram bin edges
+   *  @return pointer to AIDA 1D histogram
+   */
+  AIDA::IHistogram1D*  book1D
+  ( const std::string&   title       ,
+    const HistoBinEdges& edges       ) const ;
+  // ==========================================================================
+  /** book the 1D variable binning histogram with given ID
+   *
+   *  @see AIDA::IHistogram1D
+   *
+   *  @param ID  unique histogram ID
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edges The histogram bin edges
+   *  @return pointer to AIDA 1D histogram
+   */
+  AIDA::IHistogram1D*  book1D
+  ( const HistoID&       ID           ,
+    const std::string&   title        ,
+    const HistoBinEdges& edges        ) const ;
+  // ==========================================================================
+
+public: // 2D Fixed
+
+  // ==========================================================================
+  /** book the 2D histogram
+   *
+   *  The histogram will be assigned a unique identifier
+   *
+   *  @see IHistogram2D
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param lowX   low x limit for histogram
+   *  @param highX  high x limit for histogram
+   *  @param binsX  number of bins in x
+   *  @param lowY   low y limit for histogram
+   *  @param highY  high y limit for histogram
+   *  @param binsY  number of bins in y
+   *  @return pointer to AIDA 2D histogram
+   */
+  AIDA::IHistogram2D*  book2D
+  ( const std::string&  title         ,
+    const double        lowX    =   0 ,
+    const double        highX   = 100 ,
+    const unsigned long binsX   =  50 ,
+    const double        lowY    =   0 ,
+    const double        highY   = 100 ,
+    const unsigned long binsY   =  50 ) const ;
+  // ==========================================================================
   /** book the 2D histogram with forced ID
    *
    *  @see IHistogram2D
@@ -1472,6 +2177,75 @@ public:
     const double        lowY    =   0 ,
     const double        highY   = 100 ,
     const unsigned long binsY   =  50 ) const ;
+  // ==========================================================================
+
+public: // 2D Variable
+
+  // ==========================================================================
+  /** book the 2D variable binning histogram
+   *
+   *  The histogram will be assigned a unique identifier
+   *
+   *  @see AIDA::IHistogram2D
+   *
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edgesX The histogram x bin edges
+   *  @param edgesY The histogram y bin edges
+   *  @return pointer to AIDA 2D histogram
+   */
+  AIDA::IHistogram2D * book2D
+  ( const std::string&   title    ,
+    const HistoBinEdges& edgesX   ,
+    const HistoBinEdges& edgesY   ) const ;
+  // ==========================================================================
+  /** book the 2D variable binning histogram with given ID
+   *
+   *  @see AIDA::IHistogram2D
+   *
+   *  @param ID  unique histogram ID
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edgesX The histogram x bin edges
+   *  @param edgesY The histogram y bin edges
+   *  @return pointer to AIDA 2D histogram
+   */
+  AIDA::IHistogram2D * book2D
+  ( const HistoID&       ID           ,
+    const std::string&   title        ,
+    const HistoBinEdges& edgesX       ,
+    const HistoBinEdges& edgesY       ) const ;
+  // ==========================================================================
+
+public: // 3D Fixed
+
+  // ==========================================================================
+  /** book the 3D histogram
+   *
+   *  The histogram will be assigned a unique identifier
+   *
+   *  @see IHistogram3D
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param lowX   low x limit for histogram
+   *  @param highX  high x limit for histogram
+   *  @param binsX  number of bins in x
+   *  @param lowY   low y limit for histogram
+   *  @param highY  high y limit for histogram
+   *  @param binsY  number of bins in y
+   *  @param lowZ   low y limit for histogram
+   *  @param highZ  high y limit for histogram
+   *  @param binsZ  number of bins in y
+   *  @return pointer to AIDA 3D histogram
+   */
+  AIDA::IHistogram3D*  book3D
+  ( const std::string&  title         ,
+    const double        lowX    =   0 ,
+    const double        highX   = 100 ,
+    const unsigned long binsX   =  10 ,
+    const double        lowY    =   0 ,
+    const double        highY   = 100 ,
+    const unsigned long binsY   =  10 ,
+    const double        lowZ    =   0 ,
+    const double        highZ   = 100 ,
+    const unsigned long binsZ   =  10 ) const ;
   // ==========================================================================
   /** book the 3D histogram with forced ID
    *
@@ -1502,6 +2276,50 @@ public:
     const double        highZ   = 100 ,
     const unsigned long binsZ   =  10 ) const ;
   // ==========================================================================
+
+public: // 3D Variable
+
+  // ==========================================================================
+  /** book the 3D variable binning histogram
+   *
+   *  The histogram will be assigned a unique identifier
+   *
+   *  @see AIDA::IHistogram3D
+   *
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edgesX The histogram x bin edges
+   *  @param edgesY The histogram y bin edges
+   *  @param edgesZ The histogram z bin edges
+   *  @return pointer to AIDA 3D histogram
+   */
+  AIDA::IHistogram3D * book3D
+  ( const std::string&   title    ,
+    const HistoBinEdges& edgesX   ,
+    const HistoBinEdges& edgesY   ,
+    const HistoBinEdges& edgesZ   ) const ;
+  // ==========================================================================
+  /** book the 3D variable binning histogram with given ID
+   *
+   *  @see AIDA::IHistogram3D
+   *
+   *  @param ID  unique histogram ID
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edgesX The histogram x bin edges
+   *  @param edgesY The histogram y bin edges
+   *  @param edgesZ The histogram z bin edges
+   *  @return pointer to AIDA 3D histogram
+   */
+  AIDA::IHistogram3D * book3D
+  ( const HistoID&       ID           ,
+    const std::string&   title        ,
+    const HistoBinEdges& edgesX       ,
+    const HistoBinEdges& edgesY       ,
+    const HistoBinEdges& edgesZ       ) const ;
+  // ==========================================================================
+
+public: // 1D Fixed Profiles
+
+  // ==========================================================================
   /** book the 1D profile histogram
    *
    *  The histogram will be assigned a unique identifier
@@ -1531,6 +2349,7 @@ public:
    *
    *  @see IHistogram1D
    *  @param title histogram title (must be unique within the algorithm)
+   *  @param edges The histogram bin edges
    *  @param low   low limit for histogram
    *  @param high  high limit for histogram
    *  @param bins  number of bins
@@ -1548,6 +2367,41 @@ public:
     const std::string&  opt    = ""  ,
     const double        lowY   = -std::numeric_limits<double>::max() ,
     const double        highY  =  std::numeric_limits<double>::max() ) const;
+ // ==========================================================================
+
+public: // 1D Variable Profiles
+
+  // ==========================================================================
+  /** book the 1D profile histogram
+   *
+   *  The histogram will be assigned a unique identifier
+   *
+   *  @see IHistogram1D
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edges The histogram bin edges
+   *  @return pointer to AIDA 1D profile histogram
+   */
+  AIDA::IProfile1D*  bookProfile1D
+  ( const std::string&  title        ,
+    const HistoBinEdges&        edges        ) const;
+  // ==========================================================================
+  /** book the 1D profile histogram
+   *
+   *  The histogram will be assigned a unique identifier
+   *
+   *  @see IHistogram1D
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edges The histogram bin edges
+   *  @return pointer to AIDA 1D profile histogram
+   */
+  AIDA::IProfile1D*  bookProfile1D
+  ( const HistoID&       ID           ,
+    const std::string&   title        ,
+    const HistoBinEdges& edges        ) const;
+ // ==========================================================================
+
+public: // 2D Profiles
+
   // ==========================================================================
   /** book the 2D profile histogram
    *
@@ -1577,9 +2431,12 @@ public:
    *  @see AIDA::IProfile2D
    *  @param ID  unique histogram ID
    *  @param title histogram title (must be unique within the algorithm)
-   *  @param low   low limit for histogram
-   *  @param high  high limit for histogram
-   *  @param bins  number of bins
+   *  @param lowX   low x limit for histogram
+   *  @param highX  high x limit for histogram
+   *  @param binsX  number of bins in x
+   *  @param lowY   low y limit for histogram
+   *  @param highY  high y limit for histogram
+   *  @param binsY  number of bins in y
    *  @return pointer to AIDA histogram
    */
   AIDA::IProfile2D*  bookProfile2D
@@ -1592,7 +2449,43 @@ public:
     const double        highY   = 100 ,
     const unsigned long binsY   =  50 ) const ;
   // ==========================================================================
+
+public: // 2D Profiles
+
+  // ==========================================================================
+  /** book the 2D profile histogram
+   *
+   *  The histogram will be assigned a unique identifier
+   *
+   *  @see AIDA::IProfile2D
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edgesX x bin edges
+   *  @param edgesY y bin edges
+   *  @return pointer to AIDA 2D histogram
+   */
+  AIDA::IProfile2D*  bookProfile2D
+  ( const std::string&   title         ,
+    const HistoBinEdges& edgesX,
+    const HistoBinEdges& edgesY ) const ;
+  // ==========================================================================
+  /** book the 2D profile histogram with forced ID
+   *
+   *  @see AIDA::IProfile2D
+   *  @param ID  unique histogram ID
+   *  @param title histogram title (must be unique within the algorithm)
+   *  @param edgesX x bin edges
+   *  @param edgesY y bin edges
+   *  @return pointer to AIDA histogram
+   */
+  AIDA::IProfile2D*  bookProfile2D
+  ( const HistoID&       ID            ,
+    const std::string&   title         ,
+    const HistoBinEdges& edgesX,
+    const HistoBinEdges& edgesY  ) const ;
+  // ==========================================================================
+
 public:
+
   // ==========================================================================
   /** fill the 1D histogram with the value and weight
    *  @param histo 1D histogram to be filled
@@ -1857,16 +2750,13 @@ public: // trivial & non-trivial accessors
    */
   const Histo1DMapTitle & histo1DMapTitle() const { return m_histo1DMapTitle; }
   // ==========================================================================
-  /** get access to the map of 1D histograms index via a numeric ID
-   *
-   *  @attention This map only contains 1D histogram booked via a numeric
-   *             ID, either forced or automatically assigned.
+  /** get access to the map of all 1D histograms index via ID
    *
    *  @code
    *
-   *  const Histo1DMapNumID& histos = histo1DMapNumID() ;
+   *  const Histo1DMap& histos = histo1DMap () ;
    *  // iterate over the map!
-   *  for ( Histo1DMapNumID::const_iterator entry = histos.begin() ;
+   *  for ( Histo1DMap::const_iterator entry = histos.begin() ;
    *        histos.end() != entry ; ++entry  )
    *     {
    *        // histogram ID
@@ -1882,41 +2772,9 @@ public: // trivial & non-trivial accessors
    *
    *  @endcode
    *
-   *  @attention The map *COULD* contains NULL pointers,
-   *             the check before use is mandatory!
    *
    */
-  const Histo1DMapNumID & histo1DMapNumID () const { return m_histo1DMapNumID; }
-  // ==========================================================================
-  /** get access to the map of all 1D histograms index via a literal (string) ID
-   *
-   *  @attention This map only contains 1D histogram booked via a literal ID.
-   *
-   *  @code
-   *
-   *  const Histo1DMapLitID& histos = histo1DMapLitID() ;
-   *  // iterate over the map!
-   *  for ( Histo1DMapLitID::const_iterator entry = histos.begin() ;
-   *        histos.end() != entry ; ++entry  )
-   *     {
-   *        // histogram ID
-   *        const HistoID        ID = entry->first ;
-   *        // histogram itself
-   *        AIDA::IHistogram1D* h  = entry->second ;
-   *        if ( 0 == h ) { continue ;}
-   *
-   *        std::cout << " Histogram ID    " << ID
-   *                  << " Histogram title " << h->title() << std::endl ;
-   *
-   *     }
-   *
-   *  @endcode
-   *
-   *  @attention The map *COULD* contains NULL pointers,
-   *             the check before use is mandatory!
-   *
-   */
-  const Histo1DMapLitID & histo1DMapLitID () const { return m_histo1DMapLitID; }
+  const Histo1DMapID & histo1DMapID () const { return m_histo1DMapID ; }
   // ==========================================================================
   /** get access to the map of all 2D histograms indexed via their title
    *
@@ -1947,16 +2805,14 @@ public: // trivial & non-trivial accessors
    */
   const Histo2DMapTitle & histo2DMapTitle() const { return m_histo2DMapTitle ; }
   // ==========================================================================
-  /** get access to the map of 2D histograms index via a numeric ID
-   *
-   *  @attention This map only contains 2D histogram booked via a numeric
-   *             ID, either forced or automatically assigned.
+  /** get access to the map of 2D histograms index via ID
    *
    *  @code
    *
-   *  const Histo2DMapNumID& histos = histo2DMapNumID() ;
+   *  const Histo2DMapID& histos = histo2DMapID () ;
+   *
    *  // iterate over the map!
-   *  for ( Histo2DMapNumID::const_iterator entry = histos.begin() ;
+   *  for ( Histo2DMapID::const_iterator entry = histos.begin() ;
    *        histos.end() != entry ; ++entry  )
    *     {
    *        // histogram ID
@@ -1972,41 +2828,8 @@ public: // trivial & non-trivial accessors
    *
    *  @endcode
    *
-   *  @attention The map *COULD* contains NULL pointers,
-   *             the check before use is mandatory!
-   *
    */
-  const Histo2DMapNumID & histo2DMapNumID () const { return m_histo2DMapNumID; }
-  // ==========================================================================
-  /** get access to the map of all 2D histograms index via a literal (string) ID
-   *
-   *  @attention This map only contains 2D histogram booked via a literal ID.
-   *
-   *  @code
-   *
-   *  const Histo2DMapLitID& histos = histo2DMapLitID() ;
-   *  // iterate over the map!
-   *  for ( Histo2DMapLitID::const_iterator entry = histos.begin() ;
-   *        histos.end() != entry ; ++entry  )
-   *     {
-   *        // histogram ID
-   *        const HistoID        ID = entry->first ;
-   *        // histogram itself
-   *        AIDA::IHistogram2D* h  = entry->second ;
-   *        if ( 0 == h ) { continue ;}
-   *
-   *        std::cout << " Histogram ID    " << ID
-   *                  << " Histogram title " << h->title() << std::endl ;
-   *
-   *     }
-   *
-   *  @endcode
-   *
-   *  @attention The map *COULD* contains NULL pointers,
-   *             the check before use is mandatory!
-   *
-   */
-  const Histo2DMapLitID & histo2DMapLitID () const { return m_histo2DMapLitID; }
+  const Histo2DMapID& histo2DMapID () const { return m_histo2DMapID ; }
   // ==========================================================================
   /** get access to the map of all 3D histograms indexed via their title
    *
@@ -2037,16 +2860,14 @@ public: // trivial & non-trivial accessors
    */
   const Histo3DMapTitle & histo3DMapTitle () const { return m_histo3DMapTitle ; }
   // ==========================================================================
-  /** get access to the map of 3D histograms index via a numeric ID
-   *
-   *  @attention This map only contains 3D histogram booked via a numeric
-   *             ID, either forced or automatically assigned.
+  /** get access to the map of all 3D histograms index via a ID
    *
    *  @code
    *
-   *  const Histo3DMapNumID& histos = histo3DMapNumID() ;
+   *  const Histo3DMapID& histos = histo3DMapID() ;
+   *
    *  // iterate over the map!
-   *  for ( Histo3DMapNumID::const_iterator entry = histos.begin() ;
+   *  for ( Histo3DMapID::const_iterator entry = histos.begin() ;
    *        histos.end() != entry ; ++entry  )
    *     {
    *        // histogram ID
@@ -2062,41 +2883,8 @@ public: // trivial & non-trivial accessors
    *
    *  @endcode
    *
-   *  @attention The map *COULD* contains NULL pointers,
-   *             the check before use is mandatory!
-   *
    */
-  const Histo3DMapNumID & histo3DMapNumID () const { return m_histo3DMapNumID; }
-  // ==========================================================================
-  /** get access to the map of all 3D histograms index via a literal (string) ID
-   *
-   *  @attention This map only contains 3D histogram booked via a literal ID.
-   *
-   *  @code
-   *
-   *  const Histo3DMapLitID& histos = histo3DMapLitID() ;
-   *  // iterate over the map!
-   *  for ( Histo3DMapLitID::const_iterator entry = histos.begin() ;
-   *        histos.end() != entry ; ++entry  )
-   *     {
-   *        // histogram ID
-   *        const HistoID        ID = entry->first ;
-   *        // histogram itself
-   *        AIDA::IHistogram3D* h  = entry->second ;
-   *        if ( 0 == h ) { continue ;}
-   *
-   *        std::cout << " Histogram ID    " << ID
-   *                  << " Histogram title " << h->title() << std::endl ;
-   *
-   *     }
-   *
-   *  @endcode
-   *
-   *  @attention The map *COULD* contains NULL pointers,
-   *             the check before use is mandatory!
-   *
-   */
-  const Histo3DMapLitID & histo3DMapLitID () const { return m_histo3DMapLitID; }
+  const Histo3DMapID & histo3DMapID () const { return m_histo3DMapID; }
   // ==========================================================================
   /** get access to the map of all 1D profile histograms indexed via their title
    *
@@ -2127,16 +2915,14 @@ public: // trivial & non-trivial accessors
    */
   const Profile1DMapTitle & profile1DMapTitle() const { return m_profile1DMapTitle; }
   // ==========================================================================
-  /** get access to the map of 1D profile histograms index via a numeric ID
-   *
-   *  @attention This map only contains 2D histogram booked via a numeric
-   *             ID, either forced or automatically assigned.
+  /** get access to the map of 1D profile histograms index via a ID
    *
    *  @code
    *
-   *  const Profile1DMapNumID& histos = profile1DMapNumID() ;
+   *  const Profile1DMapID& histos = profile1DMapID() ;
+   *
    *  // iterate over the map!
-   *  for ( Profile1DMapNumID::const_iterator entry = histos.begin() ;
+   *  for ( Profile1DMapID::const_iterator entry = histos.begin() ;
    *        histos.end() != entry ; ++entry  )
    *     {
    *        // histogram ID
@@ -2152,42 +2938,8 @@ public: // trivial & non-trivial accessors
    *
    *  @endcode
    *
-   *  @attention The map *COULD* contains NULL pointers,
-   *     the check before use is mandatory!
-   *
    */
-  const Profile1DMapNumID & profile1DMapNumID () const { return m_profile1DMapNumID; }
-  // ==========================================================================
-  /** get access to the map of 1D profile histograms index via a literal ID
-   *
-   *  @attention This map only contains 2D histogram booked via a literal
-   *             ID, either forced or automatically assigned.
-   *
-   *  @code
-   *
-   *  const Profile1DMapLitID& histos = profile1DMapLitID() ;
-   *  // iterate over the map!
-   *  for ( Profile1DMapLitID::const_iterator entry = histos.begin() ;
-   *        histos.end() != entry ; ++entry  )
-   *     {
-   *        // histogram ID
-   *        const HistoID        ID = entry->first ;
-   *        // histogram itself
-   *        AIDA::IProfile1D* h  = entry->second ;
-   *        if ( 0 == h ) { continue ;}
-   *
-   *        std::cout << " Histogram ID    " << ID
-   *                  << " Histogram title " << h->title() << std::endl ;
-   *
-   *     }
-   *
-   *  @endcode
-   *
-   *  @attention The map *COULD* contains NULL pointers,
-   *     the check before use is mandatory!
-   *
-   */
-  const Profile1DMapLitID & profile1DMapLitID () const { return m_profile1DMapLitID; }
+  const Profile1DMapID & profile1DMapID () const { return m_profile1DMapID; }
   // ==========================================================================
   /** get access to the map of all 2D profile histograms indexed via their title
    *
@@ -2218,16 +2970,14 @@ public: // trivial & non-trivial accessors
    */
   const Profile2DMapTitle & profile2DMapTitle() const { return m_profile2DMapTitle; }
   // ==========================================================================
-  /** get access to the map of 2D profile histograms index via a numeric ID
-   *
-   *  @attention This map only contains 2D histogram booked via a numeric
-   *             ID, either forced or automatically assigned.
+  /** get access to the map of 2D profile histograms index via a ID
    *
    *  @code
    *
-   *  const Profile2DMapNumID& histos = profile2DMapNumID() ;
+   *  const Profile2DMapID& histos = profile2DMapID() ;
+   *
    *  // iterate over the map!
-   *  for ( Profile2DMapNumID::const_iterator entry = histos.begin() ;
+   *  for ( Profile2DMapID::const_iterator entry = histos.begin() ;
    *        histos.end() != entry ; ++entry  )
    *     {
    *        // histogram ID
@@ -2243,42 +2993,8 @@ public: // trivial & non-trivial accessors
    *
    *  @endcode
    *
-   *  @attention The map *COULD* contains NULL pointers,
-   *     the check before use is mandatory!
-   *
    */
-  const Profile2DMapNumID & profile2DMapNumID () const { return m_profile2DMapNumID; }
-  // ==========================================================================
-  /** get access to the map of 2D profile histograms index via a literal ID
-   *
-   *  @attention This map only contains 2D histogram booked via a literal
-   *             ID, either forced or automatically assigned.
-   *
-   *  @code
-   *
-   *  const Profile2DMapLitID& histos = profile2DMapLitID() ;
-   *  // iterate over the map!
-   *  for ( Profile2DMapLitID::const_iterator entry = histos.begin() ;
-   *        histos.end() != entry ; ++entry  )
-   *     {
-   *        // histogram ID
-   *        const HistoID        ID = entry->first ;
-   *        // histogram itself
-   *        AIDA::IProfile2D* h  = entry->second ;
-   *        if ( 0 == h ) { continue ;}
-   *
-   *        std::cout << " Histogram ID    " << ID
-   *                  << " Histogram title " << h->title() << std::endl ;
-   *
-   *     }
-   *
-   *  @endcode
-   *
-   *  @attention The map *COULD* contains NULL pointers,
-   *     the check before use is mandatory!
-   *
-   */
-  const Profile2DMapLitID & profile2DMapLitID () const { return m_profile2DMapLitID; }
+  const Profile2DMapID & profile2DMapID () const { return m_profile2DMapID; }
   // ==========================================================================
 public: // trivial setters
   // ==========================================================================
@@ -2312,19 +3028,29 @@ public:
                 const IInterface*  parent );
   // ==========================================================================
   /// Destructor
-  virtual ~GaudiHistos();
+  virtual ~GaudiHistos() {}
   // ==========================================================================
 protected:
   // ==========================================================================
   /** standard initialization method
    *  @return status code
    */
-  virtual StatusCode initialize ();
+  virtual StatusCode initialize()
+#ifdef __ICC
+    { return i_ghInitialize(); }
+  StatusCode i_ghInitialize()
+#endif
+  ;
   // ==========================================================================
   /** standard finalization method
    *  @return status code
    */
-  virtual StatusCode finalize   ();
+  virtual StatusCode finalize()
+#ifdef __ICC
+    { return i_ghFinalize(); }
+  StatusCode i_ghFinalize()
+#endif
+  ;
   // ==========================================================================
 private:
   // ==========================================================================
@@ -2361,6 +3087,11 @@ protected:
   // ==========================================================================
 private:
   // ==========================================================================
+  /// the handler for "HistoPrint" property
+  void printHistoHandler ( Property& /* theProp */ ) ;          // "HistoPrint"
+  // ==========================================================================
+private:
+  // ==========================================================================
   /// flag to SWITCH ON/SWITCH OFF  the histogrm fillling and booking
   bool        m_produceHistos ;
   /// flag to control output level of histograms
@@ -2382,38 +3113,28 @@ private:
   // ==========================================================================
   /// the actual storage/access of 1D histograms by unique title
   mutable Histo1DMapTitle     m_histo1DMapTitle ;
-  /// the actual storage/access of 1D histograms by unique numeric ID
-  mutable Histo1DMapNumID     m_histo1DMapNumID ;
-  /// the actual storage/access of 1D histograms by unique literal ID
-  mutable Histo1DMapLitID     m_histo1DMapLitID ;
+  /// the actual storage/access of 1D histograms by unique ID
+  mutable Histo1DMapID        m_histo1DMapID    ;
   // ==========================================================================
   /// the actual storage/access of 2D histograms by unique title
   mutable Histo2DMapTitle     m_histo2DMapTitle ;
-  /// the actual storage/access of 2D histograms by unique numeric ID
-  mutable Histo2DMapNumID     m_histo2DMapNumID ;
-  /// the actual storage/access of 2D histograms by unique literal ID
-  mutable Histo2DMapLitID     m_histo2DMapLitID ;
+  /// the actual storage/access of 2D histograms by unique ID
+  mutable Histo2DMapID        m_histo2DMapID    ;
   // ==========================================================================
   /// the actual storage/access of 3D histograms by unique title
   mutable Histo3DMapTitle     m_histo3DMapTitle ;
-  /// the actual storage/access of 3D histograms by unique numeric ID
-  mutable Histo3DMapNumID     m_histo3DMapNumID ;
-  /// the actual storage/access of 3D histograms by unique literal ID
-  mutable Histo3DMapLitID     m_histo3DMapLitID ;
+  /// the actual storage/access of 3D histograms by unique ID
+  mutable Histo3DMapID        m_histo3DMapID    ;
   // ==========================================================================
   /// the actual storage/access of 1D profile histograms by unique title
   mutable Profile1DMapTitle   m_profile1DMapTitle ;
-  /// the actual storage/access of 1D profile histograms by unique numeric ID
-  mutable Profile1DMapNumID   m_profile1DMapNumID ;
-  /// the actual storage/access of 1D profile histograms by unique literal ID
-  mutable Profile1DMapLitID   m_profile1DMapLitID ;
+  /// the actual storage/access of 1D profile histograms by unique ID
+  mutable Profile1DMapID      m_profile1DMapID    ;
   // ==========================================================================
   /// the actual storage/access of 2D profile histograms by unique title
   mutable Profile2DMapTitle   m_profile2DMapTitle ;
-  /// the actual storage/access of 2D profile histograms by unique numeric ID
-  mutable Profile2DMapNumID   m_profile2DMapNumID ;
-  /// the actual storage/access of 2D profile histograms by unique literal ID
-  mutable Profile2DMapLitID   m_profile2DMapLitID ;
+  /// the actual storage/access of 2D profile histograms by unique ID
+  mutable Profile2DMapID      m_profile2DMapID    ;
   // ==========================================================================
   /// format for printout of 1D-histograms as a table
   std::string  m_histo1DTableFormat      ;
@@ -2427,6 +3148,7 @@ private:
    *  of automatically generated literal IDs
    */
   std::map<std::string,std::string> m_idReplaceInfo;
+  // ==========================================================================
 };
 // ============================================================================
 // The END

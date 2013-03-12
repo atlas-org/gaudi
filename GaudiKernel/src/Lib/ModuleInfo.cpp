@@ -34,6 +34,9 @@ static PsApiFunctions _psApi;
   #define getpid _getpid
   #undef NOMSG
   #undef NOGDI
+  #ifndef PATH_MAX
+  #  define PATH_MAX 1024
+  #endif
 #else  // UNIX...: first the EGCS stuff, then the OS dependent includes
   #include <errno.h>
   #include <string.h>
@@ -76,18 +79,23 @@ const std::string& System::moduleNameFull()   {
   static std::string module("");
   if ( module == "" )   {
     if ( processHandle() && moduleHandle() )    {
-      char name[512] = {"Unknown.module"};
+      char name[PATH_MAX] = {"Unknown.module"};
       name[0] = 0;
 #ifdef _WIN32
       if ( _psApi.isValid() )   {
         _psApi.GetModuleFileNameExA( processHandle(), (HINSTANCE)moduleHandle(), name,sizeof(name) );
+        module = name;
       }
-#elif defined(linux) || defined(__APPLE__)
-      ::realpath(((Dl_info*)moduleHandle())->dli_fname, name);
-#elif __hpux
-      ::realpath(((HMODULE*)moduleHandle())->dsc.filename, name);
+#else
+      const char *path =
+#  if defined(linux) || defined(__APPLE__)
+          ((Dl_info*)moduleHandle())->dli_fname;
+#  elif __hpux
+          ((HMODULE*)moduleHandle())->dsc.filename;
+#  endif
+      if (::realpath(path, name))
+        module = name;
 #endif
-      module = name;
     }
   }
   return module;
@@ -172,6 +180,7 @@ System::ImageHandle System::exeHandle()    {
     }
     return handle;
   }
+  return 0;
 #elif defined(linux) || defined(__APPLE__)
   // This does NOT work!
   static Dl_info infoBuf, *info = &infoBuf;
@@ -192,28 +201,30 @@ System::ImageHandle System::exeHandle()    {
   return info;
 #elif __hpux
   // Don't know how to solve this .....
-#endif
   return 0;
+#endif
 }
 
 const std::string& System::exeName()    {
   static std::string module("");
   if ( module.length() == 0 )    {
-    char name[512] = {"Unknown.module"};
+    char name[PATH_MAX] = {"Unknown.module"};
     name[0] = 0;
 #ifdef _WIN32
     if ( _psApi.isValid() && processHandle() )   {
       _psApi.GetModuleFileNameExA( processHandle(), (HINSTANCE)exeHandle(), name,sizeof(name) );
+      module = name;
     }
 #elif defined(linux) || defined(__APPLE__)
     char cmd[512];
     ::sprintf(cmd, "/proc/%d/exe", ::getpid());
     module = "Unknown";
-    ::readlink(cmd, name, sizeof(name));
+    if (::readlink(cmd, name, sizeof(name)) >= 0)
+      module = name;
 #elif __hpux
-    ::realpath(((HMODULE*)exeHandle())->dsc.filename, name);
+    if (::realpath(((HMODULE*)exeHandle())->dsc.filename, name))
+      module = name;
 #endif
-    module = name;
   }
   return module;
 }

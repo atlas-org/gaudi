@@ -2,6 +2,7 @@
 #define GAUDIKERNEL_IREGISTRY_H
 
 // Include files
+#include "GaudiKernel/Kernel.h"
 #include <string>
 
 // forward declarations
@@ -10,7 +11,7 @@ class IOpaqueAddress;
 class IDataProviderSvc;
 
 /** @class IRegistry IRegistry.h GaudiKernel/IRegistry.h
-    
+
     The IRegistry represents the entry door to the environment
     any data object residing in a transient data store is embedded.
 
@@ -18,7 +19,7 @@ class IDataProviderSvc;
     a light-weight interface to differing registry mechanism.
 
 */
-class IRegistry  {
+class GAUDI_API IRegistry  {
 public:
   /// Type definitions
   /// Name type
@@ -28,7 +29,7 @@ public:
 
   /// destructor
   virtual ~IRegistry() { }
-  
+
   /// Add reference to object
   virtual       unsigned long   addRef    ()         = 0;
 

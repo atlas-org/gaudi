@@ -48,7 +48,7 @@ def expandvars(data):
 
 class Error(RuntimeError):
     """
-    Error occurred in the configuration process. 
+    Error occurred in the configuration process.
     """
     pass
 
@@ -171,7 +171,8 @@ class Configurable( object ):
                 cls.configurables[ conf.getType() ] = conf
             #---PM: Initialize additional properties
             for n,v in kwargs.items():
-                setattr(conf, n, v)
+                if n != "name": # it should not be confused with a normal property
+                    setattr(conf, n, v)
             if not cls._configurationLocked and not "_enabled" in kwargs and isinstance(conf, ConfigurableUser):
                 # Ensure that the ConfigurableUser gets enabled if nothing is
                 # specified in the constructor.
@@ -203,8 +204,8 @@ class Configurable( object ):
                 #  If the instance found is ConfigurableGeneric then
                 #  we create a new one with the proper type and fill with
                 #  the contents of the generic one
-                newconf = object.__new__( cls, *args, **kwargs )
-                cls.__init__( newconf, *args )
+                newconf = object.__new__( cls )
+                cls.__init__( newconf, *args, **kwargs )
                 #  initialize with the properties of generic configurable
                 #  (we map the names of the properties to lowercase versions because
                 #  old options are not case sensitive)
@@ -233,7 +234,7 @@ class Configurable( object ):
                 return conf
 
         # still here: create a new instance and initialize it
-        conf = object.__new__( cls, *args, **kwargs )
+        conf = object.__new__(cls)
         cls.__init__( conf, *args, **kwargs )
 
         # update normal, per-class cache
@@ -331,7 +332,7 @@ class Configurable( object ):
 
     # ownership rules of self through copying
     def __deepcopy__( self, memo ):
-        newconf = object.__new__( self.__class__, self.getName() )
+        newconf = object.__new__( self.__class__ )
         self.__class__.__init__( newconf, self.getName() )
 
         for proxy in self._properties.values():
@@ -591,7 +592,7 @@ class Configurable( object ):
                             new_value[i] = value[i]
                     value = new_value
                 props[ name ] = value
-        
+
         return props
 
     def properties( self ):
@@ -647,10 +648,10 @@ class Configurable( object ):
         """Set the value of a given property
         """
         return setattr(self, name, value)
-    
+
     def isPropertySet(self, name):
         """Tell if the property 'name' has been set or not.
-        
+
         Because of a problem with list and dictionary properties, in those cases
         if the value is equal to the default, the property is considered as not
         set.
@@ -666,7 +667,7 @@ class Configurable( object ):
             except KeyError:
                 pass # no default found
             return True
-    
+
     def getType( cls ):
         return cls.__name__
 
@@ -1113,7 +1114,13 @@ class ConfigurableUser( Configurable ):
                   "__used_instances__": [],
                   "_enabled": True }
     ## list of ConfigurableUser classes this one is going to modify in the
-    #  __apply_configuration__ method
+    #  __apply_configuration__ method.
+    #  The list may contain class objects, strings representing class objects or
+    #  tuples with the class object (or a string) as first element and the instance
+    #  name as second element.
+    #  If the instance name is None or not present, the function _instanceName()
+    #  is used to determine the name of the instance (the default implementation
+    #  returns "<this name>_<other name>".
     __used_configurables__ = []
     ## list of ConfigurableUser classes this one is going to query in the
     #  __apply_configuration__ method
@@ -1125,16 +1132,40 @@ class ConfigurableUser( Configurable ):
         self._enabled = _enabled
         self.__users__ = []
         
+        # Needed to retrieve the actual class if the declaration in __used_configurables__
+        # and  __queried_configurables__ is done with strings.
+        from GaudiKernel.ConfigurableDb import getConfigurable as confDbGetConfigurable
+
         # Set the list of users of the used configurables
+        # 
         self.__used_instances__ = []
         for used in self.__used_configurables__:
+            # By default we want to use the default name of the instances
+            # for the used configurables
+            used_name = Configurable.DefaultName
+            # If the entry in the list is a tuple, we need a named instance
+            if type(used) is tuple:
+                used, used_name = used # we re-set used to re-use the code below
+                if not used_name:
+                    used_name = self._instanceName(used)
+            # Check is 'used' is a string or not
+            if type(used) is str:
+                used_class = confDbGetConfigurable(used)
+            else:
+                used_class = used
+            # Instantiate the configurable that we are going to use 
             try:
-                inst = used(_enabled = False)
+                inst = used_class(name = used_name, _enabled = False)
             except AttributeError:
-                inst = used()
+                # This cover the case where the used configurable is not a
+                # ConfigurableUser instance, i.e. id doesn't have the attribute
+                # '_enabled'.
+                inst = used_class(name = used_name)
             self.__addActiveUseOf(inst)
         for queried in self.__queried_configurables__:
             try:
+                if type(queried) is str:
+                    queried = confDbGetConfigurable(used)
                 inst = queried(_enabled = False)
             except AttributeError:
                 inst = queried()
@@ -1142,7 +1173,7 @@ class ConfigurableUser( Configurable ):
     def __addActiveUseOf(self, other):
         """
         Declare that we are going to modify the Configurable 'other' in our
-        __apply_configuration__. 
+        __apply_configuration__.
         """
         self.__used_instances__.append(other)
         if hasattr(other, "__users__"): # allow usage of plain Configurables
@@ -1150,7 +1181,7 @@ class ConfigurableUser( Configurable ):
     def __addPassiveUseOf(self, other):
         """
         Declare that we are going to retrieve property values from the
-        ConfigurableUser 'other' in our __apply_configuration__. 
+        ConfigurableUser 'other' in our __apply_configuration__.
         """
         if not isinstance(other, ConfigurableUser):
             raise Error("'%s': Cannot make passive use of '%s', it is not a ConfigurableUser" % (self.name(), other.name()))
@@ -1161,7 +1192,7 @@ class ConfigurableUser( Configurable ):
         return None
     def getHandle( self ):
         return None
-    
+
     def __detach_used__(self):
         """
         Remove this ConfigurableUser instance from the users list of the used
@@ -1170,7 +1201,7 @@ class ConfigurableUser( Configurable ):
         for used in self.__used_instances__:
             if hasattr(used, "__users__"): # allow usage of plain Configurables
                 used.__users__.remove(self)
-    
+
     def propagateProperty(self, name, others = None, force = True):
         """
         Propagate the property 'name' (if set) to other configurables (if possible).
@@ -1181,8 +1212,8 @@ class ConfigurableUser( Configurable ):
                 propagate only to it
             list of configurable instances:
                 propagate to all of them.
-        
-        
+
+
         The logic is:
         - if the local property is set, the other property will be overwritten
         - local property not set and other set => keep other
@@ -1210,11 +1241,16 @@ class ConfigurableUser( Configurable ):
             # If not, and other property also not set, propagate the default
             elif not other.isPropertySet(name):
                 if isinstance(other,ConfigurableUser):
+                    otherType = type(other._properties[name].getDefault())
                     other._properties[name].setDefault(value)
+                    if otherType in [list, dict]:
+                        # Special case for list and dictionaries:
+                        # also set the property to the same value of the default (copy)
+                        other.setProp(name, otherType(value))
                 else:
                     other.setProp(name, value)
             # If not set and other set, do nothing
-        
+
     def propagateProperties(self, names = None, others = None, force = True):
         """
         Call propagateProperty for each property listed in 'names'.
@@ -1234,13 +1270,39 @@ class ConfigurableUser( Configurable ):
         in some ConfigurableUser implementations.
         """
         return self.applyConf()
-    
+
     def applyConf( self ):
         """
         Function to be overridden to convert the high level configuration into a
-        low level one. 
+        low level one.
         """
         pass
+    
+    def _instanceName(self, cls):
+        """
+        Function used to define the name of the private instance of a given class
+        name.
+        This method is used when the __used_configurables_property__ declares the
+        need of a private used configurable without specifying the name. 
+        """
+        if type(cls) is str:
+            clName = cls
+        else:
+            clName = cls.__name__
+        return "%s_%s" % (self.name(), clName)
+    
+    def getUsedInstance(self, name):
+        """
+        Return the used instance with a given name.
+        """
+        for i in self.__used_instances__:
+            if i.name() == name:
+                if hasattr(i, "_enabled"):
+                    # ensure that the instances retrieved through the method are
+                    # enabled
+                    i._enabled = True 
+                return i
+        raise KeyError(name)
 
 # list of callables to be called after all the __apply_configuration__ are called.
 postConfigActions = []
@@ -1257,7 +1319,7 @@ def appendPostConfigAction(function):
     postConfigActions.append(function)
 def removePostConfigAction(function):
     """
-    Remove a collable from the list of post-config actions. 
+    Remove a collable from the list of post-config actions.
     The list is directly accessible as 'GaudiKernel.Configurable.postConfigActions'.
     """
     postConfigActions.remove(function)
@@ -1274,7 +1336,7 @@ def applyConfigurableUsers():
     if _appliedConfigurableUsers_:
         return
     _appliedConfigurableUsers_ = True
-    
+
     confUsers = [ c
                   for c in Configurable.allConfigurables.values()
                   if hasattr(c,"__apply_configuration__") ]
@@ -1288,7 +1350,7 @@ def applyConfigurableUsers():
             else: # it does not have users or the list is empty
                 applied = True
                 # the ConfigurableUser is enabled if it doesn't have an _enabled
-                # property or its value is True 
+                # property or its value is True
                 enabled = (not hasattr(c, "_enabled")) or c._enabled
                 if enabled:
                     log.info("applying configuration of %s", c.name())

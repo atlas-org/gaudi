@@ -5,7 +5,7 @@
 /* @file GaudiHistoAlg.h
  *
  * Header file for class : GaudiHistoAlg
- * 
+ *
  * @date 30/06/2001
  * @author Vanya BELYAEV Ivan.Belyaev@itep.ru
  * @author Chris Jones   Christopher.Rob.Jones@cern.ch
@@ -35,7 +35,7 @@
  */
 // ============================================================================
 
-class GaudiHistoAlg : public GaudiHistos<GaudiAlgorithm>
+class GAUDI_API GaudiHistoAlg : public GaudiHistos<GaudiAlgorithm>
 {
 
 protected:

@@ -42,7 +42,7 @@ class EventSelectorDataStream;
    @author R. Lambert
    @version 1.0
 */
-class EventSelectorDataStream : virtual public IInterface   {
+class GAUDI_API EventSelectorDataStream: public implements1<IInterface> {
   /// Output friend for MsgStream
   friend MsgStream& operator<<(MsgStream& s, const EventSelectorDataStream& obj);
   /// Output friend for standard I/O
@@ -50,8 +50,6 @@ class EventSelectorDataStream : virtual public IInterface   {
 public:
   typedef std::vector< StringProperty >  Properties;
 protected:
-  /// Reference count
-  long                    m_refCount;
   /// Name
   std::string             m_name;
   /// Definition string
@@ -75,15 +73,6 @@ protected:
 public:
   /// Standard Constructor
   EventSelectorDataStream(const std::string& nam, const std::string& def, ISvcLocator* svcloc);
-  /** Query interfaces of Interface
-      @param riid       ID of Interface to be retrieved
-      @param ppvUnknown Pointer to Location for interface pointer
-  */
-  virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvUnknown);
-  /// Reference Interface instance               
-  virtual unsigned long addRef();
-  /// Release Interface instance                 
-  virtual unsigned long release();
   /// Attach event selector object
   virtual void setSelector(IEvtSelector* pSelector);
   /// Parse input criteria
@@ -127,4 +116,10 @@ public:
     return m_initialized;
   }
 };
+
+/// Output friend for MsgStream
+GAUDI_API MsgStream& operator<<(MsgStream& s, const EventSelectorDataStream& obj);
+/// Output friend for standard I/O
+GAUDI_API std::ostream& operator<<(std::ostream& s, const EventSelectorDataStream& obj);
+
 #endif  // GAUDIKERNEL_EVENTSELECTORDATASTREAM_H

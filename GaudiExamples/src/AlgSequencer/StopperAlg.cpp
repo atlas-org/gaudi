@@ -9,10 +9,9 @@
 
 #include "StopperAlg.h"
 
-
 // Static Factory declaration
 
-DECLARE_ALGORITHM_FACTORY(StopperAlg);
+DECLARE_ALGORITHM_FACTORY(StopperAlg)
 
 // Constructor
 //------------------------------------------------------------------------------
@@ -33,9 +32,9 @@ StatusCode StopperAlg::execute() {
 //------------------------------------------------------------------------------
   MsgStream         log( msgSvc(), name() );
   static int count = 0;
- 
+
   if ( ++count >= m_stopcount ) {
-    log << MSG::INFO << "scheduling a event processing stop...." << endreq;
+    log << MSG::INFO << "scheduling a event processing stop...." << endmsg;
     IEventProcessor* evt = svc<IEventProcessor>("ApplicationMgr");
     evt->stopRun();
     evt->release();

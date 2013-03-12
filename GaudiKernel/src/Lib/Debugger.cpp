@@ -1,27 +1,41 @@
 //====================================================================
-//	Debugger.cpp
+//      Debugger.cpp
 //--------------------------------------------------------------------
 //
-//	Package    : System (The LHCb System service)
+//      Package    : System (The LHCb System service)
 //
-//  Description: Invoke interactively the debugger from a 
+//  Description: Invoke interactively the debugger from a
 //               running application
 //
-//	Author     : M.Frank
+//      Author     : M.Frank
 //  Created    : 13/1/99
-//	Changes    : 
+//      Changes    :
 //====================================================================
-#define GAUDIKERNEL_DEBUGGER_CPP
+#if defined(_WIN32)
 
-#ifdef _WIN32
-namespace Win   {
-  #define NOMSG
-  #define NOGDI
-  #include "windows.h"
-  #include "process.h"
-  #undef NOMSG
-  #undef NOGDI
-};
+#if _MSC_VER < 1500
+// This causes a problem with VC9
+// http://social.msdn.microsoft.com/Forums/en-US/vcgeneral/thread/cfb5a608-cc6c-49b5-8e9e-6e2cbeef43a3
+namespace Win {
+#else
+// Empty macro to hide the references to the 'Win' namespace
+#define Win
+#endif
+
+// Avoid conflicts between Windows' headers and MSG.
+#ifndef NOMSG
+#  define NOMSG
+#  ifndef NOGDI
+#    define NOGDI
+#  endif
+#endif
+#include "windows.h"
+#include "process.h"
+
+#if _MSC_VER < 1500
+}; // namespace Win
+#endif
+
 #else
   #include <unistd.h>
 #endif
@@ -35,7 +49,7 @@ long System::breakExecution()   {
   _asm int 3
   return 1;
 #else
-  // I have no clu how to do this in linux
+  // I have no clue how to do this in linux
   return 0;
 #endif
 }
@@ -73,17 +87,7 @@ long System::breakExecution(long pid)   {
   if ( result != 1 ) result = Win::GetLastError();
   return result;
 #else
-  // I have no clu how to do this in linux
+  // I have no clue how to do this in linux
   return pid;
 #endif
 }
-
-
-
-
-
-
-
-
-
-

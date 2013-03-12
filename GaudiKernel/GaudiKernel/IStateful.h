@@ -7,65 +7,62 @@
 #include "GaudiKernel/StateMachine.h"
 #include <string>
 
-static const InterfaceID IID_IStateful("IStateful", 1 , 0); 
-
-/** @class IStateful GaudiKernel/IStateful GaudiKernel/IStateful.h
+/** @class IStateful IStateful.h GaudiKernel/IStateful.h
  *
  * Interface for classes that implement the Gaudi State Machine
- * 
+ *
  * @author Marco Clemencic
  * @date   2008-05-15
  */
-class IStateful : virtual public IInterface {
-  public:
-
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IStateful; }
+class GAUDI_API IStateful: virtual public IInterface {
+public:
+  /// InterfaceID
+  DeclareInterfaceID(IStateful,1,0);
 
   virtual ~IStateful(){} //< Virtual destructor.
-  
+
   /** Configuration (from OFFLINE to CONFIGURED).
   */
-  //  virtual StatusCode configure() = 0;
+  virtual StatusCode configure() = 0;
 
-  /** Initialization (from CONFIGURED to INITIALIZED). 
+  /** Initialization (from CONFIGURED to INITIALIZED).
    */
   virtual StatusCode initialize() = 0;
 
-  /** Start (from INITIALIZED to RUNNING). 
+  /** Start (from INITIALIZED to RUNNING).
   */
   virtual StatusCode start() = 0;
 
-  /** Stop (from RUNNING to INITIALIZED). 
+  /** Stop (from RUNNING to INITIALIZED).
   */
   virtual StatusCode stop() = 0;
 
-  /** Finalize (from INITIALIZED to CONFIGURED). 
+  /** Finalize (from INITIALIZED to CONFIGURED).
   */
   virtual StatusCode finalize() = 0;
-  
-  /** Initialization (from CONFIGURED to OFFLINE). 
+
+  /** Initialization (from CONFIGURED to OFFLINE).
   */
   virtual StatusCode terminate() = 0;
 
 
-  /** Initialization (from INITIALIZED or RUNNING to INITIALIZED, via CONFIGURED). 
+  /** Initialization (from INITIALIZED or RUNNING to INITIALIZED, via CONFIGURED).
   */
   virtual StatusCode reinitialize() = 0;
 
-  /** Initialization (from RUNNING to RUNNING, via INITIALIZED). 
+  /** Initialization (from RUNNING to RUNNING, via INITIALIZED).
   */
   virtual StatusCode restart() = 0;
-  
+
   /** Get the current state.
    */
   virtual Gaudi::StateMachine::State FSMState() const = 0;
-  
+
   /** When we are in the middle of a transition, get the state where the
-   *  transition is leading us. Otherwise it returns the same state as state(). 
+   *  transition is leading us. Otherwise it returns the same state as state().
    */
   virtual Gaudi::StateMachine::State targetFSMState() const = 0;
-  
+
 };
 
 #endif // GAUDIKERNEL_ISTATEFUL_H

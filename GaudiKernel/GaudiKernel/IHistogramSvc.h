@@ -5,6 +5,7 @@
 
 // Include files
 #include "GaudiKernel/IDataProviderSvc.h"
+#include "GaudiKernel/IService.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -38,22 +39,18 @@ using AIDA::IHistogram3D;
 using AIDA::IAxis;
 using AIDA::IAnnotation;
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IHistogramSvc(60, 4 , 0); 
-
-
 /** @class IHistogramSvc IHistogramSvc.h GaudiKernel/IHistogramSvc.h
 
     Definition of the IHistogramSvc interface class
 
     @author Pavel Binko and Anatael Cabrera
 */
-class IHistogramSvc : virtual public IDataProviderSvc  {
-
+class GAUDI_API IHistogramSvc: virtual public IDataProviderSvc
+{
 public:
+  /// InterfaceID
+  DeclareInterfaceID(IHistogramSvc,5,0);
 
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IHistogramSvc; }
   /// Retrieve the AIDA HistogramFactory interface
   virtual AIDA::IHistogramFactory* histogramFactory() = 0;
 
@@ -104,7 +101,7 @@ public:
   virtual AIDA::IProfile1D* bookProf
   ( const std::string& fullPath,
     const std::string& title,
-    int binsX, double lowX, double highX , 
+    int binsX, double lowX, double highX ,
     const std::string& opt = "" )          = 0;
   virtual AIDA::IProfile1D* bookProf
   ( const std::string& dirPath,
@@ -130,9 +127,9 @@ public:
     const std::string& title,
     int binsX, double lowX, double highX ,
     const std::string& opt = "" )          = 0;
-  
+
   // ==========================================================================
-  // Book 1D profile histogram with fixed binning & Y-limits 
+  // Book 1D profile histogram with fixed binning & Y-limits
   // ==========================================================================
 
   virtual AIDA::IProfile1D* bookProf
@@ -146,15 +143,15 @@ public:
   ( const std::string& dirPath  ,
     const std::string& relPath  ,
     const std::string& title    ,
-    int binsX                   , 
-    double lowX , double highX  , 
+    int binsX                   ,
+    double lowX , double highX  ,
     double lowY , double highY  ,
     const std::string& opt = "s" )          = 0;
   virtual AIDA::IProfile1D* bookProf
   ( const std::string& dirPath  ,
     int hID                     ,
     const std::string& title    ,
-    int binsX                   , 
+    int binsX                   ,
     double lowX , double highX  ,
     double lowY , double highY  ,
     const std::string& opt = "s" )          = 0;
@@ -170,11 +167,11 @@ public:
   ( DataObject*         pParent ,
     int                 hID     ,
     const std::string&  title   ,
-    int binsX                   , 
-    double lowX , double highX  , 
+    int binsX                   ,
+    double lowX , double highX  ,
     double lowY , double highY  ,
     const std::string& opt = "s" )          = 0;
-  
+
   // ==========================================================================
   // Book 1D histogram with variable binning
   // ==========================================================================
@@ -499,19 +496,19 @@ public:
                                      AIDA::IHistogram3D*& h3dObj )                = 0;
   // ---------------------------
   virtual StatusCode retrieveObject( const std::string& parentPath,
-                                     int item, 
+                                     int item,
                                      AIDA::IHistogram1D*& h1dObj )                = 0;
   virtual StatusCode retrieveObject( const std::string& parentPath,
-                                     int item, 
+                                     int item,
                                      AIDA::IProfile1D*& h1dObj )                  = 0;
   virtual StatusCode retrieveObject( const std::string& parentPath,
-                                     int item, 
+                                     int item,
                                      AIDA::IHistogram2D*& h2dObj )                = 0;
   virtual StatusCode retrieveObject( const std::string& parentPath,
-                                     int item, 
+                                     int item,
                                      AIDA::IProfile2D*& h2dObj )                = 0;
   virtual StatusCode retrieveObject( const std::string& parentPath,
-                                     int item, 
+                                     int item,
                                      AIDA::IHistogram3D*& h3dObj )                = 0;
   // ---------------------------
   virtual StatusCode retrieveObject( DataObject* parentObj,
@@ -708,7 +705,7 @@ public:
   // ==========================================================================
   // --------------------------------------------------------------------------
   // Print functions (ASCII graphical representation)
-  
+
   // Print (ASCII) the histogram into the output stream
   virtual std::ostream& print( AIDA::IBaseHistogram* h,
                                std::ostream& s = std::cout) const           = 0;
@@ -735,34 +732,15 @@ public:
                     returns pointer to DataObject (NULL on failure)
   */
   virtual DataObject* createDirectory	(
-    const std::string& parentDir, 
+    const std::string& parentDir,
     const std::string& subDir  ) = 0;
 
-  /// Re-declaring this here avoids a compiler warning about hidden
-  /// functions. Refer to ARM Page 210.
-  virtual StatusCode registerObject(const std::string& fullPath, DataObject* pObject) = 0;
-  virtual StatusCode registerObject(const std::string& parentPath, const std::string& objectPath, DataObject* pObject) = 0;
-  virtual StatusCode registerObject(const std::string& parentPath, int item, DataObject* pObject) = 0;
-  virtual StatusCode registerObject(DataObject* parentObj, const std::string& objectPath, DataObject* pObject) = 0;
-  virtual StatusCode registerObject(DataObject* parentObj, int item, DataObject* pObject) = 0;
-  virtual StatusCode unregisterObject(const std::string& fullPath) = 0;
-  virtual StatusCode unregisterObject(const std::string& parentPath, const std::string& objPath) = 0;
-  virtual StatusCode unregisterObject(const std::string& parentPath, int item) = 0;
-  virtual StatusCode unregisterObject(DataObject* pObject) = 0;
-  virtual StatusCode unregisterObject(DataObject* pParent, const std::string& objPath) = 0;
-  virtual StatusCode unregisterObject(DataObject* pParent, int item) = 0;
-  virtual StatusCode retrieveObject(IRegistry* pDirectory, const std::string& path, DataObject*& pObject) = 0;
-  virtual StatusCode retrieveObject(const std::string& fullPath, DataObject*& pObject) = 0;
-  virtual StatusCode retrieveObject(const std::string& parentPath, const std::string& objectPath, DataObject*& pObject) = 0;
-  virtual StatusCode retrieveObject(const std::string& parentPath, int item, DataObject*& pObject) = 0;
-  virtual StatusCode retrieveObject(DataObject* parentObj, const std::string& objectPath, DataObject*& pObject) = 0;
-  virtual StatusCode retrieveObject(DataObject* parentObj, int item, DataObject*& pObject) = 0;
-  virtual StatusCode findObject(IRegistry* pDirectory, const std::string& path, DataObject*& pObject) = 0;
-  virtual StatusCode findObject(const std::string& fullPath, DataObject*& pObject) = 0;
-  virtual StatusCode findObject(const std::string& parentPath, const std::string& objectPath, DataObject*& pObject) = 0;
-  virtual StatusCode findObject(const std::string& parentPath, int item, DataObject*& pObject) = 0;
-  virtual StatusCode findObject(DataObject* pNode, const std::string& objectPath, DataObject*& pObject) = 0;
-  virtual StatusCode findObject(DataObject* parentObj, int item, DataObject*& pObject) = 0;
+  /// Avoids a compiler warning about hidden functions.
+  using IDataProviderSvc::registerObject;
+  using IDataProviderSvc::unregisterObject;
+  using IDataProviderSvc::retrieveObject;
+  using IDataProviderSvc::findObject;
+
 };
 
 

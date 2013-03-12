@@ -7,25 +7,20 @@
 #include "GaudiKernel/System.h"
 #include <string>
 
-
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IAuditorSvc(304, 2 , 0); 
-
 /** @class IAuditorSvc IAuditorSvc.h GaudiKernel/IAuditorSvc.h
 
     The interface implemented by the IAuditorSvc base class.
 
     @author Pere Mato
 */
-class IAuditorSvc : virtual public IService,
-                    virtual public IAuditor {
-  public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IAuditorSvc; }
+class GAUDI_API IAuditorSvc: virtual public extend_interfaces2<IService, IAuditor> {
+public:
+  /// InterfaceID
+  DeclareInterfaceIDMultiBase(IAuditorSvc,3,0);
 
   /// management functionality: retrieve an Auditor
   virtual IAuditor* getAuditor( const std::string& name ) = 0;
-  
+
 };
 
 #endif // INTERFACES_IAUDITORSVC_H

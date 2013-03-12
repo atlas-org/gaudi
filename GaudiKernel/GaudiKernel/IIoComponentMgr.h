@@ -19,9 +19,11 @@
 // forward declare
 class IIoComponent;
 
-class IIoComponentMgr
-  : virtual public ::INamedInterface
+class GAUDI_API IIoComponentMgr : virtual public INamedInterface
 { 
+ public:
+  DeclareInterfaceID(IIoComponentMgr,1,0);
+
   /////////////////////////////////////////////////////////////////// 
   // Public enums: 
   /////////////////////////////////////////////////////////////////// 
@@ -41,9 +43,6 @@ class IIoComponentMgr
   /** Destructor: 
    */
   virtual ~IIoComponentMgr();
-
-  /// Declaration of the interface ID
-  static const InterfaceID& interfaceID();
 
   /** @brief: allow a @c IIoComponent to register itself with this
    *          manager so appropriate actions can be taken when e.g.
@@ -99,22 +98,6 @@ class IIoComponentMgr
   StatusCode io_finalize () = 0;
 
 }; 
-
-// I/O operators
-//////////////////////
-
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
-inline 
-const InterfaceID& 
-IIoComponentMgr::interfaceID() 
-{ 
-  // Declaration of the interface ID
-  static const InterfaceID IID_IIoComponentMgr("IIoComponentMgr", 1, 0);
-  return IID_IIoComponentMgr; 
-}
 
 
 #endif //> !GAUDIKERNEL_IIOCOMPONENTMGR_H

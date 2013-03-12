@@ -50,7 +50,7 @@ namespace Gaudi
         StatusCode sc = GaudiTupleAlg::initialize() ;
         if ( sc.isFailure() ) { return sc ; }
         // check for random numbers service 
-        Assert ( 0 != randSvc() , "Random Service is not available!");
+        Assert (randSvc() != 0, "Random Service is not available!");
         //
         return StatusCode::SUCCESS ;
       };
@@ -133,9 +133,9 @@ StatusCode Gaudi::Examples::EvtColAlg::execute()
   tuple -> write  () ; ///< The action is restored again!           NB !!
   
   return StatusCode::SUCCESS ;
-};
+}
 // ============================================================================
-DECLARE_NAMESPACE_ALGORITHM_FACTORY(Gaudi::Examples,EvtColAlg) ;
+DECLARE_NAMESPACE_ALGORITHM_FACTORY(Gaudi::Examples,EvtColAlg)
 // ============================================================================
 // The END 
 // ============================================================================

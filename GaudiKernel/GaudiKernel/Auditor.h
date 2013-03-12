@@ -24,15 +24,14 @@ class Algorithm;
     constructor of a concrete auditor is the declaration of
     member variables as properties. All other functionality,
     i.e. the use of services, may be used only in
-    initialise() and afterwards.
+    initialize() and afterwards.
 
     @author David Quarrie
     @date   2000
     @author Marco Clemencic
     @date   2008-03
 */
-class Auditor : virtual public IAuditor,
-                virtual public IProperty {
+class GAUDI_API Auditor : public implements2<IAuditor, IProperty> {
 public:
 
   /** Constructor
@@ -95,31 +94,33 @@ public:
   /** The standard message service. Returns a pointer to the standard message
       service. May not be invoked before sysInitialize() has been invoked.
   */
-  IMessageSvc*  msgSvc() const;
+  SmartIF<IMessageSvc>& msgSvc() const;
 
-  /// Retrieve the outputlevel of current auditor
+  /// Retrieve the output level of current auditor
   int outputLevel() const { return m_outputLevel; }
 
-  /// Set the outputlevel for current auditor
+  /// Set the output level for current auditor
   void setOutputLevel( int level );
 
   /** The standard service locator. Returns a pointer to the service locator service.
       This service may be used by an auditor to request any services it requires in
       addition to those provided by default.
   */
-  ISvcLocator* serviceLocator() const;
+  SmartIF<ISvcLocator>& serviceLocator() const;
 
   /** Access a service by name, creating it if it doesn't already exist.
   */
   template <class T>
   StatusCode service( const std::string& name, T*& svc, bool createIf = false ) const {
-    IService* theSvc;
-    StatusCode sc = serviceLocator()->getService( name, theSvc, createIf );
-    if ( sc.isSuccess() ) {
-      return theSvc->queryInterface(T::interfaceID(), (void**)&svc);
+    SmartIF<T> ptr(serviceLocator()->service(name, createIf));
+    if (ptr.isValid()) {
+      svc = ptr.get();
+      svc->addRef();
+      return StatusCode::SUCCESS;
     }
+    // else
     svc = 0;
-    return sc;
+    return StatusCode::FAILURE;
   }
 
   /// Set a value of a property of an auditor.
@@ -162,7 +163,7 @@ public:
    *  Note: the interface IProperty allows setting of the properties either
    *        directly from other properties or from strings only
    *
-   *  This is very convinient in resetting of the default
+   *  This is very convenient in resetting of the default
    *  properties in the derived classes.
    *  E.g. without this method one needs to convert
    *  everything into strings to use IProperty::setProperty
@@ -208,11 +209,11 @@ public:
    *     , m_property2   ( ... )
    *   {
    *     // declare the property
-   *     declareProperty( "Property1" , m_property1 , "Doc fro property #1" ) ;
+   *     declareProperty( "Property1" , m_property1 , "Doc for property #1" ) ;
    *
-   *     // declare the property and attach the handler  to it
+   *     // declare the property and attach the handler to it
    *     declareProperty( "Property2" , m_property2 , "Doc for property #2" )
-   *        -> declareUpdateHandler( &MyAlg::handler_2 ) ;
+   *        -> declareUpdateHandler( &MyAuditor::handler_2 ) ;
    *
    *   }
    *  @endcode
@@ -221,7 +222,7 @@ public:
    *  @see PropertyMgr::declareProperty
    *
    *  @param name the property name
-   *  @param proeprty the property itself,
+   *  @param property the property itself,
    *  @param doc      the documentation string
    *  @return the actual property objects
    */
@@ -231,18 +232,12 @@ public:
 	return m_PropertyMgr->declareProperty(name, property, doc);
   }
 
-  /// Methods for IInterface
-  unsigned long addRef();
-  unsigned long release();
-  StatusCode queryInterface(const InterfaceID& riid, void**);
-
  private:
 
-  long m_refCount;              ///< Counter for references to Auditor
   std::string m_name;	          ///< Auditor's name for identification
 
-  IMessageSvc* m_MS;            ///< Message service
-  ISvcLocator* m_pSvcLocator;   ///< Pointer to service locator service
+  mutable SmartIF<IMessageSvc> m_MS;            ///< Message service
+  mutable SmartIF<ISvcLocator> m_pSvcLocator;   ///< Pointer to service locator service
   PropertyMgr* m_PropertyMgr;   ///< For management of properties
   int          m_outputLevel;   ///< Auditor output level
   bool         m_isEnabled;     ///< Auditor is enabled flag

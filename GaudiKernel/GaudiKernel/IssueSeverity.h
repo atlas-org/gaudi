@@ -7,6 +7,7 @@ class StatusCode;
 #include <map>
 #include <iostream>
 
+#include "GaudiKernel/Kernel.h"
 
 #define ISSUE(x,y) IssueSeverity(x,__LINE__,__FILE__,y)
 #define STATUSCODE(z,x,y) StatusCode(z,ISSUE(x,y))
@@ -38,7 +39,7 @@ class IIssueLogger;
 #endif
 #endif
 
-class IssueSeverity {
+class GAUDI_API IssueSeverity {
 
 public:
 
@@ -59,7 +60,7 @@ public:
   };
 
   IssueSeverity();
-  IssueSeverity( const IssueSeverity::Level &level, int line, 
+  IssueSeverity( const IssueSeverity::Level &level, int line,
 		 const std::string& file,
 		 const std::string& msg="");
   IssueSeverity( const IssueSeverity::Level &level, const std::string& msg="");
@@ -86,7 +87,7 @@ public:
 
   operator StatusCode() const;
 
-  friend inline std::ostream& operator<< ( std::ostream&, 
+  friend inline std::ostream& operator<< ( std::ostream&,
 					   const IssueSeverity& ) ;
 
 private:
@@ -104,8 +105,8 @@ private:
   static void init();
 
 };
-  
-inline IssueSeverity::IssueSeverity(): m_line(0), m_file(""), 
+
+inline IssueSeverity::IssueSeverity(): m_line(0), m_file(""),
 				       m_level(IssueSeverity::NIL),
  				       m_msg(""), m_reported(true) {}
 
@@ -119,7 +120,7 @@ inline IssueSeverity::IssueSeverity(const IssueSeverity::Level &level, int line,
 
 }
 
-inline IssueSeverity::IssueSeverity(const IssueSeverity::Level &level, 
+inline IssueSeverity::IssueSeverity(const IssueSeverity::Level &level,
 				    const std::string& msg):
   m_line(0), m_file("??"), m_level(level), m_msg(msg), m_reported(false) {
 

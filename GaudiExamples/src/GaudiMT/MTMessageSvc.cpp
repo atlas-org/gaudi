@@ -9,7 +9,7 @@
 #include <sstream>
 #include <iostream>
 
-#include <pthread.h> 
+#include <pthread.h>
 extern pthread_mutex_t coutmutex;
 
 // Instantiation of a static factory class used by clients to create
@@ -18,7 +18,7 @@ DECLARE_SERVICE_FACTORY(MTMessageSvc)
 
 // Constructor
 MTMessageSvc::MTMessageSvc( const std::string& name, ISvcLocator* svcloc )
-  : Service( name, svcloc ) {
+  : base_class( name, svcloc ) {
   m_defaultStream = &std::cout;
   m_outputLevel   = MSG::NIL;
   declareProperty( "Format",      m_defaultFormat = "% F%18W%S%7W%R%T %0W%M");
@@ -34,7 +34,7 @@ MTMessageSvc::MTMessageSvc( const std::string& name, ISvcLocator* svcloc )
 }
 
 
-/// Initialize Service 
+/// Initialize Service
 StatusCode MTMessageSvc::initialize() {
   StatusCode sc;
   sc = Service::initialize();
@@ -84,7 +84,7 @@ void MTMessageSvc::reportMessage( const Message& msg )    {
     msg.setFormat(m_defaultFormat);
     pthread_mutex_lock(&coutmutex);
     (*m_defaultStream) << msg << std::endl << std::flush;
-    pthread_mutex_unlock(&coutmutex); 
+    pthread_mutex_unlock(&coutmutex);
   }
 }
 
@@ -123,7 +123,7 @@ void MTMessageSvc::reportMessage (const std::string& source,
 
 void MTMessageSvc::reportMessage (const StatusCode& key,
                                 const std::string& source)
-{  
+{
   MessageMap::const_iterator first = m_messageMap.lower_bound( key );
   if ( first != m_messageMap.end() ) {
     MessageMap::const_iterator last = m_messageMap.upper_bound( key );
@@ -209,7 +209,7 @@ void MTMessageSvc::eraseStream( int key, std::ostream* stream )   {
           break;
         }
       }
-    }      
+    }
   }
 }
 
@@ -233,7 +233,7 @@ void MTMessageSvc::eraseStream( std::ostream* stream )    {
           break;
         }
       }
-    }      
+    }
   }
 }
 
@@ -296,21 +296,8 @@ void MTMessageSvc::eraseMessage( const StatusCode& key, const Message& msg )
         changed = true;
         break;
       }
-    }      
+    }
   }
-}
-
-// ---------------------------------------------------------------------------
-StatusCode MTMessageSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-// ---------------------------------------------------------------------------
-  if ( IID_IMessageSvc == riid )  {
-    *ppvInterface = (IMessageSvc*)this;
-  }
-  else  {
-    return Service::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
 
 // ---------------------------------------------------------------------------
@@ -349,6 +336,6 @@ void MTMessageSvc::setOutputLevel(const std::string& source, int level)    {
     m_thresholdMap.erase ( p.first );
     m_thresholdMap.insert(ThresholdMap::value_type( source, level) );
   }
-  pthread_mutex_unlock(&coutmutex); 
+  pthread_mutex_unlock(&coutmutex);
 }
 

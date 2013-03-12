@@ -25,20 +25,20 @@ namespace DataSvcHelpers   {
    *
    * The RegistryEntry represents an entry of the transient data store.
    * The object holds the recipe how to retrieve objects from the persistent
-   * world (member IOpaqueAddress) as well as the backward link to the 
+   * world (member IOpaqueAddress) as well as the backward link to the
    * parent entry and the leaves.
    *
    * @author Markus Frank
    * @author Sebastien Ponce
    */
-  class RegistryEntry : public IRegistry  {
+  class GAUDI_API RegistryEntry : public IRegistry  {
   private:
     /// Definition of datastore type
     typedef std::vector<IRegistry*> Store;
   public:
     friend class ::DataSvc;
     /// Iterator definition
-    typedef Store::const_iterator Iterator; 
+    typedef Store::const_iterator Iterator;
   private:
     /// Reference counter
     unsigned long     m_refCount;
@@ -62,7 +62,7 @@ namespace DataSvcHelpers   {
   private:
     /** The following entries serve two aspects:
       1) They are faster for recursive calls, because they are non-virtual
-      2) They can be re-used for the non-const entry points using a 
+      2) They can be re-used for the non-const entry points using a
          const_cast of the result.
     */
     /// Recursive helper to assemble the full path name of the entry

@@ -12,51 +12,47 @@ class StatusCode;
 class IProperty;
 class Property;
 
-// Declaration of the interface ID 
-// ( interface id, major version, minor version)
-static const InterfaceID IID_IJobOptionsSvc( "IJobOptionsSvc" , 3 , 1 ); 
-
 /** @class IJobOptionsSvc IJobOptionsSvc.h GaudiKernel/IJobOptionsSvc.h
-    
+
     Main interface for the JobOptions service
 
     @author Pere Mato
 */
-class IJobOptionsSvc : virtual public IInterface {
+class GAUDI_API IJobOptionsSvc: virtual public IInterface {
 public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IJobOptionsSvc; }
+  /// InterfaceID
+  DeclareInterfaceID(IJobOptionsSvc,4,0);
 
   /** Override default properties of the calling client
       @param client Name of the client algorithm or service
       @param me Address of the interface IProperty of the client
   */
-  virtual StatusCode setMyProperties 
-  ( const std::string& client, IProperty* me ) = 0;  
-  
+  virtual StatusCode setMyProperties
+  ( const std::string& client, IProperty* me ) = 0;
+
   /// Add a property into the JobOptions catalog
-  virtual StatusCode addPropertyToCatalogue( const std::string& client, 
+  virtual StatusCode addPropertyToCatalogue( const std::string& client,
                                              const Property& property ) = 0;
   /// Remove a property from the JobOptions catalog
-  virtual StatusCode removePropertyFromCatalogue( const std::string& client, 
+  virtual StatusCode removePropertyFromCatalogue( const std::string& client,
                                                   const std::string& name ) = 0;
   /// Get the properties associated to a given client
-  virtual const std::vector<const Property*>* 
-  getProperties( const std::string& client) const = 0; 
+  virtual const std::vector<const Property*>*
+  getProperties( const std::string& client) const = 0;
 
   /// Get the list of clients
   virtual std::vector<std::string> getClients() const = 0;
-  
-  /** look for file 'File' into search path 'Path' 
-   *  and read it to update existing JobOptionsCatalogue 
-   *  @param File file   name 
-   *  @param Path search path 
-   *  @return status code 
+
+  /** look for file 'File' into search path 'Path'
+   *  and read it to update existing JobOptionsCatalogue
+   *  @param File file   name
+   *  @param Path search path
+   *  @return status code
    */
-  virtual StatusCode readOptions 
-  ( const std::string& file      , 
+  virtual StatusCode readOptions
+  ( const std::string& file      ,
     const std::string& path = "" ) = 0 ;
-  
+
 };
 
 #endif  // KERNEL_IJOBOPTIONSSVC_H

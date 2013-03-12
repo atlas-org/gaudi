@@ -21,7 +21,7 @@ class MsgStream;
  **             terminated and the Sequencer assumes the same filtered state as the
  **             last member.
  **/
-class Sequencer : public Algorithm {
+class GAUDI_API Sequencer: public Algorithm {
  public:
 
     /**
@@ -63,7 +63,7 @@ class Sequencer : public Algorithm {
      ** is invoked once per event.
      **/
     virtual StatusCode execute( );
-    
+
     /**
      ** Sequencer finalization.
      **/
@@ -73,7 +73,7 @@ class Sequencer : public Algorithm {
      ** Sequencer finalization.
      **/
     virtual StatusCode finalize( );
-    
+
     /**
      ** Sequencer beginRun.
      **/
@@ -166,10 +166,10 @@ class Sequencer : public Algorithm {
      /// "Members" property handler
      void       membershipHandler( Property& theProp );
 
-     /// Decode branch member naem list
+     /// Decode branch member name list
      StatusCode decodeBranchMemberNames( );
 
-     /// "BranchMembers" propertry handler
+     /// "BranchMembers" property handler
      void       branchMembershipHandler( Property& theProp );
 
 protected:
@@ -233,7 +233,7 @@ private:
     Sequencer( const Sequencer& a );
 
     /**
-     ** Private asignment operator: NO ASSIGNMENT ALLOWED
+     ** Private assignment operator: NO ASSIGNMENT ALLOWED
      **/
     Sequencer& operator=( const Sequencer& rhs );
 

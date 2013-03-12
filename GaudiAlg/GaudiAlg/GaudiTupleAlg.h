@@ -39,7 +39,7 @@
  */
 // ============================================================================
 
-class GaudiTupleAlg : public GaudiTuples<GaudiHistoAlg>
+class GAUDI_API GaudiTupleAlg: public GaudiTuples<GaudiHistoAlg>
 {
 
 protected:

@@ -11,19 +11,14 @@
 #include "MyGaudiTool.h"
 
 // Declaration of the AlgTool Factory
-DECLARE_TOOL_FACTORY(MyGaudiTool);
+DECLARE_TOOL_FACTORY(MyGaudiTool)
 
 //------------------------------------------------------------------------------
 MyGaudiTool::MyGaudiTool( const std::string& type,
                           const std::string& name,
                           const IInterface* parent )
   //------------------------------------------------------------------------------
-  : GaudiTool( type, name, parent ) {
-
-  // declare my interface
-  declareInterface<IMyTool>(this);
-  // declare my second interface
-  declareInterface<IMyOtherTool>(this);
+  : base_class( type, name, parent ) {
 
   // declare properties
   declareProperty( "Int",    m_int    = 100);
@@ -44,29 +39,29 @@ const std::string&  MyGaudiTool::message() const
 void  MyGaudiTool::doIt()
   //------------------------------------------------------------------------------
 {
-  info()  << "doIt() has been called" << endreq;
-  debug() << "doIt() [DEBUG] has been called" << endreq;
+  info()  << "doIt() has been called" << endmsg;
+  debug() << "doIt() [DEBUG] has been called" << endmsg;
 }
 
 //------------------------------------------------------------------------------
 void MyGaudiTool::doItAgain()
 //------------------------------------------------------------------------------
 {
-  info()  << "doItAgain() has been called" << endreq; 
+  info()  << "doItAgain() has been called" << endmsg;
 }
 
 //------------------------------------------------------------------------------
 StatusCode  MyGaudiTool::initialize()
   //------------------------------------------------------------------------------
 {
-  info() << "intialize() has been called" << endreq;
+  info() << "intialize() has been called" << endmsg;
 
   // Make use of tool<>
 
-  info() << "Int    = " << m_int    << endreq;
-  info() << "Double = " << m_double << endreq;
-  info() << "String = " << m_string << endreq;
-  info() << "Bool   = " << m_bool   << endreq;
+  info() << "Int    = " << m_int    << endmsg;
+  info() << "Double = " << m_double << endmsg;
+  info() << "String = " << m_string << endmsg;
+  info() << "Bool   = " << m_bool   << endmsg;
 
   return StatusCode::SUCCESS;
 }
@@ -74,7 +69,7 @@ StatusCode  MyGaudiTool::initialize()
 StatusCode  MyGaudiTool::finalize()
   //------------------------------------------------------------------------------
 {
-  info() << "finalize() has been called" << endreq;
+  info() << "finalize() has been called" << endmsg;
   return StatusCode::SUCCESS;
 }
 
@@ -82,7 +77,7 @@ StatusCode  MyGaudiTool::finalize()
 MyGaudiTool::~MyGaudiTool( )
   //------------------------------------------------------------------------------
 {
-  info() << "destructor has been called" << endreq;
+  info() << "destructor has been called" << endmsg;
 }
 
 

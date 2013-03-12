@@ -15,20 +15,20 @@ namespace bug_34121 {
 class MyAlgorithm : public Algorithm {
 public:
   /// Constructor of this form must be provided
-  MyAlgorithm(const std::string& name, ISvcLocator* pSvcLocator); 
+  MyAlgorithm(const std::string& name, ISvcLocator* pSvcLocator);
 
   /// Three mandatory member functions of any algorithm
   StatusCode initialize();
   StatusCode execute();
   StatusCode finalize();
-  
+
   virtual ~MyAlgorithm(){}
-  
+
 private:
 
   std::string   m_toolName;
   IMyTool*      m_tool;
-  
+
 };
 
 // Constructor
@@ -46,14 +46,14 @@ StatusCode MyAlgorithm::initialize() {
 
   MsgStream log(msgSvc(), name());
   StatusCode sc;
-  log << MSG::INFO << "initializing...." << endreq;
+  log << MSG::INFO << "initializing...." << endmsg;
 
   sc = toolSvc()->retrieveTool(m_toolName, m_tool, this );
   if( sc.isFailure() ) {
-    log << MSG::ERROR<< "Error retrieving the tool" << endreq;
+    log << MSG::ERROR<< "Error retrieving the tool" << endmsg;
     return sc;
   }
-  log << MSG::INFO << "....initialization done" << endreq;
+  log << MSG::INFO << "....initialization done" << endmsg;
 
   return StatusCode::SUCCESS;
 }
@@ -63,10 +63,10 @@ StatusCode MyAlgorithm::initialize() {
 StatusCode MyAlgorithm::execute() {
 //------------------------------------------------------------------------------
   MsgStream         log( msgSvc(), name() );
-  log << MSG::INFO << "executing...." << endreq;
+  log << MSG::INFO << "executing...." << endmsg;
 
   m_tool->doIt();
-  
+
   return StatusCode::SUCCESS;
 }
 
@@ -75,7 +75,7 @@ StatusCode MyAlgorithm::execute() {
 StatusCode MyAlgorithm::finalize() {
 //------------------------------------------------------------------------------
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "finalizing...." << endreq;
+  log << MSG::INFO << "finalizing...." << endmsg;
 
   toolSvc()->releaseTool( m_tool ).ignore();
 
@@ -85,5 +85,5 @@ StatusCode MyAlgorithm::finalize() {
 }
 
 // Static Factory declaration
-DECLARE_NAMESPACE_ALGORITHM_FACTORY(bug_34121,MyAlgorithm);
+DECLARE_NAMESPACE_ALGORITHM_FACTORY(bug_34121,MyAlgorithm)
 

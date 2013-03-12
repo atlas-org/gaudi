@@ -20,7 +20,7 @@ namespace Gaudi {
 	@author Markus Frank
     */
 
-    class Counter : public DataObject {
+    class GAUDI_API Counter : public DataObject {
 
     public:
       /// Constructors
@@ -29,7 +29,7 @@ namespace Gaudi {
       virtual ~Counter() { }
 
       /// Retrieve reference to class definition structure
-      virtual const CLID& clID() const  { return Counter::classID(); }
+      virtual const CLID& clID() const  { return classID(); }
       static const CLID& classID() { return CLID_Counter; }
 
       /// Retrieve counter value
@@ -38,6 +38,8 @@ namespace Gaudi {
       int increment() { return ++m_counter; }
       /// Decrement counter
       int decrement() { return --m_counter; }
+      /// Set value
+      void set(int val) {  m_counter = val; }
     private:
       /// Counter number
       int                 m_counter;

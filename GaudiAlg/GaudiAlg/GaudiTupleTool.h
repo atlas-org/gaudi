@@ -15,7 +15,7 @@
 /*  @file GaudiTupleTool.h
  *
  *  Header file for class : GaudiTupleTool
- * 
+ *
  *  @author Vanya BELYAEV Ivan.Belyaev@itep.ru
  *  @author Chris Jones   Christopher.Rob.Jones@cern.ch
  *  @date   2004-06-28
@@ -40,7 +40,7 @@
  */
 // ============================================================================
 
-class GaudiTupleTool : public GaudiTuples<GaudiHistoTool>
+class GAUDI_API GaudiTupleTool: public GaudiTuples<GaudiHistoTool>
 {
 
 protected:

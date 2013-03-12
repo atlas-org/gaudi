@@ -11,12 +11,12 @@
 #include <string>
 #include "GaudiKernel/ICounterSvc.h"
 #include "GaudiKernel/AlgFactory.h"
-#include "GaudiKernel/Algorithm.h" 
+#include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/MsgStream.h"
 
 /** @class CounterTestAlg CounterTestAlg.h
 
-    CounterTestAlg class 
+    CounterTestAlg class
 
     @author Markus Frank
 */
@@ -31,7 +31,7 @@ namespace GaudiSvcTest  {
     :	Algorithm(name, pSvcLocator), m_cntSvc(0) {
     }
     /// Standard Destructor
-    virtual ~CounterTestAlg() { 
+    virtual ~CounterTestAlg() {
     }
     /// Initialize
     virtual StatusCode initialize()   {

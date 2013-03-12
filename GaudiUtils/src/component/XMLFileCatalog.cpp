@@ -24,13 +24,21 @@
 #include <sys/stat.h>
 #include "uuid/uuid.h"
 
+#include <boost/format.hpp>
+
 using namespace xercesc;
 using namespace Gaudi;
 using namespace std;
 
+#if _XERCES_VERSION <= 30000
+// API change between XercesC 2 and 3
+#define setIdAttribute(a, b) setIdAttribute(a)
+#endif
+
 PLUGINSVC_FACTORY(XMLFileCatalog,IInterface*(std::string, IMessageSvc*))
 
 namespace {
+
   typedef const string& CSTR;
   inline string _toString(const XMLCh *toTranscode)  {
     char * buff = XMLString::transcode(toTranscode);
@@ -63,7 +71,7 @@ namespace {
     ~XMLTag()                            {  }
     operator CSTR () const  { return m_str; }
   };
-  bool operator==(const XMLTag& b, CSTR c) {  return c==b.m_str; }
+  // bool operator==(const XMLTag& b, CSTR c) {  return c==b.m_str; }
   bool operator==(CSTR c, const XMLTag& b) {  return c==b.m_str; }
   struct XMLCollection  {
     DOMElement* m_node;
@@ -102,6 +110,7 @@ namespace {
     void error(const SAXParseException& e);
     /// Fatal error handler
     void fatalError(const SAXParseException& e);
+    virtual ~ErrHandler() {}
   };
   struct DTDRedirect : public EntityResolver  {
     InputSource* resolveEntity(const XMLCh* const /* pubId */, const XMLCh* const /* sysId */)  {
@@ -128,6 +137,7 @@ namespace {
       static const size_t len = strlen(dtd);
       return new MemBufInputSource((const XMLByte*)dtd,len,dtdID,false);
     }
+    virtual ~DTDRedirect() {}
   };
 
   void ErrHandler::error(const SAXParseException& e)  {
@@ -135,7 +145,9 @@ namespace {
     if (m.find("The values for attribute 'name' must be names or name tokens")!=string::npos ||
       m.find("The values for attribute 'ID' must be names or name tokens")!=string::npos   ||
       m.find("for attribute 'name' must be Name or Nmtoken")!=string::npos                 ||
-      m.find("for attribute 'ID' must be Name or Nmtoken")!=string::npos      )
+      m.find("for attribute 'ID' must be Name or Nmtoken")!=string::npos                   ||
+      m.find("for attribute 'name' is invalid Name or NMTOKEN value")!=string::npos        ||
+      m.find("for attribute 'ID' is invalid Name or NMTOKEN value")!=string::npos      )
       return;
     string sys(_toString(e.getSystemId()));
     MsgStream log(m_msg,"XMLCatalog");
@@ -172,7 +184,6 @@ namespace {
 
 /// Create file identifier using UUID mechanism
 std::string Gaudi::createGuidAsString()  {
-  char text[64];
   uuid_t uuid;
   ::uuid_generate_time(uuid);
   struct Guid {
@@ -181,16 +192,17 @@ std::string Gaudi::createGuidAsString()  {
     unsigned short Data3;
     unsigned char  Data4[8];
   } *g = (Guid*)&uuid;
-  ::sprintf(text, "%08X-%04hX-%04hX-%02hhX%02hhX-%02hhX%02hhX%02hhX%02hhX%02hhX%02hhX",
-            g->Data1, g->Data2, g->Data3,
-            g->Data4[0], g->Data4[1], g->Data4[2], g->Data4[3],
-            g->Data4[4], g->Data4[5], g->Data4[6], g->Data4[7]);
-  return text;
+
+  boost::format text("%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X");
+  text % g->Data1 % g->Data2 % g->Data3;
+  for (int i = 0; i < 8; ++i)
+    text % (unsigned short)g->Data4[i];
+  return text.str();
 }
 // ----------------------------------------------------------------------------
 XMLFileCatalog::XMLFileCatalog(CSTR uri, IMessageSvc* m)
 : m_rdOnly(false),m_update(false),m_doc(0),m_parser(0),m_errHdlr(0),
-  m_file(uri), m_refCount(0), m_msgSvc(m)
+  m_file(uri), m_msgSvc(m)
 {
 }
 // ----------------------------------------------------------------------------
@@ -202,32 +214,6 @@ XMLFileCatalog::~XMLFileCatalog()   {
   m_doc = 0;
 }
 // ----------------------------------------------------------------------------
-unsigned long XMLFileCatalog::addRef()  {
-  return ++m_refCount;
-}
-// ----------------------------------------------------------------------------
-unsigned long XMLFileCatalog::release()  {
-  long cnt = --m_refCount;
-  if ( cnt <= 0 ) {
-    delete this;
-  }
-  return cnt;
-}
-// ----------------------------------------------------------------------------
-StatusCode XMLFileCatalog::queryInterface(const InterfaceID& riid, void** ppv)  {
-  if ( riid.versionMatch(IFileCatalog::interfaceID()) ) {
-    *ppv = (IFileCatalog*)this;
-  }
-  else if ( riid.versionMatch(IInterface::interfaceID()) ) {
-    *ppv = (IInterface*)this;
-  }
-  else  {
-    *ppv = 0;
-    return StatusCode::FAILURE;
-  }
-  addRef();
-  return StatusCode::SUCCESS;
-}
 /// Create file identifier using UUID mechanism
 std::string XMLFileCatalog::createFID()  const {
   return createGuidAsString();
@@ -393,7 +379,7 @@ std::pair<DOMElement*,DOMElement*> XMLFileCatalog::i_registerFID(CSTR fid) const
       DOMNode* fde = doc->getElementsByTagName(XMLStr("*"))->item(0);
       file = m_doc->createElement(XMLStr("File"));
       file->setAttribute(Attr_ID, XMLStr(fid));
-      file->setIdAttribute(Attr_ID);
+      file->setIdAttribute(Attr_ID, true);
       fde->appendChild(file);
       m_update = true;
     }
@@ -441,7 +427,7 @@ void XMLFileCatalog::registerPFN(CSTR fid, CSTR pfn, CSTR ftype) const {
       phyelem->appendChild(fnelem);
       fnelem->setAttribute(Attr_ftype,XMLStr(ftype));
       fnelem->setAttribute(Attr_name,XMLStr(pfn));
-      fnelem->setIdAttribute(Attr_name);
+      fnelem->setIdAttribute(Attr_name, true);
       m_update = true;
     }
     return;
@@ -469,7 +455,7 @@ void XMLFileCatalog::registerLFN(CSTR fid, CSTR lfn) const {
       fnelem = getDoc(true)->createElement(LFNNODE);
       logelem->appendChild(fnelem);
       fnelem->setAttribute(Attr_name,XMLStr(lfn));
-      fnelem->setIdAttribute(Attr_name);
+      fnelem->setIdAttribute(Attr_name, true);
       m_update = true;
     }
     return;
@@ -483,11 +469,21 @@ void XMLFileCatalog::commit()    {
       string xmlfile = getfile(true);
       XMLStr ii("LS");
       DOMImplementation *imp = DOMImplementationRegistry::getDOMImplementation(ii);
-      DOMWriter         *wr  = ((DOMImplementationLS*)imp)->createDOMWriter();
       XMLFormatTarget   *tar = new LocalFileFormatTarget(xmlfile.c_str());
+#if _XERCES_VERSION <= 30000
+      DOMWriter         *wr  = imp->createDOMWriter();
       wr->setFeature(XMLUni::fgDOMWRTFormatPrettyPrint, true);
       wr->writeNode(tar, *m_doc);
       wr->release();
+#else
+      DOMLSOutput       *output = imp->createLSOutput();
+      output->setByteStream(tar);
+      DOMLSSerializer   *wr     = imp->createLSSerializer();
+      wr->getDomConfig()->setParameter(XMLStr("format-pretty-print"), true);
+      wr->write(m_doc, output);
+      output->release();
+      wr->release();
+#endif
       delete  tar;
     }
   }

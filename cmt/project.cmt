@@ -1,11 +1,10 @@
 project GAUDI
 
-#use LCGCMT LCGCMT-preview
-#use LCGCMT LCGCMT_56-patches
-use LCGCMT LCGCMT_56g
+use LCGCMT LCGCMT_64c
 
-build_strategy     with_installarea
-setup_strategy     root no_config
+build_strategy with_installarea
+setup_strategy root
 structure_strategy without_version_directory
 
 container GaudiRelease
+

@@ -16,8 +16,7 @@
 // ============================================================================
 
 // ============================================================================
-/** @var s_gslSvc 
- *  define the initial value for static variable 
+/** define the initial value for static variable 
  */
 // ============================================================================
 const IGslSvc* GaudiGSL::s_gslSvc = 0;
@@ -37,7 +36,7 @@ const IGslSvc* GaudiGSL::gslSvc () { return s_gslSvc ; }
  */
 // ============================================================================
 const IGslSvc* GaudiGSL::setGslSvc ( const IGslSvc* value ) 
-{ s_gslSvc = value ; return gslSvc() ; };
+{ s_gslSvc = value ; return gslSvc() ; }
 // ============================================================================
 
 // ============================================================================

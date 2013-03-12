@@ -1,10 +1,15 @@
 // $Id: RndmTypeInfos.cpp,v 1.1 2003/02/18 09:10:49 mato Exp $
-// Include files 
+// Include files
 #include <typeinfo>
 
 // Local include files
 #include "GaudiKernel/IRndmGen.h"
 #include "GaudiKernel/RndmGenerators.h"
+
+#ifdef __ICC
+// disable icc remark #177: declared but never referenced
+#pragma warning(disable:177)
+#endif
 
 /**
  * This is needed to insure that the typeinfo symbols are defined

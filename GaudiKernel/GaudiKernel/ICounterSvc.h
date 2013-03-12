@@ -30,34 +30,34 @@ class ICounterSvc ;
  *
  *  Counter Creation:
  *  -----------------
- * @code 
+ * @code
  *
  *   // counter creation:
  *   ICounterSvc::CountObject obj = svc->create("AlgName","NumExecuted",0);
  *
  *    obj++;
- *    obj += 10; 
- *    
+ *    obj += 10;
+ *
  *    ICounterSvc::Counter*  m_counter = obj.counter();
- *    // ICounterSvc::Counter*  m_counter = obj ; ///< the same 
+ *    // ICounterSvc::Counter*  m_counter = obj ; ///< the same
  *
  *    ICounterSvc::Counter* m_counter = 0;
- *    if ( svc->create("AlgName","NumExecuted",0, m_counter).isSuccess() )  
+ *    if ( svc->create("AlgName","NumExecuted",0, m_counter).isSuccess() )
  *    {
  *       CountObject obj(m_counter);
  *       obj++;
  *    }
  *
- * @endcode 
- * 
+ * @endcode
+ *
  *  Counter access:
  *  ---------------
- *  
- * @code 
- * 
+ *
+ * @code
+ *
  *   ICounterSvc::Counter* m_counter = svc->get("AlgName","NumExecuted");
  *   if ( m_counter )  {....}
- * 
+ *
  *   // or:
  *
  *   try {
@@ -68,18 +68,20 @@ class ICounterSvc ;
  *      ...handle exception ...
  *   }
  *
- *  @endcode 
+ *  @endcode
  *
  *
  *  @author  Markus Frank
  *  @author modified by Vanya BELYAEV ibelyaev@physics.syr.edu
  *  @version 3.0
  */
-class ICounterSvc : virtual public IInterface 
+class GAUDI_API ICounterSvc: virtual public IInterface
 {
 public:
-  /// the actual type of counter @see StatEntity 
-  typedef StatEntity Counter ;  
+  /// InterfaceID
+  DeclareInterfaceID(ICounterSvc,4,0);
+  /// the actual type of counter @see StatEntity
+  typedef StatEntity Counter ;
   /** Ease the manipulation of counters in a way, that they
    *  behave like objects:
    *  Avoid:    Counter* cnt = ...;
@@ -96,9 +98,9 @@ public:
    *  @version 1.0
    */
   typedef Stat       CountObject ;
-  /// the actual type of vectors of initialized counters 
+  /// the actual type of vectors of initialized counters
   typedef std::vector<CountObject> Counters ;
-  /** @class Printout ICounterMgr.h GaudiKernel/ICounterMgr.h
+  /** @class Printout ICounterSvc.h GaudiKernel/ICounterSvc.h
    *
    * Print counters for each element in the range [first, last)
    *  e.g.  for_each(start, end, PrintCube) ;
@@ -106,7 +108,7 @@ public:
    *  @author  Markus Frank
    *  @version 1.0
    */
-  class Printout 
+  class Printout
   {
   public:
     /// Standard initializing constructor
@@ -116,17 +118,17 @@ public:
     /// Callback for printout with Counter pointers
     StatusCode operator()( MsgStream& log , const Counter* cnt )  const ;
   private:
-    // no defauld constructor 
-    Printout () ; ///< no defauld constructor 
-    // no copy 
-    Printout ( const Printout& ) ; //< no coy constructor 
-    // no assignement 
+    // no defauld constructor
+    Printout () ; ///< no defauld constructor
+    // no copy
+    Printout ( const Printout& ) ; //< no coy constructor
+    // no assignement
     Printout& operator=( const Printout& ) ; ///< no assigment is allowed
   private:
     /// Reference to counter service
     ICounterSvc* m_svc;
   } ;
-  /** Access an existing counter object. 
+  /** Access an existing counter object.
    *
    * @param  group         [IN] Hint for smart printing
    * @param  name          [IN] Counter name
@@ -134,8 +136,8 @@ public:
    *
    * @return Pointer to existing counter object (NULL if non existing).
    */
-  virtual Counter* get 
-  ( const std::string& group , 
+  virtual Counter* get
+  ( const std::string& group ,
     const std::string& name  ) const = 0;
   /** get all counters form the given group:
    *  @code
@@ -143,22 +145,22 @@ public:
    *    ICounterSvc::Counters cnts = svc->get("Efficiency") ;
    *
    *    MsgStream& stream = ... ;
-   *    for ( ICounterSvc::Counters::const_iterator ic = cnts.begin()  ; 
-   *          cnts.end() != ic ; ++ic ) 
+   *    for ( ICounterSvc::Counters::const_iterator ic = cnts.begin()  ;
+   *          cnts.end() != ic ; ++ic )
    *       {
-   *          stream << (*ic) << endreq ;
+   *          stream << (*ic) << endmsg ;
    *       }
-   * 
    *
-   *  @endcode 
-   *  @see ICounterSvc::Counters  
-   *  @param gorup the gorup name 
+   *
+   *  @endcode
+   *  @see ICounterSvc::Counters
+   *  @param gorup the gorup name
    *  @return vector of the properly initialized counters
    */
   virtual Counters get ( const std::string& group ) const = 0 ;
   /** Create a new counter object. If the counter object exists already
    * the existing object is returned. In this event the return code is
-   * COUNTER_EXISTS. The ownership of the actual counter stays with the 
+   * COUNTER_EXISTS. The ownership of the actual counter stays with the
    * service.
    *
    * @param  group         [IN]     Hint for smart printing
@@ -168,8 +170,8 @@ public:
    *
    * @return StatusCode indicating failure or success.
    */
-  virtual StatusCode create 
-  ( const std::string& group         , 
+  virtual StatusCode create
+  ( const std::string& group         ,
     const std::string& name          ,
     longlong           initial_value ,
     Counter*&          refpCounter   ) = 0;
@@ -182,8 +184,8 @@ public:
    * @param  refpCounter   [OUT]    Reference to store pointer to counter.
    * @return Fully initialized CountObject.
    */
-  virtual CountObject create 
-  ( const std::string& group    , 
+  virtual CountObject create
+  ( const std::string& group    ,
     const std::string& name     ,
     longlong  initial_value = 0 ) = 0;
   /** Remove a counter object. If the counter object does not exists,
@@ -196,7 +198,7 @@ public:
    * @return StatusCode indicating failure or success.
    */
   virtual StatusCode remove
-  ( const std::string& group , 
+  ( const std::string& group ,
     const std::string& name  ) = 0;
   /** Remove all counters of a given group. If no such counter exists
    * the return code is COUNTER_NOT_PRESENT
@@ -213,7 +215,7 @@ public:
    * @return StatusCode indicating failure or success.
    */
   virtual StatusCode print
-  ( const std::string& group   , 
+  ( const std::string& group   ,
     const std::string& name    ,
     Printout&          printer ) const = 0;
   /** If no such counter exists the return code is COUNTER_NOT_PRESENT
@@ -223,8 +225,8 @@ public:
    * @return StatusCode indicating failure or success.
    */
   virtual StatusCode print
-  ( const std::string& group   , 
-    Printout&          printer ) const = 0;  
+  ( const std::string& group   ,
+    Printout&          printer ) const = 0;
   /** Print counter value
    * @param pCounter       [IN]     Pointer to Counter object
    * @param printer        [IN]     Print actor
@@ -232,7 +234,7 @@ public:
    */
   virtual StatusCode print
   ( const Counter* pCounter ,
-    Printout&      printer  ) const = 0;  
+    Printout&      printer  ) const = 0;
   /** Print counter value
    * @param refCounter     [IN]     Reference to CountObject object
    * @param printer        [IN]     Print actor
@@ -244,8 +246,8 @@ public:
   /** @param printer        [IN]     Print actor
    *  @return StatusCode indicating failure or success.
    */
-  virtual StatusCode print 
-  ( Printout& printer ) const = 0;  
+  virtual StatusCode print
+  ( Printout& printer ) const = 0;
   /// Default Printout for counters
   virtual StatusCode defaultPrintout
   ( MsgStream&     log      ,
@@ -256,18 +258,15 @@ public:
           COUNTER_REMOVED     = 3   // Type of success. Low bit set
   } ;
 protected:
-  /// protected virtual destructor 
-  virtual ~ICounterSvc() ; ///< protected virtual destructor 
-public:
-  /// Retrieve the unique interface ID @see IInterface
-  static const InterfaceID& interfaceID() ;
+  /// protected virtual destructor
+  virtual ~ICounterSvc() ; ///< protected virtual destructor
 };
 // ============================================================================
-/// optput operator for the counter object 
+/// output operator for the counter object
 // ============================================================================
 std::ostream& operator<<( std::ostream& , const ICounterSvc::CountObject& ) ;
 // ============================================================================
-/// The END 
+/// The END
 // ============================================================================
 #endif // GAUDIKERNEL_ICOUNTERSVC_H
 // ============================================================================

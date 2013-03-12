@@ -5,19 +5,16 @@
 // Include files
 #include "GaudiKernel/IAlgTool.h"
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IMyAudTool("IMyAudTool", 1 , 0); 
-
-/** @class IMyAudTool IMyAudTool.h 
+/** @class IMyAudTool IMyAudTool.h
  *  Example of an Interface of a Algorithm Tool
  *
  *  @author Pere Mato
 */
 class IMyAudTool : virtual public IAlgTool {
- public:
+public:
+  /// InterfaceID
+  DeclareInterfaceID(IMyAudTool,2,0);
 
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IMyAudTool; }
   /// Get a message
   virtual const std::string&  message() const = 0;
   /// Do something

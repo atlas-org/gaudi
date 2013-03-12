@@ -2,6 +2,7 @@
 #ifndef GAUDIKERNEL_AUDFACTORY_H
 #define GAUDIKERNEL_AUDFACTORY_H
 
+#include "GaudiKernel/Kernel.h"
 #include "Reflex/PluginService.h"
 
 #define DECLARE_AUDITOR(x)  /*dummy*/

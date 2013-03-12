@@ -16,63 +16,48 @@
 using ROOT::Reflex::PluginService;
 
 
-namespace Gaudi 
+namespace Gaudi
 {
-  
+
 /** @class BootSvcLocator
 
     A dual-stage boostrap mechanism is used to ensure an orderly startup
     of the ApplicationMgr. If this function is called before the singleton
     ApplicationMgr instance exists, a BootstrapAppMgr singleton instance is
     created. This responds to any subsequent requests for services by
-    returning StatusCode::FAILURE, unless the ApplicationMgr singleton 
+    returning StatusCode::FAILURE, unless the ApplicationMgr singleton
     instance has been created in the interim. In this case, the BootstrapAppMgr
     forwards the request to the ApplicationMgr instance. The motiviation for
     this is to handle static object instances where the constructor attempts
     to locate services and would otherwise instantiate the ApplicationMgr
-    instance in an unorderly manner. This logic requires that the 
+    instance in an unorderly manner. This logic requires that the
     ApplicationMgr instance is created explicitly.
-    
+
 */
-  class BootSvcLocator : virtual public ISvcLocator {
+  class BootSvcLocator : public implements1<ISvcLocator> {
   public:
     BootSvcLocator();
     virtual ~BootSvcLocator();
-    /// implmentation of IInterface::addRef
-    virtual unsigned long addRef();
-    /// implmentation of IInterface::release
-    virtual unsigned long release();
-    /// implementation of IInterface::queryInterface
-    virtual StatusCode queryInterface(const InterfaceID& iid, void** pinterface);
-    virtual StatusCode getService( const std::string& name, 
-                                   IService*&  svc );
-    virtual StatusCode getService( const std::string& name,
+#if !defined(GAUDI_V22_API)|| defined(G22_NEW_SVCLOCATOR)
+    virtual StatusCode getService( const Gaudi::Utils::TypeNameString& typeName,
                                    const InterfaceID& iid,
                                    IInterface*& pinterface );
-    virtual StatusCode getService( const std::string& name,
+    virtual StatusCode getService( const Gaudi::Utils::TypeNameString& typeName,
                                    IService*& svc,
-                                   bool createIf );
+                                   const bool createIf = true);
+#endif
     virtual const std::list<IService*>& getServices( ) const;
     virtual bool existsService( const std::string& name ) const;
-  private:
-    unsigned long m_refcount;    ///< Reference counter
+
+    /// Returns a smart pointer to a service.
+    virtual SmartIF<IService> &service(const Gaudi::Utils::TypeNameString &typeName, const bool createIf = true);
+
   };
 }
 
 
-static ISvcLocator* s_svclocInstance = 0;
-static IAppMgrUI*   s_appmgrInstance = 0;
-
-//------------------------------------------------------------------------------
-bool Gaudi::hasApplicationMgr()
-//------------------------------------------------------------------------------
-{
-  //Return true if the applicationmgr has already been created
-  if ( 0 == s_appmgrInstance ) {
-    return false;
-  }
-  return true;
-}
+static SmartIF<ISvcLocator> s_svclocInstance;
+static SmartIF<IAppMgrUI>   s_appmgrInstance;
 
 //------------------------------------------------------------------------------
 IAppMgrUI* Gaudi::createApplicationMgr(const std::string& dllname,
@@ -81,12 +66,11 @@ IAppMgrUI* Gaudi::createApplicationMgr(const std::string& dllname,
 {
   // Allow not for multiple AppManagers: If already instantiated then just
   // return it
-  if ( 0 == s_appmgrInstance )    {
+  if ( !s_appmgrInstance.isValid() )    {
     s_appmgrInstance = createApplicationMgrEx(dllname, factname);
-    StatusCode sc = s_appmgrInstance->queryInterface( IID_ISvcLocator,
-                                                      pp_cast<void>(&s_svclocInstance) );
+    s_svclocInstance = s_appmgrInstance;
   }
-  return s_appmgrInstance;
+  return s_appmgrInstance.get();
 }
 
 //------------------------------------------------------------------------------
@@ -104,7 +88,7 @@ IAppMgrUI* Gaudi::createApplicationMgrEx(const std::string& dllname,
     return 0;
   }
   // Locate few interfaces of the Application Manager
-  status = iif->queryInterface( IID_IAppMgrUI, pp_cast<void>(&iappmgr) );
+  status = iif->queryInterface( IAppMgrUI::interfaceID(), pp_cast<void>(&iappmgr) );
   if( status.isFailure() ) {
     return 0;
   }
@@ -120,21 +104,20 @@ ISvcLocator* Gaudi::svcLocator()
 // of the ApplicationMgr. If this function is called before the singleton
 // ApplicationMgr instance exists, a BootSvcLocator singleton instance is
 // created. This responds to any subsequent requests for services by
-// returning StatusCode::FAILURE, unless the ApplicationMgr singleton 
+// returning StatusCode::FAILURE, unless the ApplicationMgr singleton
 // instance has been created in the interim. In this case, the BootSvcLocator
 // forwards the request to the ApplicationMgr instance. The motiviation for
 // this is to handle static object instances where the constructor attempts
 // to locate services and would otherwise instantiate the ApplicationMgr
-// instance in an unorderly manner. This logic requires that the 
+// instance in an unorderly manner. This logic requires that the
 // ApplicationMgr instance is created explicitly.
 
 {
-  if( 0 == s_svclocInstance )   {
+  if( !s_svclocInstance.isValid() )   {
     IAppMgrUI* iappmgr = createApplicationMgr();
     if( iappmgr ) {
-      StatusCode sc = iappmgr->queryInterface( IID_ISvcLocator,
-                                               pp_cast<void>(&s_svclocInstance) );
-      if( sc.isSuccess() ) {
+      s_svclocInstance = iappmgr;
+      if( s_svclocInstance.isValid() ) {
         return s_svclocInstance;
       }
     }
@@ -142,7 +125,7 @@ ISvcLocator* Gaudi::svcLocator()
     //if( 0 == s_appmgrInstance ) {
     //  s_svclocInstance = new BootSvcLocator();
     //} else {
-    //  StatusCode sc = s_appmgrInstance->queryInterface( IID_ISvcLocator,
+    //  StatusCode sc = s_appmgrInstance->queryInterface( ISvcLocator::interfaceID(),
     //                                                  pp_cast<void>(&s_svclocInstance) );
     //  if( sc.isSuccess() ) {
     //    return s_svclocInstance;
@@ -156,15 +139,9 @@ ISvcLocator* Gaudi::svcLocator()
 ISvcLocator* Gaudi::setInstance(ISvcLocator* newInstance)
 //------------------------------------------------------------------------------
 {
-  ISvcLocator* oldInstance = s_svclocInstance;
+  ISvcLocator* oldInstance = s_svclocInstance.get();
   s_svclocInstance = newInstance;
-  if ( s_appmgrInstance )     {
-    s_appmgrInstance->release();
-    s_appmgrInstance = 0;
-  }
-  if ( s_svclocInstance )    {
-    s_svclocInstance->queryInterface (IID_IAppMgrUI, pp_cast<void>(&s_appmgrInstance));
-  }
+  s_appmgrInstance = s_svclocInstance;
   return oldInstance;
 }
 
@@ -172,22 +149,15 @@ ISvcLocator* Gaudi::setInstance(ISvcLocator* newInstance)
 IAppMgrUI* Gaudi::setInstance(IAppMgrUI* newInstance)
 //------------------------------------------------------------------------------
 {
-  IAppMgrUI* oldInstance = s_appmgrInstance;
+  IAppMgrUI* oldInstance = s_appmgrInstance.get();
   s_appmgrInstance = newInstance;
-  if ( s_svclocInstance )     {
-    s_svclocInstance->release();
-    s_svclocInstance = 0;
-  }
-  if ( s_appmgrInstance )    {
-    s_appmgrInstance->queryInterface (IID_ISvcLocator,
-                                      pp_cast<void>(&s_svclocInstance));
-  }
+  s_svclocInstance = s_appmgrInstance;
   return oldInstance;
 }
 
 //------------------------------------------------------------------------------
-IInterface* Gaudi::createInstance( const std::string& name, 
-                                                const std::string& factname, 
+IInterface* Gaudi::createInstance( const std::string& name,
+                                                const std::string& factname,
                                                 const std::string& dllname)
 //------------------------------------------------------------------------------
 {
@@ -203,11 +173,11 @@ IInterface* Gaudi::createInstance( const std::string& name,
   void* libHandle = 0;
   status = System::loadDynamicLib( dllname, &libHandle);
   if ( status.isSuccess() )   {
-    IInterface* ii = PluginService::Create<IInterface*>(factname, (IInterface*)0);
+    ii = PluginService::Create<IInterface*>(factname, (IInterface*)0);
     if ( ii ) return ii;
-    IService* is = PluginService::Create<IService*>(factname, name, (ISvcLocator*)0);
+    is = PluginService::Create<IService*>(factname, name, (ISvcLocator*)0);
     if ( is ) return is;
-    IAlgorithm* ia = PluginService::Create<IAlgorithm*>(factname, name, (ISvcLocator*)0);
+    ia = PluginService::Create<IAlgorithm*>(factname, name, (ISvcLocator*)0);
     if ( ia ) return ia;
 
     return 0;
@@ -216,7 +186,7 @@ IInterface* Gaudi::createInstance( const std::string& name,
     // DLL library not loaded. Try in the local module
     std::cout << System::getLastErrorString() << std::endl;
     std::cout << "Gaudi::Bootstrap: Not found DLL " << dllname << std::endl;
-    return 0; 
+    return 0;
   }
 }
 
@@ -239,12 +209,6 @@ namespace {
       facName = copy.facName;
       fac     = copy.fac;
     }
-    ShadowEntry& operator=(const ShadowEntry& copy)   {
-      dllName = copy.dllName;
-      facName = copy.facName;
-      fac     = copy.fac;
-      return *this;
-    }
   };
 }
 
@@ -257,7 +221,7 @@ IAppMgrUI* Gaudi::createApplicationMgr(const std::string& dllname )    {
 //------------------------------------------------------------------------------
 IAppMgrUI* Gaudi::createApplicationMgr()    {
 //------------------------------------------------------------------------------
-  return createApplicationMgr("GaudiSvc", "ApplicationMgr");
+  return createApplicationMgr("GaudiCoreSvc", "ApplicationMgr");
 }
 
 //=======================================================================
@@ -265,76 +229,44 @@ IAppMgrUI* Gaudi::createApplicationMgr()    {
 //=======================================================================
 
 static std::list<IService*> s_bootServices;
-static IService*            s_bootService   = 0;
-static IInterface*          s_bootInterface = 0;
+static SmartIF<IService>    s_bootService;
+static SmartIF<IInterface>  s_bootInterface;
 
 using Gaudi::BootSvcLocator;
 
 BootSvcLocator::BootSvcLocator() {
-  m_refcount = 0;
 }
 BootSvcLocator::~BootSvcLocator() {
 }
-unsigned long BootSvcLocator::addRef() {
-  m_refcount++;
-  return m_refcount;
-}
-unsigned long BootSvcLocator::release() {
-  unsigned long count = --m_refcount;
-  if( count <= 0) {
-    delete this;
-  }
-  return count;
-}
-StatusCode Gaudi::BootSvcLocator::queryInterface(const InterfaceID& iid, void** pinterface)
-{
-  if( iid == IID_IInterface ) {  
-    *pinterface = (IInterface*)this;
-    addRef();
-    return StatusCode::SUCCESS;
-  } 
-  else if ( iid == IID_ISvcLocator ) {
-    *pinterface = (ISvcLocator*)this;
-    addRef();
-    return StatusCode::SUCCESS;
-  } 
-  return StatusCode::FAILURE;
-}
-StatusCode Gaudi::BootSvcLocator::getService( const std::string& name, 
-                                       IService*&  svc ) {
-  StatusCode sc = StatusCode::FAILURE;
-  if ( 0 != s_appmgrInstance ) {
-    sc = s_svclocInstance->getService(name, svc );
-  } else {
-    svc = s_bootService;
-  }
-  return sc;
-}
-StatusCode Gaudi::BootSvcLocator::getService( const std::string& name,
+
+#if !defined(GAUDI_V22_API) || defined(G22_NEW_SVCLOCATOR)
+StatusCode Gaudi::BootSvcLocator::getService( const Gaudi::Utils::TypeNameString& typeName,
                                        const InterfaceID& iid,
                                        IInterface*& pinterface ) {
   StatusCode sc = StatusCode::FAILURE;
-  if ( 0 != s_appmgrInstance ) {
-    sc = s_svclocInstance->getService(name, iid, pinterface );
+  if ( s_appmgrInstance.isValid() ) {
+    sc = s_svclocInstance->getService(typeName, iid, pinterface );
   } else {
-    pinterface = s_bootInterface;
+    pinterface = s_bootInterface.get();
   }
   return sc;
 }
-StatusCode Gaudi::BootSvcLocator::getService( const std::string& name,
+StatusCode Gaudi::BootSvcLocator::getService( const Gaudi::Utils::TypeNameString& typeName,
                                        IService*& svc,
-                                       bool createIf ) {
+                                       const bool createIf ) {
   StatusCode sc = StatusCode::FAILURE;
-  if ( 0 != s_appmgrInstance ) {
-    sc = s_svclocInstance->getService(name, svc, createIf );
+  if ( s_appmgrInstance.isValid() ) {
+    sc = s_svclocInstance->getService(typeName, svc, createIf );
   } else {
-    svc = s_bootService;
+    svc = s_bootService.get();
   }
   return sc;
 }
+#endif
+
 const std::list<IService*>& Gaudi::BootSvcLocator::getServices( ) const {
   StatusCode sc = StatusCode::FAILURE;
-  if ( 0 != s_appmgrInstance ) {
+  if ( s_appmgrInstance.isValid() ) {
     return s_svclocInstance->getServices( );
   } else {
     return s_bootServices;
@@ -342,8 +274,17 @@ const std::list<IService*>& Gaudi::BootSvcLocator::getServices( ) const {
 }
 bool Gaudi::BootSvcLocator::existsService( const std::string& name ) const {
   bool result = false;
-  if ( 0 != s_appmgrInstance ) {
-    result = s_svclocInstance->existsService(name );
+  if ( s_appmgrInstance.isValid() ) {
+    result = s_svclocInstance->existsService(name);
   }
   return result;
+}
+
+
+SmartIF<IService>& Gaudi::BootSvcLocator::service(const Gaudi::Utils::TypeNameString &typeName, const bool createIf) {
+  if ( s_appmgrInstance.isValid() ) {
+    return s_svclocInstance->service(typeName, createIf);
+  } else {
+    return s_bootService;
+  }
 }

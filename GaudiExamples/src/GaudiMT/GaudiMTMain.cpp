@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 
-const int MAX_THREADS(1023); //to check command line parameter 
+const int MAX_THREADS(1023); //to check command line parameter
 // Include files
 #include "GaudiKernel/SmartIF.h"
 #include "GaudiKernel/Bootstrap.h"
@@ -12,7 +12,7 @@ const int MAX_THREADS(1023); //to check command line parameter
 #include "GaudiKernel/IEventProcessor.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/ThreadGaudi.h"
-                                                                                                                       
+
 #include <cassert>
 #include <iostream>
 
@@ -49,18 +49,18 @@ void* work (void* counter)
   int id_thread = *(static_cast<int*>(counter));
   assert( id_thread >= 0 );
   std::string threadStrID(getGaudiThreadIDfromID(id_thread));
-  COUTTHREAD("++++ Thread : " << id_thread << " string = " << threadStrID) ; 
+  COUTTHREAD("++++ Thread : " << id_thread << " string = " << threadStrID) ;
 
   int m_evtMax = 0;
 
   // Get an instance of the Pesa application manager
   IInterface* m_pesaAppMgr = Gaudi::createApplicationMgr();
- 
+
   // Get the EventLoopMgr name from the Application Manager
   std::string nameEventLoopMgr = "EventLoopMgr" ;
- 
+
   std::string value ;
-  SmartIF<IProperty> propMgr ( IID_IProperty, m_pesaAppMgr );
+  SmartIF<IProperty> propMgr ( m_pesaAppMgr );
   if( !propMgr.isValid() ) {
     COUTTHREAD(" Fatal error while retrieving Gaudi PropertyMgr ")
   } else {
@@ -79,13 +79,13 @@ void* work (void* counter)
       m_evtMax = std::atoi(value.c_str()) ;
     }
   }
- 
+
   nameEventLoopMgr = nameEventLoopMgr + threadStrID ;
- 
+
   COUTTHREAD("---> Thread : " << id_thread << " - Name for EventLoopManager : " + nameEventLoopMgr)
   StatusCode sc ;
   IEventProcessor* m_processingMgr = 0 ;
-  SmartIF<ISvcLocator> svcLoc( IID_ISvcLocator, m_pesaAppMgr );
+  SmartIF<ISvcLocator> svcLoc( m_pesaAppMgr );
   if (svcLoc.isValid()) {
     sc = svcLoc->service( nameEventLoopMgr , m_processingMgr);
     if( !sc.isSuccess() )  {
@@ -97,8 +97,8 @@ void* work (void* counter)
   for (int i = 0; i < m_evtMax; i++) {
     // ExecuteEvent from the application manager
     if ( 0 != m_processingMgr ) {
-      SmartIF<IEventProcessor> processor(IID_IEventProcessor, m_processingMgr);
- 
+      SmartIF<IEventProcessor> processor(m_processingMgr);
+
       if ( processor.isValid() )    {
 	COUTTHREAD(" ---> Executing WorkerThread---> " << id_thread)
 	sc = processor->executeEvent(NULL);
@@ -130,10 +130,10 @@ int main (int argc, char** argv)
 
   // Create an instance of an application manager
   IInterface* iface = Gaudi::createApplicationMgr();
-  SmartIF<IProperty>     propMgr ( IID_IProperty, iface );
-  SmartIF<IAppMgrUI>     appMgr  ( IID_IAppMgrUI, iface );
-  SmartIF<IClassManager>     dllMgr  ( IID_IClassManager, iface );
- 
+  SmartIF<IProperty>     propMgr ( iface );
+  SmartIF<IAppMgrUI>     appMgr  ( iface );
+  SmartIF<IClassManager> dllMgr  ( iface );
+
   if( !appMgr.isValid() || !propMgr.isValid() || !dllMgr.isValid()) {
     std::cout << "Fatal error while creating the ApplicationMgr " << std::endl;
     return 1;
@@ -172,7 +172,7 @@ int main (int argc, char** argv)
   std::string v_nt ;
   int nt ;
   sc = propMgr->getProperty("NoOfThreads", v_nt);
-  if( sc.isFailure() ) {                                                                                         
+  if( sc.isFailure() ) {
     std::cout << "Cannot get get number of worker threads" << std::endl;
     return 1;
   } else {
@@ -184,7 +184,7 @@ int main (int argc, char** argv)
       std::cout << "---> Use " << nt << " worker threads <---" << std::endl;
     }
   }
- 
+
   // Configure the application manager
   sc = appMgr->configure();
   std::cout << "---> Configure ApplicationMgr : " << appMgr->stateName() << " Status : " << sc.getCode() << std::endl;
@@ -192,25 +192,25 @@ int main (int argc, char** argv)
     std::cout << "---> Fatal error while configuring the ApplicationMgr " << std::endl;
     return 1;
   }
- 
+
   // Initialize the application manager
   sc = appMgr->initialize();
   std::cout << "---> Initialize ApplicationMgr : " << appMgr->stateName() << " Status : " << sc.getCode() << std::endl;
   if( sc.isFailure() ) {
-    std::cout << "---> Fatal error while intializing the ApplicationMgr " << std::endl;
+    std::cout << "---> Fatal error while initializing the ApplicationMgr " << std::endl;
     return 1;
   }
 
   // Create threads and process events
-  worker_done = nt; //initialised counter
+  worker_done = nt; //Initialized counter
 
   pthread_t thread[nt];
   int tID[nt];
 
   for (int i=0; i<nt; ++i) {
-    /** 
+    /**
      * This will start the worker thread. It will stop by itself when the
-     * called non-member method exits.  
+     * called non-member method exits.
      */
     tID[i]=i;
     pthread_create(&thread[i], 0, work, static_cast<void*>(&tID[i]));
@@ -221,14 +221,14 @@ int main (int argc, char** argv)
   pthread_mutex_unlock(&mutex);
 
   // Finalize the application manager
-  sc = appMgr->finalize();                                                                                       
+  sc = appMgr->finalize();
   std::cout << "---> Finalize  ApplicationMgr : " << appMgr->stateName() << " Status : " << sc.getCode() << std::endl;
 
   if( sc.isFailure() ) {
     std::cout << "---> Fatal error while finalizing  the ApplicationMgr " << std::endl;
     return 1;
   }
- 
+
   // Terminate the application manager
   sc = appMgr->terminate();
   std::cout << "---> Terminate ApplicationMgr : " << appMgr->stateName() << " Status : " << sc.getCode() << std::endl;
@@ -236,7 +236,7 @@ int main (int argc, char** argv)
     std::cout << "---> Fatal error while terminating the ApplicationMgr " << std::endl;
     return 1;
   }
-  
+
   //destroyes the mutex resources allocated
   pthread_cond_destroy(&condition);
   pthread_mutex_destroy(&mutex);

@@ -36,12 +36,6 @@
 
 namespace 
 {
-  inline std::string
-  fmt ( const double /* value */  ) 
-  {
-    return std::string();
-  } ;
-  
   
   std::ostream& operator<< 
     ( std::ostream&       stream ,
@@ -69,14 +63,13 @@ namespace
 //       << " \t" << ent.eMeanTime      () 
 //       << " \t" << ent.eMeanErrorTime () 
 //       << " \t" << ent.eRMSTime       () ;
-  } ;
-};
+  }
+}
 
 
 namespace 
 {
-  /** @fn makeTest
-   *  the simple function to test teh preformace of 
+  /** the simple function to test the preformace of 
    *  allocators. Actually it tests the CPU 
    *  performace of operators "new" and "delete"
    *
@@ -132,8 +125,8 @@ namespace
       }
       
     } // end of repetition loop
-  } ;
-};
+  }
+}
 
 int main()
 {
@@ -213,7 +206,7 @@ int main()
 
   
   return 0 ;
-} ;
+}
 
 
 // ============================================================================

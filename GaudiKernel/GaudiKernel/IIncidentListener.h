@@ -7,19 +7,16 @@
 #include "GaudiKernel/Incident.h"
 #include <string>
 
-
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IIncidentListener(311, 1 , 0); 
-
 /** @class IIncidentListener IIncidentListener.h GaudiKernel/IIncidentListener.h
     The interface implemented by any class wanting to listen to Incidents.
     @author Pere Mato
 */
-class IIncidentListener : virtual public IInterface {
-  public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IIncidentListener; }
-  /// Inform that a new incident has occured
+class GAUDI_API IIncidentListener: virtual public IInterface {
+public:
+  /// InterfaceID
+  DeclareInterfaceID(IIncidentListener,2,0);
+
+  /// Inform that a new incident has occurred
   virtual void handle(const Incident&) = 0;
 };
 

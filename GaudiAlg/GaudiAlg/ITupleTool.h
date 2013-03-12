@@ -1,6 +1,6 @@
 // $Id: ITupleTool.h,v 1.2 2004/10/18 08:18:00 mato Exp $
 // ============================================================================
-#ifndef GAUDIALG_ITUPLETOOL_H 
+#ifndef GAUDIALG_ITUPLETOOL_H
 #define GAUDIALG_ITUPLETOOL_H 1
 // ============================================================================
 // Include files
@@ -23,27 +23,24 @@
 
 // ============================================================================
 /** @class ITupleTool ITupleTool.h GaudiTools/ITupleTool.h
- *  
+ *
  *
  *  @author Vanya BELYAEV Ivan.Belyaev@itep.ru
  *  @date   2004-06-28
  */
 // ============================================================================
 
-class ITupleTool : virtual public IAlgTool 
+class GAUDI_API ITupleTool: virtual public IAlgTool
 {
 public:
+  /// InterfaceID
+  DeclareInterfaceID(ITupleTool,2,0);
+
   typedef Tuples::TupleID   TupleID ;
   typedef Tuples::Tuple     Tuple   ;
-public: 
-  
-  /// Return the unique interface ID
-  static const InterfaceID& interfaceID() ;
-  
-public:
-  
-  /** get N-tuple object ( book on-demand ) with unique identidier 
-   *  
+
+  /** get N-tuple object ( book on-demand ) with unique identifier
+   *
    *  @code
    *
    *  ITupleTool* tool = .. ;
@@ -53,32 +50,32 @@ public:
    *  tuple->column( "C" , tan(0.1) );
    *  tuple->write()
    *
-   *  @endcode 
+   *  @endcode
    *
-   *  NTuple will be booked with automatically assigned numerical ID 
+   *  NTuple will be booked with automatically assigned numerical ID
    *
-   *  @param title unique title for ntuple 
-   *  @param clid  class identifier 
-   *  @return ntuple object 
+   *  @param title unique title for ntuple
+   *  @param clid  class identifier
+   *  @return ntuple object
    */
-  virtual Tuple  nTuple 
-  ( const std::string& title                        , 
+  virtual Tuple  nTuple
+  ( const std::string& title                        ,
     const CLID&        clid  = CLID_ColumnWiseTuple ) const = 0 ;
-  
-  virtual Tuple  nTuple 
-  ( const TupleID&     ID                           , 
-    const std::string& title = ""                   , 
+
+  virtual Tuple  nTuple
+  ( const TupleID&     ID                           ,
+    const std::string& title = ""                   ,
     const CLID&        clid  = CLID_ColumnWiseTuple ) const = 0 ;
-  
-  virtual Tuple  evtCol 
-  ( const std::string& title                        , 
+
+  virtual Tuple  evtCol
+  ( const std::string& title                        ,
     const CLID&        clid  = CLID_RowWiseTuple    ) const = 0 ;
-  
-  virtual Tuple  evtCol 
-  ( const TupleID&     ID                           , 
-    const std::string& title = ""                   , 
+
+  virtual Tuple  evtCol
+  ( const TupleID&     ID                           ,
+    const std::string& title = ""                   ,
     const CLID&        clid  = CLID_RowWiseTuple    ) const = 0 ;
-  
+
 protected:
 
   virtual ~ITupleTool( ); ///< Destructor

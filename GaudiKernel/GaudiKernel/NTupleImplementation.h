@@ -3,7 +3,8 @@
 #define GAUDIKERNEL_NTUPLEIMP_H
 
 // Framework include files
-#include "NTuple.h"
+#include "GaudiKernel/NTuple.h"
+#include "GaudiKernel/Kernel.h"
 
 // Forward declarations
 class INTupleSvc;
@@ -11,7 +12,7 @@ class IConversionSvc;
 
 namespace NTuple   {
   // Concrete N tuple class definition
-  class TupleImp : public Tuple  {
+  class GAUDI_API TupleImp : public Tuple  {
   protected:
     /// Container with N tuple _Columns
     ItemContainer     m_items;
@@ -122,7 +123,7 @@ namespace NTuple   {
     }
     /// Retrieve Reference to class defininition structure
     virtual const CLID& clID() const   {
-      return ColumnWiseTuple::classID();
+      return classID();
     }
     /// Static access to class defininition structure
     static const CLID& classID()      {
@@ -141,7 +142,7 @@ namespace NTuple   {
     }
     /// Retrieve Reference to class defininition structure
     virtual const CLID& clID() const   {
-      return RowWiseTuple::classID();
+      return classID();
     }
     /// Static access to class defininition structure
     static const CLID& classID()      {

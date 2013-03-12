@@ -1,8 +1,6 @@
 // $Id: TuplePut.h,v 1.2 2007/05/24 14:22:58 hmd Exp $
 // =============================================================================
-// CVS tag $Name:  $, verison $Revison:$
-// =============================================================================
-#ifndef GAUDIALG_TUPLEPUT_H 
+#ifndef GAUDIALG_TUPLEPUT_H
 #define GAUDIALG_TUPLEPUT_H 1
 // =============================================================================
 // Include files
@@ -20,134 +18,134 @@
 #include "Reflex/Reflex.h"
 // =============================================================================
 /** @file
- *  Implementation file for Tuple::TupleObj::put method 
+ *  Implementation file for Tuple::TupleObj::put method
  *  @author Vanya BELYAEV ibelyaev@physics.syr.edu
  *  @date 2007-04-08
  */
 // =============================================================================
-namespace Tuples 
-{ 
-  /** @class ItemStore ItemStore.h GaudiAlg/ItemStore.h
-   * 
-   *  Simple class, which represents the local storage of N-tupel items
-   *  of the given type. Essentially it is a restricted 
-   *  GaudiUtils::HashMap with the ownership of the newly created entries 
+namespace Tuples
+{
+  /** @class ItemStore TuplePut.h GaudiAlg/TuplePut.h
+   *
+   *  Simple class, which represents the local storage of N-tuple items
+   *  of the given type. Essentially it is a restricted
+   *  GaudiUtils::HashMap with the ownership of the newly created entries
    *
    *  @author Vanya BELYAEV ibelyaev@physics.syr.edu
    *  @date   2007-04-08
    */
-  template <class VALUE> 
-  class ItemStore 
+  template <class VALUE>
+  class ItemStore
   {
     friend class TupleObj ;
   private:
     typedef GaudiUtils::HashMap<std::string,NTuple::Item<VALUE>*>  Store;
   public:
-    /// constructor : create empty map 
+    /// constructor : create empty map
     ItemStore() : m_map() {}
-    /// destructor : delete all known entries 
-    ~ItemStore() 
+    /// destructor : delete all known entries
+    ~ItemStore()
     {
-      for ( typename Store::iterator ientry  = m_map.begin() ; 
-            m_map.end() != ientry ; ++ientry ) 
-      { if ( 0 != ientry->second ) { delete ientry->second ; } } 
-    } ;
+      for ( typename Store::iterator ientry  = m_map.begin() ;
+            m_map.end() != ientry ; ++ientry )
+      { if ( 0 != ientry->second ) { delete ientry->second ; } }
+    }
   protected:
-    /// the only one method: 
-    inline NTuple::Item<VALUE>* getItem 
+    /// the only one method:
+    inline NTuple::Item<VALUE>* getItem
     ( const std::string& key , Tuples::TupleObj* tuple )
     {
-      // find the item by name 
+      // find the item by name
       typename Store::iterator ifound = m_map.find( key ) ;
       // existing item?
       if ( m_map.end() != ifound ) { return ifound->second ; }        // RETURN
       // check the tuple for booking:
       if ( 0 == tuple ) { return 0 ; }
-      // check the existrence of the name 
-      if ( !tuple->goodItem ( key ) ) 
+      // check the existence of the name
+      if ( !tuple->goodItem ( key ) )
       {
-        tuple -> Error ( "ItemStore::getItem('" + key 
+        tuple -> Error ( "ItemStore::getItem('" + key
                          + "') item name is not unique").ignore() ;
-        return 0 ;                                                    // RETURN 
+        return 0 ;                                                    // RETURN
       }
-      // get the underlying object      
+      // get the underlying object
       NTuple::Tuple* tup = tuple->tuple() ;
-      if ( 0 == tup ) 
+      if ( 0 == tup )
       {
-        tuple -> Error ( "ItemStore::getItem('" + key 
+        tuple -> Error ( "ItemStore::getItem('" + key
                          + "') invalid NTuple::Tuple*" ).ignore() ;
         return 0 ;                                                   // RETURN
-      }  
+      }
       // create new item:
       NTuple::Item<VALUE>* item = new NTuple::Item<VALUE>() ;
-      // add it into N-tuple 
+      // add it into N-tuple
       StatusCode sc = tup->addItem( key , *item ) ;                 // ATTENTION!
-      if ( sc.isFailure() ) 
+      if ( sc.isFailure() )
       {
-        tuple -> Error   ( "ItemStore::getItem('" + key 
+        tuple -> Error   ( "ItemStore::getItem('" + key
                            + "') cannot addItem" , sc ).ignore() ;
-        return 0 ;                                                  // RETURN 
+        return 0 ;                                                  // RETURN
       }
-      // check the name again 
-      if ( !tuple->addItem( key , System::typeinfoName ( typeid ( VALUE ) ) ) ) 
+      // check the name again
+      if ( !tuple->addItem( key , System::typeinfoName ( typeid ( VALUE ) ) ) )
       {
-        tuple -> Warning ( "ItemStore::getItem('" + key 
+        tuple -> Warning ( "ItemStore::getItem('" + key
                            + "') the item not unique " ).ignore() ;
-      }    
+      }
       // add the newly created item into the store:
-      if ( !m_map.insert ( std::make_pair ( key , item ) ).second ) 
+      if ( !m_map.insert ( std::make_pair ( key , item ) ).second )
       {
-        tuple -> Warning ( "ItemStore::getItem('" + key 
-                           + "') item is not inserted!" ).ignore() ;        
+        tuple -> Warning ( "ItemStore::getItem('" + key
+                           + "') item is not inserted!" ).ignore() ;
       }
       //
-      return item ;                                                  // RETURN 
+      return item ;                                                  // RETURN
     }
   private:
-    // copy constructor is disabled 
-    ItemStore           ( const ItemStore& ) ; ///< no copy is allowed 
-    // assignement is disabled 
-    ItemStore& operator=( const ItemStore& ) ; ///< no assignement is allowed 
+    // copy constructor is disabled
+    ItemStore           ( const ItemStore& ) ; ///< no copy is allowed
+    // assignment is disabled
+    ItemStore& operator=( const ItemStore& ) ; ///< no assignment is allowed
   private:
-    /// the underlying map 
-    Store m_map ; ///< the underlying map 
+    /// the underlying map
+    Store m_map ; ///< the underlying map
   } ;
-} // end of namespace Tuples 
+} // end of namespace Tuples
 // =============================================================================
-/** The function allows to add almost arbitrary object into N-tuple 
- *  @attention it requires POOL persistency 
+/** The function allows to add almost arbitrary object into N-tuple
+ *  @attention it requires POOL persistency
  *
- *  @param name column name 
- *  @param obj  pointer to the object  
+ *  @param name column name
+ *  @param obj  pointer to the object
  *
  *  @author Vanya BELYAEV ibelyaev@physics.syr.edu
  *  @date 2007-04-08
- */        
+ */
 // =============================================================================
 template <class TYPE>
-inline StatusCode Tuples::TupleObj::put 
-( const std::string& name , const TYPE* obj ) 
+inline StatusCode Tuples::TupleObj::put
+( const std::string& name , const TYPE* obj )
 {
   if (  invalid    () ) { return InvalidTuple     ; }   // RETURN
-  if ( !evtColType () ) { return InvalidOperation ; }   // RETURN 
-  
-  // static block: The Reflex type description & the flag 
-  static bool               s_fail = false ;                // STATIC 
-  static ROOT::Reflex::Type s_type         ;                // STATIC 
-  // check the status 
-  if      (  s_fail  ) { return InvalidItem ; }                           // RETURN 
-  else if ( !s_type  ) 
-  { 
+  if ( !evtColType () ) { return InvalidOperation ; }   // RETURN
+
+  // static block: The Reflex type description & the flag
+  static bool               s_fail = false ;                // STATIC
+  static ROOT::Reflex::Type s_type         ;                // STATIC
+  // check the status
+  if      (  s_fail  ) { return InvalidItem ; }                           // RETURN
+  else if ( !s_type  )
+  {
     const std::string class_name = System::typeinfoName ( typeid ( TYPE ) ) ;
     s_type = ROOT::Reflex::Type::ByName( class_name  ) ;
-    if ( !s_type ) 
+    if ( !s_type )
     {
-      s_fail = true ; 
-      return Error ( " put('"+name+"'," + class_name + 
-                     ") :Invalid ROOT::Reflex::Type", InvalidItem ) ;    // RETURN 
+      s_fail = true ;
+      return Error ( " put('"+name+"'," + class_name +
+                     ") :Invalid ROOT::Reflex::Type", InvalidItem ) ;    // RETURN
     }
   }
-  // the local storage of items 
+  // the local storage of items
   static Tuples::ItemStore<TYPE*> s_map ;
   // get the variable by name:
   NTuple::Item<TYPE*>* item = s_map.getItem ( name , this ) ;
@@ -161,7 +159,7 @@ inline StatusCode Tuples::TupleObj::put
 // ============================================================================
 
 // ============================================================================
-// The END 
+// The END
 // ============================================================================
 #endif // GAUDIALG_TUPLEPUT_H
 // ============================================================================

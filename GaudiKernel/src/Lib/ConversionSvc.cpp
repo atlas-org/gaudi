@@ -28,14 +28,14 @@ StatusCode ConversionSvc::makeCall(int typ,
                                    bool ignore_add,
                                    bool ignore_obj,
                                    bool update,
-                                   IOpaqueAddress*& pAddress, 
+                                   IOpaqueAddress*& pAddress,
                                    DataObject*& pObject)      {
   if ( 0 != pAddress || ignore_add )    {
     if ( 0 != pObject  || ignore_obj )    {
       const CLID&  obj_class =
-        (0 != pObject && !ignore_obj) ? pObject->clID() 
+        (0 != pObject && !ignore_obj) ? pObject->clID()
         : (0 != pAddress && !ignore_add)
-        ? pAddress->clID()                       
+        ? pAddress->clID()
         : CLID_NULL;
       IConverter*  cnv  = converter(obj_class);
       if ( !cnv && pObject ) {
@@ -43,7 +43,7 @@ StatusCode ConversionSvc::makeCall(int typ,
         loadConverter( pObject);
         cnv  = converter(obj_class);
       }
-      
+
       StatusCode status(StatusCode::FAILURE,true);
       if ( 0 != cnv )   {
         switch(typ)   {
@@ -88,7 +88,7 @@ StatusCode ConversionSvc::makeCall(int typ,
       if ( pObject != 0 )   {
         log << System::typeinfoName(typeid(*pObject));
       }
-      log << "  CLID= " << obj_class << endreq;
+      log << "  CLID= " << obj_class << endmsg;
       return NO_CONVERTER;
     }
     return INVALID_OBJECT;
@@ -97,7 +97,7 @@ StatusCode ConversionSvc::makeCall(int typ,
 }
 
 void ConversionSvc::loadConverter(DataObject*) {
-  
+
 }
 
 StatusCode ConversionSvc::updateServiceState(IOpaqueAddress* /*pAddress */)   {
@@ -129,7 +129,7 @@ StatusCode ConversionSvc::createRep(DataObject* pObj, IOpaqueAddress*& refpAddre
   return makeCall(CREATE_REP, true, false, false, refpAddress, pObj);
 }
 
-/// Resolve the references of the converted object. 
+/// Resolve the references of the converted object.
 StatusCode ConversionSvc::fillRepRefs(IOpaqueAddress* pAddress, DataObject* pObj)  {
   return makeCall(FILL_REP_REFS, true, false, false, pAddress, pObj);
 }
@@ -176,7 +176,7 @@ StatusCode ConversionSvc::setDataProvider(IDataProviderSvc* pDataSvc)    {
     if ( 0 != cnv )   {
       if (cnv->setDataProvider(m_dataSvc).isFailure()) {
         MsgStream log(msgSvc(), name());
-        log << MSG::ERROR << "setting Data Provider" << endreq;
+        log << MSG::ERROR << "setting Data Provider" << endmsg;
       }
     }
   }
@@ -184,7 +184,7 @@ StatusCode ConversionSvc::setDataProvider(IDataProviderSvc* pDataSvc)    {
 }
 
 /// Access the transient store
-IDataProviderSvc* ConversionSvc::dataProvider()  const   {
+SmartIF<IDataProviderSvc>& ConversionSvc::dataProvider()  const   {
   return m_dataSvc;
 }
 
@@ -198,7 +198,7 @@ StatusCode ConversionSvc::setAddressCreator(IAddressCreator* creator)   {
     if ( 0 != cnv )   {
       if (cnv->setAddressCreator(m_addressCreator).isFailure()) {
 	MsgStream log(msgSvc(), name());
-	log << MSG::ERROR << "setting Address Creator"  << endreq;
+	log << MSG::ERROR << "setting Address Creator"  << endmsg;
       }
     }
   }
@@ -206,7 +206,7 @@ StatusCode ConversionSvc::setAddressCreator(IAddressCreator* creator)   {
 }
 
 /// Access the transient store
-IAddressCreator* ConversionSvc::addressCreator()  const   {
+SmartIF<IAddressCreator>& ConversionSvc::addressCreator()  const   {
   return m_addressCreator;
 }
 
@@ -216,8 +216,8 @@ StatusCode ConversionSvc::setConversionSvc(IConversionSvc* /* svc */)   {
 }
 
 /// Get conversion service the converter is connected to
-IConversionSvc* ConversionSvc::conversionSvc()    const   {
-  return (IConversionSvc*)this;
+SmartIF<IConversionSvc>& ConversionSvc::conversionSvc()    const   {
+  return m_cnvSvc;
 }
 
 /// Add converter object to conversion service.
@@ -275,7 +275,7 @@ StatusCode ConversionSvc::removeConverter(const CLID& clid)  {
     m_workers->erase(j, stop);
     return StatusCode::SUCCESS;
   }
-  return NO_CONVERTER;  
+  return NO_CONVERTER;
 }
 
 /// Initialize the service.
@@ -290,33 +290,35 @@ StatusCode ConversionSvc::finalize()      {
   MsgStream log(msgSvc(), name());
   for ( Workers::iterator i = m_workers->begin(); i != m_workers->end(); i++ )    {
     if ( (*i).converter()->finalize().isFailure() ) {
-      log << MSG::ERROR << "finalizing worker" << endreq;
+      log << MSG::ERROR << "finalizing worker" << endmsg;
     }
     (*i).converter()->release();
   }
   m_workers->erase(m_workers->begin(), m_workers->end() );
-  if ( m_dataSvc ) m_dataSvc->release();
+  // release interfaces
+  m_addressCreator = 0;
   m_dataSvc = 0;
+  m_cnvSvc = 0;
   return Service::finalize();
 }
 
 
 /// Create new Converter using factory
-IConverter* ConversionSvc::createConverter(long typ, 
+IConverter* ConversionSvc::createConverter(long typ,
                                            const CLID& clid,
                                            const ICnvFactory* /*fac*/)   {
   IConverter* pConverter;
-  pConverter = PluginService::CreateWithId<IConverter*>(ConverterID(typ,clid),serviceLocator());
+  pConverter = PluginService::CreateWithId<IConverter*>(ConverterID(typ,clid),serviceLocator().get());
   if ( 0 == pConverter )  {
     typ = (typ<0xFF) ? typ : typ&0xFFFFFF00;
-    pConverter = PluginService::CreateWithId<IConverter*>(ConverterID(typ,clid),serviceLocator());
+    pConverter = PluginService::CreateWithId<IConverter*>(ConverterID(typ,clid),serviceLocator().get());
   }
   return pConverter;
 }
 
 /// Configure the freshly created converter
-StatusCode ConversionSvc::configureConverter(long /* typ */, 
-                                              const CLID& /* clid */, 
+StatusCode ConversionSvc::configureConverter(long /* typ */,
+                                              const CLID& /* clid */,
                                               IConverter* pConverter)    {
   if ( 0 != pConverter )    {
     pConverter->setConversionSvc(this).ignore();
@@ -328,8 +330,8 @@ StatusCode ConversionSvc::configureConverter(long /* typ */,
 }
 
 /// Initialize new converter
-StatusCode ConversionSvc::initializeConverter(long /* typ */, 
-                                              const CLID& /* clid */, 
+StatusCode ConversionSvc::initializeConverter(long /* typ */,
+                                              const CLID& /* clid */,
                                               IConverter* pConverter)    {
   if ( pConverter )    {
     return pConverter->initialize();
@@ -338,8 +340,8 @@ StatusCode ConversionSvc::initializeConverter(long /* typ */,
 }
 
 /// Activate the freshly created converter
-StatusCode ConversionSvc::activateConverter(long /* typ */, 
-                                            const CLID& /* clid */, 
+StatusCode ConversionSvc::activateConverter(long /* typ */,
+                                            const CLID& /* clid */,
                                             IConverter* pConverter)    {
   if ( 0 != pConverter )    {
     return StatusCode::SUCCESS;
@@ -347,7 +349,7 @@ StatusCode ConversionSvc::activateConverter(long /* typ */,
   return NO_CONVERTER;
 }
 
-/// Retrieve the class type of objects the converter produces. 
+/// Retrieve the class type of objects the converter produces.
 const CLID& ConversionSvc::objType() const    {
   return CLID_NULL;
 }
@@ -355,25 +357,6 @@ const CLID& ConversionSvc::objType() const    {
 /// Retrieve the class type of the data store the converter uses.
 long ConversionSvc::repSvcType() const {
   return m_type;
-}
-
-/// Query interface
-StatusCode ConversionSvc::queryInterface(const InterfaceID& riid, void** ppvInterface)  {
-  if ( IID_IConversionSvc.versionMatch(riid) )  {
-    *ppvInterface = (IConversionSvc*)this;
-  }
-  else if ( IID_IConverter.versionMatch(riid) )  {
-    *ppvInterface = (IConverter*)this;
-  }
-  else if ( IID_IAddressCreator.versionMatch(riid) )  {
-    *ppvInterface = (IAddressCreator*)this;
-  }
-  else  {
-    // Interface is not directly availible: try out a base class
-    return Service::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
 
 /// Connect the output file to the service with open mode.
@@ -395,7 +378,7 @@ StatusCode ConversionSvc::commitOutput(const std::string& , bool ) {
 /// Create a Generic address using explicit arguments to identify a single object.
 StatusCode ConversionSvc::createAddress(long                 /* svc_type */,
                                         const CLID&          /* clid     */,
-                                        const std::string*   /* par      */, 
+                                        const std::string*   /* par      */,
                                         const unsigned long* /* ip       */,
                                         IOpaqueAddress*& refpAddress)    {
   refpAddress = 0;
@@ -409,10 +392,10 @@ StatusCode ConversionSvc::convertAddress( const IOpaqueAddress* /* pAddress */,
   refAddress = "";
   return StatusCode::FAILURE;
 }
-    
+
 /// Convert an address in string form to object form
-StatusCode ConversionSvc::createAddress( long /* svc_type */, 
-                                        const CLID& /* clid */, 
+StatusCode ConversionSvc::createAddress( long /* svc_type */,
+                                        const CLID& /* clid */,
                                         const std::string& /* refAddress */,
                                         IOpaqueAddress*& refpAddress)
 {
@@ -422,7 +405,8 @@ StatusCode ConversionSvc::createAddress( long /* svc_type */,
 
 /// Standard Constructor
 ConversionSvc::ConversionSvc(const std::string& name, ISvcLocator* svc, long type)
- : Service(name, svc)
+ : base_class(name, svc),
+   m_cnvSvc(static_cast<IConversionSvc*>(this))
 {
   m_type            = type;
   m_dataSvc         = 0;

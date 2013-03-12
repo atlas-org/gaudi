@@ -1,5 +1,5 @@
 // $Id: TestTool.h,v 1.2 2004/07/12 13:30:19 mato Exp $
-#ifndef TESTTOOL_H 
+#ifndef TESTTOOL_H
 #define TESTTOOL_H 1
 
 // Include files
@@ -13,19 +13,18 @@
 
 
 /** @class TestTool TestTool.h
- *  
+ *
  *
  *  @author Chris Jones
  *  @date   2004-03-08
  */
 
-class TestTool : public GaudiTool,
-                 virtual public ITestTool {
+class TestTool : public extends1<GaudiTool, ITestTool> {
 
 public:
 
   /// Standard constructor
-  TestTool( const std::string& type, 
+  TestTool( const std::string& type,
             const std::string& name,
             const IInterface* parent);
 

@@ -7,58 +7,58 @@
 
 /** @class Message Message.h GaudiKernel/Message.h
 
-    The Message class. This class is used to contain messages which can then 
+    The Message class. This class is used to contain messages which can then
     be formatted and sent to a message service
 
     @author Iain Last
 */
-class Message {
+class GAUDI_API Message {
 public:
   /// Default constructor
-  Message();  
-  
+  Message();
+
   /// Constructor.
   Message ( const char* src, int type, const char* msg );
-  
+
   /// Constructor.
   Message ( const std::string& src, int type, const std::string& msg );
-  
+
   /// Default destructor.
   ~Message() {}
-  
+
   /// Get the message string.
   const std::string& getMessage() const;
 
   /// Set the message string.
   void setMessage( const std::string& msg );
-  
+
   /// Get the message type.
   int getType() const;
 
   /// Set the message type.
   void setType( int msg_type );
-  
+
   /// Get the message source.
   const std::string& getSource() const;
 
   /// Set the message source.
   void setSource( const std::string& src );
-  
+
   /// Get the format string.
   const std::string& getFormat() const;
 
   /// Get the default format string.
   static const std::string getDefaultFormat();
-  
+
   /// Set the format string.
   void setFormat( const std::string& msg ) const;
-  
+
   /// Get the time format string.
   const std::string& getTimeFormat() const;
-  
+
   /// Get the default time format string
   static const std::string getDefaultTimeFormat() ;
-  
+
   /// Set the time format string.
   void setTimeFormat( const std::string& timeFormat ) const;
 
@@ -80,7 +80,7 @@ protected:
 
   /// Decode format.
   void decodeFormat( const std::string& format ) const;
-  
+
   /// Truncate or pad the output string to the field width as necessary.
   void sizeField( const std::string& text ) const;
 
@@ -98,7 +98,7 @@ protected:
 
   /// Time format string.
   mutable std::string m_time_format;
-  
+
   /// The type.
   int m_type;
 
@@ -132,7 +132,7 @@ protected:
   /// The character used to indicate that the message timestamp should be printed.
   static const char TIME;
 
-  /// The character used to indicate that the message 
+  /// The character used to indicate that the message
   /// timestamp should be printed in UTC time.
   static const char UTIME;
 
@@ -144,7 +144,7 @@ protected:
    */
   static const char FILL;
 
-  /** The character used to indicate that the previous decimal characters 
+  /** The character used to indicate that the previous decimal characters
    * should be taken as the field width.
    */
   static const char WIDTH;
@@ -156,5 +156,11 @@ protected:
   static const char* DEFAULT_TIME_FORMAT;
 
 };
+
+/// Insert the message into a stream.
+GAUDI_API std::ostream& operator << ( std::ostream& stream, const Message& msg );
+
+/// Insert the message into a stream.
+GAUDI_API bool operator == ( const Message& a, const Message& b );
 
 #endif

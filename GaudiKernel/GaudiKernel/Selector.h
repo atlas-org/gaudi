@@ -14,7 +14,7 @@
 #ifndef GAUDI_NTUPLESVC_SELECTOR_H
 #define GAUDI_NTUPLESVC_SELECTOR_H 1
 
-// Frameowk include files
+// Framework include files
 #include "GaudiKernel/SelectStatement.h"
 
 // Forward declarations
@@ -26,11 +26,11 @@ namespace NTuple    {
 
   /** NTuple Selector class.
   */
-  class Selector : public SelectStatement   {
+  class GAUDI_API Selector : public SelectStatement {
   protected:
     /// reference to parent interface
     IInterface* m_parent;
-    /// Boolean to indicate need for initialisation
+    /// Boolean to indicate need for initialization
     bool        m_firstCall;
     /// StatusCode indication initialization result
     StatusCode  m_status;
@@ -54,7 +54,7 @@ namespace NTuple    {
     virtual bool operator()(void* nt);
     /// Specialized callback for NTuples
     virtual bool operator()(NTuple::Tuple* nt);
-    /// Selector Initialisation
+    /// Selector Initialization
     virtual StatusCode initialize(NTuple::Tuple* nt);
   };
 }

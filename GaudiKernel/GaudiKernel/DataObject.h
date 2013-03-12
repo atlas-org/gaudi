@@ -22,13 +22,13 @@ static const CLID CLID_DataObject = 1;
 
 /** @class DataObject DataObject.h GaudiKernel/DataObject.h
 
-    A DataObject is the base class of any identifyable object
+    A DataObject is the base class of any identifiable object
     on any data store.
     The base class supplies the implementation of data streaming.
 
     @author M.Frank
 */
-class DataObject   {
+class GAUDI_API DataObject {
 private:
   /// Reference count
   unsigned long       m_refCount;
@@ -57,10 +57,8 @@ public:
   /// Retreive DataObject name. It is the name when registered in the store.
   const std::string& name() const;
 
-  /// Serialization mechanism: Serialize the object for reading
-  virtual StreamBuffer& serialize(StreamBuffer& s);
-  /// Serialization mechanism: Serialize the object for writing
-  virtual StreamBuffer& serialize(StreamBuffer& s)  const;
+  /// Provide empty placeholder for internal object reconfiguration callback
+  virtual StatusCode update();
 
   /**@name inline code of class DataObject    */
   /// Set pointer to Registry
@@ -98,13 +96,13 @@ public:
   }
 };
 
-// Additional functions to support the Serialialization of objects in the transient store 
+// Additional functions to support the Serialization of objects in the transient store
 
-namespace Gaudi 
-{  
-  void pushCurrentDataObject(DataObject** pobjAddr);
-  void popCurrentDataObject();
-  DataObject* getCurrentDataObject();
+namespace Gaudi
+{
+  GAUDI_API void pushCurrentDataObject(DataObject** pobjAddr);
+  GAUDI_API void popCurrentDataObject();
+  GAUDI_API DataObject* getCurrentDataObject();
 }
 
 

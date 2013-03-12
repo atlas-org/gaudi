@@ -2,6 +2,7 @@
 #ifndef GAUDIKERNEL_CNVFACTORY_H
 #define GAUDIKERNEL_CNVFACTORY_H
 
+#include "GaudiKernel/Kernel.h"
 #include "Reflex/PluginService.h"
 #include "GaudiKernel/ClassID.h"
 #include "RVersion.h"
@@ -37,7 +38,7 @@ namespace {
 
 // Identified class for converters
 
-class ConverterID {
+class GAUDI_API ConverterID {
   public:
    ConverterID( long stype, CLID clid ) : m_stype(stype), m_clid(clid) {}
    ~ConverterID() {}

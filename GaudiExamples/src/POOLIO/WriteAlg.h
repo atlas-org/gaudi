@@ -16,7 +16,7 @@
 class WriteAlg : public Algorithm {
  protected:
   /// Reference to run records data service
-  IDataProviderSvc* m_runRecordSvc;
+  IDataProviderSvc* m_recordSvc;
 
   /// Reference to event counter
   Gaudi::Examples::Counter* m_evtCount;
@@ -27,7 +27,7 @@ class WriteAlg : public Algorithm {
  public:
   /// Constructor: A constructor of this form must be provided.
   WriteAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : Algorithm(name, pSvcLocator), m_runRecordSvc(0), m_evtCount(0) { }
+  : Algorithm(name, pSvcLocator), m_recordSvc(0), m_evtCount(0) { }
   /// Standard Destructor
   virtual ~WriteAlg() { }
   /// Initialize

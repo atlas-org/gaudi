@@ -1,7 +1,7 @@
 // $Id: ErrorLogTest.cpp,v 1.3 2006/11/30 10:35:26 mato Exp $
 
 
-// Include files 
+// Include files
 #include "ErrorLogTest.h"
 
 #include "GaudiKernel/MsgStream.h"
@@ -10,7 +10,7 @@
 
 #include "GaudiKernel/IssueSeverity.h"
 
-DECLARE_ALGORITHM_FACTORY(ErrorLogTest);
+DECLARE_ALGORITHM_FACTORY(ErrorLogTest)
 
 //------------------------------------------------------------------------------
 ErrorLogTest::ErrorLogTest(const std::string& name,
@@ -28,7 +28,7 @@ StatusCode ErrorLogTest::initialize()
   MsgStream log( msgSvc(), name() );
 
 //   if (service("THistSvc",m_ths).isFailure()) {
-//     log << MSG::ERROR << "Couldn't get THistSvc" << endreq;
+//     log << MSG::ERROR << "Couldn't get THistSvc" << endmsg;
 //     return StatusCode::FAILURE;
 //   }
 
@@ -37,7 +37,7 @@ StatusCode ErrorLogTest::initialize()
   IssueSeverity war = ISSUE(IssueSeverity::WARNING,"this is a warning");
   IssueSeverity fat = ISSUE(IssueSeverity::FATAL,"this is a fatal");
 
-  //  StatusCode sc(StatusCode::SUCCESS, ISSUE(IssueSeverity::DEBUG,"debug3 ErrObj"));  
+  //  StatusCode sc(StatusCode::SUCCESS, ISSUE(IssueSeverity::DEBUG,"debug3 ErrObj"));
 
   StatusCode sc = STATUSCODE(StatusCode::SUCCESS, IssueSeverity::DEBUG, "debug");
 
@@ -65,9 +65,9 @@ StatusCode ErrorLogTest::finalize()
 //------------------------------------------------------------------------------
 {
   MsgStream log(msgSvc(), name());
-  log << MSG::WARNING << "Finalizing..." << endreq;
+  log << MSG::WARNING << "Finalizing..." << endmsg;
 
-  
+
 
   return StatusCode::SUCCESS;
 }

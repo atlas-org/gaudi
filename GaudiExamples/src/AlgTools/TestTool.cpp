@@ -1,9 +1,8 @@
-// $Id: TestTool.cpp,v 1.2 2006/01/10 19:58:26 hmd Exp $
-// Include files 
+// Include files
 
 // from Gaudi
 #include "GaudiKernel/ToolFactory.h"
-#include "GaudiKernel/MsgStream.h" 
+#include "GaudiKernel/MsgStream.h"
 
 // local
 #include "TestTool.h"
@@ -23,23 +22,22 @@ DECLARE_TOOL_FACTORY(TestTool)
 TestTool::TestTool( const std::string& type,
                     const std::string& name,
                     const IInterface* parent )
-  : GaudiTool ( type, name , parent ) {
+  : base_class ( type, name , parent ) {
 
-  declareInterface<ITestTool>(this);
   declareProperty( "Tools", m_tools );
 
 }
 
 //=============================================================================
 
-StatusCode TestTool::initialize() 
+StatusCode TestTool::initialize()
 {
-  debug() << "Initialize" << endreq;
+  debug() << "Initialize" << endmsg;
 
   if ( !GaudiTool::initialize() ) return StatusCode::FAILURE;
 
   // setup tool registry
-  IAlgTool * mytool;
+  //IAlgTool * mytool;
   for ( ToolList::iterator it = m_tools.begin();
         it != m_tools.end(); ++it ) {
     std::string name = (*it);
@@ -49,15 +47,15 @@ StatusCode TestTool::initialize()
       type = (*it).substr( 0, slash );
       name = (*it).substr( slash+1 );
     }
-    debug() << "Loading tool " << name << " of type " << type << endreq;
-    mytool = tool<IAlgTool>( type, name );
+    debug() << "Loading tool " << name << " of type " << type << endmsg;
+    /* mytool = */ tool<IAlgTool>( type, name );
   }
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode TestTool::finalize()   
-{ 
-  debug() << "Finalize" << endreq;
-  return GaudiTool::finalize();   
+StatusCode TestTool::finalize()
+{
+  debug() << "Finalize" << endmsg;
+  return GaudiTool::finalize();
 }

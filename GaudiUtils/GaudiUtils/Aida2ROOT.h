@@ -1,13 +1,15 @@
 // $Id: Aida2ROOT.h,v 1.3 2007/08/06 14:49:36 hmd Exp $
 // ============================================================================
-#ifndef GAUDIALG_AIDA2ROOT_H 
+#ifndef GAUDIALG_AIDA2ROOT_H
 #define GAUDIALG_AIDA2ROOT_H 1
 // ============================================================================
 // Include files
 // ============================================================================
-// Forward declarations 
+#include "GaudiKernel/Kernel.h"
 // ============================================================================
-namespace AIDA 
+// Forward declarations
+// ============================================================================
+namespace AIDA
 {
   class IBaseHistogram ;
   class IHistogram     ;
@@ -18,7 +20,7 @@ namespace AIDA
   class IProfile2D     ;
 }
 // ============================================================================
-// ROOT 
+// ROOT
 // ============================================================================
 class TH1D       ;
 class TH2D       ;
@@ -27,36 +29,36 @@ class TProfile   ;
 class TProfile2D ;
 class TObject    ;
 // ============================================================================
-namespace Gaudi 
+namespace Gaudi
 {
   namespace Utils
-  { 
+  {
     // ========================================================================
     /** @class Aida2ROOT Aida2ROOT.h GaudiKernel/Aida2ROOT.h
      *
-     *  Accessor to underlying ROOT-representation of 
-     *  transient histograms 
+     *  Accessor to underlying ROOT-representation of
+     *  transient histograms
      *  The actual code is imported from Bender project.
      *
-     *  It relies on PI implementation of AIDA interface, 
-     *  modified by Markus FRANK. 
+     *  It relies on PI implementation of AIDA interface,
+     *  modified by Markus FRANK.
      *
      *  @see Gaudi::H1D
      *  @see Gaudi::H2D
      *  @see Gaudi::H3D
-     *  @see Gaudi::Profile1D 
-     *  @see Gaudi::Profile2D 
+     *  @see Gaudi::Profile1D
+     *  @see Gaudi::Profile2D
      *
-     *  @see AIDA::IHistogram1D 
-     *  @see AIDA::IHistogram2D 
-     *  @see AIDA::IHistogram3D 
-     *  @see AIDA::IProfile1D 
-     *  @see AIDA::IProfile2D 
+     *  @see AIDA::IHistogram1D
+     *  @see AIDA::IHistogram2D
+     *  @see AIDA::IHistogram3D
+     *  @see AIDA::IProfile1D
+     *  @see AIDA::IProfile2D
      *
      *  @author Vanya BELYAEV ibelyaev@physics.syr.edu
      *  @date   2007-01-23
      */
-    class Aida2ROOT
+    class GAUDI_API Aida2ROOT
     {
     public:
       /// get the underlying pointer for 1D-histogram
@@ -65,11 +67,11 @@ namespace Gaudi
       static TH2D*       aida2root ( AIDA::IHistogram2D* aida ) ;
       /// get the underlying pointer for 3D-histogram
       static TH3D*       aida2root ( AIDA::IHistogram3D* aida ) ;
-      /// get the underlying pointer for 1D-profile 
+      /// get the underlying pointer for 1D-profile
       static TProfile*   aida2root ( AIDA::IProfile1D*   aida ) ;
       /// get the underlying pointer for 2D-profile
       static TProfile2D* aida2root ( AIDA::IProfile2D*   aida ) ;
-      /// get root representation for other cases 
+      /// get root representation for other cases
       static TObject*    aida2root ( AIDA::IHistogram*   aida ) ;
     } ;
     // ========================================================================
@@ -77,7 +79,7 @@ namespace Gaudi
   // ==========================================================================
 } // end of namespace Gaudi
 // ============================================================================
-// The END 
+// The END
 // ============================================================================
 #endif // GAUDIALG_AIDA2ROOT_H
 // ============================================================================

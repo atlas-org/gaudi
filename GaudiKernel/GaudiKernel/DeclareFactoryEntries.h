@@ -13,6 +13,7 @@
 //
 //====================================================================
 
+#include "GaudiKernel/Kernel.h"
 #include "GaudiKernel/CnvFactory.h"
 #include "GaudiKernel/SvcFactory.h"
 #include "GaudiKernel/AlgFactory.h"

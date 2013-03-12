@@ -20,13 +20,16 @@
   </tr>
   <tr>
     <td><b>Description</b></td>
-    <td> Details of the constituent package versions are available in the 
+    <td> Details of the constituent package versions are available in the
       <a href="https://svnweb.cern.ch/world/wsvn/gaudi/packages/GaudiRelease/tags/$(GAUDIVERS)/cmt/requirements">requirements file</a>.<br>
       The <a href="../release.notes.html">release notes</a> contain the details of changes since the previous release.</td>
   </tr>
   <tr>
         <td><b>Supported platforms</b></td>
-        <td>Windows with VC++ 7.1, Scientific Linux CERN 4 with gcc-3.4 (released with debug and non debug versions, 32 and 64 bits)</td>
+        <td>
+        Scientific Linux CERN 5 with gcc-4.3 and gcc-4.6 (released with debug and non debug versions, 32 and 64 bits),
+        Scientific Linux CERN 6 with gcc-4.6 (released with debug and non debug versions, 64 bits only),
+        </td>
   </tr>
   <tr>
         <td><b>Download</b></td>
@@ -53,7 +56,6 @@
   <ul>
     <LI> <a href="http://lcgapp.cern.ch/doxygen/CORAL/$(CORALVERS)/doxygen/html/" target="_blank">$(CORALVERS)</A> (relational access)
     <LI> <a href="http://lcgapp.cern.ch/doxygen/COOL/$(COOLVERS)/doxygen/html/" target="_blank">$(COOLVERS)</A> (conditions database)
-    <LI> <a href="http://lcgapp.cern.ch/doxygen/POOL/$(POOLVERS)/doxygen/html/" target="_blank">$(POOLVERS)</A> (persistency)
     <LI> <a href="http://lcgapp.cern.ch/doxygen/ROOT/$(ROOTVERS)/doxygen/html/" target="_blank">ROOT $(ROOTVERS)</A> (persistency)
   </ul></li>
   <li>Externals:
@@ -64,7 +66,6 @@
       document.write("<LI> <a href=\"" + url + "\" target=\"_blank\">Boost " + boostVers + "</a>");
     </script>
     <LI> <a href="http://lcgsoft.cern.ch/index.py?page=pkg_overview&pkg=uuid" target="_blank">uuid $(uuidVERS)</A>
-    <LI> <a href="http://lcgsoft.cern.ch/index.py?page=pkg_overview&pkg=pcre" target="_blank">pcre $(PCREVERS)</A>
     <LI> <a href="http://lcgsoft.cern.ch/index.py?page=pkg_overview&pkg=gccxml" target="_blank">GCC-XML $(GCCXMLVERS)</A>
     <LI> <a href="http://aida.freehep.org/doc/v$(AIDAVERS)/api/index.html" target="_blank">AIDA $(AIDAVERS)</A> (histogramming)
     <script type="text/javascript" language="JavaScript">
@@ -80,7 +81,7 @@
 </UL>
 See also:
   Standard Template Library
-    (<a href="http://gcc.gnu.org/onlinedocs/libstdc++/libstdc++-html-USERS-3.4/index.html" target="_blank">gcc-3.4</a>,
-     <a href="http://gcc.gnu.org/onlinedocs/libstdc++/libstdc++-html-USERS-4.3/index.html" target="_blank">gcc-4.3</a>)
+    (<a href="http://gcc.gnu.org/onlinedocs/libstdc++/libstdc++-html-USERS-4.3/index.html" target="_blank">gcc-4.3</a>,
+     <a href="http://gcc.gnu.org/onlinedocs/gcc-4.6.3/libstdc++/api/" target="_blank">gcc-4.6</a>)
 \endhtmlonly
  */

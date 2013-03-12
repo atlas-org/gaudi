@@ -1,4 +1,3 @@
-// $Id: TestToolAlg.cpp,v 1.2 2006/01/10 19:58:26 hmd Exp $
 // Include files
 
 // from Gaudi
@@ -31,19 +30,19 @@ TestToolAlg::TestToolAlg( const std::string& name,
 //=============================================================================
 // Destructor
 //=============================================================================
-TestToolAlg::~TestToolAlg() {};
+TestToolAlg::~TestToolAlg() {}
 
 //=============================================================================
 // Initialisation. Check parameters
 //=============================================================================
 StatusCode TestToolAlg::initialize() {
 
-  debug() << "Initialise" << endreq;
+  debug() << "Initialise" << endmsg;
 
   if ( !GaudiAlgorithm::initialize() ) return StatusCode::FAILURE;
 
   // setup tool registry
-  IAlgTool * mytool;
+  //IAlgTool * mytool;
   for ( ToolList::iterator it = m_tools.begin();
         it != m_tools.end(); ++it ) {
     std::string name = (*it);
@@ -53,29 +52,29 @@ StatusCode TestToolAlg::initialize() {
       type = (*it).substr( 0, slash );
       name = (*it).substr( slash+1 );
     }
-    debug() << "Loading tool " << name << " of type " << type << endreq;
-    mytool = tool<IAlgTool>( type, name );
+    debug() << "Loading tool " << name << " of type " << type << endmsg;
+    /*mytool = */tool<IAlgTool>( type, name );
   }
 
   return StatusCode::SUCCESS;
-};
+}
 
 //=============================================================================
 // Main execution
 //=============================================================================
 StatusCode TestToolAlg::execute() {
 
-  debug() << "Execute" << endreq;
+  debug() << "Execute" << endmsg;
 
   return StatusCode::SUCCESS;
-};
+}
 
 //=============================================================================
 //  Finalize
 //=============================================================================
 StatusCode TestToolAlg::finalize() {
 
-  debug() << "Finalize" << endreq;
+  debug() << "Finalize" << endmsg;
 
   return GaudiAlgorithm::finalize();
 }

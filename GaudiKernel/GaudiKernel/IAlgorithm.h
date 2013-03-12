@@ -7,9 +7,6 @@
 #include "GaudiKernel/StateMachine.h"
 #include <string>
 
-// Declaration of the interface ID ( interface id, major version, minor version)
-static const InterfaceID IID_IAlgorithm("IAlgorithm", 3 , 2);
-
 /** @class IAlgorithm IAlgorithm.h GaudiKernel/IAlgorithm.h
 
     The IAlgorithm is the interface implemented by the Algorithm base class.
@@ -18,11 +15,12 @@ static const InterfaceID IID_IAlgorithm("IAlgorithm", 3 , 2);
 
     @author Paul Maley
     @author D.Quarrie
+    @author Marco Clemencic
 */
-class IAlgorithm : virtual public INamedInterface {
- public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IAlgorithm; }
+class GAUDI_API IAlgorithm : virtual public INamedInterface {
+public:
+  /// InterfaceID
+  DeclareInterfaceID(IAlgorithm,4,0);
 
   /** The version of the algorithm
    */

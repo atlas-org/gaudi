@@ -1,5 +1,3 @@
-//$Id: genconf.cpp,v 1.35 2008/10/15 21:51:24 marcocle Exp $	//
-
 #ifdef _WIN32
 // Disable a warning in Boost program_options headers:
 // inconsistent linkage in program_options/variables_map.hpp
@@ -10,8 +8,23 @@
 #define NOGDI
 #endif
 
-// Include files----------------------------------------------------------------
+#ifdef __ICC
+// disable icc warning #279: controlling expression is constant
+// ... a lot of noise produced by the boost/filesystem/operations.hpp
+#pragma warning(disable:279)
+// Avoid icc remark #193: zero used for undefined preprocessing identifier "_MSC_VER"
+#if !defined(_WIN32) && !defined(_MSC_VER)
+#define _MSC_VER 0
+#endif
+#endif
+
 #include "boost/program_options.hpp"
+// the hack for remark #193 is needed only for program_options and breaks regex.
+#if defined(__ICC) && !defined(_WIN32) && (_MSC_VER == 0)
+#undef _MSC_VER
+#endif
+
+// Include files----------------------------------------------------------------
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/exception.hpp"
 #include "boost/filesystem/convenience.hpp"
@@ -20,6 +33,7 @@
 #include "boost/algorithm/string/trim.hpp"
 #include "boost/algorithm/string/case_conv.hpp"
 #include "boost/format.hpp"
+#include "boost/regex.hpp"
 
 #include "GaudiKernel/System.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -35,6 +49,8 @@
 #include "GaudiKernel/HashMap.h"
 #include "GaudiKernel/GaudiHandle.h"
 
+#include "GaudiKernel/Time.h"
+
 #include "Reflex/PluginService.h"
 #include "Reflex/Reflex.h"
 #include "Reflex/SharedLibrary.h"
@@ -46,7 +62,6 @@
 #include <fstream>
 #include <sstream>
 #include <exception>
-#include <ctime>
 #include <set>
 #include <vector>
 
@@ -67,9 +82,13 @@ typedef std::vector<fs::path>    LibPathNames_t;
 
 namespace {
   const std::string py_tab = "    ";
+
+  /// Regular expression to validate the property names.
+  /// @see http://docs.python.org/reference/lexical_analysis.html#identifiers
+  const boost::regex pythonIdentifier("^[a-zA-Z_][a-zA-Z0-9_]*$");
 }
 
-class configGenerator 
+class configGenerator
 {
   /// name of the package we are processing
   string  m_pkgName;
@@ -81,13 +100,13 @@ class configGenerator
   /// buffer of auto-generated configurables
   stringstream m_pyBuf;
 
-  /// switch to decide if the generated configurables need 
+  /// switch to decide if the generated configurables need
   /// to import GaudiHandles (ie: if one of the components has a XyzHandle<T>)
   bool    m_importGaudiHandles;
 
   /// buffer of generated configurables informations for the "Db" file
   /// The "Db" file is holding informations about the generated configurables
-  /// This file is later one used by the PropertyProxy.py to locate 
+  /// This file is later one used by the PropertyProxy.py to locate
   /// Configurables and know their default values, host module,...
   stringstream m_dbBuf;
 
@@ -100,7 +119,7 @@ class configGenerator
 
 public:
   configGenerator( const string& pkgName,
-		   const string& outputDirName ) : 
+		   const string& outputDirName ) :
     m_pkgName           ( pkgName ),
     m_outputDirName     ( outputDirName ),
     m_pyBuf             ( ),
@@ -153,14 +172,14 @@ public:
   }
 
 private:
-  void genComponent( const std::string& libName,
-		     const std::string& componentName, 
-		     const std::string& componentType, 
-		     const vector<Property*>& properties );
+  int genComponent( const std::string& libName,
+                    const std::string& componentName,
+                    const std::string& componentType,
+                    const vector<Property*>& properties );
   void genImport( std::ostream& s, const boost::format& frmt,std::string indent);
   void genHeader( std::ostream& pyOut, std::ostream& dbOut );
   void genBody( std::ostream& pyOut,
-		std::ostream& dbOut ) { 
+		std::ostream& dbOut ) {
     pyOut << m_pyBuf.str() << flush;
     dbOut << m_dbBuf.str() << flush;
   }
@@ -168,8 +187,8 @@ private:
 		   std::ostream& dbOut );
 
   /// handle the "marshalling" of Properties
-  void pythonizeValue( const Property* prop, 
-		       string& pvalue, 
+  void pythonizeValue( const Property* prop,
+		       string& pvalue,
 		       string& ptype );
 
   /// Translates a valid C++ typename into a valid python one
@@ -182,7 +201,6 @@ int createAppMgr();
 int main ( int argc, char** argv )
 //-----------------------------------------------------------------------------
 {
-  fs::path::default_name_check(fs::native);
   fs::path pwd = fs::initial_path();
   fs::path out;
   Strings_t libs;
@@ -190,8 +208,8 @@ int main ( int argc, char** argv )
 
   // declare a group of options that will be allowed only on command line
   po::options_description generic("Generic options");
-  generic.add_options() 
-    ("help,h",            
+  generic.add_options()
+    ("help,h",
      "produce this help message")
     ("package-name,p",
      po::value<string>(),
@@ -213,7 +231,7 @@ int main ( int argc, char** argv )
      po::value< Strings_t >()->composing(),
      "preloading library")
     ;
-  
+
   // declare a group of options that will be allowed both on command line
   // _and_ in configuration file
   po::options_description config("Configuration");
@@ -240,7 +258,7 @@ int main ( int argc, char** argv )
 
   po::options_description cmdline_options;
   cmdline_options.add(generic).add(config);
-  
+
   po::options_description config_file_options;
   config_file_options.add(config);
 
@@ -248,19 +266,18 @@ int main ( int argc, char** argv )
   visible.add(generic).add(config);
 
   po::variables_map vm;
-  
+
   try {
     po::store( po::command_line_parser(argc, argv).
-	       options(cmdline_options).run(), 
+	       options(cmdline_options).run(),
 	       vm );
 
     po::notify(vm);
 
-    // try to read configuration from the optionnally given configuration file
+    // try to read configuration from the optionally given configuration file
     if( vm.count("input-cfg") ) {
       string cfgFileName = vm["input-cfg"].as<string>();
-      cfgFileName = fs::complete( fs::path( cfgFileName, 
-					    fs::native ) ).string();
+      cfgFileName = fs::system_complete( fs::path( cfgFileName ) ).string();
       std::ifstream ifs( cfgFileName.c_str() );
       po::store( parse_config_file( ifs, config_file_options ), vm );
     }
@@ -273,9 +290,9 @@ int main ( int argc, char** argv )
   }
 
   //--- Process command options -----------------------------------------------
-  if( vm.count("help")) { 
-    cout << visible << endl; 
-    return EXIT_FAILURE; 
+  if( vm.count("help")) {
+    cout << visible << endl;
+    return EXIT_FAILURE;
   }
 
   if( vm.count("package-name") ) {
@@ -288,15 +305,15 @@ int main ( int argc, char** argv )
   }
 
   if( vm.count("input-libraries") ) {
-    // re-shape the input arguments: 
-    //  - removes spurious spaces, 
+    // re-shape the input arguments:
+    //  - removes spurious spaces,
     //  - split into tokens.
     Strings_t inputLibs;
     {
       string tmp = vm["input-libraries"].as<string>();
       boost::trim(tmp);
-      boost::split( inputLibs, tmp, 
-		    boost::is_any_of(" "), 
+      boost::split( inputLibs, tmp,
+		    boost::is_any_of(" "),
 		    boost::token_compress_on );
     }
 
@@ -305,8 +322,7 @@ int main ( int argc, char** argv )
     for ( Strings_t::const_iterator iLib = inputLibs.begin();
 	  iLib != inputLibs.end();
 	  ++iLib ) {
-      fs::path libPath = fs::path( *iLib, fs::native );
-      std::string lib = libPath.leaf().substr(0, libPath.leaf().find('.') );
+      std::string lib = fs::path(*iLib).stem().string();
       if ( 0 == lib.find("lib") ) {
         lib = lib.substr(3); // For *NIX remove "lib"
       }
@@ -317,8 +333,8 @@ int main ( int argc, char** argv )
       }
     } //> end loop over input-libraries
     if ( libs.empty() ) {
-      cout << "ERROR: input component library(ies) required !\n" 
-           << "ERROR: 'input-libraries' argument was [" 
+      cout << "ERROR: input component library(ies) required !\n"
+           << "ERROR: 'input-libraries' argument was ["
            << vm["input-libraries"].as<string>()
            << "]"
            << endl;
@@ -330,20 +346,19 @@ int main ( int argc, char** argv )
     cout << visible << endl;
     return EXIT_FAILURE;
   }
-  
+
   if( vm.count("output-dir") ) {
-    out = fs::complete( fs::path( vm["output-dir"].as<string>(), 
-                                  fs::native ) );
+    out = fs::system_complete( fs::path( vm["output-dir"].as<string>() ) );
   }
-  
+
   if ( vm.count("debug-level") ) {
     PluginService::SetDebug( vm["debug-level"].as<int>() );
   }
-  
+
   if ( vm.count("load-library") ) {
     Strings_t lLib_list = vm["load-library"].as< Strings_t >();
-    for (Strings_t::const_iterator lLib=lLib_list.begin(); 
-	 lLib != lLib_list.end(); 
+    for (Strings_t::const_iterator lLib=lLib_list.begin();
+	 lLib != lLib_list.end();
 	 ++lLib) {
       // load done through ROOT::Reflex helper class
       SharedLibrary tmplib(*lLib) ;
@@ -356,16 +371,16 @@ int main ( int argc, char** argv )
     try {
       fs::create_directory(out);
     }
-    catch ( fs::filesystem_error err ) {
+    catch ( fs::filesystem_error &err ) {
       cout << "ERR0R: error creating directory: "<< err.what() << endl;
       return EXIT_FAILURE;
     }
   }
-  
+
   cout << ":::::: libraries : [ ";
   copy( libs.begin(), libs.end(), ostream_iterator<string>(cout, " ") );
   cout << "] ::::::" << endl;
-  
+
   configGenerator py( pkgName, out.string() );
   py.setConfigurableModule     (vm["configurable-module"].as<string>());
   py.setConfigurableDefaultName(vm["configurable-default-name"].as<string>());
@@ -379,18 +394,18 @@ int main ( int argc, char** argv )
     sc = py.genConfig( libs );
   }
   catch ( exception& e ) {
-    cout << "ERROR: Could not generate Configurable(s) !\n" 
+    cout << "ERROR: Could not generate Configurable(s) !\n"
          << "ERROR: Got exception: " << e.what() << endl;
     return EXIT_FAILURE;
   }
-  
+
   if ( EXIT_SUCCESS == sc ) {
     // create an empty __init__.py file in the output dir
     fstream initPy( ( out / fs::path( "__init__.py" ) ).string().c_str(),
         std::ios_base::out|std::ios_base::trunc );
     initPy << "## Hook for " << pkgName << " genConf module\n" << flush;
   }
-    
+
   cout << ":::::: libraries : [ ";
   copy( libs.begin(), libs.end(), ostream_iterator<string>(cout, " ") );
   cout << "] :::::: [DONE]" << endl;
@@ -401,8 +416,8 @@ int main ( int argc, char** argv )
 /// Given a Reflex::Member object, return the id for the configurable (name or id, if it is a string).
 /// non-string ids are used for the persistency (DataObjects)
 inline std::string getId(const Member & m) {
-      return (m.Properties().HasProperty("id") && (m.Properties().PropertyValue("id").TypeInfo() == typeid(std::string))) ? 
-             m.Properties().PropertyAsString("id") : 
+      return (m.Properties().HasProperty("id") && (m.Properties().PropertyValue("id").TypeInfo() == typeid(std::string))) ?
+             m.Properties().PropertyAsString("id") :
              m.Properties().PropertyAsString("name") ;
 }
 
@@ -426,46 +441,46 @@ int configGenerator::genConfig( const Strings_t& libs )
 {
   //--- Disable checking StatusCode -------------------------------------------
   StatusCode::disableChecking();
-  
+
   const Strings_t::const_iterator endLib = libs.end();
-  
-  const std::string gaudiSvc = "GaudiSvc";
+
+  const std::string gaudiSvc = "GaudiCoreSvc";
   const bool isGaudiSvc = ( std::find( libs.begin(), endLib, gaudiSvc ) != endLib );
-  
+
   //--- Instantiate ApplicationMgr --------------------------------------------
   if ( !isGaudiSvc && createAppMgr() ) {
     cout << "ERROR: ApplicationMgr can not be created. Check environment" << endl;
     return EXIT_FAILURE;
   }
-  
+
   //--- Iterate over component factories --------------------------------------
   Scope factories = Scope::ByName(PLUGINSVC_FACTORY_NS);
   if ( !factories ) {
     cout << "ERROR: No PluginSvc factory namespace could be found" << endl;
     return EXIT_FAILURE;
   }
-  
+
   ISvcLocator* svcLoc = Gaudi::svcLocator();
-  IService*    dummySvc = new Service( "DummySvc", svcLoc );
+  IInterface*  dummySvc = new Service( "DummySvc", svcLoc );
   dummySvc->addRef();
 
   bool allGood = true;
 
   // iterate over all the requested libraries
   for ( Strings_t::const_iterator iLib=libs.begin(); iLib != endLib; ++iLib ) {
-    
+
     std::cout << ":::: processing library: " << *iLib << "..." << std::endl;
-    
+
     // reset state
     m_importGaudiHandles = false;
     m_pyBuf.str("");
     m_dbBuf.str("");
 
     // Scan the pluginSvc namespace and store the "background" of already
-    // alived components, so we can extract our signal later on
+    // alive components, so we can extract our signal later on
     set<string> bkgNames;
     if ( !isGaudiSvc ) {
-      for ( Member_Iterator it = factories.FunctionMember_Begin(); 
+      for ( Member_Iterator it = factories.FunctionMember_Begin();
             it != factories.FunctionMember_End(); ++it ) {
         string ident = getId(*it);
         if ( PluginService::Debug() > 0 ) {
@@ -475,7 +490,7 @@ int configGenerator::genConfig( const Strings_t& libs )
       }
     }
     const set<string>::const_iterator bkgNamesEnd = bkgNames.end();
-    
+
     //--- Load component library ----------------------------------------------
     System::ImageHandle handle;
     unsigned long err = System::loadDynamicLib( *iLib, &handle );
@@ -484,9 +499,9 @@ int configGenerator::genConfig( const Strings_t& libs )
       allGood = false;
       continue;
     }
-    
-    for ( Member_Iterator it = factories.FunctionMember_Begin(); 
-          it != factories.FunctionMember_End(); 
+
+    for ( Member_Iterator it = factories.FunctionMember_Begin();
+          it != factories.FunctionMember_End();
           ++it ) {
       const string ident = getId(*it);
       if ( bkgNames.find(ident) != bkgNamesEnd ) {
@@ -495,7 +510,7 @@ int configGenerator::genConfig( const Strings_t& libs )
         }
         continue;
       }
-      
+
       // Atlas contributed code (patch #1247)
       // Skip the generation of configurables if the component does not come
       // from the same library we are processing (i.e. we found a symbol that
@@ -527,18 +542,18 @@ int configGenerator::genConfig( const Strings_t& libs )
       boost::trim(name);
 
       cout << " - component: " << name << endl;
-      
+
       if ( type == "IInterface" ) {
         /// not enough information...
         /// skip it
         continue;
       }
-      
+
       if ( type == "Converter" || type == "DataObject" ) {
         /// no Properties, so don't bother create Configurables...
         continue;
       }
-      
+
       //if ( type == "ApplicationMgr" ) {
       ///  @FIXME: no Configurable for this component. yet...
       ///  continue;
@@ -551,9 +566,9 @@ int configGenerator::genConfig( const Strings_t& libs )
         allGood = false;
         continue;
       }
-      
+
       string cname = "DefaultName";
-      vector<void*>  args; 
+      vector<void*>  args;
       args.reserve( 3 );
       if ( type == "AlgTool" ) {
         args.resize( 3 );
@@ -589,25 +604,27 @@ int configGenerator::genConfig( const Strings_t& libs )
         }
       }
       catch ( exception& e ) {
-        cout << "ERROR: Error instantiating " << name 
+        cout << "ERROR: Error instantiating " << name
              << " from " << *iLib << endl;
         cout << "ERROR: Got exception: " << e.what() << endl;
         allGood = false;
         continue;
       }
       catch ( ... ) {
-        cout << "ERROR: Error instantiating " << name 
+        cout << "ERROR: Error instantiating " << name
              << " from " << *iLib << endl;
         allGood = false;
         continue;
       }
       if( prop ) {
-        genComponent( *iLib, name, type, prop->getProperties() );
+        if (genComponent( *iLib, name, type, prop->getProperties() )) {
+          allGood = false;
+        }
         prop->release();
       } else {
         cout << "ERROR: could not cast IInterface* object to an IProperty* !\n"
              << "ERROR: return type from PluginSvc is [" << rtype << "]...\n"
-             << "ERROR: NO Configurable will be generated for [" 
+             << "ERROR: NO Configurable will be generated for ["
              << name << "] !"
              << endl;
         allGood = false;
@@ -626,37 +643,37 @@ int configGenerator::genConfig( const Strings_t& libs )
               std::ios_base::out|std::ios_base::trunc );
     std::fstream db( dbName.c_str(),
               std::ios_base::out|std::ios_base::trunc );
-    
+
     genHeader ( py, db );
     genBody   ( py, db );
     genTrailer( py, db );
-    
+
   } //> end loop over libraries
-  
+
   dummySvc->release();
   dummySvc = 0;
-  
+
   return allGood ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 void configGenerator::genImport( std::ostream& s,
                                  const boost::format& frmt,
                                  std::string indent = ""){
-  
+
   std::string::size_type pos = 0, nxtpos = 0;
   std::string mod;
-  
+
   while ( std::string::npos != pos ){
     // find end of module name
     nxtpos = m_configurable["Module"].find_first_of(',',pos);
-    
+
     // Prepare import string
     mod = m_configurable["Module"].substr(pos,nxtpos-pos);
     std::ostringstream import;
     import << boost::format(frmt) % mod;
-    
-    // append a normal import or a try/excpet enclosed one depending
-    // on availability of a fall-back bodule (next in the list)
+
+    // append a normal import or a try/except enclosed one depending
+    // on availability of a fall-back module (next in the list)
     if ( std::string::npos == nxtpos ) {
       // last possible module
       s << indent << import.str() << "\n" << flush;
@@ -680,25 +697,24 @@ void configGenerator::genHeader( std::ostream& py,
 //-----------------------------------------------------------------------------
 {
   // python file part
-  time_t rawtime;
-  time( &rawtime );
-  py << "#" << ctime(&rawtime) //<< "\n"
+  std::string now = Gaudi::Time::current().format(true);
+  py << "#" << now //<< "\n"
      << "\"\"\"Automatically generated. DO NOT EDIT please\"\"\"\n";
   if ( m_importGaudiHandles ) {
     py << "from GaudiKernel.GaudiHandles import *\n";
   }
-  
+
   genImport(py,boost::format("from %1%.Configurable import *"));
-  
+
   // db file part
   db << "##  -*- python -*-  \n"
-     << "# db file automatically generated by genconf on: " 
-     << ctime(&rawtime); // << "\n";
+     << "# db file automatically generated by genconf on: "
+     << now; // << "\n";
   db << "## insulates outside world against anything bad that could happen\n"
      << "## also prevents global scope pollution\n"
      << "def _fillCfgDb():\n";
   genImport(db,boost::format("from %1%.ConfigurableDb import CfgDb"),py_tab);
-  
+
   db << "\n"
      << py_tab << "# get a handle on the repository of Configurables\n"
      << py_tab << "cfgDb = CfgDb()\n"
@@ -729,47 +745,60 @@ void configGenerator::genTrailer( std::ostream& /*py*/,
 }
 
 //-----------------------------------------------------------------------------
-void configGenerator::genComponent( const std::string& libName,
-                                    const std::string& componentName, 
-                                    const std::string& componentType, 
-                                    const vector<Property*>& properties )
+int
+configGenerator::genComponent( const std::string& libName,
+                               const std::string& componentName,
+                               const std::string& componentType,
+                               const vector<Property*>& properties )
 //-----------------------------------------------------------------------------
 {
   string cname = componentName;
   pythonizeName(cname);
-    
+
   typedef GaudiUtils::HashMap<std::string, std::string> PropertyDoc_t;
   PropertyDoc_t propDoc;
-  
+
   m_pyBuf << "\n";
-  m_pyBuf << "class " << cname 
-          << "( " << m_configurable[componentType] << " ) :" 
+  m_pyBuf << "class " << cname
+          << "( " << m_configurable[componentType] << " ) :"
           << "\n";
   m_pyBuf << "  __slots__ = { \n";
-  for ( vector<Property*>::const_iterator it = properties.begin() ; 
+  for ( vector<Property*>::const_iterator it = properties.begin() ;
         it != properties.end(); ++it ) {
+
     const string pname  = (*it)->name();
+    // Validate property name (it must be a valid Python identifier)
+    if (!boost::regex_match(pname, pythonIdentifier)) {
+      std::cout << "ERROR: invalid property name \"" << pname
+                << "\" in component " << cname
+                << " (invalid Python identifier)" << std::endl;
+      // try to make the buffer at least more or less valid python code.
+      m_pyBuf << " #ERROR-invalid identifier '" << pname << "'\n"
+              << "  }\n";
+      return 1;
+    }
+
     string pvalue, ptype;
     pythonizeValue( (*it), pvalue, ptype );
     m_pyBuf << "    '" << pname << "' : " << pvalue <<", # " << ptype << "\n";
-    
+
     if ( (*it)->documentation() != "none" ) {
       propDoc[pname] = (*it)->documentation();
     }
-    
+
   }
   m_pyBuf << "  }\n";
   m_pyBuf << "  _propertyDocDct = { \n";
   for ( PropertyDoc_t::const_iterator iProp = propDoc.begin();
         iProp != propDoc.end();
         ++iProp ) {
-    m_pyBuf << std::setw(5)  
+    m_pyBuf << std::setw(5)
             << "'"       << iProp->first  << "' : "
             << "\"\"\" "  << iProp->second << " \"\"\",\n";
   }
   m_pyBuf << "  }\n";
-  
-  m_pyBuf 
+
+  m_pyBuf
     << "  def __init__(self, name = " << m_configurable["DefaultName"]
                                       << ", **kwargs):\n"
     << "      super(" << cname << ", self).__init__(name)\n"
@@ -781,20 +810,21 @@ void configGenerator::genComponent( const std::string& libName,
     << "      return '" << componentName  << "'\n"
     << "  pass # class " << cname << "\n"
     << flush;
-  
+
   // name of the auto-generated module
   const string pyName = ( fs::path(m_outputDirName) /
 			  fs::path(libName+"Conf.py") ).string();
   const string modName = fs::basename( fs::path( pyName ).leaf() );
-  
+
   // now the db part
-  m_dbBuf 
+  m_dbBuf
     << py_tab << "cfgDb.add( configurable = '" << cname << "',\n"
     << py_tab << "           package = '" << m_pkgName << "',\n"
     << py_tab << "           module  = '" << m_pkgName << "." << modName << "',\n"
     << py_tab << "           lib     = '" << libName << "' )\n"
     << flush;
 
+  return 0;
 }
 //-----------------------------------------------------------------------------
 void configGenerator::pythonizeName( string& name )
@@ -804,11 +834,11 @@ void configGenerator::pythonizeName( string& name )
   static string out("__rp__s___");
   for ( string::iterator i = name.begin(); i != name.end(); ++i ) {
     if ( in.find(*i) != string::npos ) *i = out[in.find(*i)];
-  }  
+  }
 }
 
 //-----------------------------------------------------------------------------
-void configGenerator::pythonizeValue( const Property* p, 
+void configGenerator::pythonizeValue( const Property* p,
                                       string& pvalue, string& ptype )
 //-----------------------------------------------------------------------------
 {
@@ -816,11 +846,11 @@ void configGenerator::pythonizeValue( const Property* p,
   const type_info& ti = *p->type_info();
   if ( ti == typeid(bool) ) {
     pvalue = ( cvalue == "0" || cvalue == "False" || cvalue == "false" )
-           ? "False" 
+           ? "False"
            : "True";
     ptype  = "bool";
   }
-  else if ( ti == typeid(char)  || ti == typeid(signed char)    
+  else if ( ti == typeid(char)  || ti == typeid(signed char)
             || ti == typeid(unsigned char)  ||
             ti == typeid(short) || ti == typeid(unsigned short) ||
             ti == typeid(int)   || ti == typeid(unsigned int)   ||
@@ -847,30 +877,33 @@ void configGenerator::pythonizeValue( const Property* p,
     ptype  = "float";
   }
   else if ( ti == typeid(string) ) {
-    
+
     pvalue = "'"+cvalue+"'";
     ptype  = "str";
   }
   else if ( ti == typeid(GaudiHandleBase) ) {
     m_importGaudiHandles = true;
-    const GaudiHandleProperty& hdl 
+    const GaudiHandleProperty& hdl
       = dynamic_cast<const GaudiHandleProperty&>(*p);
     const GaudiHandleBase&     base = hdl.value();
-    
+
     pvalue = base.pythonRepr();
     ptype  = "GaudiHandle";
   }
   else if ( ti == typeid(GaudiHandleArrayBase) ) {
     m_importGaudiHandles = true;
-    const GaudiHandleArrayProperty& hdl 
+    const GaudiHandleArrayProperty& hdl
       = dynamic_cast<const GaudiHandleArrayProperty&>(*p);
     const GaudiHandleArrayBase&     base = hdl.value();
-    
+
     pvalue = base.pythonRepr();
     ptype  = "GaudiHandleArray";
   }
   else {
-    pvalue = cvalue;
+    std::ostringstream v_str;
+    v_str.setf(std::ios::fixed); // to correctly display floats
+    p->toStream(v_str);
+    pvalue = v_str.str();
     ptype  = "list";
   }
 }
@@ -880,11 +913,11 @@ int createAppMgr()
 //-----------------------------------------------------------------------------
 {
   IInterface* iface = Gaudi::createApplicationMgr();
-  SmartIF<IProperty> propMgr ( IID_IProperty, iface );
-  SmartIF<IAppMgrUI> appUI  ( IID_IAppMgrUI, iface );
+  SmartIF<IProperty> propMgr ( iface );
+  SmartIF<IAppMgrUI> appUI  ( iface );
 
   if ( propMgr.isValid() && appUI.isValid() ) {
-    propMgr->setProperty( "JobOptionsType", "NONE" );  // No joboptions
+    propMgr->setProperty( "JobOptionsType", "NONE" );  // No job options
     propMgr->setProperty( "AppName", "");              // No initial printout message
     propMgr->setProperty( "OutputLevel", "7");         // No other printout messages
     appUI->configure();

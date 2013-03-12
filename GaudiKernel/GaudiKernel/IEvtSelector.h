@@ -3,45 +3,40 @@
 #define GAUDIKERNEL_IEVTSELECTOR_H 1
 
 // Include files
-
-//#include "GaudiKernel/Kernel.h"
-#include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/IOpaqueAddress.h"
 #include "GaudiKernel/StatusCode.h"
 #include <string>
 
-// Declaration of the interface ID ( interface id, major version, minor version)
-static const InterfaceID IID_IEvtSelector(41, 1 , 0);
-
 /** @class IEvtSelector IEvtSelector.h GaudiKernel/IEvtSelector.h
 
     The Event Selector Interface. The EventSelector component is able
     to produce a list of event  given a set of stream specifications.
-  
+
     @author C. Cioffi
     @date   14/11/2003
 */
-class IEvtSelector : virtual public IInterface {
- public:
+class GAUDI_API IEvtSelector: virtual public IInterface {
+public:
+  /// InterfaceID
+  DeclareInterfaceID(IEvtSelector,2,0);
+
   class Context{
   public:
     virtual ~Context() { }
     virtual void* identifier() const=0;
   };
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IEvtSelector;}
 
-  /**Create and return a context object that will 
+  /**Create and return a context object that will
      keep track of the state of selection.
 
-     @param c Reference of a pointer to a Context object. 
+     @param c Reference of a pointer to a Context object.
   */
   virtual StatusCode createContext(Context*& c) const = 0;
 
-  /**Fetch the next event or the first event if it will be use soon 
-     after the creation of the context. 
-     It will return StatusCode::FAILURE if there have been problem in the fetching or it 
+  /**Fetch the next event or the first event if it will be use soon
+     after the creation of the context.
+     It will return StatusCode::FAILURE if there have been problem in the fetching or it
      has been reached the end of the list of events.
 
      @param c Reference to the Context object.
@@ -56,7 +51,7 @@ class IEvtSelector : virtual public IInterface {
   virtual StatusCode next(Context& c,int jump) const  = 0;
 
   /**Fetch the previous event.
-     It will return StatusCode::FAILURE if there have been problem in the fetching or it 
+     It will return StatusCode::FAILURE if there have been problem in the fetching or it
      has been reached the begin of the list of events.
 
      @param c Reference to the Context object.
@@ -64,7 +59,7 @@ class IEvtSelector : virtual public IInterface {
   virtual StatusCode previous(Context& c) const = 0;
 
   /**Same of previous(Context& c) the possibility to jump the previous n-1 events.
-     
+
      @param c Reference to the Context object.
      @param jump The event to jump to from the current event.
    */
@@ -75,7 +70,7 @@ class IEvtSelector : virtual public IInterface {
     */
   virtual StatusCode last(Context& refContext) const = 0;
 
-  /** Will set the state of the context in a way that the next event read 
+  /** Will set the state of the context in a way that the next event read
     * is the first of the list.
     *
     * @param c Reference to the Context object.
@@ -98,7 +93,7 @@ class IEvtSelector : virtual public IInterface {
 
   /** Will set a new criteria for the selection of the next list of events and will change
     * the state of the context in a way to point to the new list.
-    * 
+    *
     * @param cr The new criteria string.
     * @param c Reference pointer to the Context object.
     */

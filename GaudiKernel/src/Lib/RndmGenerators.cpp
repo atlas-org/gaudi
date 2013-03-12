@@ -23,8 +23,8 @@ Rndm::Numbers::Numbers(const Rndm::Numbers& copy )
 }
 
 // Construct and initialize the generator
-Rndm::Numbers::Numbers(IRndmGenSvc* svc, const IRndmGen::Param& par)  
-: m_generator(0) 
+Rndm::Numbers::Numbers(const SmartIF<IRndmGenSvc>& svc, const IRndmGen::Param& par)
+: m_generator(0)
 {
   StatusCode status = initialize(svc, par);
   if (!status.isSuccess()) {
@@ -38,11 +38,12 @@ Rndm::Numbers::~Numbers()    {
 }
 
 // Initialize the generator
-StatusCode Rndm::Numbers::initialize(IRndmGenSvc* svc,
+StatusCode Rndm::Numbers::initialize(const SmartIF<IRndmGenSvc>& svc,
                                      const IRndmGen::Param& par)  {
-  if ( 0 != svc && 0 == m_generator )   {
-    StatusCode status = svc->generator( par, m_generator );
-    return status;
+  if ( svc.isValid() && 0 == m_generator )   {
+    /// @FIXME: this is a hack, but I do not have the time to review the
+    ///         correct constantness of all the methods
+    return const_cast<IRndmGenSvc*>(svc.get())->generator( par, m_generator );
   }
   return StatusCode::FAILURE;
 }
@@ -57,3 +58,19 @@ StatusCode Rndm::Numbers::finalize()   {
   return StatusCode::SUCCESS;
 }
 
+#if !defined(GAUDI_V22_API) || defined(G22_NEW_SVCLOCATOR)
+// Construct and initialize the generator
+Rndm::Numbers::Numbers(IRndmGenSvc* svc, const IRndmGen::Param& par)
+: m_generator(0)
+{
+  StatusCode status = initialize(svc, par);
+  if (!status.isSuccess()) {
+    throw GaudiException ("Initialization failed !", "Rndm::Numbers", status);
+  }
+}
+
+// Initialize the generator
+StatusCode Rndm::Numbers::initialize(IRndmGenSvc* svc, const IRndmGen::Param& par) {
+  return initialize(SmartIF<IRndmGenSvc>(svc), par);
+}
+#endif

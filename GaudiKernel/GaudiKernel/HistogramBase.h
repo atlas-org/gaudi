@@ -2,6 +2,7 @@
 #define HISTOGRAMSVC_BASE_H
 
 #include <iostream>
+#include "GaudiKernel/Kernel.h"
 
 class TObject;
 
@@ -18,7 +19,7 @@ namespace Gaudi {
     *   @author  M.Frank
     *   @version 1.0
     */
-  class HistogramBase {
+  class GAUDI_API HistogramBase {
   public:
     /// ROOT object implementation
     virtual TObject* representation() const = 0;
@@ -30,7 +31,7 @@ namespace Gaudi {
     virtual std::ostream& write(std::ostream& s) const = 0;
     /// Write (binary) histogram to file
     virtual int           write(const char* file_name) const = 0;
-    virtual ~HistogramBase() {}
+    virtual ~HistogramBase();
   }; // class
 
 } // namespace Gaudi

@@ -11,17 +11,12 @@ class DataObject;
 //Added to allow use of AIDA in applications
 //without prefix AIDA:: (as before):
 namespace AIDA {
-	class ITuple;
-	class IAnnotation;
+  class ITuple;
+  class IAnnotation;
 }
 
 using AIDA::ITuple;
 using AIDA::IAnnotation;
-
-
-//Declaration of the interface ID (interface id, major version, minor version)
-static const InterfaceID IID_IAIDATupleSvc(120, 2, 0);
-
 
 /** @class IAIDATupleSvc IAIDATupleSvc.h GaudiKernel/IAIDATupleSvc.h
  *
@@ -31,20 +26,19 @@ static const InterfaceID IID_IAIDATupleSvc(120, 2, 0);
  *  @date   2005-05-23
  */
 
-class IAIDATupleSvc : virtual public IDataProviderSvc {
-    
-public:
+class GAUDI_API IAIDATupleSvc : virtual public IDataProviderSvc {
 
-	//Retrieve interface ID
-	static const InterfaceID& interfaceID() { return IID_IAIDATupleSvc; }
+public:
+  /// InterfaceID
+  DeclareInterfaceID(IAIDATupleSvc,3,0);
 
   // ===================================
   // Book a tuple in the transient store
   // ===================================
-  virtual AIDA::ITuple*	book(	const std::string& fullPath,
-	                            const std::string& title,
-	                            const std::string& columns	) = 0;
- 
+  virtual AIDA::ITuple*	book( const std::string& fullPath,
+	                      const std::string& title,
+	                      const std::string& columns ) = 0;
+
 
   // =======================================
   // Register a tuple in the transient store
@@ -52,21 +46,21 @@ public:
   virtual StatusCode registerObject( const std::string& dirPath,
                                      const std::string& objPath,
                                      AIDA::ITuple* tObj ) = 0;
-    
+
 
   virtual StatusCode registerObject( DataObject* pParent,
                                      const std::string& objPath,
                                      AIDA::ITuple* tObj ) = 0;
-  
+
 
   // =========================================
   // Unregister a tuple in the transient store
   // =========================================
   virtual StatusCode unregisterObject( AIDA::ITuple* tObj ) = 0;
-  
+
   virtual StatusCode unregisterObject( AIDA::ITuple* tObj,
                                        const std::string& objectPath ) = 0;
-  
+
 
   // ====================================
   // Retrieve a tuple from the data store
@@ -77,7 +71,7 @@ public:
   virtual StatusCode retrieveObject( const std::string& parentPath,
                                      const std::string& objPath,
                                      AIDA::ITuple*& tObj ) = 0;
-  
+
   virtual StatusCode retrieveObject( DataObject* parentObj,
                                      const std::string& objPath,
                                      AIDA::ITuple*& tObj ) = 0;
@@ -109,7 +103,7 @@ public:
   // ==============
   // Helper methods
   // ==============
-	
+
 	//Create all directories in a given full path
 	virtual DataObject* createPath( const std::string& newPath )= 0;
 
@@ -119,7 +113,7 @@ public:
 
   virtual StatusCode myTest() = 0;
 
-  //virtual std::string storeName(AIDA::ITuple*& tObj) = 0;  
+  //virtual std::string storeName(AIDA::ITuple*& tObj) = 0;
 };
 
 #endif //GAUDIKERNEL_IAIDATUPLESVC_H

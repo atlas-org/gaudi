@@ -6,7 +6,7 @@
 //	Author     : M.Frank
 //  History    :
 // +---------+----------------------------------------------+---------
-// |    Date |                 Comment                      | Who     
+// |    Date |                 Comment                      | Who
 // +---------+----------------------------------------------+---------
 // | 29/10/99| Initial version                              | MF
 // +---------+----------------------------------------------+---------
@@ -29,62 +29,42 @@
 
 /// Standard Service constructor
 RndmEngine::RndmEngine(const std::string& name, ISvcLocator* loc)
-: Service(name, loc), m_pIncidentSvc(0)
+: base_class(name, loc)
 {
 }
 
 /// Standard Service destructor
 RndmEngine::~RndmEngine()   {
-  if ( m_pIncidentSvc  ) m_pIncidentSvc->release();
 }
 
-/// Query interface
-StatusCode RndmEngine::queryInterface(const InterfaceID& riid, void** ppvInterface)  {
-  if ( IID_IRndmEngine == riid )   {
-    *ppvInterface = (IRndmEngine*)this;
-  }
-  else if ( IID_ISerialize == riid )   {
-    *ppvInterface = (ISerialize*)this;
-  }
-  else if ( IID_IIncidentListener == riid )   {
-    *ppvInterface = (IIncidentListener*)this;
-  }
-  else  {
-    return Service::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
-}
-
-/// Service override: initialisation
+/// Service override: initialization
 StatusCode RndmEngine::initialize()   {
   StatusCode status = Service::initialize();
   if ( status.isSuccess() )   {
     status = setProperties();
     if ( status.isSuccess() )   {
-      status = serviceLocator()->service( "IncidentSvc", m_pIncidentSvc, true );
+      m_pIncidentSvc = serviceLocator()->service("IncidentSvc");
+      if (!m_pIncidentSvc.isValid()) {
+        status = StatusCode::FAILURE;
+      }
     }
   }
   return status;
 }
 
-/// Service override: finalisation
+/// Service override: finalization
 StatusCode RndmEngine::finalize()   {
-  StatusCode status = Service::finalize();
-  if ( m_pIncidentSvc )     {
-    m_pIncidentSvc->release();
-  }
-  m_pIncidentSvc = 0;
-  return status;
+  m_pIncidentSvc = 0; // release
+  return Service::finalize();
 }
 
 /** IRndmEngine interface implementation  */
-/// Input serialisation from stream buffer. Restores the status of the generator engine.
+/// Input serialization from stream buffer. Restores the status of the generator engine.
 StreamBuffer& RndmEngine::serialize(StreamBuffer& str)    {
   return str;
 }
 
-/// Output serialisation to stream buffer. Saves the status of the generator engine.
+/// Output serialization to stream buffer. Saves the status of the generator engine.
 StreamBuffer& RndmEngine::serialize(StreamBuffer& str) const    {
   return str;
 }
@@ -99,7 +79,7 @@ void RndmEngine::handle (const Incident& /* inc */ )    {
 }
 
 /** Multiple shots returning vector with flat random numbers.
-    @param  array    Array containing random numbers 
+    @param  array    Array containing random numbers
     @param  howmany  fill 'howmany' random numbers into array
     @param  start    ... starting at position start
     @return StatusCode indicating failure or success.

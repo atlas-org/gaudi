@@ -7,10 +7,9 @@
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "SubAlg.h"
 
-
 // Static Factory declaration
 
-DECLARE_ALGORITHM_FACTORY(SubAlg);
+DECLARE_ALGORITHM_FACTORY(SubAlg)
 
 // Constructor
 //------------------------------------------------------------------------------
@@ -23,7 +22,7 @@ SubAlg::SubAlg(const std::string& name, ISvcLocator* ploc)
 StatusCode SubAlg::initialize() {
 //------------------------------------------------------------------------------
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "initializing...." << endreq;
+  log << MSG::INFO << "initializing...." << endmsg;
 //  return StatusCode::FAILURE;
   return StatusCode::SUCCESS;
 }
@@ -33,7 +32,7 @@ StatusCode SubAlg::initialize() {
 StatusCode SubAlg::execute() {
 //------------------------------------------------------------------------------
   MsgStream         log( msgSvc(), name() );
-  log << MSG::INFO << "executing...." << endreq;
+  log << MSG::INFO << "executing...." << endmsg;
   return StatusCode::SUCCESS;
 }
 
@@ -42,6 +41,6 @@ StatusCode SubAlg::execute() {
 StatusCode SubAlg::finalize() {
 //------------------------------------------------------------------------------
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "finalizing...." << endreq;
+  log << MSG::INFO << "finalizing...." << endmsg;
   return StatusCode::SUCCESS;
 }

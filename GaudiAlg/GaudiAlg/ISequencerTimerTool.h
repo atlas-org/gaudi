@@ -1,12 +1,10 @@
 // $Id: ISequencerTimerTool.h,v 1.4 2005/07/29 16:49:43 hmd Exp $
-#ifndef ISEQUENCERTIMERTOOL_H 
+#ifndef ISEQUENCERTIMERTOOL_H
 #define ISEQUENCERTIMERTOOL_H 1
 
 // Include files
 // from Gaudi
 #include "GaudiKernel/IAlgTool.h"
-
-static const InterfaceID IID_ISequencerTimerTool( "ISequencerTimerTool", 1, 0 );
 
 /** @class ISequencerTimerTool ISequencerTimerTool.h
  *  Implements the time measurement inside a sequencer
@@ -14,11 +12,11 @@ static const InterfaceID IID_ISequencerTimerTool( "ISequencerTimerTool", 1, 0 );
  *  @author Olivier Callot
  *  @date   2004-05-19
  */
- 
-class ISequencerTimerTool : public virtual IAlgTool {
-public: 
-   // Return the interface ID
-  static const InterfaceID& interfaceID() { return IID_ISequencerTimerTool; }
+
+class GAUDI_API ISequencerTimerTool: public virtual IAlgTool {
+public:
+  /// InterfaceID
+  DeclareInterfaceID(ISequencerTimerTool,2,1);
 
   /** add a timer entry with the specified name **/
   virtual int addTimer( std::string name ) = 0 ;
@@ -26,15 +24,18 @@ public:
   /** Increase the indentation of the name **/
   virtual void increaseIndent() = 0 ;
 
-  /** Decrease the indentation fo the name **/
+  /** Decrease the indentation of the name **/
   virtual void decreaseIndent() = 0;
 
+  using IAlgTool::start;
   /** start the counter, i.e. register the current time **/
   virtual void start( int index ) = 0;
 
+  using IAlgTool::stop;
   /** stop the counter, return the elapsed time **/
   virtual double stop( int index ) = 0;
 
+  using IAlgTool::name;
   /** returns the name of the counter **/
   virtual std::string name( int index ) = 0;
 
@@ -46,5 +47,11 @@ public:
 
   /** returns the flag telling that global timing is wanted **/
   virtual bool globalTiming() = 0;
+
+  /** prepares and saves the timing histograms **/
+  virtual void saveHistograms() = 0;
+
+  /** Destructor */
+  virtual ~ISequencerTimerTool();
 };
 #endif // ISEQUENCERTIMERTOOL_H

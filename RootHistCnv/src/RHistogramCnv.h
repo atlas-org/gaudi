@@ -15,7 +15,7 @@
 
 namespace RootHistCnv {
 
-  /** @class RHistogramCnv RHistogramCnv.hRHistogramCnv.h
+  /** @class RHistogramCnv RHistogramCnv.h RHistogramCnv.h
     *
     * Generic converter to save/read AIDA_ROOT histograms using ROOT.
     * This converter shortcuts the AIDA binding and takes advantage

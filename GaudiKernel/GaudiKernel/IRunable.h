@@ -4,25 +4,22 @@
 
 #include "GaudiKernel/IInterface.h"
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IRunable(501, 1 , 0); 
-
 /** @class IRunable IRunable.h GaudiKernel/IRunable.h
 
     Runable interface definition. Package GaudiKernel
 
     Abstract interface of an object to be "run".
-    Best analogy: java.thread.Thread.run(). 
+    Best analogy: java.thread.Thread.run().
     A known user is the application manager, which
     gives control to a runable for execution of the event loop.
 
    @author Markus Frank
-   @version 1.0
+   @version 2.0
 */
-class IRunable : virtual public IInterface   {
+class GAUDI_API IRunable: virtual public IInterface {
 public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IRunable; }
+  /// InterfaceID
+  DeclareInterfaceID(IRunable,2,0);
 
   /// Run the class implementation
   virtual StatusCode run() = 0;

@@ -1,8 +1,12 @@
-// $Id: StatusCode.h,v 1.10 2008/10/28 14:15:03 marcocle Exp $
+// $Id: StatusCode.h,v 1.12 2008/10/28 17:21:58 marcocle Exp $
 #ifndef GAUDIKERNEL_STATUSCODE_H
 #define GAUDIKERNEL_STATUSCODE_H
 
 #include <ostream>
+
+#include "GaudiKernel/Kernel.h"
+#include "GaudiKernel/IssueSeverity.h"
+#include "boost/shared_ptr.hpp"
 
 /**
  * @class StatusCode StatusCode.h GaudiKernel/StatusCode.h
@@ -16,7 +20,6 @@
 
 class IMessageSvc;
 class IStatusCodeSvc;
-class IssueSeverity;
 
 class IgnoreError {};
 
@@ -29,53 +32,92 @@ public:
   };
 
   /// Constructor.
-  StatusCode();
-  StatusCode( unsigned long code, const IssueSeverity& );
-  StatusCode( unsigned long code, bool checked = false );
+  StatusCode():
+    d_code(SUCCESS), m_checked(false), m_severity() {}
+  StatusCode( unsigned long code, const IssueSeverity& sev ):
+    d_code(code),m_checked(false), m_severity() {
+    try { // ensure that we do not throw even if the we cannot copy the severity
+      m_severity = SeverityPtr(new IssueSeverity(sev));
+    }
+    catch (...) {}
+  }
+  StatusCode( unsigned long code, bool checked = false ):
+    d_code(code),m_checked(checked), m_severity() {}
 
-  StatusCode( const StatusCode& sc );
+  StatusCode( const StatusCode& rhs ):
+    d_code(rhs.d_code), m_checked(rhs.m_checked),
+    m_severity(rhs.m_severity)
+    { rhs.m_checked = true; }
 
   /// Destructor.
-  ~StatusCode();
+  GAUDI_API ~StatusCode();
 
   /** Test for a status code of SUCCESS.
    * N.B. This is the only case where a function has succeeded.
    */
-  bool isSuccess() const;
+  bool isSuccess() const {
+    m_checked = true;
+    return (d_code == SUCCESS);
+  }
 
   /** Test for a status code of FAILURE.
    * N.B. This is a specific type of failure where there aren't any more
-   * appropriate staus codes. To test for any failure use :
+   * appropriate status codes. To test for any failure use :
    * if ( !StatusCode.isSuccess() ) ...
    */
-  bool isFailure() const;
-  bool isRecoverable() const;
+  bool isFailure() const { return !isSuccess(); }
+  bool isRecoverable() const {
+    m_checked = true;
+    return (d_code == RECOVERABLE);
+  }
 
   /// Get the status code by value.
-  unsigned long getCode() const;
+  unsigned long getCode() const{
+    m_checked = true;
+    return d_code;
+  }
 
   /// Set the status code by value.
-  void setCode( unsigned long );
+  void setCode(unsigned long value)  {
+    m_checked = false;
+    d_code = value;
+  }
 
   /// Ignore the checking code;
-  void setChecked() const;
-  void ignore() const;
+  void setChecked() const{
+    m_checked = true;
+  }
+  void ignore() const { setChecked(); }
 
   /// Cast operator.
-  operator unsigned long() const;
+  operator unsigned long() const { return getCode(); }
 
   /// Severity
-  const IssueSeverity& severity() const;
+  GAUDI_API const IssueSeverity& severity() const;
 
   /// Assignment operator.
-  StatusCode& operator=(unsigned long value);
-  StatusCode& operator=(const StatusCode& rhs);
+  StatusCode& operator=(unsigned long value) {
+    setCode(value);
+    return *this;
+  }
+  StatusCode& operator=(const StatusCode& rhs){
+    if (this == &rhs) return *this; // Protection against self-assignment
+    d_code = rhs.d_code;
+    m_checked = rhs.m_checked;
+    rhs.m_checked = true;
+    m_severity = rhs.m_severity;
+    return *this;
+  }
 
   /// Comparison operator.
-  friend bool operator< ( const StatusCode& a, const StatusCode& b );
+  friend bool operator< ( const StatusCode& a, const StatusCode& b ) {
+    return a.d_code < b.d_code;
+  }
 
   /// Comparison operator.
-  friend bool operator> ( const StatusCode& a, const StatusCode& b );
+  friend bool operator> ( const StatusCode& a, const StatusCode& b ) {
+    return a.d_code > b.d_code;
+  }
 
 #ifndef _WIN32
   operator IgnoreError() const {
@@ -84,88 +126,18 @@ public:
   }
 #endif
 
-  static void enableChecking();
-  static void disableChecking();
+  static GAUDI_API void enableChecking();
+  static GAUDI_API void disableChecking();
 
 protected:
   /// The status code.
   unsigned long   d_code;      ///< The status code
   mutable bool    m_checked;   ///< If the Status code has been checked
-  IssueSeverity*  m_severity;  ///< Pointer to a IssueSeverity
+  typedef boost::shared_ptr<IssueSeverity> SeverityPtr;
+  SeverityPtr     m_severity;  ///< Pointer to a IssueSeverity
 
   static bool     s_checking;  ///< Global flag to control if StatusCode need to be checked
-
-  static IssueSeverity* cloneSeverity(const IssueSeverity*);
 };
-
-inline StatusCode::StatusCode(): 
-  d_code(SUCCESS), m_checked(false), m_severity(0) {}
-
-inline StatusCode::StatusCode( unsigned long code, bool checked ) : 
-  d_code(code),m_checked(checked), m_severity(0) {}
-
-inline StatusCode::StatusCode( unsigned long code, const IssueSeverity& sev ) : 
-  d_code(code),m_checked(false), m_severity(cloneSeverity(&sev)) {
-}
-
-inline StatusCode::StatusCode( const StatusCode &rhs ) {
-  d_code = rhs.d_code;
-  m_checked = rhs.m_checked;
-  rhs.m_checked = true;
-  m_severity = rhs.m_severity ? cloneSeverity(rhs.m_severity) : 0;
-}
-
-inline bool StatusCode::isSuccess() const {
-  m_checked = true;
-  return (d_code == SUCCESS );
-}
-
-inline bool StatusCode::isFailure() const {
-  m_checked = true;
-  return (d_code != SUCCESS );
-}
-
-inline bool StatusCode::isRecoverable() const {
-  m_checked = true;
-  return (d_code == RECOVERABLE);
-}
-
-inline unsigned long StatusCode::getCode() const {
-  m_checked = true;
-  return d_code;
-}
-
-inline void StatusCode::setCode(unsigned long value) {
-  m_checked = false;
-  d_code = value;
-}
-
-inline void StatusCode::setChecked() const {
-  m_checked = true;
-}
-
-inline void StatusCode::ignore() const {
-  m_checked = true;
-}
-
-inline StatusCode::operator unsigned long() const  {
-  m_checked = true;
-  return d_code;
-}
-
-inline StatusCode& StatusCode::operator=(unsigned long value)   {
-  d_code = value;
-  m_checked = false;
-  return *this;
-}
-
-inline bool operator< ( const StatusCode& a, const StatusCode& b ) {
-  return a.d_code < b.d_code;
-}
-
-inline bool operator> ( const StatusCode& a, const StatusCode& b ) {
-  return a.d_code > b.d_code;
-}
 
 inline std::ostream& operator<< ( std::ostream& s , const StatusCode& sc )
 {

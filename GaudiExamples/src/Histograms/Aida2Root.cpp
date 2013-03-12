@@ -1,4 +1,11 @@
 // $Id: Aida2Root.cpp,v 1.6 2008/01/17 15:06:55 marcocle Exp $
+
+#ifdef __ICC
+// disable icc remark #2259: non-pointer conversion from "X" to "Y" may lose significant bits
+//   TODO: To be removed, since it comes from ROOT TMathBase.h
+#pragma warning(disable:2259)
+#endif
+
 // ============================================================================
 // Include files 
 // ============================================================================
@@ -113,7 +120,7 @@ private:
 // ============================================================================
 /// Declaration of the Algorithm Factory
 // ============================================================================
-DECLARE_ALGORITHM_FACTORY(Aida2Root) ;
+DECLARE_ALGORITHM_FACTORY(Aida2Root)
 // ============================================================================
 namespace 
 {
@@ -134,7 +141,7 @@ namespace
 StatusCode Aida2Root::finalize() 
 {
   
-  always() << "Get the native ROOT representation of histograms!" << endreq ;
+  always() << "Get the native ROOT representation of histograms!" << endmsg ;
   
   {  // loop over all 1D-histograms
     for ( List::const_iterator ipath = m_1Ds.begin() ; 
@@ -150,35 +157,35 @@ StatusCode Aida2Root::finalize()
       if ( 0 == root ) 
       { return Error ( "Unable to convert to ROOT the 1D-histogram '"+(*ipath)+"'") ; }
       /// use the native printout from ROOT 
-      info() << "The native ROOT printout for 1D-histogram '" << (*ipath) << "':" << endreq ;
+      info() << "The native ROOT printout for 1D-histogram '" << (*ipath) << "':" << endmsg ;
       root->Print() ;  
 
-      info () << " |  Compare       | AIDA/HistoStats |     ROOT/TH1    |      Delta      | "  << endreq ;      
+      info () << " |  Compare       | AIDA/HistoStats |     ROOT/TH1    |      Delta      | "  << endmsg ;      
       const std::string format = " | %1$-14.14s | %2$ 15.8g | %3$- 15.8g | %4$= 15.8g | "  ;
       info () << print 
         ( Gaudi::Utils::HistoStats::mean        ( aida ) , 
-          root->GetMean      ()    , "'mean'"        , format  ) << endreq ;
+          root->GetMean      ()    , "'mean'"        , format  ) << endmsg ;
       info () << print 
         ( Gaudi::Utils::HistoStats::meanErr     ( aida ) , 
-          root->GetMeanError ()    , "'meanErr'"     , format  ) << endreq ;
+          root->GetMeanError ()    , "'meanErr'"     , format  ) << endmsg ;
       info () << print 
         ( Gaudi::Utils::HistoStats::rms         ( aida ) , 
-          root->GetRMS       ()    , "'rms'"         , format  ) << endreq ;
+          root->GetRMS       ()    , "'rms'"         , format  ) << endmsg ;
       info () << print 
         ( Gaudi::Utils::HistoStats::rmsErr      ( aida ) , 
-          root->GetRMSError  ()    , "'rmsErr'"      , format  ) << endreq ;
+          root->GetRMSError  ()    , "'rmsErr'"      , format  ) << endmsg ;
       info () << print 
         ( Gaudi::Utils::HistoStats::skewness    ( aida ) , 
-          root->GetSkewness ()     , "'skewness'"    , format  ) << endreq ;      
+          root->GetSkewness ()     , "'skewness'"    , format  ) << endmsg ;      
       info () << print 
         ( Gaudi::Utils::HistoStats::skewnessErr ( aida ) , 
-          root->GetSkewness ( 11 ) , "'skewnessErr'" , format  ) << endreq ;      
+          root->GetSkewness ( 11 ) , "'skewnessErr'" , format  ) << endmsg ;      
       info () << print 
         ( Gaudi::Utils::HistoStats::kurtosis  ( aida ) , 
-          root->GetKurtosis ()     , "'kurtosis'"    , format  ) << endreq ;
+          root->GetKurtosis ()     , "'kurtosis'"    , format  ) << endmsg ;
       info () << print 
         ( Gaudi::Utils::HistoStats::kurtosisErr ( aida ) , 
-          root->GetKurtosis ( 11 ) , "'kurtosisErr'" , format  ) << endreq ;
+          root->GetKurtosis ( 11 ) , "'kurtosisErr'" , format  ) << endmsg ;
     }
   }
 
@@ -196,7 +203,7 @@ StatusCode Aida2Root::finalize()
       if ( 0 == root ) 
       { return Error ( "Unable to convert to ROOT the 2D-histogram '"+(*ipath)+"'") ; }
       /// use the native printout from ROOT 
-      info() << "The native ROOT printout for 2D-histogram '" << (*ipath) << "':" << endreq ;
+      info() << "The native ROOT printout for 2D-histogram '" << (*ipath) << "':" << endmsg ;
       root->Print() ;  
     }
   }
@@ -215,7 +222,7 @@ StatusCode Aida2Root::finalize()
       if ( 0 == root ) 
       { return Error ( "Unable to convert to ROOT the 3D-histogram '"+(*ipath)+"'") ; }
       /// use the native printout from ROOT 
-      info() << "The native ROOT printout for 3D-histogram '" << (*ipath) << "':" << endreq ;
+      info() << "The native ROOT printout for 3D-histogram '" << (*ipath) << "':" << endmsg ;
       root->Print() ;  
     }
   }
@@ -235,7 +242,7 @@ StatusCode Aida2Root::finalize()
       if ( 0 == root ) 
       { return Error ( "Unable to convert to ROOT the 1D-profile '"+(*ipath)+"'") ; }
       /// use the native printout from ROOT 
-      info() << "The native ROOT printout for 1D-profile '" << (*ipath) << "':" << endreq ;
+      info() << "The native ROOT printout for 1D-profile '" << (*ipath) << "':" << endmsg ;
       root->Print() ;  
     }
   }
@@ -255,7 +262,7 @@ StatusCode Aida2Root::finalize()
       if ( 0 == root ) 
       { Error ( "Unable to convert to ROOT the 2D-profile '"+(*ipath)+"'") ; }
       /// use the native printout from ROOT 
-      info() << "The native ROOT printout for 2D-profile '" << (*ipath) << "':" << endreq ;
+      info() << "The native ROOT printout for 2D-profile '" << (*ipath) << "':" << endmsg ;
       root->Print() ;  
     }
   }

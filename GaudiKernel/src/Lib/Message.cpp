@@ -3,12 +3,12 @@
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
+#include <cstdio>
 #include <cctype>
 #include "GaudiKernel/IMessageSvc.h"
 #include "GaudiKernel/Message.h"
 #include "GaudiKernel/Timing.h"
-
-#include "GaudiKernel/time_r.h"
+#include "GaudiKernel/Time.h"
 
 using namespace MSG;
 
@@ -29,24 +29,26 @@ const char* Message::DEFAULT_FORMAT = "% F%18W%S%7W%R%T %0W%M";
 const char* Message::DEFAULT_TIME_FORMAT = "%Y-%m-%d %H:%M:%S,%f";
 
 namespace {
-	
-  std::string formattedTime ( std::string fmt, bool universal = false );
-
+  // get the current time from the system and format it according to the format
+  inline std::string formattedTime (const std::string &fmt, bool universal = false )
+  {
+    return Gaudi::Time::current().format(!universal, fmt);
+  }
 }
-  
+
 //#############################################################################
 // ---------------------------------------------------------------------------
 // Routine: Constructor.
 // Purpose:
 // ---------------------------------------------------------------------------
 //
-Message::Message() : 
-  m_message( "" ), m_source( "UNKNOWN" ), m_format( DEFAULT_FORMAT ), 
-  m_time_format(DEFAULT_TIME_FORMAT), m_type( MSG::NIL ), 
+Message::Message() :
+  m_message( "" ), m_source( "UNKNOWN" ), m_format( DEFAULT_FORMAT ),
+  m_time_format(DEFAULT_TIME_FORMAT), m_type( NIL ),
   m_fill( ' ' ), m_width( 0 ), m_left( true )
 {
 }
-  
+
 //#############################################################################
 // ---------------------------------------------------------------------------
 // Routine: Constructor.
@@ -54,8 +56,8 @@ Message::Message() :
 // ---------------------------------------------------------------------------
 //
 Message::Message ( const char* src, int type, const char* msg ) :
-  m_message( msg ), m_source( src ), m_format( DEFAULT_FORMAT ), 
-  m_time_format(DEFAULT_TIME_FORMAT), m_type( type ), 
+  m_message( msg ), m_source( src ), m_format( DEFAULT_FORMAT ),
+  m_time_format(DEFAULT_TIME_FORMAT), m_type( type ),
   m_fill( ' ' ), m_width( 0 ), m_left( true )
 {
 }
@@ -68,7 +70,7 @@ Message::Message ( const char* src, int type, const char* msg ) :
 //
 Message::Message ( const std::string& src, int type, const std::string& msg ) :
   m_message( msg ), m_source( src ), m_format( DEFAULT_FORMAT ),
-  m_time_format(DEFAULT_TIME_FORMAT), m_type( type ), 
+  m_time_format(DEFAULT_TIME_FORMAT), m_type( type ),
   m_fill( ' ' ), m_width( 0 ), m_left( true )
 {
 }
@@ -80,8 +82,8 @@ Message::Message ( const std::string& src, int type, const std::string& msg ) :
 // ---------------------------------------------------------------------------
 //
 const std::string& Message::getMessage() const
-{ 
-  return m_message; 
+{
+  return m_message;
 }
 
 //#############################################################################
@@ -90,9 +92,9 @@ const std::string& Message::getMessage() const
 // Purpose: Set the message string.
 // ---------------------------------------------------------------------------
 //
-void Message::setMessage( const std::string& msg ) 
-{ 
-  m_message = msg; 
+void Message::setMessage( const std::string& msg )
+{
+  m_message = msg;
 }
 
 //#############################################################################
@@ -101,9 +103,9 @@ void Message::setMessage( const std::string& msg )
 // Purpose: Get the message type.
 // ---------------------------------------------------------------------------
 //
-int Message::getType() const 
-{ 
-  return m_type; 
+int Message::getType() const
+{
+  return m_type;
 }
 
 //#############################################################################
@@ -112,9 +114,9 @@ int Message::getType() const
 // Purpose: Set the message type.
 // ---------------------------------------------------------------------------
 //
-void Message::setType( int msg_type ) 
-{ 
-  m_type = msg_type; 
+void Message::setType( int msg_type )
+{
+  m_type = msg_type;
 }
 
 //#############################################################################
@@ -123,9 +125,9 @@ void Message::setType( int msg_type )
 // Purpose: Get the message source.
 // ---------------------------------------------------------------------------
 //
-const std::string& Message::getSource() const 
-{ 
-  return m_source; 
+const std::string& Message::getSource() const
+{
+  return m_source;
 }
 
 //#############################################################################
@@ -134,18 +136,18 @@ const std::string& Message::getSource() const
 // Purpose: Set the message source.
 // ---------------------------------------------------------------------------
 //
-void Message::setSource( const std::string& src ) 
-{ 
-  m_source = src; 
+void Message::setSource( const std::string& src )
+{
+  m_source = src;
 }
-  
+
 //#############################################################################
 // ---------------------------------------------------------------------------
-// Routine: operator << 
+// Routine: operator <<
 // Purpose:Insert the message into a stream.
 // ---------------------------------------------------------------------------
 //
-std::ostream& operator << ( std::ostream& stream, const Message& msg ) 
+std::ostream& operator << ( std::ostream& stream, const Message& msg )
 {
   msg.makeFormattedMsg( msg.m_format );
   stream << msg.m_formatted_msg;
@@ -158,7 +160,7 @@ std::ostream& operator << ( std::ostream& stream, const Message& msg )
 // Purpose: comparison operator needed for maps
 // ---------------------------------------------------------------------------
 //
-bool Message::operator < ( const Message& b ) 
+bool Message::operator < ( const Message& b )
 {
   return m_type   < b.m_type ||
          m_source < b.m_source ||
@@ -167,11 +169,11 @@ bool Message::operator < ( const Message& b )
 
 //#############################################################################
 // ---------------------------------------------------------------------------
-// Routine: operator == 
+// Routine: operator ==
 // Purpose: comparison op.
 // ---------------------------------------------------------------------------
 //
-bool operator == ( const Message& a, const Message& b ) 
+bool operator == ( const Message& a, const Message& b )
 {
   return a.m_source == b.m_source &&
     a.m_type == b.m_type &&
@@ -180,7 +182,7 @@ bool operator == ( const Message& a, const Message& b )
 
 //#############################################################################
 // ---------------------------------------------------------------------------
-// Routine: 
+// Routine:
 // Purpose: Get the format string.
 // ---------------------------------------------------------------------------
 //
@@ -191,7 +193,7 @@ const std::string& Message::getFormat() const
 
 //#############################################################################
 // ---------------------------------------------------------------------------
-// Routine: 
+// Routine:
 // Purpose: Get the default format string.
 // ---------------------------------------------------------------------------
 //
@@ -203,8 +205,8 @@ const std::string Message::getDefaultFormat()
 
 //#############################################################################
 // ---------------------------------------------------------------------------
-// Routine: 
-// Purpose: Set the format string - 
+// Routine:
+// Purpose: Set the format string -
 //          use isFormatted() to check for valid format.
 // ---------------------------------------------------------------------------
 //
@@ -218,7 +220,7 @@ void Message::setFormat( const std::string& format ) const
 
 //#############################################################################
 // ---------------------------------------------------------------------------
-// Routine: 
+// Routine:
 // Purpose: Get the time format string.
 // ---------------------------------------------------------------------------
 //
@@ -229,7 +231,7 @@ const std::string& Message::getTimeFormat() const
 
 //#############################################################################
 // ---------------------------------------------------------------------------
-// Routine: 
+// Routine:
 // Purpose: Get the default time format string.
 // ---------------------------------------------------------------------------
 //
@@ -241,8 +243,8 @@ const std::string Message::getDefaultTimeFormat()
 
 //#############################################################################
 // ---------------------------------------------------------------------------
-// Routine: 
-// Purpose: Set the time format string - 
+// Routine:
+// Purpose: Set the time format string -
 //          use isFormatted() to check for valid format.
 // ---------------------------------------------------------------------------
 //
@@ -252,8 +254,8 @@ void Message::setTimeFormat( const std::string& timeFormat ) const
     m_time_format = DEFAULT_TIME_FORMAT;
   else
     m_time_format = timeFormat;
-}  
-  
+}
+
 //#############################################################################
 // ---------------------------------------------------------------------------
 // Routine: makeFormattedMsg
@@ -265,9 +267,9 @@ void Message::makeFormattedMsg( const std::string& format ) const
   m_formatted_msg = "";
   std::string::const_iterator i = format.begin();
   while( i != format.end() ) {
-    
+
     // Output format string until format statement found.
-    while(  i != format.end() && *i != FORMAT_PREFIX ) 
+    while(  i != format.end() && *i != FORMAT_PREFIX )
       m_formatted_msg += *i++;
 
     // Test for end of format string.
@@ -277,23 +279,23 @@ void Message::makeFormattedMsg( const std::string& format ) const
     // Find type of formatting.
     std::string this_format = "";
     while( i != format.end() && *i != FORMAT_PREFIX &&
-           *i != MESSAGE && *i != TYPE && *i != SOURCE && 
-           *i != FILL && *i != WIDTH && *i != TIME && *i != UTIME && 
+           *i != MESSAGE && *i != TYPE && *i != SOURCE &&
+           *i != FILL && *i != WIDTH && *i != TIME && *i != UTIME &&
            *i != JUSTIFY_LEFT && *i != JUSTIFY_RIGHT ) {
       this_format += *i++;
     }
-    
+
     // Reached end of string with improper format.
     if ( i == format.end() ) {
       invalidFormat();
       break;
     }
 
-    this_format += *i++;    
+    this_format += *i++;
     decodeFormat( this_format );
   }
 }
-  
+
 //#############################################################################
 // ---------------------------------------------------------------------------
 // Routine: decodeFormat
@@ -305,7 +307,7 @@ void Message::decodeFormat( const std::string& format ) const
   if ( ! format.empty() ) {
     const char FORMAT_TYPE = format[ format.length() - 1 ];
     const std::string FORMAT_PARAM = format.substr( 0, format.length() - 1 );
-    
+
     // Now test the format.
     std::string level;
     switch( FORMAT_TYPE ) {
@@ -313,7 +315,7 @@ void Message::decodeFormat( const std::string& format ) const
       if ( FORMAT_PARAM.length() == 1 ) {
         m_fill = FORMAT_PARAM[0];
       }
-      else 
+      else
         invalidFormat();
       break;
 
@@ -323,7 +325,7 @@ void Message::decodeFormat( const std::string& format ) const
         sizeField( timeStr );
       }
       break;
-      
+
     case UTIME:
       {
         const std::string& timeStr = formattedTime ( m_time_format, true ) ;
@@ -331,18 +333,17 @@ void Message::decodeFormat( const std::string& format ) const
       }
       break;
 
-    case MESSAGE: 
+    case MESSAGE:
       sizeField( m_message );
       break;
-      
-    case SOURCE: 
+
+    case SOURCE:
       sizeField( m_source );
       break;
-      
-    case TYPE: 
+
+    case TYPE:
       switch ( m_type )    {
-        using namespace MSG;
-#define SET(x)  case x:  level=#x;  break 
+#define SET(x)  case x:  level=#x;  break
         SET( NIL );
         SET( VERBOSE );
         SET( DEBUG );
@@ -359,10 +360,10 @@ void Message::decodeFormat( const std::string& format ) const
       sizeField( level );
       break;
 
-    case FORMAT_PREFIX: m_formatted_msg += FORMAT_PREFIX; break;      
-    case JUSTIFY_RIGHT: m_left = false; break;    
-    case JUSTIFY_LEFT: m_left = true; break;      
-    case WIDTH: setWidth( FORMAT_PARAM ); break;      
+    case FORMAT_PREFIX: m_formatted_msg += FORMAT_PREFIX; break;
+    case JUSTIFY_RIGHT: m_left = false; break;
+    case JUSTIFY_LEFT: m_left = true; break;
+    case WIDTH: setWidth( FORMAT_PARAM ); break;
     default: invalidFormat(); break;
     }
   }
@@ -395,14 +396,14 @@ void Message::setWidth( const std::string& formatArg ) const
   bool only_digits = true;
   for( std::string::const_iterator i = formatArg.begin();
        i != formatArg.end(); i++ ) {
-    
+
     if ( ! isdigit( *i ) ) {
       only_digits = false;
       invalidFormat();
       break;
     }
   }
-  
+
   // Convert string to int.
   if ( only_digits ) {
 #ifdef __GNUG__
@@ -420,69 +421,32 @@ void Message::setWidth( const std::string& formatArg ) const
 // ---------------------------------------------------------------------------
 //
 
-void Message::sizeField( const std::string& text ) const 
+void Message::sizeField( const std::string& text ) const
 {
   std::string newText;
   if ( m_width == 0 || m_width == static_cast<int>( text.length() ) ) {
     newText = text;
   }
   else {
-    
+
     // Truncate the text if it is too long.
     if ( m_width < static_cast<int>( text.length() ) ) {
       newText = text.substr( 0, m_width );
       for ( int i = 0, j = newText.length()-1; i < 3 && j >= 0; i++, j-- )
         newText[ j ] = '.';
     }
-    
+
     // Pad the text.
     else {
       newText = std::string( m_width, m_fill );
-      if ( m_left ) 
-        newText.replace( newText.begin(), newText.begin() + text.length(), 
+      if ( m_left )
+        newText.replace( newText.begin(), newText.begin() + text.length(),
                          text.begin(), text.end() );
       else
-        newText.replace( newText.end() - text.length(), newText.end(), 
+        newText.replace( newText.end() - text.length(), newText.end(),
                          text.begin(), text.end() );
     }
   }
 
   m_formatted_msg += newText;
 }
-
-namespace {
-	
-  // get the current time from the system and format it according to the format
-  std::string formattedTime ( std::string fmt, bool universal ) 
-  {
-    // get current time in milliseconds
-    longlong t = System::currentTime( System::milliSec );
-    int msec = static_cast<int>(t % 1000);
-    time_t sec = static_cast<time_t>(t / 1000);
-    
-    // convert to break-down time
-    struct tm tms ;
-    if (universal) {
-      gmtime_r( &sec, &tms );
-    } else {
-      localtime_r( &sec, &tms );
-    }
-    
-    // replace %f in the format string with miliseconds
-    std::string::size_type n = fmt.find("%f") ;
-    if ( n != std::string::npos ) {
-      char subs[4] ;
-      sprintf ( subs, "%03d", msec ) ;
-      while ( n != std::string::npos ) {
-        fmt.replace ( n, 2, subs ) ;
-        n = fmt.find("%f") ;
-      }
-    }
-    
-    char buf[128] ;
-    strftime(buf, 128, fmt.c_str(), &tms );
-    return std::string( buf );
-  }
-  	
-} 
- 

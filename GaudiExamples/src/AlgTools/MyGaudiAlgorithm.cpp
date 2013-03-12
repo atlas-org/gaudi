@@ -10,16 +10,14 @@
 #include "IMyTool.h"
 #include "MyGaudiAlgorithm.h"
 
-
 // Static Factory declaration
-
-DECLARE_ALGORITHM_FACTORY(MyGaudiAlgorithm);
+DECLARE_ALGORITHM_FACTORY(MyGaudiAlgorithm)
 
 // Constructor
 //------------------------------------------------------------------------------
 MyGaudiAlgorithm::MyGaudiAlgorithm(const std::string& name, ISvcLocator* ploc)
   : GaudiAlgorithm(name, ploc)
-  , m_myPrivToolHandle("MyTool/PrivToolHandle",this)
+  , m_myPrivToolHandle("MyTool/PrivToolHandle", this)
   , m_myPubToolHandle("MyTool/PubToolHandle") {
   //------------------------------------------------------------------------------
   declareProperty("ToolWithName", m_privateToolType = "MyTool",
@@ -35,7 +33,7 @@ StatusCode MyGaudiAlgorithm::initialize() {
   StatusCode sc = GaudiAlgorithm::initialize();
   if ( sc.isFailure() ) return sc;
 
-  info() << "initializing...." << endreq;
+  info() << "initializing...." << endmsg;
 
   m_publicTool   = tool<IMyTool>("MyTool");
   m_privateTool  = tool<IMyTool>("MyTool",this);
@@ -49,7 +47,7 @@ StatusCode MyGaudiAlgorithm::initialize() {
     return StatusCode::FAILURE;
   }
 
-  info() << "....initialization done" << endreq;
+  info() << "....initialization done" << endmsg;
 
   return sc;
 }
@@ -58,7 +56,7 @@ StatusCode MyGaudiAlgorithm::initialize() {
 //------------------------------------------------------------------------------
 StatusCode MyGaudiAlgorithm::execute() {
   //------------------------------------------------------------------------------
-  info() << "executing...." << endreq;
+  info() << "executing...." << endmsg;
 
   m_publicTool->doIt();
   m_privateTool->doIt();
@@ -77,7 +75,7 @@ StatusCode MyGaudiAlgorithm::execute() {
 //------------------------------------------------------------------------------
 StatusCode MyGaudiAlgorithm::finalize() {
   //------------------------------------------------------------------------------
-  info() << "finalizing...." << endreq;
+  info() << "finalizing...." << endmsg;
 
   return GaudiAlgorithm::finalize();
 }

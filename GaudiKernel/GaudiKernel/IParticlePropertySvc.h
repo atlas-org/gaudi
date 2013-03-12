@@ -9,9 +9,6 @@
 // Forward declarations.
 class ParticleProperty;
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IParticlePropertySvc(70, 2 , 0); 
-
 /** @class IParticlePropertySvc IParticlePropertySvc.h GaudiKernel/IParticlePropertySvc.h
 
     This class is an interface to the ParticlePropertySvc.
@@ -19,16 +16,16 @@ static const InterfaceID IID_IParticlePropertySvc(70, 2 , 0);
     @author Iain Last
     @author G.Corti
 */
-class IParticlePropertySvc : virtual public IService {
+class GAUDI_API IParticlePropertySvc: virtual public IService {
 
 public:
+  /// InterfaceID
+  DeclareInterfaceID(IParticlePropertySvc,3,0);
+
   // Typedefs for container type
   typedef std::vector<ParticleProperty*> VectPP;
   typedef VectPP::const_iterator         const_iterator;
   typedef VectPP::iterator               iterator;
-
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IParticlePropertySvc; }
 
   /** Create a new particle property
       @param  particle  String name of the particle
@@ -44,20 +41,20 @@ public:
   virtual StatusCode push_back( const std::string& particle,
 				int geantId, int jetsetId,
 				double charge, double mass, double tlife ,
-				const std::string& evtName , int pythiaId , 
+				const std::string& evtName , int pythiaId ,
 				double maxWidth ) = 0;
-  
+
   /** Create a new particle property.
       @param  pp a particle property class
       @return StatusCode - SUCCESS if the particle property was added
   */
   virtual StatusCode push_back( ParticleProperty* pp ) = 0;
-  
+
   /// Get a const reference to the begining of the container.
   virtual const_iterator begin() const = 0;
 
   /// Get a const reference to the end of the container.
-  virtual const_iterator end() const = 0;  
+  virtual const_iterator end() const = 0;
 
   /// Get the container size.
   virtual int size() const = 0;
@@ -80,7 +77,7 @@ public:
   /// Erase a property by particle name.
   virtual StatusCode erase( const std::string& name ) = 0;
 
-  /// Erase a property by StdHep id 
+  /// Erase a property by StdHep id
   virtual StatusCode eraseByStdHepID( int stdHepID ) = 0;
 
 };

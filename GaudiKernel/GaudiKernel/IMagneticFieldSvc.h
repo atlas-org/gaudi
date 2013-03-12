@@ -13,7 +13,7 @@ template <class TYPE> class SvcFactory;
 namespace ROOT {
   namespace Math {
     class DefaultCoordinateSystemTag;
-    
+
     // from Math/Point3Dfwd.h
     template<class CoordSystem, class Tag> class PositionVector3D;
     // from Math/Vector3Dfwd.h
@@ -27,27 +27,23 @@ namespace ROOT {
   }
 }
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IMagneticFieldSvc(80, 1 , 0); 
-
-
 /** @class IMagneticFieldSvc IMagneticFieldSvc.h GaudiKernel/IMagneticFieldSvc.h
 
     The interface to the MagneticFieldSvc
 
     @author Iain Last
 */
-class IMagneticFieldSvc : virtual public IService   {
+class GAUDI_API IMagneticFieldSvc: virtual public IService {
 
 public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IMagneticFieldSvc; }
+  /// InterfaceID
+  DeclareInterfaceID(IMagneticFieldSvc,2,0);
 
   // Get the magnetic field vector at a given point in space.
   // Input: XYZPoint - Point at which magnetic field vector is to be given.
-  // Output: XYZVector - Magnectic field vector.
+  // Output: XYZVector - Magnetic field vector.
   // Return: StatusCode SUCCESS if calculation was performed.
-  virtual StatusCode fieldVector( const ROOT::Math::XYZPoint& xyz, 
+  virtual StatusCode fieldVector( const ROOT::Math::XYZPoint& xyz,
 				  ROOT::Math::XYZVector& fvec ) const = 0;
 
 };

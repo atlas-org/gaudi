@@ -12,6 +12,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
+#include <exception>
 
 bool StatusCode::s_checking(false);
 
@@ -23,42 +24,20 @@ void StatusCode::disableChecking() {
   s_checking = false;
 }
 
-IssueSeverity* StatusCode::cloneSeverity(const IssueSeverity* sev)
-{
-  if( sev ) return new IssueSeverity(*sev);
-  else      return 0;
-}
-
 const IssueSeverity& StatusCode::severity() const {
   static IssueSeverity dummy;
   if (m_severity) return *m_severity;
   else            return dummy;
 }
 
-StatusCode& StatusCode::operator=(const StatusCode& rhs) {
-  if (this == &rhs) return *this; // Protection against self-assignment
-  d_code = rhs.d_code;
-  m_checked = rhs.m_checked;
-  rhs.m_checked = true;
-  if (m_severity) delete m_severity;
-  m_severity = rhs.m_severity ? cloneSeverity(rhs.m_severity): 0;
-  return *this;
-}
-
 StatusCode::~StatusCode() {
-  if(s_checking) {
+  if(UNLIKELY(s_checking)) {
 
-    if (!m_checked && !GaudiException::s_proc) {
+    if (!m_checked && !GaudiException::s_proc && !std::uncaught_exception() ) {
 
-      IMessageSvc* msg = 0 ;
-      if(Gaudi::svcLocator()->service("MessageSvc", msg, true).isFailure()) {
-        msg = 0 ; // one cannot rely on the returned value on the previous line
-      }
+      SmartIF<IMessageSvc> msg(Gaudi::svcLocator());
 
-      IStatusCodeSvc *scs = 0 ;
-      if (Gaudi::svcLocator()->service("StatusCodeSvc",scs,true).isFailure()) {
-        scs = 0 ; // one cannot rely on the returned value on the previous line
-      }
+      SmartIF<IStatusCodeSvc> scs(Gaudi::svcLocator()->service("StatusCodeSvc"));
 
       const size_t depth = 21;
       void* addresses[depth];
@@ -84,10 +63,7 @@ StatusCode::~StatusCode() {
         }
 
       }
-      if (msg) msg->release();
-      if (scs) scs->release();
     }
   }
-  if (m_severity) delete m_severity;
 }
 

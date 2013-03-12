@@ -10,22 +10,23 @@
 #include <string>
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/exception.hpp" /*filesystem_error*/
+#include "GaudiKernel/Kernel.h" /* GAUDI_API */
 /** @class DirSearchPath
  * @brief search for files in a list of directories
  * @author Paolo Calafiura <pcalafiura@lbl.gov> - ATLAS Collaboration
  * $Id: DirSearchPath.h,v 1.2 2007/10/16 15:37:25 marcocle Exp $
  */
-class DirSearchPath {
+class GAUDI_API DirSearchPath {
 public:
   typedef boost::filesystem::path path;
 
-  /// \name structors
+  /// \name constructors
   //@{
   DirSearchPath() { addCWD(); }
   /// \throws boost::filesystem::filesystem_error
 #ifdef _WIN32
   DirSearchPath(const std::string& stringifiedPath, const char* separator=",;");
-#else 
+#else
   DirSearchPath(const std::string& stringifiedPath, const char* separator=",:");
 #endif
   //@}
@@ -48,7 +49,7 @@ public:
   std::list<path> find_all(const path& file) const;
   //@}
 
-  
+
   /// \name helpers
   //@{
   static bool existsDir(const std::string& dirName); ///< check dirName is valid

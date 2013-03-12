@@ -18,17 +18,15 @@
  *  @author Marco Clemencic
  *  @date   2005-12-14
  */
-class TimeException: public GaudiException {
+class GAUDI_API TimeException: public GaudiException {
 public:
   // Standard constructor
   TimeException( const std::string& Message = "unspecified exception",
                  const std::string& Tag = "*Gaudi::Time*",
                  const StatusCode & Code = StatusCode::FAILURE ):
     GaudiException(Message,Tag,Code) {}
-  /// Destructor.
-  virtual ~TimeException() throw () {}
-  /// Clone the exception.
-  virtual TimeException* clone() const { return new TimeException(*this); }
+  /// Destructor needed to match the signature of GaudiException::~GaudiException().
+  virtual ~TimeException() throw() {}
 };
 
 struct tm;
@@ -56,7 +54,7 @@ namespace Gaudi {
    *  @author Marco Clemencic
    *  @date   2005-12-15
    */
-  class TimeSpan {
+  class GAUDI_API TimeSpan {
     friend class Time;
   public:
     typedef longlong ValueType;
@@ -213,7 +211,7 @@ namespace Gaudi {
    *  @author Marco Clemencic
    *  @date   2005-12-15
    */
-  class Time {
+  class GAUDI_API Time {
     friend class TimeSpan;
   public:
     typedef longlong ValueType;
@@ -250,7 +248,7 @@ namespace Gaudi {
     Time (int year, int month, int day, int hour, int min, int sec,
           ValueType nsecs, bool local = true);
     // implicit copy constructor
-    // implicit assingment operator
+    // implicit assignment operator
     // implicit destructor
 
     /// Returns the minimum time.
@@ -286,8 +284,8 @@ namespace Gaudi {
 
     ValueType  ns (void) const;
 
-    std::string  format (bool local, const std::string &spec) const;
-    std::string  nanoformat (int minwidth = 1, int maxwidth = 9) const;
+    std::string  format (bool local, std::string spec = "%c") const;
+    std::string  nanoformat (size_t minwidth = 1, size_t maxwidth = 9) const;
 
     static bool  isLeap (int year);
 

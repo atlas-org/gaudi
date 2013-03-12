@@ -22,7 +22,7 @@ Prescaler::initialize()
   const StatusCode sc = GaudiAlgorithm::initialize();
   if ( !sc) return sc;
 
-  info() << name( ) << ":Prescaler::Initialize - pass: " << m_percentPass << endreq;
+  info() << name( ) << ":Prescaler::Initialize - pass: " << m_percentPass << endmsg;
  
  return sc;
 }
@@ -34,9 +34,9 @@ Prescaler::execute()
   float fraction = (float(100.0) * (float)(m_pass+1)) / (float)m_seen;
   if ( fraction > m_percentPass ) {
     setFilterPassed( false );
-    info() << name() << ":Prescaler::execute - filter failed" << endreq;
+    info() << name() << ":Prescaler::execute - filter failed" << endmsg;
   } else {
-    info() << name() << ":Prescaler::execute - filter passed" << endreq;
+    info() << name() << ":Prescaler::execute - filter passed" << endmsg;
     ++m_pass;
   }
   return StatusCode::SUCCESS;
@@ -46,6 +46,6 @@ StatusCode
 Prescaler::finalize()
 {
   info() << name( ) << ":Prescaler::finalize - total events: "
-         << m_seen << ", passed events: " << m_pass << endreq;
+         << m_seen << ", passed events: " << m_pass << endmsg;
   return GaudiAlgorithm::finalize();
 }

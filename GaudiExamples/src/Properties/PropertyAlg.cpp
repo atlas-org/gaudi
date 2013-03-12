@@ -13,10 +13,10 @@
 
 #include "PropertyAlg.h"
 
-
-// Static Factory declaration
-
-DECLARE_ALGORITHM_FACTORY(PropertyAlg);
+#ifdef __ICC
+// disable icc remark #1572: floating-point equality and inequality comparisons are unreliable
+#pragma warning(disable:1572)
+#endif
 
 // Read Handler
 //------------------------------------------------------------------------------
@@ -42,11 +42,15 @@ PropertyAlg::PropertyAlg(const std::string& name, ISvcLocator* ploc)
   // Declare the algorithm's properties
 
   declareProperty( "Int",    m_int    = 100);
+  declareProperty( "Int64",  m_int64  = 100);
+  declareProperty( "UInt64", m_uint64 = 100);
   declareProperty( "Double", m_double = 100.);
   declareProperty( "String", m_string = "hundred");
   declareProperty( "Bool",   m_bool   = true);
 
   declareProperty( "IntArray",    m_intarray );
+  declareProperty( "Int64Array",  m_int64array );
+  declareProperty( "UInt64Array", m_uint64array );
   declareProperty( "DoubleArray", m_doublearray);
   declareProperty( "StringArray", m_stringarray);
   declareProperty( "BoolArray",   m_boolarray);
@@ -81,10 +85,14 @@ PropertyAlg::PropertyAlg(const std::string& name, ISvcLocator* ploc)
   log << MSG::INFO << "Before Initialization......" << endmsg;
 
   log << MSG::INFO << "Int    = " << m_int << endmsg;
+  log << MSG::INFO << "Int64  = " << m_int64 << endmsg;
+  log << MSG::INFO << "UInt64 = " << m_uint64 << endmsg;
   log << MSG::INFO << "Double = " << m_double << endmsg;
   log << MSG::INFO << "String = " << m_string << endmsg;
   log << MSG::INFO << "Bool   = " << m_bool << endmsg;
   log << MSG::INFO << "IntArray    = " << m_intarray << endmsg;
+  log << MSG::INFO << "Int64Array  = " << m_int64array << endmsg;
+  log << MSG::INFO << "UInt64Array = " << m_uint64array << endmsg;
   log << MSG::INFO << "DoubleArray = " << m_doublearray << endmsg;
   log << MSG::INFO << "StringArray = " << m_stringarray << endmsg;
   log << MSG::INFO << "BoolArray   = " << m_boolarray << endmsg;
@@ -116,10 +124,14 @@ StatusCode PropertyAlg::initialize() {
       << endmsg;
 
   log << MSG::INFO << "Int    = " << m_int << endmsg;
+  log << MSG::INFO << "Int64  = " << m_int64 << endmsg;
+  log << MSG::INFO << "UInt64 = " << m_uint64 << endmsg;
   log << MSG::INFO << "Double = " << m_double << endmsg;
   log << MSG::INFO << "String = " << m_string << endmsg;
   log << MSG::INFO << "Bool   = " << m_bool << endmsg;
   log << MSG::INFO << "IntArray    = " << m_intarray << endmsg;
+  log << MSG::INFO << "Int64Array  = " << m_int64array << endmsg;
+  log << MSG::INFO << "UInt64Array = " << m_uint64array << endmsg;
   log << MSG::INFO << "DoubleArray = " << m_doublearray << endmsg;
   log << MSG::INFO << "StringArray = " << m_stringarray << endmsg;
   log << MSG::INFO << "BoolArray   = " << m_boolarray << endmsg;
@@ -139,6 +151,7 @@ StatusCode PropertyAlg::initialize() {
   // Checking units
   //
   for (unsigned int i = 0; i < u_doublearrayunits.size(); i++ ) {
+
     if( u_doublearrayunits[i] != u_doublearray[i] ) {
       log << MSG::ERROR
           << format
@@ -198,7 +211,7 @@ StatusCode PropertyAlg::initialize() {
 
   log << MSG::INFO << "==========Checking Accesing Properties by string=========" << endmsg;
 
-  SmartIF<IProperty> appmgr(IID_IProperty, serviceLocator());
+  SmartIF<IProperty> appmgr(serviceLocator());
   //StatusCode sc = serviceLocator()->service("ApplicationMgr", appmgr);
   if( !appmgr.isValid() ) {
     log << MSG::ERROR << "Unable to locate the ApplicationMgr" << endmsg;
@@ -304,4 +317,5 @@ StatusCode PropertyAlg::finalize() {
   return StatusCode::SUCCESS;
 }
 
-
+// Static Factory declaration
+DECLARE_ALGORITHM_FACTORY(PropertyAlg)

@@ -9,10 +9,10 @@
 //  Author    : M.Frank
 //  History   :
 // +---------+----------------------------------------------+---------
-// |    Date |                 Comment                      | Who     
+// |    Date |                 Comment                      | Who
 // +---------+----------------------------------------------+---------
 // | 29/10/98| Initial version                              | MF
-// | 29/09/99| Added access to ICnvManager for missing      | 
+// | 29/09/99| Added access to ICnvManager for missing      |
 // |         | converters                                   | MF
 // | 20/09/00| Connect dynamically to conversion service    |
 // |         | for N-tuple persistency                      | MF
@@ -114,13 +114,14 @@ StatusCode TagCollectionSvc::connect(const std::string& ident, std::string& logn
             switch(::toupper((*i).value()[0]))  {
               case 'Y':
                props.push_back( Prop("ShareFiles", (*i).value()));
+               break ;
             }
             break;
           }
           break;
         case 'T':   // TYP='<HBOOK,ROOT,OBJY,...>'
           switch(::toupper((*i).value()[0]))  {
-          case 'H':                  
+          case 'H':
             svc = "HbookCnv::ConvSvc";
             break;
           case 'P':
@@ -156,39 +157,38 @@ StatusCode TagCollectionSvc::connect(const std::string& ident, std::string& logn
 }
 
 /// Create conversion service
-StatusCode TagCollectionSvc::createService( const std::string& nam, 
-                                            const std::string& typ, 
-                                            const std::vector<Prop>& props, 
+StatusCode TagCollectionSvc::createService( const std::string& nam,
+                                            const std::string& typ,
+                                            const std::vector<Prop>& props,
                                             IConversionSvc*& pSvc)    {
-  SmartIF<ISvcManager> mgr(IID_ISvcManager, serviceLocator());
+  using Gaudi::Utils::TypeNameString;
+  SmartIF<ISvcManager> mgr(serviceLocator());
 
-  // FIXME: (MCl) why TagCollectionSvc has to directly create a ConversionSvc?  
+  // TagCollectionSvc has to directly create a ConversionSvc to manage it directly.
   StatusCode status = NO_INTERFACE;
-  if ( mgr.isValid( ) )    {
-    IService* isvc = 0;
-    status = mgr->createService(typ, nam, isvc);
-    if ( status.isSuccess() )   {
-      status = isvc->queryInterface(IID_IConversionSvc, (void**)&pSvc);
+  if ( mgr.isValid() )    {
+
+    SmartIF<IService> &isvc = mgr->createService(TypeNameString(nam, typ));
+    if (isvc.isValid())   {
+      status = isvc->queryInterface(IConversionSvc::interfaceID(), (void**)&pSvc);
       if ( status.isSuccess() )     {
-        SmartIF<IProperty> iprop(IID_IProperty,isvc);
+        SmartIF<IProperty> iprop(isvc);
         status = NO_INTERFACE;
         if ( iprop.isValid( ) )    {
           for ( std::vector<Prop>::const_iterator j = props.begin(); j != props.end(); j++)   {
             iprop->setProperty(StringProperty((*j).first, (*j).second)).ignore();
           }
-          // FIXME: (MCl) why NTupleSvc has to directly create a ConversionSvc?  
+          // NTupleSvc has to directly create a ConversionSvc to manage it directly.
           status = isvc->sysInitialize();
           if ( status.isSuccess() )   {
             status = pSvc->setDataProvider(this);
             if ( status.isSuccess() )   {
-              isvc->release();
               return status;
             }
           }
         }
         pSvc->release();
       }
-      isvc->release();
     }
   }
   pSvc = 0;

@@ -1,5 +1,448 @@
 Package GaudiExamples
-Package manager : Pere Mato
+Package manager : Marco Clemencic
+
+============================ GaudiExamples v23r6 =============================
+============================ GaudiExamples v23r5 =============================
+! 2012-11-15 - Marco Clemencic
+ - Added a test for CorruptedInputFile exit code that uses a real corrupted
+   file.
+
+! 2012-11-12 - Marco Clemencic
+ - Added a test algorithm to fire custom incidents.
+ - Test the return code in case of incident CorruptedInputFile.
+
+! 2012-11-07 - Marco Clemencic
+ - Added work-around for bug #98693:
+     inconsistent behavior after segfault in Python (ROOT).
+
+! 2012-11-05 - Marco Clemencic
+ - Test that the return code is correct after a segfault.
+
+============================ GaudiExamples v23r4 =============================
+! 2012-09-11 - Marco Clemencic
+ - Added test for the feature introduced in patch #5518 (histogram for timing
+   measurements).
+
+! 2012-07-27 - Marco Clemencic
+ - Rationalized the permissions of files in the repository.
+
+! 2012-06-28 - Marco Clemencic
+ - Modified a property test to expose bug #95733 and updated reference files
+   after the fix.
+
+============================ GaudiExamples v23r3 =============================
+! 2012-06-09 - Marco Clemencic
+ - Fixed a compilation warning in the IntelProfiler examples.
+
+! 2012-06-08 - Marco Clemencic
+ - Added CMake configuration files.
+
+! 2012-06-07 - Marco Clemencic
+ - Fixed Clang warnings.
+
+! 2012-06-06 - Marco Clemencic
+ - Task #22742: Optimize the GaudiAlgorithm get() functions
+   - added call to getIfExists in GaudiCommonTest algorithm
+
+! 2012-05-30 - Vanya Belyaev
+ - Patch #5379: Improvements for GaudiAlgs.py
+   - TupleEx1.py
+     add long long and unsigned long long columns
+
+! 2012-05-03 - Marco Clemencic
+ - Fixed some "pedantic" warnings.
+
+============================ GaudiExamples v23r2 =============================
+! 2012-02-24 - Sasha Mazurov
+ - Patch #5210: add example for IntelProfiler
+   (see doc/intelprofiler.md)
+
+============================ GaudiExamples v23r1 =============================
+! 2012-02-27 - Marco Clemencic
+ - Fixed glitches in the Google Profiling tests
+   - normalized CPU profiler output
+   - disabled tests on i686 (the package is not built on that platform)
+
+! 2012-02-24 - Vanya Belyaev
+ - Patch #5235: ntuples in (Gaudi)Python
+   - TupleEx4.py:
+       remove esoteric vectors and add n-tuple with Time
+
+! 2012-02-22 - Marco Clemencic
+ - Added tests for Google Profiling Auditors (patch #4852).
+
+! 2012-02-06 - Marco Clemencic
+ - Extended property tests to use 64 bit integers (patch #5204).
+
+============================ GaudiExamples v23r0 =============================
+! 2012-01-25 - Marco Clemencic
+ - Added a test service to trigger failures in various stages.
+
+! 2012-01-24 - Marco Clemencic
+ - Updated few reference files after the update of RootCnv.
+ - Removed obsolete script create_qmt_files.py
+
+! 2012-01-17 - Marco Clemencic
+ - Minor changes in DataOnDemandSvc after improvements in the code.
+
+! 2012-01-16 - Marco Clemencic
+ - Added a test for the new dynamic mapping of DataOnDemandSvc (based on the
+   already existing test).
+
+! 2011-12-13 - Marco Clemencic
+ - Added tests using namespace qualifiers in instance names in .opts (Gaudi.exe
+   and gaudirun.py).
+ - Reordering of tests.
+
+! 2011-12-12 - Marco Clemencic
+ - Fixed tests for new dependencies:
+   - updated configuration
+   - translated options
+   - fixed dependencies
+ - Fixed EvtCol{Write,Read}.py scripts.
+
+! 2011-12-09 - Marco Clemencic
+ - Rationalized structure:
+   - removed obsolete test runner scripts
+   - moved python scripts 'scripts'
+   - moved reference files to 'tests/qmtest/refs'
+   - moved input.hbook to 'tests/data'
+ - Added a ConfigurableUser to simplify the configuration (replaces Common.opts)
+
+! 2011-12-08 - Marco Clemencic
+ - Ported POOLIO Write and Read tests to ROOT.
+
+! 2011-12-05 - Marco Clemencic
+ - Removed the unused FastContainerSvc.
+ - Moved ParticlePropertySvc to a dedicated package and wrapped it in the
+   namespace Gaudi.
+
+! 2011-12-02 - Marco Clemencic
+ - Removed DataListenerSvc test.
+
+! 2011-12-01 - Chris Jones
+ - Fixed bug #85377: GaudiTuple tuple does not undestand ulonglong
+   Add some addition Tuple checks, for various data types.
+
+! 2011-11-22 - Marco Clemencic
+ - Fixed gcc 4.6 warning (-Wunused-but-set-variable).
+   It was already present with ICC, but disabled.
+
+============================ GaudiExamples v22r5 =============================
+============================ GaudiExamples v22r4 =============================
+! 2011-09-02 - Marco Clemencic
+ - Extended ExtendedProperties test to expose bug #86303
+
+============================ GaudiExamples v22r3 =============================
+! 2011-08-16 - Marco Clemencic
+ - Fixed some tests (checks) on Windows.
+
+! 2011-08-15 - Marco Clemencic
+ - Updated reference files (patch #5014)
+
+! 2011-08-04 - Marco Clemencic
+ - Updated a reference file (patch #4923)
+
+! 2011-07-26 - Marco Clemencic
+ - Update of a reference file (patch #4891).
+
+! 2011-06-23 - Hubert Degaudenzi
+ - fixed warnings from the eclipse code analysis engine.
+
+! 2011-04-27 - Charles Leggett
+ - added explicit -import=Reflex to requirements
+ M     cmt/requirements
+
+============================ GaudiExamples v22r2 =============================
+! 2011-04-08 - Marco Clemencic
+ - Updated IncidentSvc test after the introduction of the new incidents
+   BeginProcessing and EndProcessing.
+
+! 2011-03-23 - Marco Clemencic
+ - Fixed VC9 warnings.
+   - Replaced C-style string manipulation and formatting with C++ (and Boost)
+     implementations.
+   - Disabled some warnings.
+
+! 2011-03-16 - Marco Clemencic
+ - Updated reference files after patch #4727
+
+! 2011-03-09 - Marco Clemencic
+ - Modified the ErrorLog QMTest description to work with builds both from CMT
+   and CMake.
+
+============================ GaudiExamples v22r1 =============================
+============================ GaudiExamples v22r0 =============================
+! 2011-01-20 - Marco Clemencic
+ - Added a test for bug #74981.
+
+! 2011-01-19 - Markus Frank
+ - Fixes for bug #77109.  Remove calls to DataObject::serialize.
+   (patch #4613)
+
+! 2011-01-17 - Brett Viren, Marco Clemencic
+ - Fixed bug #75996: Support for CLHEP 2.0
+   Added a "using namespace CLHEP".
+
+! 2011-01-17 - Marco Clemencic
+ - Bug #76642: Strange behaviour of InputCopyStream
+   Added a test to validate the new behavior of InputCopyStream (fail if
+   called after OutputStream).
+
+! 2011-01-12 - Marco Clemencic
+ - Fixed bug #76395: spurious count printouts in MyTrack and MyVertex classes
+   Modified MyTrack and MyVertex to print the count of lost instances only
+   if different from 0.
+
+! 2011-01-11 - Marco Clemencic
+ - Fixed some ICC remarks.
+
+============================ GaudiExamples v21r11 ============================
+! 2010-09-22 - Marco Clemencic
+ - Added test for bug #71216
+   (Gaudi crashes when output nTuple file cannot be written)
+
+! 2010-09-21 - Marco Clemencic
+ - Fixed bug #70956: Add method to find the reason for termination of the
+                     event loop
+   - Added tests for the various application return codes.
+
+! 2010-09-02 - Marco Clemencic
+ - Fixed configuration for the Python binary module.
+
+! 2010-09-01 - Marco Clemencic
+ - Added an example of a Python binary module in src/PythonModule (plus test).
+
+! 2010-08-18 - Charles Leggett
+ - Patch #4323: allow user defined heavy ion handling in PartPropSvc
+
+============================ GaudiExamples v21r10 ============================
+! 2010-07-13 - Markus Frank
+ - Patch #4212: Fix to POOLIOextColl tests
+
+! 2010-06-24 - Markus Frank
+ - Patch #4212: Adapt POOLIO tests to check event tag collection bug
+   in case address column is booked AFTER arrays/matrices.
+   (patch #4210)
+
+! 2010-05-27 - Charles Leggett
+ - Patch #3683: Ignore unchecked StatusCodes in xxxDict.so libraries
+   Added an example of usage of the StatusCodeSvc filters.
+
+============================ GaudiExamples v21r9 =============================
+! 2010-04-23 - Marco Clemencic
+ - Adapted the tests to the changed the default values of ApplicationMgr
+   properties StopOnSignal and StalledEventMonitoring.
+
+! 2010-04-22 - Marco Clemencic
+ - Added an algorithm to test the signal handler (GaudiTesting::SignallingAlg)
+   and the QMTest test.
+
+! 2010-04-20 - Marco Clemencic
+ - Removed ICC warnings and remarks.
+
+============================ GaudiExamples v21r8 =============================
+! 2010-03-16 - Vanya Belyaev
+ - Patch #3840: Fix for bug #59009
+   Add ascii-dump for python histogram examples fix the corresponding reference
+   files.
+
+! 2010-02-26 - Marco Clemencic
+ - Added a test for the EventTimeoutWatchdog of the EventLoopMgr.
+
+! 2010-01-29 - Marco Clemencic
+ - Fixed icc warning #191: type qualifier is meaningless on cast type
+
+! 2010-01-28 - Marco Clemencic
+ - Fixed icc remark #424: extra ";" ignored
+ - Fixed icc remark #593: variable "X" was set but never used
+ - Fixed icc remark #177: X declared but never referenced
+
+============================ GaudiExamples v21r7 =============================
+! 2010-01-14 - Juan Palacios
+ - Patch #3652: Bug fixes for GaudiPython HistoUtils.py and TupleUtils.py
+   - TupleEx4.py : update the example of usage of Gaudi-NTuples for GaudiPython
+                   scripts
+
+! 2010-01-11 - Vanya Belyaev
+ - Patch #3588: Fix a typo (&logic) in GaudiPython.GaudiAlgs module for "Histo()" method
+   - python/HistoEx2.py:
+     extend a little bit the example to test "Histos()" method.
+
+! 2010-01-11 - Marco Clemencic
+ - Updated the reference files after patch #3478.
+
+! 2010-01-06 - Marco Clemencic
+ - Updates reference files after a change in GaudiPoolDb default options (fix).
+
+! 2009-12-18 - Marco Clemencic
+ - Modified the tests to be able to run them from a read-only area.
+
+============================ GaudiExamples v21r6 =============================
+! 2009-11-10 - Rob Lambert
+ - Patch #3444: Patch to fix logic error in RecordStream
+   - updated reference files
+
+================ GaudiExamples v21r5 ====================================
+! 2009-10-13 - Marco Clemencic
+ - Disabled the support for LorentzVector as Property (patch #3223) on Windows
+   (compilation problem).
+ - Clean-up and update of test reference files for Windows.
+
+! 2009-10-12 - Marco Clemencic
+ - Normalization of white-spaces in Python files.
+   (using http://svn.python.org/projects/python/tags/r254/Tools/scripts/reindent.py)
+ - Added QMTest test to run the example of patch #2978.
+
+! 2009-10-12 - Vanya Belyaev
+ - Patch #2978: GaudiKernel/StringKey.h
+   Added example script to test the StringKey class.
+
+! 2009-10-08 - Vanya Belyaev
+ - Patch #3311: Add ASCII dump for 1D-profile histograms
+   Extension of patch #3261 to 1D-profile histograms
+ - Patch #3223: Add some more "Extended" property types to Gaudi
+   Added examples of the new properties.
+
+! 2009-10-07 - Vanya Belyaev
+ - Patch #3261: Utility for ASCII dump of 1D-histograms
+   Simple test that run a small example using the 1D histogram dump.
+
+! 2009-10-05 - Marco Clemencic
+ - Extended the test on algorithm destructors to take into account the case of
+   shared sub-algorithms.
+
+! 2009-10-02 - Marco Clemencic
+ - Fixed bug #56358: Algorithms crashing in finalize are finalized a second time
+   - Modified EvtColWrite.py and EvtColRead.py to call explicitly AppMgr.exit()
+     (not called automatically, probably because of a circular dependency
+     between Python objects).
+ - Fixed bug #55292: Algorithms are never deleted
+   - Added a test to verify that the destructors of algorithm are actually called.
+ - Introduced a directory for test-specific algorithms.
+
+! 2009-09-21 - Marco Clemencic
+ - Removed osx specific reference files (the normal Linux ones are good enough)
+
+! 2009-09-18 - Marco Clemencic
+ - Updated reference files after patch #3249.
+
+! 2009-09-08 - Marco Clemencic
+ - Updated reference files after patch #3222.
+
+================ GaudiExamples v21r4 ====================================
+! 2009-09-02 - Marco Clemencic
+ - Updated Linux reference files after patch #3182.
+
+! 2009-07-30 - Marco Clemencic
+ - Fixed some doxygen warnings.
+ - Fixed a bug in src/GSLTools/FuncMinimumIAlg.cpp.
+
+! 2009-07-27 - Marco Clemencic
+ - Adapted the reference files to the changes in GaudiAlg.
+
+! 2009-07-20 - Marco Clemencic
+ - Fixed a misuse of boost::assign::list_of.
+ - Added '-no_static' to the declaration of the libraries (implemented since CMT
+   v1r20p20081118).
+
+! 2009-07-16 - Vanya Belyaev
+ - Patch #3134:
+   - Some polishing of GaudiPython.GaudiAlgs module and related modules
+   - More handles for interactive algorithm inspection (GaudiPython)
+   Detailed description in GaudiAlg/doc/patch_3134.html
+
+================ GaudiExamples v21r3 ====================================
+! 2009-07-08 - Christopher Rob Jones
+ - Patch #3095: Add support for variable bin width histograms to GaudiAlg
+
+! 2009-07-08 - Marco Clemencic
+ - Removed the usage of extend_interfaces1.
+
+! 2009-07-03 - Marco Clemencic
+ - Updated reference files after changes for  bug #46519.
+
+================ GaudiExamples v21r2 ====================================
+! 2009-06-29 - Marco Clemencic
+ - Removed the special compile time flag for the dictionary (problem fixed in
+   ROOT 5.22.00c)
+
+! 2009-06-22 - Marco Clemencic
+ - Added a compile time flag for the dictionary to hide warnings.
+
+! 2009-06-15 - Hubert Degaudenzi
+ - use the new LCG tag convention.
+
+! 2009-06-10 - Marco Clemencic
+ - Removed _dll.cpp and _load.cpp files (not needed anymore).
+
+! 2009-05-19 - Marco Clemencic
+ - Fixed a typo in python/HistEx2.py, added a test python/Aida2RootEx.py and
+   adapted it to recent changes.
+
+================ GaudiExamples v21r1 ====================================
+! 2009-05-19 - Marco Clemencic
+ - Removed the dependency on HbookCnv.
+
+! 2009-05-15 - Marco Clemencic
+ - Fixed bug #50389: AppMgr.algorithm/tool/algorithms does not work for
+                     GaudiPython::PyAlg<TYPE>
+   Changed the inheritance from "implements#": replaced "virtual public" with
+   "public" (more correct and does not confuse PyROOT).
+   Added the suggested line to HistoEx.py in order to test the feature.
+
+! 2009-05-07 - Marco Clemencic
+ - Removed the usage of SmartIF::pRef in RandomNumberAlg.cpp (and fixed a typo
+   in the name of the file).
+
+================ GaudiExamples v21r0 ====================================
+! 2009-04-20 - Marco Clemencic
+ - Removed the code introduced with patch #2601 (prototype for file summary
+   records) made obsolete by patch #2699.
+
+! 2009-04-07 - Marco Clemencic
+ - Moved back the namespace MSG to the global namespace.
+
+! 2009-04-07 - Markus Frank
+ - Patch #2955: Fixup to Records service
+   (Marco Clemencic: updated reference files)
+
+! 2009-04-06 - Marco Clemencic
+ - Updated reference files after fix to bug #48942.
+ - Updated reference files after patch #2930 (Unix only).
+ - Renamed back the namespace Msg to MSG and moved it into the namespace Gaudi.
+ - Renamed back INamed to INamedInterface.
+
+! 2009-04-03 - Markus Frank
+ - Patch #2792: Update to file records service
+   - Renamed /RunRecords to /FileRecords.
+   - Removed the default sub-directories in the RecordDataSvc.
+
+! 2009-03-13 - Marco Clemencic
+ - Task #9061: Introduction of component managers
+   - Adapted to use the changes in the ISvcLocator, ISvcManager and IAlgManager
+     interfaces.
+ - Updated the reference files for the tests.
+
+! 2009-02-19 - Marco Clemencic
+ - Patch #2790: Rename the namespace MSG to Msg
+
+! 2009-02-06 - Marco Clemencic
+ - Moved the implementation of the methods addRef and release to the templated
+   base class implements<> (avoids duplication).
+
+! 2009-01-30 - Marco Clemencic
+ - Replaced all the occurrences of endreq with endmsg.
+
+! 2009-01-29 - Marco Clemencic
+ - Symbol visibility
+   - Decorated the test event model classes in src/Lib: Collision, Counter,
+     Event, MyTrack, MyVertex (see GaudiKernel release.notes).
+
+! 2009-01-22 - Marco Clemencic
+ - Adapted to the new IInterface functionalities (see GaudiKernel release.notes)
+ - Removed the IID_* constants.
+ - Fixed some reference files after a fix of the spelling of a word.
 
 ================ GaudiExamples v20r4 ====================================
 ! 2008-12-10 - Marco Clemencic
@@ -62,10 +505,10 @@ Package manager : Pere Mato
  - Patch #2073: SharedObjectsContainer and 'blind' access to TYPE::Container &
                 TYPE::Selection
    Added an example (Selections) to illustrate the usage of 'blind' access to
-   containers and SharedObjectsContainer. 
+   containers and SharedObjectsContainer.
 
 ! 2008-10-09 - Pere Mato
- - Patch #2261. Introducing name alias for Algorithms and Services 
+ - Patch #2261. Introducing name alias for Algorithms and Services
    Added the new macros DECLARE_NAMED_ALGORITHM_FACTORY(type,name) to be used
    instead of the current DECLARE_ALGORITHM_FACTORY(type) for algorithms with
    templates. Similarly for Services.
@@ -149,7 +592,7 @@ Package manager : Pere Mato
    - TimingAlg.cpp: simple example which illustrates all ways to measure the
                     timing of some lines of code.
    - Timing.opts: the configuration file to run TimingAlg.cpp example.
- 
+
 ! 2008-05-05 - Marco Clemencic
  - Updated reference files for DataOnDemand example.
 
@@ -166,7 +609,7 @@ Package manager : Pere Mato
 
 ! 2008-03-03 - Marco Clemencic
  - Added test for bug #34121 (setting tool properties in Python).
- 
+
 ================ GaudiExamples v19r8 ====================================
 ! 2008-02-25 - Marco Clemencic
  - Added test based on the options GSLTools.opts (a very basic one).
@@ -177,7 +620,7 @@ Package manager : Pere Mato
 
 ================ GaudiExamples v19r7 ====================================
 ! 2008-01-30 - Marco Clemencic
- - Adaptations to changes in GaudiPoolDb and GaudiUtils. 
+ - Adaptations to changes in GaudiPoolDb and GaudiUtils.
 
 ! 2008-01-29 - Marco Clemencic
  - Minor improvement to the test gaudiexamples.abort_event.
@@ -194,7 +637,7 @@ Package manager : Pere Mato
 ! 2008-01-15 - Marco Clemencic
  - Moved the validation of the ext_props tests into a separate file (Python
    module), because it is shared among the two tests, and added a hack for
-   windows output (which differs from the unix one). 
+   windows output (which differs from the unix one).
 
 ! 2008-01-14 - Marco Clemencic
  - Synchronized options/ExtendedProperties.py with its .opts counterpart.
@@ -202,7 +645,7 @@ Package manager : Pere Mato
 
 ! 2008-01-14 - Vanya BELYAEV
  - Patch #1581.
-   - src/ExtendedProperties/ExtendedProperties.cpp 
+   - src/ExtendedProperties/ExtendedProperties.cpp
    - options/ExtendedProperties.opts
      add new types for the properties
 
@@ -228,7 +671,7 @@ Package manager : Pere Mato
 
 ! 2007-10-29 - Pere Mato
  - removed fake dictionary of DataObject in the DataOnDemand example.
- 
+
 ! 2007-10-22 - Marco Clemencic
  - Use the pattern QMTest and add .qmt files (QMTest test description) for all
    the tests run usually with runexamples.py.
@@ -239,7 +682,7 @@ Package manager : Pere Mato
 
 ! 2007-09-28 - Pere Mato
  - Renamed the meta module containing common configurables from ConfDb to
-   Configurables. 
+   Configurables.
 
 ! 2007-09-28 - Marco Clemencic
  - Changed all "long" persistent data to "int".
@@ -321,7 +764,7 @@ Package manager : Pere Mato
  - protected persistent class behind the Gaudi::Examples namespace.
 
 ! 2007-02-19 - Ivan Belyaev
- Patch #1002: 
+ Patch #1002:
  - added use of the new timing tool to the Alsequence options
 
 ! 2007-02-16 - Charles Leggett
@@ -334,63 +777,63 @@ Package manager : Pere Mato
 ! 2007-02-13 - Vanya Belyaev
   patch #1024
  - python/Properties.py
-   python/ExtendedProperties.py 
+   python/ExtendedProperties.py
 
-   Two python examples 
-  (full analogues for C++ exmples 
+   Two python examples
+  (full analogues for C++ exmples
    options/Property.opt and options/ExtendedProperties.opts)
-   which illustrates the usage of simple and extended 
+   which illustrates the usage of simple and extended
     properties through python
 
-   The last couple of lines for both scripts are commented, 
-   since gaudimodule.iProperty.properties() method 
+   The last couple of lines for both scripts are commented,
+   since gaudimodule.iProperty.properties() method
    is broken with reimplementation using PropertyEntry class.
 
-   th ecorrect behavior is easy to turn on, 
-   one just need to replace the line: 
- 
+   th ecorrect behavior is easy to turn on,
+   one just need to replace the line:
+
          dct[p.name()] = PropertyEntry(p)
 
    with the correct line:
 
-          dct[p.name()] = self.__getattr__( p.name() ) 
+          dct[p.name()] = self.__getattr__( p.name() )
 
-   The real problem is that PropertyEntry is 
-   assumes that property coudl be ONLY of type 
+   The real problem is that PropertyEntry is
+   assumes that property coudl be ONLY of type
    either ATLAS' GaudiHandler or some primitive type.
-   PropertyEntry does not support the property types, 
+   PropertyEntry does not support the property types,
    widely used in LHCb.
 
  - options/DataOnDemandSvc.opts
 
-   1) replace the (old) properties DataOnDemand.Nodes and 
+   1) replace the (old) properties DataOnDemand.Nodes and
    DataOnDemand.Algorithms with new ma-like properties
-   DataOnDemand.NodeMap and DataOnDemand.AlgMap 
-   2) make use of shorter TES paths (omit the leading 
+   DataOnDemand.NodeMap and DataOnDemand.AlgMap
+   2) make use of shorter TES paths (omit the leading
     '/Event')
 
  - src/ExtendedProperties/ExtendedProperties.cpp
-   fix the unchecked StatusCode 
-     
+   fix the unchecked StatusCode
+
 ! 2007-01-26 - Vanya BELYAEV
  patch #990:
  - src/Histograms/Aida2Root.cpp
    options/Aida2Root.opts
      new example which illustrated the usage of Aida2ROOT utility
  - python/Aida2RootEx.py
-     the same in Python 
+     the same in Python
  - python/TupleEx3.py
      new example which illustrates more possibilities to fill
-     N-tuples with arrays&matrices 
- - python/EvtColWrite.py 
-     tiny fix 
+     N-tuples with arrays&matrices
+ - python/EvtColWrite.py
+     tiny fix
 
 ! 2007-01-23 - Pere Mato
  - added reference files for windows and changed runexamples script
  - POOLIO/Dict.h: removed reference to ContainedOnject.cpp
-  
+
 ! 2007-01-18 - Charles Leggett
- patch #972. 
+ patch #972.
  - add messageCount to IMessageSvc
  - extend Auditor::(sys)afterExecute to pass a const StatusCode&,
    which is the return code of the algorithm
@@ -418,15 +861,15 @@ Package manager : Pere Mato
   Patch #924
  - src/TupleAlg3.cpp
    add new example for N-Tuple fill with ROOT-objects
-   on request form Patrick Koppenburg: 
-     3D/4D-vectors, SVectors and SMatrices 
- - options/TupleEx.opts 
-    add new algorithm into the configuration 
+   on request form Patrick Koppenburg:
+     3D/4D-vectors, SVectors and SMatrices
+ - options/TupleEx.opts
+    add new algorithm into the configuration
  - python/TupleEx2.py
-    new examples with advancs N-Tuple fill 
- - src/Maps/MapAlg.cpp 
-   options/Maps/opts 
-    new algorithm which shows different 
+    new examples with advancs N-Tuple fill
+ - src/Maps/MapAlg.cpp
+   options/Maps/opts
+    new algorithm which shows different
     maps available in Gaudi
 
 ! 2006-11-29 - Hubert Degaudenzi
@@ -534,7 +977,7 @@ Package manager : Pere Mato
 ================ GaudiExamples v18r1 ==============================
 !2005-12-16 - Hubert Degaudenzi
  - added the examples from the python directory (Vanya). Added the
-   corresponding reference files (.pyref). 
+   corresponding reference files (.pyref).
  - Changed the runexamples.py  script to include them as well. 2
    options have been added: --pyonly runs only the python examples and
    --exeonly runs only the executables files (with options files). By
@@ -554,15 +997,15 @@ Package manager : Pere Mato
    src/TupleEx/TupleAlg.cpp
    options/TupleEx.opts
 
-      new (sub)example which illustrate how to define effective 
-      custom columns for N-Tuple. In this example filling N-Tuple 
-      with "dublets" and "triplets" are illustrated, where "dublet" 
-      is  std::pair<double,double> and  "triplet" is 
+      new (sub)example which illustrate how to define effective
+      custom columns for N-Tuple. In this example filling N-Tuple
+      with "dublets" and "triplets" are illustrated, where "dublet"
+      is  std::pair<double,double> and  "triplet" is
       std::pair<std::pair<double,double>,double>
- 
+
 ================ GaudiExamples v18r0 ==============================
  - Updated Python examples to work with latest GaudiPython
- 
+
 ================ GaudiExamples v17r2 ==============================
 ! 2005-11-09 - Pere Mato
  - fixed DataOnDemand and Properties tests (windows)
@@ -587,40 +1030,40 @@ Package manager : Pere Mato
 ! 2005-08-14 - Chris Jones
  - Add algorithm GaudiHistoAlgorithm to the src/Histograms example.
    Illustrates the use of the GaudiHistoAlg base class.
- - Update TupleAlg example algorithm to illustrate the use of both numeric 
+ - Update TupleAlg example algorithm to illustrate the use of both numeric
    and literal IDs.
 
 ! 2005-08-07 - Vanya BELYAEV
 
-    Set of new ++ and Python examples 
+    Set of new ++ and Python examples
 
  - src/CounterEx/Counteralg.cpp
-   options/CounterEx.opts 
+   options/CounterEx.opts
 
-     new C++ example for usage of general statistical counters 
+     new C++ example for usage of general statistical counters
      for GaudiAlgorithm-based classes
 
  - python/CounterEx.py
 
-     new pure Python example for usage of general statistical 
+     new pure Python example for usage of general statistical
      counters for GaudiAlgo-based classes
 
- - python/HistoEx.py, python/HistoEx1.py, 
+ - python/HistoEx.py, python/HistoEx1.py,
 
      new pure Python example for usage of general histogramming
      facilities for HistoAlgo-based classes
 
  - python/TupleEx.py
 
-     new pure Python example for usage of general facilities for 
+     new pure Python example for usage of general facilities for
      N-Tuples for TupleAlgo-based classes
 
    New files:
    ==========
-   python/CounterEx.py 
-   python/HistoEx.py 
-   python/HistoEx1.py 
-   python/TupleEx1.py 
+   python/CounterEx.py
+   python/HistoEx.py
+   python/HistoEx1.py
+   python/TupleEx1.py
    src/CounterEx/CounterAlg.cpp
 
 
@@ -648,7 +1091,7 @@ Package manager : Pere Mato
 ================ GaudiExamples v15r1 ==============================
 !20041025 - Pere Mato
   - Added new DataOnDemand example
-  
+
 ================ GaudiExamples v15r0 ==============================
 !20040515 - M.Frank
   - Adapt the GaudiMT example to the new event selector interface
@@ -657,9 +1100,9 @@ Package manager : Pere Mato
     2) Read data with POOL:   POOLIORead.exe ../options/POOLIORead.opts
     3) Write eventCollection: POOLIOCollWrite.exe ../options/POOLIOCollWrite.opts
     4) Read  eventCollection: POOLIOCollRead.exe ../options/POOLIOCollRead.opts
-    
+
 ================ GaudiExamples v14r1 ==============================
- 
+
 !20040401 - Pere Mato
   - GSLTools: Adapted to new version of GaudiGSL (not compatible)
     basically the "Adapters" have changed in a non compatible way.
@@ -667,7 +1110,7 @@ Package manager : Pere Mato
  !20040309 - Pere Mato
   - Added extra test in AlgTools example to check if tools are released, finalized and
     destroyed even in the case of cyclic dependencies
- 
+
 ================ GaudiExamples v14r0 ==============================
 !20040108 - Pere Mato
 
@@ -675,7 +1118,7 @@ Package manager : Pere Mato
 !20031127 - Pere Mato
   - Added new examples to test new version of GaudiGSL (GSLTools)
   - Changed for new AIDA (3.0) with namespaces
-  
+
 !20031024 - Paolo Calafiura
   - runexamples.py: first attempt at running valgrind. Needs work on output parsing
 
@@ -693,21 +1136,21 @@ Package manager : Pere Mato
 ! 20030404 - Pere Mato
   - fixed requirements to work on Windows after including
     new examples
-  
+
 ! 20030311 - Paolo Calafiura
   - bug fixes in GaudiMT, PropertyAlg
 
 ! 20030227 - Charles Leggett and Paolo Calafiura
-  - New example ColorMsg to test colorized messages 
+  - New example ColorMsg to test colorized messages
 
 ! 20030225 - Werner Wiedenmann and Paolo Calafiura
-  - New example GaudiMT to test multi-thread extensions 
+  - New example GaudiMT to test multi-thread extensions
 
 ! 20030204 - Pere Mato
   - Renamed and moved job option files to /options with name .opts
   - Added script 'runexamples.py' to run all examples at once and compare
     output with reference files
-  
+
 ================ GaudiExamples v11r1 ================================
 ! 20021112 - Pere Mato
   - Changed Histograms.exe example to test reading histograms
@@ -757,7 +1200,7 @@ Package manager : Pere Mato
 ================v9r0=====================================
 ! 20011116 - Pere Mato
   Small changes to make examples work for Gaudi v9
-  Added new example AlgTools to test the Algorithm tools 
+  Added new example AlgTools to test the Algorithm tools
 
 ! 20010629 - Pere Mato
   Major changes in the ....
@@ -782,5 +1225,5 @@ Package manager : Pere Mato
   Added a new example to test Properties
 
 ! 20001108 - Pere Mato
-  Extracted the AlgSequencer and RandomNumber examples from the 
+  Extracted the AlgSequencer and RandomNumber examples from the
   LHCb collection of examples

@@ -13,21 +13,18 @@
     @author David Quarrie
     @date   2001
 */
-class PythonScriptingSvc : public Service, virtual public IRunable {
+class PythonScriptingSvc : public extends1<Service, IRunable> {
 
-public: 
+public:
   /// Standard Constructor.
   PythonScriptingSvc( const std::string& name, ISvcLocator* svc );
 
-  /// Initialise the service.  [IService::initialize()]
+  /// Initialize the service.  [IService::initialize()]
   virtual StatusCode initialize();
-  
+
   /// Finalize the service. [IService::finalize()]
   virtual StatusCode finalize();
-  
-  /// Query the interfaces.  [IInterface::queryInterface()]
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface );
-    
+
   /// Run the service by taking full control. [IRunable::run()]
   virtual StatusCode run();
 

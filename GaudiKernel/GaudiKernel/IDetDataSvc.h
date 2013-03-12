@@ -5,9 +5,6 @@
 // Base class
 #include "GaudiKernel/IInterface.h"
 
-// IConditionDataSvc service ID (interface id, major version, minor version)
-static const InterfaceID IID_IDetDataSvc ("IDetDataSvc", 1, 0);
-
 // Forward declarations
 namespace Gaudi { class Time; }
 
@@ -21,17 +18,11 @@ namespace Gaudi { class Time; }
     @date August 2001
 *///--------------------------------------------------------------------------
 
-class IDetDataSvc : virtual public IInterface
+class GAUDI_API IDetDataSvc: virtual public IInterface
 {
-
- public:
-
-  // Re-implemented from IInterface methods
-
-  /// Interface ID of this class
-  static const InterfaceID& interfaceID() { return IID_IDetDataSvc; }
-
- public:
+public:
+  /// InterfaceID
+  DeclareInterfaceID(IDetDataSvc,2,0);
 
   /// Check if the event time has been set
   virtual bool validEventTime() const = 0;
@@ -41,7 +32,6 @@ class IDetDataSvc : virtual public IInterface
 
   /// Set the event time
   virtual void setEventTime( const Gaudi::Time& ) = 0;
-
 };
 
 #endif // GAUDIKERNEL_IDETDATASVC_H

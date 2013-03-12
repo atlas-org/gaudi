@@ -117,13 +117,13 @@ StatusCode CounterAlg::execute ()
   const int print  = (int) executed.flag() ;
   if ( 0 == print%1000 ) 
   {
-    info () <<  " Event number "     << print << endreq ;
+    info () <<  " Event number "     << print << endmsg ;
     printStat() ; 
     info () << " Efficiency (binomial counter: \"eff\"): (" 
             << counter("eff").eff()    * 100.0  << " +- "
-            << counter("eff").effErr() * 100.0  << ")%"<< endreq ;
+            << counter("eff").effErr() * 100.0  << ")%"<< endmsg ;
   }
   
   return StatusCode::SUCCESS ;
-} ;
+}
 // ============================================================================

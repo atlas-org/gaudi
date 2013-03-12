@@ -7,6 +7,7 @@
 #include "GaudiKernel/CnvFactory.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/NTuple.h"
+#include "GaudiKernel/INTupleSvc.h"
 
 #include "RRWNTupleCnv.h"
 #include "TTree.h"
@@ -16,8 +17,8 @@
 DECLARE_NAMESPACE_CONVERTER_FACTORY(RootHistCnv,RRWNTupleCnv)
 
 //------------------------------------------------------------------------------
-StatusCode RootHistCnv::RRWNTupleCnv::book(const std::string& desc, 
-                                           INTuple* nt, 
+StatusCode RootHistCnv::RRWNTupleCnv::book(const std::string& desc,
+                                           INTuple* nt,
                                            TTree*& rtree)
 //------------------------------------------------------------------------------
 {
@@ -31,12 +32,12 @@ StatusCode RootHistCnv::RRWNTupleCnv::book(const std::string& desc,
     std::string tag = itm;
     tag += rootVarType( itms[i]->type() );
     // add the branch
-    log << MSG::INFO << "ID " << desc << ": added branch: " 
-        << itm << " / " << tag << endreq;
+    log << MSG::INFO << "ID " << desc << ": added branch: "
+        << itm << " / " << tag << endmsg;
     rtree->Branch(itm,const_cast<void*>(itms[i]->buffer()),tag.c_str());
   }
   log << MSG::INFO << "Booked TTree with ID:" << desc
-      << " \"" << nt->title() << "\"" << endreq;
+      << " \"" << nt->title() << "\"" << endmsg;
   return StatusCode::SUCCESS;
 }
 
@@ -59,8 +60,8 @@ StatusCode RootHistCnv::RRWNTupleCnv::writeData(TTree* rtree, INTuple* nt)
 }
 
 //------------------------------------------------------------------------------
-StatusCode RootHistCnv::RRWNTupleCnv::readData(TTree* /* tree */, 
-                                               INTuple* /* nt */, 
+StatusCode RootHistCnv::RRWNTupleCnv::readData(TTree* /* tree */,
+                                               INTuple* /* nt */,
                                                long /* ievt */)
 //------------------------------------------------------------------------------
 {

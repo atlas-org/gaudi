@@ -5,22 +5,19 @@
 // Include files
 #include "GaudiKernel/IInterface.h"
 
-// Forward declartions
+// Forward declarations
 class IEventProcessor;
-
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IEventProcessor(321, 2 , 0); 
 
 /** @class IEventProcessor IEventProcessor.h GaudiKernel/IEventProcessor.h
  *  The IEventProcessor is the interface to process events.
- *             
+ *
  *  @author Markus Frank
  *   @version 2
- */  
-class IEventProcessor : virtual public IInterface     {
-public:	
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IEventProcessor; }
+ */
+class GAUDI_API IEventProcessor: virtual public IInterface {
+public:
+  /// InterfaceID
+  DeclareInterfaceID(IEventProcessor,3,0);
   /// Process single event
   virtual StatusCode executeEvent(void* par=0) = 0;
   /// Process the maxevt events as a Run (beginRun() and endRun() called)

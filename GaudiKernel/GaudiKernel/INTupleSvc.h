@@ -12,10 +12,6 @@ namespace NTuple    {
   class Directory;
 }
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_INTupleSvc(120, 1 , 0); 
-
-
 /** @class INTupleSvc INTupleSvc.h GaudiKernel/INTupleSvc.h
 
     <P>The ntuple service interface allows to:
@@ -31,17 +27,17 @@ static const InterfaceID IID_INTupleSvc(120, 1 , 0);
          <LI> Write individual records from to a N tuple.
          <LI> Read individual records from an existing N tuple.
          </UL>
-         created N tuples are automatically put onto the 
+         created N tuples are automatically put onto the
          N tuple data store.
     </UL>
 
    @author Markus Frank
    @version 1.0
 */
-class INTupleSvc : virtual public IDataProviderSvc	    {
-  public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_INTupleSvc; }
+class GAUDI_API INTupleSvc: virtual public IDataProviderSvc {
+public:
+  /// InterfaceID
+  DeclareInterfaceID(INTupleSvc,2,0);
   /// Create requested N tuple (Hide constructor)
   virtual StatusCode create(const CLID& typ, const std::string& title, NTuple::Tuple*& refpTuple) = 0;
   /** Book Ntuple and register it with the data store.

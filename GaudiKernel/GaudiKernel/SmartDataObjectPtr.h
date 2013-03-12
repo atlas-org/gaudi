@@ -25,12 +25,12 @@ class DataObject;
     is handled.
       It is important to keep as less functions as possible NON-VIRTUAL
     in particular those, which handle the data access - they might be called
-    very often and hence the comiler must be able to inline them.
+    very often and hence the compiler must be able to inline them.
 
     @author  M.Frank
     @version 1.0
 */
-class SmartDataObjectPtr    {
+class GAUDI_API SmartDataObjectPtr {
 public:
   typedef DataObject* (* AccessFunction) (SmartDataObjectPtr* ptr);
   /// Helper class to configure smart pointer functionality
@@ -47,24 +47,24 @@ public:
 
 public:
   /** Standard constructor: Construct an SmartDataObjectPtr instance.
-      @param  svc          Pointer to the data service 
+      @param  svc          Pointer to the data service
                            interface used to interact with the store.
       @param  pDir         Pointer to data directory
       @param  path         path to object relative to data directory
   */
   SmartDataObjectPtr(AccessFunction access, IDataProviderSvc* pService, IRegistry* pDir, const std::string& path)
-    : m_dataProvider(pService), 
+    : m_dataProvider(pService),
       m_pRegistry(pDir),
       m_status(StatusCode::SUCCESS,true),
       m_path(path),
       m_accessFunc(access)
-  { 
+  {
   }
   /** Copy constructor: Construct an copy of a SmartDataStorePtr instance.
       @param  copy          Copy of Smart Pointer to object.
   */
   SmartDataObjectPtr(const SmartDataObjectPtr& copy)
-    : m_dataProvider(copy.m_dataProvider), 
+    : m_dataProvider(copy.m_dataProvider),
       m_pRegistry(copy.m_pRegistry),
       m_status(copy.m_status),
       m_path(copy.m_path),
@@ -128,21 +128,21 @@ public:
   }
 
   /** Object retrieve method.
-     If the object is not known to the local object, it is requested 
+     If the object is not known to the local object, it is requested
      from the data service either using the full path if there is no
      directory information present.
   */
   DataObject* retrieveObject();
 
   /** Object find method.
-     If the object is not known to the local object, it is requested 
+     If the object is not known to the local object, it is requested
      from the data service either using the full path if there is no
      directory information present.
   */
   DataObject* findObject();
 
   /** Object update method.
-      If the object is not known to the local object, it is requested 
+      If the object is not known to the local object, it is requested
       from the data service either using the full path if there is no
       directory information present.
       Needs to be virtual to to implicit object access.
@@ -151,39 +151,39 @@ public:
 
 protected:
 
-  /** Find the specified object from the data store. 
+  /** Find the specified object from the data store.
       @param  pDirectory   Pointer to the directory entry holding the object.
       @param  refpObject   Reference to the pointer finally holding the object
       @return              StatusCode indicating success or failure.
   */
   StatusCode find(IRegistry* pDirectory, const std::string& path, DataObject*& refpObject);
 
-  /** Find the specified object from the data store. 
+  /** Find the specified object from the data store.
       @param  fullPath     String containing the full path necessary to locate the object.
       @param  refpObject   Reference to the pointer finally holding the object
       @return              StatusCode indicating success or failure.
   */
   StatusCode find(const std::string& fullPath, DataObject*& refpObject);
 
-  /** Retrieve the specified object from the data store. 
+  /** Retrieve the specified object from the data store.
       @param  pDirectory   Pointer to the directory entry holding the object.
       @param  refpObject   Reference to the pointer finally holding the object
       @return              StatusCode indicating success or failure.
   */
   StatusCode retrieve(IRegistry* pDirectory, const std::string& path, DataObject*& refpObject);
-  /** Retrieve the specified object from the data store. 
+  /** Retrieve the specified object from the data store.
       @param  fullPath     String containing the full path necessary to locate the object.
       @param  refpObject   Reference to the pointer finally holding the object
       @return              StatusCode indicating success or failure.
   */
   StatusCode retrieve(const std::string& fullPath, DataObject*& refpObject);
 
-  /** Update the specified object from the data store. 
+  /** Update the specified object from the data store.
       @param  pDirectory   Pointer to the directory entry holding the object.
       @return              StatusCode indicating success or failure.
   */
   StatusCode update(IRegistry* pDirectory);
-  /** Update the specified object from the data store. 
+  /** Update the specified object from the data store.
       @param  fullPath     String containing the full path necessary to locate the object.
       @return              StatusCode indicating success or failure.
   */

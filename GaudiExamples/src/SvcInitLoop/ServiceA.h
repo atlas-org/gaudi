@@ -3,12 +3,10 @@
 
 #include "GaudiKernel/Service.h"
 
-class ServiceA :public Service {
+class ServiceA: public Service {
 public:
- ServiceA(const std::string& nam, ISvcLocator* svcLoc);
- virtual StatusCode initialize();
- virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface );
- static const InterfaceID& interfaceID();
+  ServiceA(const std::string& nam, ISvcLocator* svcLoc);
+  virtual StatusCode initialize();
 };
 
 

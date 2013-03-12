@@ -16,11 +16,11 @@ class TList;
 class TDirectory;
 class TGraph;
 
-class ITHistSvc: virtual public IService {
+class GAUDI_API ITHistSvc: virtual public IService {
 
 public:
-
-  static const InterfaceID& interfaceID();
+  /// InterfaceID
+  DeclareInterfaceID(ITHistSvc,2,0);
 
   virtual StatusCode regHist(const std::string& name) = 0;
   virtual StatusCode regHist(const std::string& name, TH1*) = 0;
@@ -42,6 +42,7 @@ public:
   virtual std::vector<std::string> getTrees() const = 0;
   virtual std::vector<std::string> getGraphs() const = 0;
 
+  //  virtual StatusCode getTHists(TList&) const = 0;
   virtual StatusCode getTHists(TDirectory *td, TList &, 
 			       bool recurse=false) const = 0;
   virtual StatusCode getTHists(const std::string& name, TList &, 
@@ -52,6 +53,7 @@ public:
   virtual StatusCode getTHists(const std::string& name, TList &, 
 			       bool recurse=false, bool reg=false) = 0;
 
+  //  virtual StatusCode getTTrees(TList&) const = 0;
   virtual StatusCode getTTrees(TDirectory *td, TList &, 
 			       bool recurse=false) const = 0;
   virtual StatusCode getTTrees(const std::string& name, TList &, 
@@ -68,14 +70,5 @@ public:
   virtual bool exists(const std::string& name) const = 0;
 
 };
-
-inline
-const InterfaceID&
-ITHistSvc::interfaceID() {
-
-  static const InterfaceID m_IID("THistSvc", 1, 1);
-
-  return m_IID;
-}
 
 #endif

@@ -1,5 +1,5 @@
 // $Id: AIDATupleAlgorithmRead.cpp,v 1.3 2006/11/27 09:53:05 hmd Exp $
-// Include files 
+// Include files
 #include "AIDATupleAlgorithmRead.h"
 
 #include "GaudiKernel/MsgStream.h"
@@ -8,7 +8,6 @@
 #include "GaudiKernel/SmartDataPtr.h"
 #include "GaudiKernel/DataObject.h"
 #include "GaudiKernel/IRegistry.h"
-
 
 // Static factory declaration
 
@@ -30,21 +29,21 @@ StatusCode AIDATupleAlgorithmRead::initialize()
 {
   StatusCode status;
   MsgStream log( msgSvc(), name() );
-  log << MSG::INFO << "Initializing..." << endreq;
+  log << MSG::INFO << "Initializing..." << endmsg;
 
   //status = atupleSvc()->myTest();
-  
+
   //Book N-tuple 1
 
   status = atupleSvc()->retrieveObject("MyTuples/1", tuple);
 
-  log << MSG::INFO << "Tuple: " << long(tuple) << endreq;
-  log << MSG::INFO << "Number of rows of the Tuple: " << tuple->rows() << endreq;
+  log << MSG::INFO << "Tuple: " << long(tuple) << endmsg;
+  log << MSG::INFO << "Number of rows of the Tuple: " << tuple->rows() << endmsg;
   if( status.isSuccess() ) {
-    log << MSG::INFO << "Registering Tuple" << endreq;
+    log << MSG::INFO << "Registering Tuple" << endmsg;
     status = atupleSvc()->registerObject("MyTuples", "1", tuple);
   }
-  
+
   log << MSG::INFO << "Finished booking NTuples" << endmsg;
 
   return status;
@@ -55,21 +54,21 @@ StatusCode AIDATupleAlgorithmRead::initialize()
 StatusCode AIDATupleAlgorithmRead::execute()
 //-----------------------------------
 {
-        
+
   //StatusCode status;
   MsgStream log( msgSvc(), name() );
-  log << MSG::INFO << "Executing..." << endreq;
-    
+  log << MSG::INFO << "Executing..." << endmsg;
+
   int i_px = tuple->findColumn( "px" );
   int i_py = tuple->findColumn( "py" );
   int i_pz = tuple->findColumn( "pz" );
   int i_mass = tuple->findColumn( "mass" );
-  
+
   float px;
   float py;
   float pz;
   float mass;
- 
+
 
   tuple->start();
   int i = 0;
@@ -83,10 +82,10 @@ StatusCode AIDATupleAlgorithmRead::execute()
     pz = tuple->getFloat(i_pz);
     log << MSG::INFO << " pz: " << pz ;
     mass = tuple->getFloat(i_mass);
-    log << MSG::INFO << " mass: " << mass << endreq;
+    log << MSG::INFO << " mass: " << mass << endmsg;
   }
 
-  log << MSG::INFO << "Reading mass>1" << endreq;
+  log << MSG::INFO << "Reading mass>1" << endmsg;
   atupleSvc()->setCriteria(tuple,"mass>1");
 
   tuple->start();
@@ -101,9 +100,9 @@ StatusCode AIDATupleAlgorithmRead::execute()
     pz = tuple->getFloat(i_pz);
     log << MSG::INFO << " pz: " << pz ;
     mass = tuple->getFloat(i_mass);
-    log << MSG::INFO << " mass: " << mass << endreq;
+    log << MSG::INFO << " mass: " << mass << endmsg;
   }
-  
+
   return StatusCode::SUCCESS;
 }
 

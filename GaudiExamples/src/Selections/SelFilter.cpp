@@ -18,6 +18,11 @@
 // ============================================================================
 // Boost
 // ============================================================================
+#ifdef __ICC
+// disable icc remark #177: declared but never referenced
+// Problem with boost::lambda
+#pragma warning(disable:177)
+#endif
 #include "boost/lambda/lambda.hpp"
 #include "boost/lambda/bind.hpp"
 // ============================================================================
@@ -49,9 +54,12 @@ namespace Gaudi
         static Rndm::Numbers  flat    ( randSvc () , Rndm::Flat    ( -1 , 1 ) ) ;
         
         if      ( exist<Gaudi::Examples::MyTrack::Selection> ( m_input ) ) 
-        { info() << "Selection at '" << m_input << "'" << endreq ; }
+        { info() << "Selection at '" << m_input << "'" << endmsg ; }
         else if ( exist<Gaudi::Examples::MyTrack::Container> ( m_input ) ) 
-        { info() << "Container at '" << m_input << "'" << endreq ; }
+        { info() << "Container at '" << m_input << "'" << endmsg ; }
+
+        if ( !exist<Range> ( m_input ) ) 
+        { err () << "No Range is available at location " << m_input << endmsg ; }
         
         // get input data in 'blind' way 
         Range range = get<Range> ( m_input ) ;
@@ -78,7 +86,7 @@ namespace Gaudi
         info () << "Sample size is " 
                 << range.size() 
                 << "/" << size 
-                << "/" << sample -> size()  << endreq ;
+                << "/" << sample -> size()  << endmsg ;
         
         // register it in TES 
         put ( sample , name() ) ;

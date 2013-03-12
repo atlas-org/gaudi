@@ -12,8 +12,8 @@
     useful until we have a scripting language
 
     @author David Quarrie
-*/ 
-class CommandProperty : public StringProperty {
+*/
+class GAUDI_API CommandProperty: public StringProperty {
 public:
   /// Constructors and destructors
 	CommandProperty();

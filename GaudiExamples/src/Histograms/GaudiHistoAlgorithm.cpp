@@ -1,6 +1,8 @@
 // $Id: GaudiHistoAlgorithm.cpp,v 1.5 2008/10/09 09:59:14 marcocle Exp $
 // Include files
 
+#include "boost/assign/list_of.hpp"
+
 // ============================================================================
 // GaudiKernel
 // ============================================================================
@@ -35,7 +37,7 @@ GaudiHistoAlgorithm::GaudiHistoAlgorithm( const std::string& name,
 //=============================================================================
 // Destructor
 //=============================================================================
-GaudiHistoAlgorithm::~GaudiHistoAlgorithm() {};
+GaudiHistoAlgorithm::~GaudiHistoAlgorithm() {}
 
 //=============================================================================
 // Initialization
@@ -47,7 +49,7 @@ StatusCode GaudiHistoAlgorithm::initialize()
   if ( sc.isFailure() ) return sc;
 
   return sc;
-};
+}
 
 //=============================================================================
 // Main execution
@@ -122,6 +124,24 @@ StatusCode GaudiHistoAlgorithm::execute()
   profile2D( gauss, expo, poisson, "2dprof", "2D profile1", -5, 5, 0, 5 );
   profile2D( gauss, expo, poisson, 321, "2D profile2", -5, 5, 0, 5 );
 
+  // variable binning
+  using namespace boost::assign;
+  const GaudiAlg::HistoBinEdges edgesX = list_of<double>(-5)(-4)(-2.5)(0)(1)(2.25)(4)(5);
+  const GaudiAlg::HistoBinEdges edgesY = list_of<double>(-5)(-3.7)(-2)(0.5)(1)(2)(4.5)(5);
+  const GaudiAlg::HistoBinEdges edgesZ = list_of<double>(-5)(-3)(0)(5);
+
+  // 1D
+  plot1D( flat, "varBinning/x", "1D Variable Binning", edgesX );
+  // 2D
+  plot2D( flat, gauss, "varBinning/y", "2D Variable Binning", edgesX, edgesY );
+  // 3D
+  plot3D( flat, gauss, expo, "varBinning/z", "3D Variable Binning", edgesX, edgesY, edgesZ );
+  // 1D profile
+  profile1D( flat, gauss, 
+             "varBinning/a", "1D Profile Variable Binning", edgesX );
+  // 2D Profile
+  profile2D( flat, gauss, expo, "varBinning/b", "2D Profile Variable Binning", edgesX, edgesY );
+
   // ============================================================================
   // The following is just a comparision of fill times for the various 1D methods
   // to illustrate that the shortcut methods are not significantly slower
@@ -155,7 +175,7 @@ StatusCode GaudiHistoAlgorithm::execute()
   if (0==nCalls) Print( "Filling Histograms...... Please be patient !" );
   ++nCalls;
   return StatusCode::SUCCESS;
-};
+}
 
 //=============================================================================
 //  Finalize

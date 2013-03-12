@@ -8,12 +8,9 @@
 #include <string>
 #include <vector>
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IProperty(20, 2 , 0); 
-
 /** @class IProperty IProperty.h GaudiKernel/IProperty.h
 
-    The IProperty is the basic interface for all components which have 
+    The IProperty is the basic interface for all components which have
     properties that can be set or get.
 
     @author Paul Maley
@@ -22,15 +19,15 @@ static const InterfaceID IID_IProperty(20, 2 , 0);
 */
 class Property;
 
-class IProperty : virtual public IInterface  {
+class GAUDI_API IProperty: virtual public IInterface  {
 public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IProperty; }
+  /// InterfaceID
+  DeclareInterfaceID(IProperty,2,0);
 
   /// Set the property by property
   virtual StatusCode setProperty( const Property& p // Reference to the input property
                                 ) = 0;
-  /// Set the property by string 
+  /// Set the property by string
   virtual StatusCode setProperty( const std::string& s ) = 0;
   /// Set the property by std::string
   virtual StatusCode setProperty( const std::string& n, const std::string& v ) = 0;

@@ -1,4 +1,3 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/src/Lib/DataSvc.cpp,v 1.38 2008/10/23 15:57:37 marcocle Exp $
 //====================================================================
 //	DataSvc.cpp
 //--------------------------------------------------------------------
@@ -39,6 +38,17 @@
 #include <cstdlib>
 #include <vector>
 #include <algorithm>
+#include <sstream>
+
+namespace {
+  /// Helper function to convert item numbers to path strings
+  /// i.e. int -> "/" + int
+  inline std::string itemToPath(int item) {
+    std::ostringstream path;
+    path << '/' << item;
+    return path.str();
+  }
+}
 
 // If you absolutely need optimization: switch off dynamic_cast.
 // This improves access to the data store roughly by 10 %
@@ -48,6 +58,12 @@
 #define CAST_REGENTRY(x,y) dynamic_cast<x>(y)
 //#define CAST_REGENTRY(x,y) (x)(y)
 typedef DataSvcHelpers::RegistryEntry RegEntry;
+
+#define ON_DEBUG if (UNLIKELY(outputLevel() <= MSG::DEBUG))
+#define ON_VERBOSE if (UNLIKELY(outputLevel() <= MSG::VERBOSE))
+
+#define DEBMSG ON_DEBUG debug()
+#define VERMSG ON_VERBOSE verbose()
 
 /** IDataManagerSvc: Remove all data objects below the sub tree
  *  identified by its full path name.
@@ -423,18 +439,14 @@ StatusCode DataSvc::registerObject (const std::string& parentPath,
 StatusCode DataSvc::registerObject(const std::string& parentPath,
                                    int item,
                                    DataObject* pObject)   {
-  char buffer[32] = "/";
-  ::_itoa( item, &buffer[1] , 10 );
-  return registerObject(parentPath, buffer, pObject);
+  return registerObject(parentPath, itemToPath(item), pObject);
 }
 
 /// Register object with the data store.
 StatusCode DataSvc::registerObject(DataObject* parentObj,
                                    int item,
                                    DataObject* pObject)   {
-  char buffer[32] = "/";
-  ::_itoa( item, &buffer[1] , 10 );
-  return registerObject(parentObj, buffer, pObject);
+  return registerObject(parentObj, itemToPath(item), pObject);
 }
 
 /// Register object with the data store.
@@ -504,9 +516,7 @@ StatusCode DataSvc::registerObject(DataObject* parentObj,
           DataObject* obj = leaf->object();
           if ( 0 == obj )    {
             if (0 == pObject) {
-              MsgStream log(msgSvc(), name());
-              log << MSG::ERROR
-                  << "registerObject: trying to register null DataObject" << endreq;
+              error() << "registerObject: trying to register null DataObject" << endmsg;
               return StatusCode::FAILURE;
             }
             else  {
@@ -566,9 +576,7 @@ StatusCode DataSvc::unregisterObject(const std::string& parentPath,
 
 /// Unregister object from the data store.
 StatusCode DataSvc::unregisterObject(const std::string& parentPath, int item) {
-  char objPath[32] = "/";
-  ::_itoa( item, &objPath[1] , 10 );
-  return unregisterObject(parentPath, objPath);
+  return unregisterObject(parentPath, itemToPath(item));
 }
 
 /// Unregister object from the data store.
@@ -626,9 +634,7 @@ StatusCode DataSvc::unregisterObject (DataObject* pParentObj,
 
 /// Unregister object from the data store.
 StatusCode DataSvc::unregisterObject(DataObject* pParentObj, int item)    {
-  char objPath[32] = "/";
-  ::_itoa( item, &objPath[1] , 10 );
-  return unregisterObject(pParentObj, objPath);
+  return unregisterObject(pParentObj, itemToPath(item));
 }
 
 /** Invoke data fault handling if enabled
@@ -688,8 +694,7 @@ StatusCode DataSvc::loadObject(IConversionSvc* pLoader, IRegistry* pRegistry) {
     else                                 return  INVALID_OBJ_ADDR;
   }
 
-  MsgStream log( msgSvc(), name() );
-  log << MSG::VERBOSE << "Requested object " << pRegistry->identifier() << endmsg;
+  VERMSG << "Requested object " << pRegistry->identifier() << endmsg;
 
   if ( m_enableAccessHdlr )  {
     // Fire data access incident
@@ -712,12 +717,12 @@ StatusCode DataSvc::loadObject(IConversionSvc* pLoader, IRegistry* pRegistry) {
     status = pLoader->createObj(pAddress, pObject);  // Call data loader
     if ( status.isSuccess() )    {
 
-      log << MSG::VERBOSE << "Object " << pRegistry->identifier() << " created" << endmsg;
+      VERMSG << "Object " << pRegistry->identifier() << " created" << endmsg;
 
       RegEntry *pEntry = CAST_REGENTRY(RegEntry*,pRegistry);
       pEntry->setObject(pObject);
 
-      log << MSG::VERBOSE << "Filling object " << pRegistry->identifier() << endmsg;
+      VERMSG << "Filling object " << pRegistry->identifier() << endmsg;
       status = pLoader->fillObjRefs(pAddress, pObject);
     }
   }
@@ -748,8 +753,8 @@ StatusCode DataSvc::loadObject(IConversionSvc* pLoader, IRegistry* pRegistry) {
       return StatusCode::SUCCESS;
     }
   }
-  if ( status.isSuccess() ) {
-    log << MSG::VERBOSE << "Object " << pRegistry->identifier() << " successfully loaded" << endmsg;
+  ON_VERBOSE if ( status.isSuccess() ) {
+    verbose() << "Object " << pRegistry->identifier() << " successfully loaded" << endmsg;
   }
   return status;
 }
@@ -892,9 +897,7 @@ StatusCode DataSvc::retrieveObject(const std::string& parentPath,
 StatusCode DataSvc::retrieveObject(const std::string& parentPath,
                                    int item,
                                    DataObject*& pObject)   {
-  char buffer[32] = "/";
-  ::_itoa(item,&buffer[1],10);
-  return retrieveObject(parentPath, buffer, pObject);
+  return retrieveObject(parentPath, itemToPath(item), pObject);
 }
 
 /// Retrieve object from data store.
@@ -909,9 +912,7 @@ StatusCode DataSvc::retrieveObject(DataObject* parentObj,
 StatusCode DataSvc::retrieveObject(DataObject* parentObj,
                                    int item,
                                    DataObject*& pObject)  {
-  char buffer[32] = "/";
-  ::_itoa(item,&buffer[1],10);
-  return retrieveObject(parentObj, buffer, pObject);
+  return retrieveObject(parentObj, itemToPath(item), pObject);
 }
 
 /// Retrieve object identified by its directory from the data store.
@@ -930,7 +931,7 @@ StatusCode DataSvc::findObject(IRegistry* pRegistry,
     }
     pObject = pReg->object();
   }
-  return (0 == pObject) ? OBJ_NOT_LOADED : IID_IDataProviderSvc_NO_ERROR;
+  return (0 == pObject) ? OBJ_NOT_LOADED : IDataProviderSvc_NO_ERROR;
 }
 
 /// Find object identified by its full path in the data store.
@@ -940,7 +941,7 @@ StatusCode DataSvc::findObject(const std::string& path,
   if ( checkRoot() )  {
     if ( path.length() == 0 || path == m_rootName )   {
       pObject = m_root->object();
-      return (0 == pObject) ? OBJ_NOT_LOADED : IID_IDataProviderSvc_NO_ERROR;
+      return (0 == pObject) ? OBJ_NOT_LOADED : IDataProviderSvc_NO_ERROR;
     }
     else if ( path[0] != SEPARATOR )    {
       return findObject(m_rootName, path, pObject);
@@ -965,18 +966,14 @@ StatusCode DataSvc::findObject(const std::string& parentPath,
 /// Retrieve object identified by its full path from the data store.
 StatusCode DataSvc::findObject(const std::string& parentPath,
                                int item, DataObject*& pObject)   {
-  char buffer[32] = "/";
-  ::_itoa(item,&buffer[1],10);
-  return findObject(parentPath, buffer, pObject);
+  return findObject(parentPath, itemToPath(item), pObject);
 }
 
 /// Find object identified by its full path in the data store.
 StatusCode DataSvc::findObject(DataObject* parentObj,
                                int item,
                                DataObject*& pObject)    {
-  char buffer[32] = "/";
-  ::_itoa(item,&buffer[1],10);
-  return findObject(parentObj, buffer, pObject);
+  return findObject(parentObj, itemToPath(item), pObject);
 }
 
 /// Find object identified by its full path in the data store.
@@ -1111,7 +1108,7 @@ StatusCode DataSvc::linkObject(IRegistry* from,
           // Now register the soft link
           StatusCode status = from_entry->add( objPath, to, true);
           return status.isSuccess() ?
-            IID_IDataProviderSvc_NO_ERROR : DOUBL_OBJ_PATH;
+            IDataProviderSvc_NO_ERROR : DOUBL_OBJ_PATH;
         }
       }
     }
@@ -1295,21 +1292,6 @@ StatusCode DataSvc::preLoad()   {
   return StatusCode::SUCCESS;
 }
 
-/// Query interface
-StatusCode DataSvc::queryInterface(const InterfaceID& riid, void** ppvInterface)  {
-  if ( IID_IDataProviderSvc.versionMatch(riid) )  {
-    *ppvInterface = (IDataProviderSvc*)this;
-    addRef();
-    return SUCCESS;
-  }
-  else if ( IID_IDataManagerSvc.versionMatch(riid) )   {
-    *ppvInterface = (IDataManagerSvc*)this;
-    addRef();
-    return SUCCESS;
-  }
-  return Service::queryInterface(riid, ppvInterface);
-}
-
 /// Service initialization
 StatusCode DataSvc::initialize()    {
   // Nothing to do: just call base class initialisation
@@ -1318,9 +1300,8 @@ StatusCode DataSvc::initialize()    {
     return sc;
   }
   sc = service("IncidentSvc", m_incidentSvc, true);
-  if ( !sc.isSuccess() )  {
-    MsgStream log(msgSvc(), name());
-    log << MSG::ERROR << "Failed to access incident service." << endmsg;
+  if ( UNLIKELY(!sc.isSuccess()) )  {
+    error() << "Failed to access incident service." << endmsg;
   }
   return sc;
 }
@@ -1338,16 +1319,14 @@ StatusCode DataSvc::reinitialize()    {
   }
   // re-initialize the base class
   sc = Service::reinitialize();
-  if (!sc.isSuccess()) {
-    MsgStream log(msgSvc(), name());
-    log << MSG::ERROR << "Unable to reinitialize base class" << endreq;
+  if ( UNLIKELY(!sc.isSuccess()) ) {
+    error() << "Unable to reinitialize base class" << endmsg;
     return sc;
   }
   // the initialize part is copied here
   sc = service("IncidentSvc", m_incidentSvc, true);
-  if ( !sc.isSuccess() )  {
-    MsgStream log(msgSvc(), name());
-    log << MSG::ERROR << "Failed to access incident service." << endmsg;
+  if ( UNLIKELY(!sc.isSuccess()) )  {
+    error() << "Failed to access incident service." << endmsg;
     return sc;
   }
   // return
@@ -1391,7 +1370,7 @@ IConversionSvc* DataSvc::getDataLoader(IRegistry* /* pReg */)   {
 
 /// Standard Constructor
 DataSvc::DataSvc(const std::string& name,ISvcLocator* svc)
-: Service(name,svc), m_rootCLID( /*CLID_Event*/ 110),
+: base_class(name,svc), m_rootCLID( /*CLID_Event*/ 110),
   m_rootName( "/Event"), m_root(0)
 {
   m_dataLoader = 0;

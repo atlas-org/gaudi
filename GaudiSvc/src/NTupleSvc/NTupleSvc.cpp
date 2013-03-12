@@ -9,10 +9,10 @@
 //  Author    : M.Frank
 //  History   :
 // +---------+----------------------------------------------+---------
-// |    Date |                 Comment                      | Who     
+// |    Date |                 Comment                      | Who
 // +---------+----------------------------------------------+---------
 // | 29/10/98| Initial version                              | MF
-// | 29/09/99| Added access to ICnvManager for missing      | 
+// | 29/09/99| Added access to ICnvManager for missing      |
 // |         | converters                                   | MF
 // | 20/09/00| Connect dynamically to conversion service    |
 // |         | for N-tuple persistency                      | MF
@@ -50,9 +50,18 @@ DECLARE_SERVICE_FACTORY(NTupleSvc)
 /// Selector factory instantiation
 DECLARE_NAMESPACE_OBJECT_FACTORY(NTuple,Selector)
 
+#include <sstream>
+
+namespace {
+  inline std::string toStr(long id) {
+    std::ostringstream s; s << id;
+    return s.str();
+  }
+}
+
 /// Standard Constructor
 NTupleSvc::NTupleSvc(const std::string& name, ISvcLocator* svc)
- : DataSvc(name, svc)
+ : base_class(name, svc)
 {
   declareProperty("Input",  m_input);
   declareProperty("Output", m_output);
@@ -177,7 +186,7 @@ StatusCode NTupleSvc::updateDirectories()   {
 
 // Finalize single service
 void NTupleSvc::releaseConnection(Connection& c)  {
-  SmartIF<IService> isvc(IID_IService, c.service );
+  SmartIF<IService> isvc( c.service );
   if ( isvc.isValid( ) )   {
     isvc->finalize().ignore();
   }
@@ -212,18 +221,6 @@ StatusCode NTupleSvc::finalize()      {
   status = DataSvc::finalize();
   status = disconnectAll();
   return status;
-}
-
-/// Query interface
-StatusCode NTupleSvc::queryInterface(const InterfaceID& riid, void** ppvInterface)  {
-  if ( IID_INTupleSvc == riid )
-    *ppvInterface = (INTupleSvc*)this;
-  else if ( IID_IDataSourceMgr == riid )
-    *ppvInterface = (IDataSourceMgr*)this;
-  else  // Interface is not directly availible: try out a base class
-    return DataSvc::queryInterface(riid, ppvInterface);
-  addRef();
-  return StatusCode::SUCCESS;
 }
 
 StatusCode NTupleSvc::connect(const std::string& ident)    {
@@ -304,7 +301,7 @@ StatusCode NTupleSvc::createService(const std::string&       /* nam */,
   /// CGL: set the storage type
   // Get the value of the Stat persistancy mechanism from the AppMgr
   IProperty*   appPropMgr = 0;
-  StatusCode sts = serviceLocator()->queryInterface(IID_IProperty, pp_cast<void>(&appPropMgr) );
+  StatusCode sts = serviceLocator()->queryInterface(IProperty::interfaceID(), pp_cast<void>(&appPropMgr) );
   if( !sts.isSuccess() ) {
    // Report an error and return the FAILURE status code
    log << MSG::ERROR << "Could not get PropMgr" << endmsg;
@@ -322,10 +319,10 @@ StatusCode NTupleSvc::createService(const std::string&       /* nam */,
   long storage_typ = TEST_StorageType;
   if ( sp.value() == "HBOOK" ) {
     storage_typ = HBOOK_StorageType;
-  } 
+  }
   else if ( sp.value() == "ROOT" ) {
     storage_typ = ROOT_StorageType;
-  } 
+  }
   else {
     appPropMgr->release();
     log << MSG::ERROR << "Unknown NTuple Persistency format: " << sp.value() << endmsg;
@@ -335,20 +332,20 @@ StatusCode NTupleSvc::createService(const std::string&       /* nam */,
   appPropMgr->release();
 
   if ( typ.length() > 0 && typ != sp.value() )    {
-    log << MSG::WARNING << "NTuple persistency type is " 
+    log << MSG::WARNING << "NTuple persistency type is "
         << sp.value() << "." << endmsg
         << "Type given by job option "
         << "NTupleSvc.Input/Output ignored!" << endmsg;
   }
 
   //      log << MSG::DEBUG << "storage type: " << m_storageType << endmsg;
-  
-  // FIXME: (MCl) why NTupleSvc has to directly create a ConversionSvc?  
+
+  // FIXME: (MCl) why NTupleSvc has to directly create a ConversionSvc?
   IService* pService = 0;
   IInterface* iface = new ConversionSvc(name()+"Conversions", serviceLocator(), storage_typ);
-  StatusCode status = iface->queryInterface(IID_IService, pp_cast<void>(&pService));
+  StatusCode status = iface->queryInterface(IService::interfaceID(), pp_cast<void>(&pService));
   if ( status.isSuccess() )   {
-    status = iface->queryInterface(IID_IConversionSvc, pp_cast<void>(&pSvc));
+    status = iface->queryInterface(IConversionSvc::interfaceID(), pp_cast<void>(&pSvc));
     if ( !status.isSuccess() )   {
       pService->release();
       return status;
@@ -431,8 +428,7 @@ NTuple::Tuple* NTupleSvc::book (const std::string& dirPath, const std::string& r
 
 /// Book Ntuple and register it with the data store.
 NTuple::Tuple* NTupleSvc::book (const std::string& dirPath, long id, const CLID& type, const std::string& title)  {
-  char txt[32];
-  return book( dirPath, _itoa(id, txt, 10), type, title);
+  return book( dirPath, toStr(id), type, title);
 }
 
 /// Book Ntuple and register it with the data store.
@@ -456,16 +452,15 @@ NTuple::Tuple* NTupleSvc::book (DataObject* pParent, const std::string& relPath,
 }
 
 /// Book Ntuple and register it with the data store.
-NTuple::Tuple* NTupleSvc::book (DataObject* pParent, 
-                                long id, 
-                                const CLID& type, 
+NTuple::Tuple* NTupleSvc::book (DataObject* pParent,
+                                long id,
+                                const CLID& type,
                                 const std::string& title)  {
-  char txt[32];
-  return book( pParent, ::_itoa(id, txt,10), type, title);
+  return book( pParent, toStr(id), type, title);
 }
 
 /// Create Ntuple directory and register it with the data store.
-NTuple::Directory* NTupleSvc::createDirectory (DataObject* pParent, 
+NTuple::Directory* NTupleSvc::createDirectory (DataObject* pParent,
                                                const std::string& relPath)   {
   if ( 0 != pParent )   {
     IRegistry* pDir = pParent->registry();
@@ -481,14 +476,12 @@ NTuple::Directory* NTupleSvc::createDirectory (DataObject* pParent,
 
 /// Create Ntuple directory and register it with the data store.
 NTuple::Directory* NTupleSvc::createDirectory (DataObject* pParent, long id)    {
-  char txt[32];
-  return createDirectory( pParent, ::_itoa(id, txt,10) );
+  return createDirectory( pParent, toStr(id) );
 }
 
 /// Create Ntuple directory and register it with the data store.
 NTuple::Directory* NTupleSvc::createDirectory (const std::string& dirPath, long id)    {
-  char txt[32];
-  return createDirectory( dirPath, ::_itoa(id, txt,10) );
+  return createDirectory( dirPath, toStr(id) );
 }
 
 /// Create Ntuple directory and register it with the data store.
@@ -711,4 +704,3 @@ StatusCode NTupleSvc::readRecord(DataObject* pParent, const std::string& relPath
   }
   return INVALID_OBJ_PATH;
 }
-

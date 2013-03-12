@@ -9,7 +9,6 @@
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/IDataManagerSvc.h"
 
-
 // Example related include files
 #include "WriteAlg.h"
 
@@ -35,7 +34,7 @@ StatusCode WriteAlg::execute() {
 
   static int evtnum = 0;
   static int runnum = 999;
-  
+
   MsgStream log(msgSvc(), name());
   Rndm::Numbers rndmflat(randSvc(), Rndm::Flat(0.,1.));
   Rndm::Numbers rndmgauss(randSvc(), Rndm::Gauss(10.,1.));
@@ -44,12 +43,12 @@ StatusCode WriteAlg::execute() {
   Event* event = new Event();
   event->setEvent(++evtnum);
   event->setRun(runnum);
-  event->setTime(TimePoint());
+  event->setTime(Gaudi::Time());
 
-  IDataManagerSvc* evtmgr = dynamic_cast<IDataManagerSvc*>(eventSvc());
+  SmartIF<IDataManagerSvc> evtmgr(eventSvc());
   sc = evtmgr->setRoot("/Event", event);
   if( sc.isFailure() ) {
-    log << MSG::ERROR << "Unable to register /Event object" << endreq;
+    log << MSG::ERROR << "Unable to register /Event object" << endmsg;
     return sc;
   }
   // Create containers
@@ -68,7 +67,7 @@ StatusCode WriteAlg::execute() {
   for( int i = 0; i < n; i++ ) {
     // Create new track
     MyTrack* t = new MyTrack((float)rndmgauss(),(float)rndmgauss(),(float)rndmgauss());
-    myTracks->add ( t ); 
+    myTracks->add ( t );
     t->setEvent(event);
     dvertex->addDaughterTrack(t);
     if( rndmflat() > 0.5 ) {
@@ -78,7 +77,7 @@ StatusCode WriteAlg::execute() {
       int m = (int)(rndmflat() * 10.);
       for( int j = 0; j < m; j++ ) {
         MyTrack* dt = new MyTrack(t->px()/m,t->py()/m,t->pz()/m);
-        myTracks->add ( dt ); 
+        myTracks->add ( dt );
         dt->setEvent(event);
         dv->addDaughterTrack(dt);
       }
@@ -87,17 +86,17 @@ StatusCode WriteAlg::execute() {
 
   sc = eventSvc()->registerObject("/Event","MyTracks",myTracks);
   if( sc.isFailure() ) {
-    log << MSG::ERROR << "Unable to register MyTracks" << endreq;
+    log << MSG::ERROR << "Unable to register MyTracks" << endmsg;
     return sc;
   }
   sc = eventSvc()->registerObject("/Event","MyVertices",myVertices);
   if( sc.isFailure() ) {
-    log << MSG::ERROR << "Unable to register MyVertices" << endreq;
+    log << MSG::ERROR << "Unable to register MyVertices" << endmsg;
     return sc;
   }
 
   // All done
-  log << MSG::INFO << "Generated event " << evtnum << endreq;
+  log << MSG::INFO << "Generated event " << evtnum << endmsg;
   return StatusCode::SUCCESS;
 }
 

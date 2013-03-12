@@ -1,29 +1,30 @@
-// $Id: CounterSvcAlg.cpp,v 1.2 2008/02/21 11:32:38 marcocle Exp $ 
+// $Id: CounterSvcAlg.cpp,v 1.2 2008/02/21 11:32:38 marcocle Exp $
 // ============================================================================
 // CVS tag $Name:  $, verison $Revision: 1.2 $
 // ============================================================================
-// Include files 
+// Include files
 // ============================================================================
 // GaudiKernel
 // ============================================================================
 #include "GaudiKernel/ICounterSvc.h"
 #include "GaudiKernel/AlgFactory.h"
-#include "GaudiKernel/Algorithm.h" 
+#include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/MsgStream.h"
+
 // ============================================================================
 namespace GaudiExamples
 {
-  /** @class CounterSvcAlg 
-   *  simple algorothm to demonstrate the functionality of ICounterSvc 
-   *  @see ICounterSvc 
-   *  @see  CounterSvc 
-   *  Actually it is a slightly modified version of 
+  /** @class CounterSvcAlg
+   *  simple algorothm to demonstrate the functionality of ICounterSvc
+   *  @see ICounterSvc
+   *  @see  CounterSvc
+   *  Actually it is a slightly modified version of
    *  the class GaudiSvcTest::CounterTestAlg by Markus FRANK
    *  @author Vanya BELYAEV ibelyaev@physucs.syr.edu
    *  @date 2007-05-25
    */
-  class CounterSvcAlg 
-    : public Algorithm 
+  class CounterSvcAlg
+    : public Algorithm
   {
   public:
     /// Constructor: A constructor of this form must be provided.
@@ -34,7 +35,7 @@ namespace GaudiExamples
     /// Standard Destructor
     virtual ~CounterSvcAlg() {}
     /// Initialize
-    virtual StatusCode initialize()   
+    virtual StatusCode initialize()
     {
       MsgStream log(msgSvc(), name());
       StatusCode sc = service("CounterSvc", m_cntSvc, true);
@@ -61,11 +62,11 @@ namespace GaudiExamples
       m_cntSvc->create(m_counterBaseName, "Eff1") ;
       m_cntSvc->create(m_counterBaseName, "Eff2") ;
       m_cntSvc->create(m_counterBaseName, "Sum") ;
-      
+
       return sc ;
     }
     /// Finalize
-    virtual StatusCode finalize()   
+    virtual StatusCode finalize()
     {
       MsgStream log(msgSvc(), name());
       ICounterSvc::Printout p(m_cntSvc);
@@ -81,39 +82,39 @@ namespace GaudiExamples
       return StatusCode::SUCCESS;
     }
     /// Event callback
-    virtual StatusCode execute()    
+    virtual StatusCode execute()
     {
       static size_t nEvent = 0 ;
       ++nEvent ;
-      
+
       ICounterSvc::CountObject cnt(m_total);
       (*m_evtCount)++;
       cnt++;
-      
+
       ICounterSvc::CountObject e1 = m_cntSvc->get(m_counterBaseName,"Eff1") ;
       e1 += ( 0 == nEvent%2 ) ;
-      
+
       ICounterSvc::CountObject e2 = m_cntSvc->get(m_counterBaseName,"Eff2") ;
       e2 += ( 0 == nEvent%3 ) ;
-      
+
       ICounterSvc::CountObject sum = m_cntSvc->get(m_counterBaseName,"Sum") ;
       sum += nEvent ;
-      
+
       return StatusCode::SUCCESS;
     }
   private:
     ICounterSvc::Counter* m_evtCount;
     ICounterSvc::Counter* m_total;
     ICounterSvc*  m_cntSvc;
-    
+
     std::string m_counterBaseName;
   };
-  
-} // end of namespace GaudiExamples 
+
+} // end of namespace GaudiExamples
 
 // ============================================================================
 DECLARE_NAMESPACE_ALGORITHM_FACTORY (GaudiExamples, CounterSvcAlg)
 
 // ============================================================================
-// The END 
+// The END
 // ============================================================================

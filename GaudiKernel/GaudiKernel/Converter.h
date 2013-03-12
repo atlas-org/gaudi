@@ -7,33 +7,23 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IService.h"
 #include "GaudiKernel/ConversionSvc.h"
+#include "GaudiKernel/IDataProviderSvc.h"
+#include "GaudiKernel/IDataManagerSvc.h"
 
 // Forward declarations
 class IMessageSvc;
 class IRegistry;
-class IDataProviderSvc;
-class IDataManagerSvc;
 
 /** @class Converter Converter.h GaudiKernel/Converter.h
 
-    Converter base class. See interface for detailed description, 
+    Converter base class. See interface for detailed description,
     arguments and return values
 
     @author Markus Frank
     @version 1.0
 */
-class Converter : virtual public IConverter	    {
-
+class GAUDI_API Converter : public implements1<IConverter> {
 public:
-
-  /// Query interfaces of Interface
-  virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
-
-  /// Reference Interface instance
-  virtual unsigned long addRef();
-
-  /// Release Interface instance 
-  virtual unsigned long release();
 
   /// Initialize the converter
   virtual StatusCode initialize();
@@ -45,21 +35,21 @@ public:
   virtual StatusCode setDataProvider(IDataProviderSvc* svc);
 
   /// Get Data provider service
-  virtual IDataProviderSvc* dataProvider()    const;
+  virtual SmartIF<IDataProviderSvc>& dataProvider()    const;
 
   /// Set conversion service the converter is connected to
   virtual StatusCode setConversionSvc(IConversionSvc* svc);
 
   /// Get conversion service the converter is connected to
-  virtual IConversionSvc* conversionSvc()    const;
+  virtual SmartIF<IConversionSvc>& conversionSvc()    const;
 
   /// Set address creator facility
   virtual StatusCode setAddressCreator(IAddressCreator* creator);
 
   /// Retrieve address creator facility
-  virtual IAddressCreator* addressCreator()   const;
+  virtual SmartIF<IAddressCreator>& addressCreator()   const;
 
-  /// Retrieve the class type of objects the converter produces. 
+  /// Retrieve the class type of objects the converter produces.
   virtual const CLID& objType() const;
 
   /// Retrieve the class type of the data store the converter uses.
@@ -81,7 +71,7 @@ public:
   /// Convert the transient object to the requested representation.
   virtual StatusCode createRep(DataObject* pObject, IOpaqueAddress*& refpAddress);
 
-  /// Resolve the references of the converted object. 
+  /// Resolve the references of the converted object.
   virtual StatusCode fillRepRefs(IOpaqueAddress* pAddress,DataObject* pObject);
 
   /// Update the converted representation of a transient object.
@@ -91,7 +81,7 @@ public:
   virtual StatusCode updateRepRefs(IOpaqueAddress* pAddress, DataObject* pObject);
 
   /// Standard Constructor
-  Converter(long storage_type, const CLID& class_type, ISvcLocator* svc);
+  Converter(long storage_type, const CLID& class_type, ISvcLocator* svc = 0);
 
   /// Access a service by name, creating it if it doesn't already exist.
   template <class T>
@@ -105,40 +95,41 @@ public:
     return service_i(type, name, T::interfaceID(), (void**)&psvc);
   }
 
+  /// Return a pointer to the service identified by name (or "type/name")
+  SmartIF<IService> service(const std::string& name, const bool createIf = true) const;
+
 protected:
 
   /// Standard Destructor
   virtual ~Converter();
 
   /// Retrieve pointer to service locator
-  ISvcLocator* serviceLocator()   const;
+  SmartIF<ISvcLocator>& serviceLocator()   const;
   /// Retrieve pointer to message service
-  IMessageSvc* msgSvc()   const;
+  SmartIF<IMessageSvc>& msgSvc()   const;
   // Obsoleted name, kept due to the backwards compatibility
-  IMessageSvc* messageService()   const;
+  SmartIF<IMessageSvc>& messageService()   const;
   /// Get Data Manager service
-  IDataManagerSvc* dataManager() const;
+  SmartIF<IDataManagerSvc>& dataManager() const;
 
 private:
 
-  /// Reference counter                          
-  unsigned long     m_refCount;
   /// Storage type
   long              m_storageType;
   /// Class type the converter can handle
   const CLID        m_classType;
   /// Pointer to the address creation service interface
-  IAddressCreator*    m_addressCreator;
+  mutable SmartIF<IAddressCreator> m_addressCreator;
   /// Pointer to data provider service
-  IDataProviderSvc* m_dataProvider;
+  mutable SmartIF<IDataProviderSvc> m_dataProvider;
   /// Pointer to data manager service
-  IDataManagerSvc*  m_dataManager;
+  mutable SmartIF<IDataManagerSvc>  m_dataManager;
   /// Pointer to the connected conversion service
-  IConversionSvc*   m_conversionSvc;
+  mutable SmartIF<IConversionSvc>   m_conversionSvc;
   /// Service Locator reference
-  ISvcLocator*      m_svcLocator;
-  /// MessageSvc reference 
-  mutable IMessageSvc* m_messageSvc;
+  mutable SmartIF<ISvcLocator>      m_svcLocator;
+  /// MessageSvc reference
+  mutable SmartIF<IMessageSvc> m_messageSvc;
 
   /** implementation of service method */
   StatusCode service_i(const std::string& svcName,
@@ -152,4 +143,4 @@ private:
 };
 
 
-#endif // GAUDIKERNEL_CONVERTER_H 
+#endif // GAUDIKERNEL_CONVERTER_H

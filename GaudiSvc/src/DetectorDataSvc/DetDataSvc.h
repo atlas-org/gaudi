@@ -15,15 +15,13 @@ class IAddressCreator;
 ///---------------------------------------------------------------------------
 /** @class DetDataSvc DetDataSvc.h DetectorDataSvc/DetDataSvc.h
 
-    A DataSvc specialised in detector data.
+    A DataSvc specialized in detector data.
 
     @author Marco Clemencic (previous author unknown)
 
 *///--------------------------------------------------------------------------
 
-class DetDataSvc  : public DataSvc,
-		    virtual public IDetDataSvc,
-		    virtual public IIncidentListener
+class DetDataSvc  : public extends2<DataSvc, IDetDataSvc, IIncidentListener>
 {
 
   friend class SvcFactory<DetDataSvc>;
@@ -31,7 +29,7 @@ class DetDataSvc  : public DataSvc,
   // unhides DataSvc updateObject methods
   using DataSvc::updateObject;
 
- public:
+public:
 
   // Overloaded DataSvc methods
 
@@ -56,19 +54,11 @@ class DetDataSvc  : public DataSvc,
   /// Standard Destructor
   virtual ~DetDataSvc();
 
- private:
+private:
   /// Deal with Detector Description initialization
   StatusCode setupDetectorDescription();
 
- public:
-
-  // Reimplemented from IInterface
-
-  /// Query the interface of the service
-  virtual StatusCode queryInterface( const InterfaceID& riid,
-				     void** ppvInterface );
-
- public:
+public:
 
   // Implementation of the IDetDataSvc interface
 
@@ -82,14 +72,14 @@ class DetDataSvc  : public DataSvc,
   /// Set the new event time
   virtual void setEventTime( const Gaudi::Time& time );
 
- public:
+public:
 
   // Implementation of the IIncidentListener interface
 
   /// Inform that a new incident has occured
   virtual void handle( const Incident& );
 
- private:
+private:
 
   /// Detector Data Persistency Storage type
   int              m_detStorageType;
@@ -110,12 +100,8 @@ class DetDataSvc  : public DataSvc,
   Gaudi::Time        m_eventTime;
 
   /// Address Creator to be used
-  IAddressCreator* m_addrCreator;
+  SmartIF<IAddressCreator> m_addrCreator;
 
 };
 
 #endif // DETECTORDATASVC_DETDATASVC_H
-
-
-
-

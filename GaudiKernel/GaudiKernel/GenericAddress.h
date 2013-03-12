@@ -18,7 +18,7 @@ class IRegistry;
     @author Markus Frank
     @version 1.0
 */
-class GenericAddress : public IOpaqueAddress  {
+class GAUDI_API GenericAddress: public IOpaqueAddress  {
 protected:
   /// Reference count
   unsigned long   m_refCount;
@@ -35,8 +35,8 @@ protected:
 
 public:
   /// Dummy constructor
-  GenericAddress() 
-    : m_refCount(0), 
+  GenericAddress()
+    : m_refCount(0),
       m_svcType(0),
       m_clID(0),
       m_pRegistry(0)
@@ -44,7 +44,7 @@ public:
     m_ipar[0]=m_ipar[1]=0xFFFFFFFF;
   }
   /// Standard Constructor
-  GenericAddress(const GenericAddress& copy)  
+  GenericAddress(const GenericAddress& copy)
     : IOpaqueAddress(copy),
       m_refCount(0),
       m_svcType(copy.m_svcType),
@@ -59,10 +59,10 @@ public:
   /// Standard Constructor
   GenericAddress( long svc,
                   const CLID& clid,
-                  const std::string& p1="", 
+                  const std::string& p1="",
                   const std::string& p2="",
                   unsigned long ip1=0,
-                  unsigned long ip2=0)  
+                  unsigned long ip2=0)
     : m_refCount(0),
       m_svcType(svc),
       m_clID(clid),

@@ -1,5 +1,5 @@
 // $Id: IUpdateManagerSvc.h,v 1.5 2007/10/31 19:02:17 marcocle Exp $
-#ifndef GAUDIKERNEL_IUPDATEMANAGERSVC_H 
+#ifndef GAUDIKERNEL_IUPDATEMANAGERSVC_H
 #define GAUDIKERNEL_IUPDATEMANAGERSVC_H 1
 
 // Include files
@@ -18,8 +18,6 @@ class IDataProviderSvc;
 class IDetDataSvc;
 namespace Gaudi { class Time; }
 
-static const InterfaceID IID_IUpdateManagerSvc ( "IUpdateManagerSvc", 1, 0 );
-
 /** @class BaseObjectMemberFunction
  *
  * Base class of ObjectMemberFunction. It is used to allow to use containers of
@@ -33,13 +31,13 @@ public:
   virtual ~BaseObjectMemberFunction() {};
 
   virtual StatusCode operator() () const = 0;
-	
+
   virtual BaseObjectMemberFunction *makeCopy() const = 0;
 
   virtual const std::type_info &type() const = 0;
-	
+
   virtual bool match(BaseObjectMemberFunction *) const = 0;
-	
+
   virtual DataObject* castToDataObject() const = 0;
   virtual ValidDataObject* castToValidDataObject() const = 0;
   virtual void* castToVoid() const = 0;
@@ -74,7 +72,7 @@ public:
   virtual BaseObjectMemberFunction *makeCopy() const {
     return new ObjectMemberFunction<CallerClass>(m_instance,m_memberFunction);
   }
-  
+
   /// Returns the type_info of the CallerClass
   virtual const std::type_info &type() const { return typeid(CallerClass); }
 
@@ -115,7 +113,7 @@ protected:
 
   /// Pointer to the member function.
   MemberFunctionType m_memberFunction;
-	
+
   friend class IUpdateManagerSvc;
 };
 
@@ -147,12 +145,12 @@ template<class ActualType>
 class PtrSetter: public BasePtrSetter {
 public:
   typedef ActualType dest_type;
-  
+
   /// Construct a new object using the destination pointer.
   PtrSetter(dest_type *&dest):m_storage(&dest) {
     *m_storage = NULL;
-  }    
-  
+  }
+
   /// Empty virtual destructor.
   virtual ~PtrSetter() {}
   /// sets the internal pointer to the provided data object (with a dynamic_cast).
@@ -161,7 +159,7 @@ public:
   }
   /// tells if the internal pointer is NULL.
   virtual bool isNull() { return *m_storage == NULL; }
-  
+
 private:
   /// pointer to the pointer to fill provided by the user.
   dest_type **m_storage;
@@ -174,11 +172,10 @@ private:
  *  @author Marco CLEMENCIC
  *  @date   2005-03-30
  */
-class IUpdateManagerSvc : virtual public IInterface {
-public: 
-
-  /// Return the interface ID
-  static const InterfaceID& interfaceID() { return IID_IUpdateManagerSvc; }
+class GAUDI_API IUpdateManagerSvc: virtual public IInterface {
+public:
+  /// InterfaceID
+  DeclareInterfaceID(IUpdateManagerSvc,2,0);
 
   /// Give access to the data provider.
   virtual IDataProviderSvc *dataProvider() const = 0;
@@ -259,15 +256,15 @@ public:
   inline StatusCode update(CallerClass *instance){
     return i_update(dynamic_cast<void*>(instance));
   }
-  
+
   /// Debug method: it dumps the dependency network through the message service (not very readable, for experts only).
   virtual void dump() = 0;
-  
+
   /// Force the update manager service to wait before entering the newEvent loop.
   virtual void acquireLock() = 0;
   /// Let the update manager service enter the newEvent loop.
   virtual void releaseLock() = 0;
-  
+
   /// Remove all the items referring to objects present in the transient store.
   /// This is needed when the Detector Transient Store is purged, otherwise we
   /// will keep pointers to not existing objects.

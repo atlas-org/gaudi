@@ -48,8 +48,7 @@ namespace Tuples
     OBJECT m_object ;
   };
   
-  /** @fn useFun
-   *  trivial helper function to convert on flight 
+  /** trivial helper function to convert on flight 
    *  pointer to function into "functor"
    *  It is especially useful in conjunction with 
    *  N-Tuples fills

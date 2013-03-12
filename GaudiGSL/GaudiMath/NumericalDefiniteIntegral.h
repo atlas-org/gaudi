@@ -69,7 +69,7 @@ namespace Genfun
      *  @author Vanya  BELYAEV Ivan.Belyaev@itep.ru
      *  @date   2003-08-31
      */
-    class NumericalDefiniteIntegral : public AbsFunction
+    class GAUDI_API NumericalDefiniteIntegral : public AbsFunction
     {
     public:
       struct _Workspace ;
@@ -82,7 +82,7 @@ namespace Genfun
     public:
 
       /// From CLHEP/GenericFunctions
-      FUNCTION_OBJECT_DEF( NumericalDefiniteIntegral ) ;
+      FUNCTION_OBJECT_DEF( NumericalDefiniteIntegral )
 
     public:
 
@@ -409,8 +409,8 @@ namespace Genfun
 
     };
 
-  };   // end of namespace GaudiMathImplementation
-};   // end of namespace Genfun
+  } // end of namespace GaudiMathImplementation
+} // end of namespace Genfun
 
 // ============================================================================
 // The END

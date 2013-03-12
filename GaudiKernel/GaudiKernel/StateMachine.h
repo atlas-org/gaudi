@@ -33,7 +33,7 @@ enum Transition {
  * Function to get the new state according to the required transition, checking
  * if the transition is allowed.
  */
-State ChangeState(const Transition transition, const State state);
+State GAUDI_API ChangeState(const Transition transition, const State state);
 
 } // namespace Gaudi
 } // namespace StateMachine

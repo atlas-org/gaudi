@@ -1,9 +1,0 @@
-cleanup.*
-setup.*
-*.make
-Makefile
-*.nmake
-*.nmakesav
-NMake
-install.history
-*.makesav

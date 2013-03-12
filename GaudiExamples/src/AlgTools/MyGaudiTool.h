@@ -12,9 +12,7 @@
  *  @author Pere Mato
  *  @date   14/10/2001
  */
-class MyGaudiTool : public GaudiTool,
-                    virtual public IMyTool,
-                    virtual public IMyOtherTool {
+class MyGaudiTool : public extends2<GaudiTool, IMyTool, IMyOtherTool> {
 public:
 
   /// Standard Constructor

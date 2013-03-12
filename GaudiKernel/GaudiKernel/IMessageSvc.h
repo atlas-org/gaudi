@@ -1,4 +1,3 @@
-// $Header: /tmp/svngaudi/tmp.jEpFh25751/Gaudi/GaudiKernel/GaudiKernel/IMessageSvc.h,v 1.8 2008/10/01 14:39:27 marcocle Exp $
 #ifndef GAUDIKERNEL_IMESSAGESVC_H
 #define GAUDIKERNEL_IMESSAGESVC_H
 
@@ -11,48 +10,54 @@
 class StatusCode;
 class Message;
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IMessageSvc(30, 1 , 1); 
-
-/// Printlevels enumeration
-namespace MSG   {
-  enum Level   {
-        NIL = 0,
-        VERBOSE,
-        DEBUG,
-        INFO,
-        WARNING,
-        ERROR,
-        FATAL,
-        ALWAYS,
-        NUM_LEVELS
+/// Print levels enumeration
+namespace MSG {
+  enum Level {
+    NIL = 0,
+    VERBOSE,
+    DEBUG,
+    INFO,
+    WARNING,
+    ERROR,
+    FATAL,
+    ALWAYS,
+    NUM_LEVELS
   };
-  enum Color   {
-        BLACK = 0,
-        RED,
-        GREEN,
-        YELLOW,
-        BLUE,
-        PURPLE,
-        CYAN,
-        WHITE,
-        NUM_COLORS
+  enum Color {
+    BLACK = 0,
+    RED,
+    GREEN,
+    YELLOW,
+    BLUE,
+    PURPLE,
+    CYAN,
+    WHITE,
+    NUM_COLORS
   };
 }
 
+#ifdef _WIN32
+// Avoid (hopefully) conflicts between Windows' headers and MSG.
+#  ifndef NOMSG
+#    define NOMSG
+#    ifndef NOGDI
+#      define NOGDI
+#    endif
+#  endif
+#endif
+
 /** @class IMessageSvc IMessageSvc.h GaudiKernel/IMessageSvc.h
 
-    The IMessage is the interface implmented by the message service.
+    The IMessage is the interface implemented by the message service.
     This interface is used by any algorithm or services wanting to report
     messages to the end-user.
 
     @author Iain Last
 */
-class IMessageSvc : virtual public IInterface {
+class GAUDI_API IMessageSvc: virtual public IInterface {
 public:
-
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IMessageSvc; }
+  /// InterfaceID
+  DeclareInterfaceID(IMessageSvc,2,0);
 
   /** Report a message by sending a Message object to the message service
       @param message  Reference to a message object
@@ -65,33 +70,33 @@ public:
   */
   virtual void reportMessage( const Message& message ) = 0;
 
-  /** Report an error to the message service. The service will use the error code 
-      number for formating a human readible message
+  /** Report an error to the message service. The service will use the error code
+      number for formating a human readable message
       @param code Error code number
       @param source Message source. Typically the alg/svc name
   */
-  virtual void reportMessage( const StatusCode& code, 
+  virtual void reportMessage( const StatusCode& code,
                               const std::string& source = "" ) = 0;
-  
+
   /** Report a message by specifying the source, severity level and text.
-      @param source Message source. Typically the alg/svc name 
+      @param source Message source. Typically the alg/svc name
       @param type Severity level
       @param message Text message
   */
-  virtual void reportMessage( const std::string& source, 
-                              int type, 
+  virtual void reportMessage( const std::string& source,
+                              int type,
                               const std::string& message ) = 0;
 
   /** Report a message by specifying the source, severity level and text. The text is
       passed as C like character string to avoid extra copying.
-      @param source Message source. Typically the alg/svc name 
+      @param source Message source. Typically the alg/svc name
       @param type Severity level
       @param message Text message
   */
   virtual void reportMessage( const char* source,
                               int type,
                               const char* message = "" ) = 0;
-  
+
   /** Insert a message to be sent for a given status code into the error code repository.
       @param code Status error code
       @param message Message associated
@@ -118,15 +123,15 @@ public:
       @param stream Pointer to a C++ stream
   */
   virtual void insertStream( int type,
-                             const std::string& name, 
+                             const std::string& name,
                              std::ostream* stream ) = 0;
 
   /// Delete all the streams.
   virtual void eraseStream() = 0;
-  
+
   /// Delete all the streams for a given message type (severity level).
   virtual void eraseStream( int message_type ) = 0;
-  
+
   /** Delete a single stream for a given message type (severity level)
       @param type Severity level
       @param stream Pointer to a C++ stream
@@ -162,11 +167,11 @@ public:
       @param source  Message source
       @param new_level Severity level
   */
-  virtual void setOutputLevel( const std::string& source, 
+  virtual void setOutputLevel( const std::string& source,
                                int new_level)  = 0;
 
 
-  /** Show whether colrs are used
+  /** Show whether colors are used
    */
   virtual bool useColor() const = 0;
 
@@ -179,7 +184,19 @@ public:
    */
   virtual int messageCount( MSG::Level level ) const = 0;
 
+};
 
+class GAUDI_API IInactiveMessageCounter: virtual public IInterface {
+public:
+  /// InterfaceID
+  DeclareInterfaceID(IInactiveMessageCounter,1,0);
+
+  /** Increment deactivated message count.
+   *  Used by MsgStream to record the sources of messages that are prepared, but
+   *  not printed (because if insufficient level).
+   */
+  virtual void incrInactiveCount( MSG::Level level,
+                                  const std::string& src ) = 0;
 };
 
 #endif // GAUDIKERNEL_IMESSAGESVC_H

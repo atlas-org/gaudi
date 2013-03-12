@@ -8,9 +8,6 @@
 // Framework include files
 #include "GaudiKernel/IInterface.h"
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IRndmEngine(142, 1 , 0); 
-
 /** @class IRndmEngine IRndmEngine.h GaudiKernel/IRndmEngine.h
 
     Definition of a interface for a generic random number generator
@@ -20,14 +17,14 @@ static const InterfaceID IID_IRndmEngine(142, 1 , 0);
     @author  M.Frank
     @version 1.0
 */
-class IRndmEngine  : virtual public IInterface    {
+class GAUDI_API IRndmEngine: virtual public IInterface {
 public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IRndmEngine; }
+  /// InterfaceID
+  DeclareInterfaceID(IRndmEngine,2,0);
   /// Single shot returning single random number
   virtual double rndm() const = 0;
   /** Multiple shots returning vector with flat random numbers.
-      @param  array    Array containing random numbers 
+      @param  array    Array containing random numbers
       @param  howmany  fill 'howmany' random numbers into array
       @param  start    ... starting at position start
       @return StatusCode indicating failure or success.

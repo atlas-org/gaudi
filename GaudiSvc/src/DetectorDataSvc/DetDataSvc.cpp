@@ -1,4 +1,3 @@
-// $Id: DetDataSvc.cpp,v 1.24 2008/10/27 19:22:21 marcocle Exp $
 #define  DETECTORDATASVC_DETDATASVC_CPP
 
 // Include files
@@ -11,38 +10,43 @@
 #include "GaudiKernel/DataObject.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SvcFactory.h"
+#include "GaudiKernel/System.h"
+using System::isEnvSet;
+using System::getEnv;
+
+#define ON_DEBUG if (UNLIKELY(outputLevel() <= MSG::DEBUG))
+#define ON_VERBOSE if (UNLIKELY(outputLevel() <= MSG::VERBOSE))
+
+#define DEBMSG ON_DEBUG debug()
+#define VERMSG ON_VERBOSE verbose()
 
 // Instantiation of a static factory class used by clients to create
 // instances of this service
 DECLARE_SERVICE_FACTORY(DetDataSvc)
 
-// Service initialisation
+// Service initialization
 StatusCode DetDataSvc::initialize()   {
-  MsgStream log(msgSvc(), name());
-
-  // Call base class initialisation
+  // Call base class initialization
   StatusCode sc  = DataSvc::initialize();
-  if( sc.isFailure() ) return sc;
+  if( UNLIKELY(sc.isFailure()) ) return sc;
 
   // Set Data Loader
-  IConversionSvc* cnv_svc;
-  sc = serviceLocator()->service(m_persistencySvcName, cnv_svc, true);
-  if( sc .isFailure() ) {
-    log << MSG::ERROR << "Unable to retrieve " << m_persistencySvcName << endreq;
+  SmartIF<IConversionSvc> cnv_svc(serviceLocator()->service(m_persistencySvcName));
+  if( UNLIKELY(!cnv_svc.isValid()) ) {
+    error() << "Unable to retrieve " << m_persistencySvcName << endmsg;
+    return StatusCode::FAILURE;
+  }
+
+  sc = setDataLoader(cnv_svc);
+  if( UNLIKELY(sc.isFailure()) ) {
+    error() << "Unable to set DataLoader" << endmsg;
     return sc;
   }
 
-  sc = setDataLoader( cnv_svc );
-  cnv_svc->release();
-  if( sc .isFailure() ) {
-    log << MSG::ERROR << "Unable to set DataLoader" << endreq;
-    return sc;
-  }
-
-  // Get address creator fron the DetectorPersistencySvc
-  sc = cnv_svc->queryInterface(IID_IAddressCreator, pp_cast<void>(&m_addrCreator));
-  if (sc.isFailure()) {
-    log << MSG::ERROR << "Unable to get AddressCreator." << endreq;
+  // Get address creator from the DetectorPersistencySvc
+  m_addrCreator = cnv_svc;
+  if ( UNLIKELY(!m_addrCreator.isValid()) ) {
+    error() << "Unable to get AddressCreator." << endmsg;
     return StatusCode::FAILURE;
   }
 
@@ -50,12 +54,11 @@ StatusCode DetDataSvc::initialize()   {
 }
 
 StatusCode DetDataSvc::setupDetectorDescription() {
-  // Now you can use the MsgSvc
-  MsgStream log(msgSvc(), name());
-
   // Initialize the detector data transient store
-  log << MSG::DEBUG << "Storage type used is: " << m_detStorageType << endreq;
-  log << MSG::DEBUG << "Setting DetectorDataSvc root node... " << endreq;
+  ON_DEBUG {
+    debug() << "Storage type used is: " << m_detStorageType << endmsg;
+    debug() << "Setting DetectorDataSvc root node... " << endmsg;
+  }
 
   if( m_usePersistency ) {
 
@@ -63,17 +66,17 @@ StatusCode DetDataSvc::setupDetectorDescription() {
     if( m_detDbLocation.empty() || "empty" == m_detDbLocation ) {
 
       // if the name of DBlocation is not given - construct it!
-	    // by retrieving the value of XMLDDBROOT
+	  // by retrieving the value of XMLDDBROOT
 
-      if ( 0 != getenv("XMLDDDBROOT") ) {
-        m_detDbLocation  = getenv("XMLDDDBROOT");
+      /// @todo: remove references to obsolete package XMLDDDBROOT
+      if ( isEnvSet("XMLDDDBROOT") ) {
+        m_detDbLocation  = getEnv("XMLDDDBROOT");
         m_detDbLocation += "/DDDB/lhcb.xml";
       }
     }
     if( m_detDbLocation.empty() || "empty" == m_detDbLocation ) {
-      log << MSG::ERROR
-          << "Detector data location name not set. Detector data will "
-          << "not be found." << endreq;
+      error() << "Detector data location name not set. Detector data will "
+                 "not be found." << endmsg;
       return StatusCode::FAILURE;
     }
     else {
@@ -89,31 +92,27 @@ StatusCode DetDataSvc::setupDetectorDescription() {
         std::string dbrName = "/" + m_detDbRootName;
         sc = i_setRoot( dbrName, rootAddr );
         if( sc.isFailure() ) {
-          log << MSG::ERROR << "Unable to set detector data store root"
-              << endreq;
+          error() << "Unable to set detector data store root" << endmsg;
           return sc;
         }
       }
       else {
-        log << MSG::ERROR << "Unable to create address for  /dd" << endreq;
+        error() << "Unable to create address for  /dd" << endmsg;
         return sc;
       }
     }
     // Writing the description file in the output log file [bugs #2854]
-    log << MSG::ALWAYS << "Detector description database: " << m_detDbLocation << endreq;
+    always() << "Detector description database: " << m_detDbLocation << endmsg;
   }
   else {
-    log << MSG::INFO << "Detector description not requested to be loaded"
-        << endreq;
+    info() << "Detector description not requested to be loaded" << endmsg;
   }
 
   return StatusCode::SUCCESS;
 }
 
 // Service initialisation
-StatusCode DetDataSvc::reinitialize()   {
-  MsgStream log(msgSvc(), name());
-
+StatusCode DetDataSvc::reinitialize() {
   // The DetectorDataSvc does not need to be re-initialized. If it is done
   // all the Algorithms having references to DetectorElements will become
   // invalid and crash the program.  (Pere Mato)
@@ -133,40 +132,20 @@ StatusCode DetDataSvc::reinitialize()   {
 /// Finalize the service.
 StatusCode DetDataSvc::finalize()
 {
-  MsgStream log(msgSvc(), name());
-  log << MSG::DEBUG << "Finalizing" << endreq;
+  DEBMSG << "Finalizing" << endmsg;
 
   // clears the store
   m_usePersistency = false; // avoid creation of an empty store when clearing
   clearStore().ignore();
 
   // Releases the address creator
-  if (0 != m_addrCreator) {
-    m_addrCreator->release();
-  }
+  m_addrCreator = 0;
 
   // Releases the DataLoader
   setDataLoader(0).ignore();
 
   // Finalize the base class
   return DataSvc::finalize();
-}
-
-/// Query interface
-StatusCode DetDataSvc::queryInterface(const InterfaceID& riid,
-				      void** ppvInterface)
-{
-  // With the highest priority return the specific interfaces
-  // If interfaces are not directly available, try out a base class
-  if ( IID_IDetDataSvc.versionMatch(riid) ) {
-    *ppvInterface = (IDetDataSvc*)this;
-  } else if ( IID_IIncidentListener.versionMatch(riid) ) {
-    *ppvInterface = (IIncidentListener*)this;
-  } else {
-    return DataSvc::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
 
 /// Remove all data objects in the data store.
@@ -191,11 +170,10 @@ StatusCode DetDataSvc::clearStore()   {
       std::string dbrName = "/" + m_detDbRootName;
       sc = i_setRoot( dbrName, rootAddr );
       if( sc.isFailure() ) {
-        log << MSG::ERROR
-	    << "Unable to set detector data store root" << endreq;
+        error() << "Unable to set detector data store root" << endmsg;
       }
     } else {
-      log << MSG::ERROR << "Unable to create address for  /dd" << endreq;
+      error() << "Unable to create address for  /dd" << endmsg;
     }
     return sc;
 
@@ -206,7 +184,7 @@ StatusCode DetDataSvc::clearStore()   {
 
 /// Standard Constructor
 DetDataSvc::DetDataSvc(const std::string& name,ISvcLocator* svc) :
-  DataSvc(name,svc), m_eventTime(0)  {
+  base_class(name,svc), m_eventTime(0)  {
   declareProperty("DetStorageType",  m_detStorageType = XML_StorageType );
   declareProperty("DetDbLocation",   m_detDbLocation  = "empty" );
   declareProperty("DetDbRootName",   m_detDbRootName  = "dd" );
@@ -223,12 +201,8 @@ DetDataSvc::~DetDataSvc()  {
 
 /// Set the new event time
 void DetDataSvc::setEventTime ( const Gaudi::Time& time ) {
-  // m_eventTime = TimePoint( time );
   m_eventTime = time;
-  if ( msgSvc()->outputLevel() <= MSG::DEBUG) {
-    MsgStream log( msgSvc(), name() );
-    log << MSG::DEBUG << "Event Time set to " << eventTime() << endmsg;
-  }
+  DEBMSG << "Event Time set to " << eventTime() << endmsg;
 }
 
 /// Check if the event time has been set
@@ -241,12 +215,13 @@ const Gaudi::Time& DetDataSvc::eventTime ( ) const {
   return m_eventTime;
 }
 
-/// Inform that a new incident has occured
+/// Inform that a new incident has occurred
 void DetDataSvc::handle ( const Incident& inc ) {
-  MsgStream log( msgSvc(), name() );
-  log << MSG::DEBUG << "New incident received" << endreq;
-  log << MSG::DEBUG << "Incident source: " << inc.source() << endreq;
-  log << MSG::DEBUG << "Incident type: " << inc.type() << endreq;
+  ON_DEBUG {
+    debug() << "New incident received" << endmsg;
+    debug() << "Incident source: " << inc.source() << endmsg;
+    debug() << "Incident type: " << inc.type() << endmsg;
+  }
   return;
 }
 
@@ -254,75 +229,66 @@ void DetDataSvc::handle ( const Incident& inc ) {
 /// @todo update also its ancestors in the data store if necessary
 StatusCode DetDataSvc::updateObject( DataObject* toUpdate ) {
 
-  MsgStream log( msgSvc(), name() );
-  log << MSG::DEBUG << "Method updateObject starting" << endreq;
+  DEBMSG << "Method updateObject starting" << endmsg;
 
   // Check that object to update exists
   if ( 0 == toUpdate ) {
-    log << MSG::ERROR
-	<< "There is no DataObject to update" << endreq;
+    error() << "There is no DataObject to update" << endmsg;
     return INVALID_OBJECT;
   }
 
   // Retrieve IValidity interface of object to update
   IValidity* condition = dynamic_cast<IValidity*>( toUpdate );
   if ( 0 == condition ) {
-    log << MSG::WARNING
+    warning()
 	<< "Cannot update DataObject: DataObject does not implement IValidity"
-	<< endreq;
+	<< endmsg;
     return StatusCode::SUCCESS;
   }
 
   // Check that the event time has been defined
   if ( !validEventTime() ) {
-    log << MSG::WARNING
+    warning()
 	<< "Cannot update DataObject: event time undefined"
-	<< endreq;
+	<< endmsg;
     return StatusCode::SUCCESS;
   }
 
   // No need to update if condition is valid
   if ( condition->isValid( eventTime() ) ) {
-    log << MSG::DEBUG
-	<< "DataObject is valid: no need to update" << endreq;
+    DEBMSG << "DataObject is valid: no need to update" << endmsg;
     return StatusCode::SUCCESS;
   } else {
-    log << MSG::DEBUG
-	<< "DataObject is invalid: update it" << endreq;
+    DEBMSG << "DataObject is invalid: update it" << endmsg;
   }
 
   // TODO: before loading updated object, update HERE its parent in data store
 
   // Now delegate update to the conversion service by calling the base class
-  log << MSG::DEBUG
-      << "Delegate update to relevant conversion service" << endreq;
+  DEBMSG << "Delegate update to relevant conversion service" << endmsg;
   StatusCode status = DataSvc::updateObject(toUpdate);
   if ( !status.isSuccess() ) {
-    log << MSG::ERROR
-	<< "Could not update DataObject" << endreq;
+    error() << "Could not update DataObject" << endmsg;
     if ( status == NO_DATA_LOADER )
-      log << MSG::ERROR << "There is no data loader" << endreq;
+      error() << "There is no data loader" << endmsg;
     return status;
   }
 
   // Now cross-check that the new condition is valid
   condition = dynamic_cast<IValidity*>(toUpdate);
   if ( 0 == condition ) {
-    log << MSG::ERROR
-	<< "Updated DataObject does not implement IValidity" << endreq;
+    error() << "Updated DataObject does not implement IValidity" << endmsg;
     return StatusCode::FAILURE;
   }
-  if ( !condition->isValid( eventTime() ) ) {
-    log << MSG::ERROR
-	<< "Updated DataObject is not valid" << endreq;
-    log << MSG::ERROR
-	<< "Are you sure the conversion service has updated it?" << endreq;
+  if ( FSMState() == Gaudi::StateMachine::RUNNING &&
+       !condition->isValid( eventTime() ) ) {
+    error() << "Updated DataObject is not valid" << endmsg;
+    error() << "Are you sure the conversion service has updated it?" << endmsg;
     return StatusCode::FAILURE;
   }
 
   // DataObject was successfully updated
-  log << MSG::DEBUG << "Method updateObject exiting successfully" << endreq;
+  DEBMSG << "Method updateObject exiting successfully" << endmsg;
   return StatusCode::SUCCESS;
 
 }
-

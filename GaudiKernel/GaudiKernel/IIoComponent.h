@@ -9,16 +9,16 @@
 /** @class IIoComponent
  */
 
-// STL includes
-#include <string>
-
 // GaudiKernel includes
 #include "GaudiKernel/INamedInterface.h"
 #include "GaudiKernel/StatusCode.h"
 
-class IIoComponent
-  : virtual public ::INamedInterface
+class GAUDI_API IIoComponent : virtual public INamedInterface
 { 
+
+ public:
+  DeclareInterfaceID(IIoComponent,1,0);
+
   /////////////////////////////////////////////////////////////////// 
   // Public methods: 
   /////////////////////////////////////////////////////////////////// 
@@ -36,9 +36,6 @@ class IIoComponent
   // Non-const methods: 
   /////////////////////////////////////////////////////////////////// 
 
-  /// Declaration of the interface ID
-  static const InterfaceID& interfaceID();
-  
   /** @brief callback method to reinitialize the internal state of
    *         the component for I/O purposes (e.g. upon @c fork(2))
    */
@@ -53,14 +50,6 @@ class IIoComponent
 // Inline methods: 
 /////////////////////////////////////////////////////////////////// 
 
-inline 
-const InterfaceID& 
-IIoComponent::interfaceID() 
-{ 
-  // Declaration of the interface ID
-  static const InterfaceID IID_IIoComponent("IIoComponent", 1, 0);
-  return IID_IIoComponent; 
-}
 
 
 #endif //> !GAUDIKERNEL_IIOCOMPONENT_H

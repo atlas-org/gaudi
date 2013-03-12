@@ -15,21 +15,20 @@
 class ISvcLocator;
 
 //
-// ClassName:   MTMessageSvc 
-//  
-// Description: The MTMessageSvc service implements the IMessageSvc interface anbd provides the
-//              basic messaging needed by batch oriented applications. 
+// ClassName:   MTMessageSvc
+//
+// Description: The MTMessageSvc service implements the IMessageSvc interface and provides the
+//              basic messaging needed by batch oriented applications.
 //
 // Author:      Iain Last
 //
-class MTMessageSvc : public Service,
-                     virtual public IMessageSvc { 
+class MTMessageSvc : public extends1<Service, IMessageSvc> {
 public:
   typedef std::pair< std::string, std::ostream* > NamedStream;
   typedef std::multimap< int, NamedStream > StreamMap;
   typedef std::multimap< StatusCode, Message > MessageMap;
   typedef std::map< std::string, int > ThresholdMap;
-  
+
   // Default constructor.
   MTMessageSvc( const std::string& name, ISvcLocator* svcloc );
   // Destructor.
@@ -51,7 +50,7 @@ public:
 
   // Implementation of IMessageSvc::reportMessage()
   virtual void reportMessage( const std::string& source, int type, const std::string& message);
-  
+
   // Implementation of IMessageSvc::insertMessage()
   virtual void insertMessage( const StatusCode& code, const Message& message );
 
@@ -66,13 +65,13 @@ public:
 
   // Implementation of IMessageSvc::insertStream()
   virtual void insertStream( int message_type, const std::string& name, std::ostream* stream );
-  
+
   // Implementation of IMessageSvc::eraseStream()
   virtual void eraseStream();
-  
+
   // Implementation of IMessageSvc::eraseStream()
   virtual void eraseStream( int message_type );
-  
+
   // Implementation of IMessageSvc::eraseStream()
   virtual void eraseStream( int message_type, std::ostream* stream );
 
@@ -80,12 +79,12 @@ public:
   virtual void eraseStream( std::ostream* stream );
 
   // Implementation of IMessageSvc::desaultStream()
-  virtual std::ostream* defaultStream() const { 
-    return m_defaultStream; 
+  virtual std::ostream* defaultStream() const {
+    return m_defaultStream;
   }
 
   // Implementation of IMessageSvc::setDefaultStream()
-  virtual void setDefaultStream( std::ostream* stream ) { 
+  virtual void setDefaultStream( std::ostream* stream ) {
     m_defaultStream = stream;
   }
 
@@ -101,10 +100,7 @@ public:
   // Implementation of IMessageSvc::setOuputLevel()
   virtual void setOutputLevel(const std::string& source, int new_level);
 
-  // Implementation of IInterface::queryInterface()
-  virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvUnknown);
-
-  /** Show whether colrs are used
+  /** Show whether colors are used
    */
   virtual bool useColor() const { return false; }
 

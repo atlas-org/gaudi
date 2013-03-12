@@ -10,6 +10,7 @@
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/IConversionSvc.h"
 #include "GaudiKernel/IAddressCreator.h"
+#include "GaudiKernel/IDataProviderSvc.h"
 
 
 /** @class ConversionSvc ConversionSvc.h GaudiKernel/ConversionSvc.h
@@ -23,12 +24,12 @@
     - createConverter:     the actual convetrer creation
     - configureConverter:  configure converter before initialize
     - initializeConverter: initializes the converter
-    - activateConverter:   any additional configuration to be done after 
+    - activateConverter:   any additional configuration to be done after
                            initialize.
 
     configureConverter and activateConverter are user hooks, where
     the convetrer can be manipulated by the hosting service
-    and knowledge can be supplied, which a "generic" converter cannot 
+    and knowledge can be supplied, which a "generic" converter cannot
     aquire itself.
 
     These hooks allow any sub-classed conversion service to
@@ -43,9 +44,7 @@
     @author Markus Frank
     @version 1.0
 */
-class ConversionSvc  : public Service, 
-                       virtual public IConversionSvc,
-                       virtual public IAddressCreator
+class GAUDI_API ConversionSvc: public extends2<Service, IConversionSvc, IAddressCreator>
 {
 public:
   class WorkerEntry {
@@ -53,7 +52,7 @@ public:
     CLID        m_class;
     IConverter* m_converter;
   public:
-    WorkerEntry(const CLID& cl, IConverter* cnv) 
+    WorkerEntry(const CLID& cl, IConverter* cnv)
       : m_class(cl), m_converter(cnv)       {
     }
     WorkerEntry(const WorkerEntry& copy)
@@ -111,19 +110,19 @@ public:
   /** Implementation of IConverter: Get Data provider service
       @return    Pointer to data provider service
   */
-  virtual IDataProviderSvc* dataProvider()  const;
+  virtual SmartIF<IDataProviderSvc>& dataProvider()  const;
 
   /// Implementation of IConverter: Set conversion service the converter is connected to
   virtual StatusCode setConversionSvc(IConversionSvc* svc);
 
   /// Implementation of IConverter: Get conversion service the converter is connected to
-  virtual IConversionSvc* conversionSvc()    const;
+  virtual SmartIF<IConversionSvc>& conversionSvc()    const;
 
   /// Set address creator facility
   virtual StatusCode setAddressCreator(IAddressCreator* creator);
 
   /// Retrieve address creator facility
-  virtual IAddressCreator* addressCreator()   const;
+  virtual SmartIF<IAddressCreator>& addressCreator()   const;
 
   /// Implementation of IConverter: Create the transient representation of an object.
   virtual StatusCode createObj(IOpaqueAddress* pAddress,DataObject*& refpObject);
@@ -140,7 +139,7 @@ public:
   /// Implementation of IConverter: Convert the transient object to the requested representation.
   virtual StatusCode createRep(DataObject* pObject, IOpaqueAddress*& refpAddress);
 
-  /// Implementation of IConverter: Resolve the references of the converted object. 
+  /// Implementation of IConverter: Resolve the references of the converted object.
   virtual StatusCode fillRepRefs(IOpaqueAddress* pAddress,DataObject* pObject);
 
   /// Implementation of IConverter: Update the converted representation of a transient object.
@@ -174,7 +173,7 @@ public:
   /// Create a Generic address using explicit arguments to identify a single object.
   virtual StatusCode createAddress( long svc_type,
                                     const CLID& clid,
-                                    const std::string* par, 
+                                    const std::string* par,
                                     const unsigned long* ip,
                                     IOpaqueAddress*& refpAddress);
 
@@ -183,7 +182,7 @@ public:
                                      std::string& refAddress);
 
   /// Convert an address in string form to object form
-  virtual StatusCode createAddress( long svc_type, 
+  virtual StatusCode createAddress( long svc_type,
                                     const CLID& clid,
                                     const std::string& refAddress,
                                     IOpaqueAddress*& refpAddress);
@@ -193,9 +192,6 @@ public:
 
   /// Standard Constructor
   ConversionSvc(const std::string& name, ISvcLocator* svc, long type);
-
-  /// Query interface
-  virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
 
 protected:
   /// Standard Destructor
@@ -212,12 +208,12 @@ protected:
 
   /// Activate the new converter after initialization
   virtual StatusCode activateConverter(long typ, const CLID& clid, IConverter* cnv);
-  
+
   /// Load converter or dictionary needed by the converter
   virtual void loadConverter(DataObject* pObject);
 
   /// Retrieve address creation interface
-  virtual IAddressCreator* addressCreator()   {
+  virtual SmartIF<IAddressCreator>& addressCreator()   {
     return m_addressCreator;
   }
 
@@ -226,16 +222,24 @@ protected:
                        bool ignore_add,
                        bool ignore_obj,
                        bool update,
-                       IOpaqueAddress*& pAddress, 
+                       IOpaqueAddress*& pAddress,
                        DataObject*& pObject);
 
   /// Pointer to data provider service
-  IDataProviderSvc*   m_dataSvc;
+  mutable SmartIF<IDataProviderSvc>   m_dataSvc;
   /// Pointer to the address creation service interface
-  IAddressCreator*    m_addressCreator;
+  mutable SmartIF<IAddressCreator>    m_addressCreator;
+  /// Pointer to the IConversionSvc interface of this
+  mutable SmartIF<IConversionSvc>     m_cnvSvc;
   /// Conversion service type
   long                m_type;
   /// List of conversion workers
   Workers*            m_workers;
+
+private:
+  /// Fake copy constructor (never implemented).
+  ConversionSvc(const ConversionSvc&);
+  /// Fake assignment operator (never implemented).
+  ConversionSvc& operator= (const ConversionSvc&);
 };
 #endif // GAUDIKERNEL_CONVERSIONSVC_H

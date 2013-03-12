@@ -27,17 +27,13 @@ template <class TYPE> class SvcFactory;
 // 
 //------------------------------------------------------------------
 
-class PartPropSvc: public Service, virtual public IPartPropSvc {
+class PartPropSvc: public extends1<Service, IPartPropSvc> {
 
 public:
 
   virtual StatusCode initialize();
   virtual StatusCode reinitialize();
   virtual StatusCode finalize();
-
-  // Query the interfaces.
-  virtual StatusCode queryInterface( const InterfaceID& riid, 
-				     void** ppvInterface );
 
   // The table
   HepPDT::ParticleDataTable *PDT();

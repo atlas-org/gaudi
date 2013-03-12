@@ -7,9 +7,6 @@
 #include <vector>
 #include <utility>
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IFileCatalog("IFileCatalog", 1, 0); 
-
 /*
  *   Gaudi namespace declaration
  */
@@ -24,18 +21,18 @@ namespace Gaudi {
     *  @version 1.0
     *  @date    20/10/2007
     */
-  class IFileCatalog : virtual public IInterface {
+  class GAUDI_API IFileCatalog : virtual public IInterface {
 
   public:
+    /// InterfaceID
+    DeclareInterfaceID(IFileCatalog,2,0);
+
     /// Public type definitions
     typedef std::pair<std::string,std::string>  NamedItem;
     typedef std::vector<NamedItem>              Attributes;
     typedef std::vector<NamedItem>              Files;
     typedef std::vector<std::string>            Strings;
 
-  public:
-    /// Retrieve interface ID
-    static const InterfaceID& interfaceID() { return IID_IFileCatalog; }
     /** Catalog interface                                               */
     /// Create file identifier using UUID mechanism
     virtual std::string createFID() const = 0;
@@ -49,7 +46,7 @@ namespace Gaudi {
     virtual void rollback() = 0;
     /// Check if the catalog is read-only
     virtual bool readOnly()  const = 0;
-    /// Check if the catalog should be updated 
+    /// Check if the catalog should be updated
     virtual bool dirty() const = 0;
     /// Dump all PFNames of the catalog and their attributes associate to the FileID
     virtual void getPFN(const std::string& fid, Files& files) const = 0;
@@ -67,18 +64,18 @@ namespace Gaudi {
     virtual std::string lookupLFN(const std::string& lfn)  const = 0;
     /// Return the status of a FileID
     virtual bool existsFID(const std::string& fid)  const = 0;
-    /// Delete FileID Node from the catalog 
+    /// Delete FileID Node from the catalog
     virtual void deleteFID(const std::string& FileID) const = 0;
-    /// Create a Node for a FileID and DOM Node of the PFN with all the attributes 
+    /// Create a Node for a FileID and DOM Node of the PFN with all the attributes
     virtual void registerPFN(const std::string& fid, const std::string& pfn, const std::string& ftype) const = 0;
-    /// Create a Node for a FileID and DOM Node of the LFN with all the attributes 
+    /// Create a Node for a FileID and DOM Node of the LFN with all the attributes
     virtual void registerLFN(const std::string& fid, const std::string& lfn) const = 0;
     /// Create a Node for a FileID and DOM Node
     virtual void registerFID(const std::string& fid) const = 0;
     /// Dump all MetaData of the catalog for a given file ID
     virtual void getMetaData(const std::string& fid, Attributes& attr) const = 0;
     /// Access metadata item
-    virtual std::string getMetaDataItem(const std::string& fid, const std::string& name) const = 0; 
+    virtual std::string getMetaDataItem(const std::string& fid, const std::string& name) const = 0;
     /// Insert/update metadata item
     virtual void setMetaData(const std::string& fid, const std::string& name, const std::string& value) const = 0;
     /// Drop all metadata of one FID

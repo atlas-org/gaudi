@@ -1,6 +1,6 @@
 // $Id: GslErrorCount.h,v 1.2 2006/11/30 10:40:53 mato Exp $
 // ============================================================================
-#ifndef GAUDIGSL_GSLERRORCOUNT_H 
+#ifndef GAUDIGSL_GSLERRORCOUNT_H
 #define GAUDIGSL_GSLERRORCOUNT_H 1
 // Include files
 // from STL
@@ -14,60 +14,57 @@
 // forward declaration
 
 /** @class GslErrorCount GslErrorCount.h
- *  
- *  Concrete GSL eror handler 
+ *
+ *  Concrete GSL error handler
  *  It is just counts number of GSL errors
  *
  *  @author Vanya Belyaev Ivan.Belyaev@itep.ru
  *  @date   30/04/2002
  */
 
-class GslErrorCount :
-  public virtual  IGslErrorHandler , 
-  public AlgTool 
-{
-public:  
-  
-  /** handle the GSL error 
+class GslErrorCount: public extends1<AlgTool, IGslErrorHandler> {
+public:
+
+  /** handle the GSL error
    *  @see IGslErrorHandler
-   *  @param error  error to be handled 
+   *  @param error  error to be handled
    *  @see GslError
-   *  @return status code 
+   *  @return status code
    */
-  virtual StatusCode handle 
+  virtual StatusCode handle
   ( const GslError& error ) const ;
 
   /** standard finalization of Tool
-   *  @see  AlgTool 
+   *  @see  AlgTool
    *  @see IAlgTool
    *  @return status code
    */
   virtual StatusCode finalize   () ;
-  
+
   /** Standard constructor
    *  @param type   tool type (?)
    *  @param name   tool name
-   *  @param parent pointer to parent 
+   *  @param parent pointer to parent
    */
   GslErrorCount
-  ( const std::string& type   , 
+  ( const std::string& type   ,
     const std::string& name   ,
     const IInterface*  parent );
-  
-  /// destructor (protetced and virtual)
-  virtual ~GslErrorCount( );   
-  
+
+  /// destructor (protected and virtual)
+  virtual ~GslErrorCount( );
+
 private:
-  
-  /// container of error counters 
+
+  /// container of error counters
   typedef std::map<GslError,unsigned int>  Counters ;
   mutable Counters m_counters ;
 
-  
+
 };
 
 // ============================================================================
-// The END 
+// The END
 // ============================================================================
 #endif // GAUDIGSL_GSLERRORCOUNT_H
 // ============================================================================

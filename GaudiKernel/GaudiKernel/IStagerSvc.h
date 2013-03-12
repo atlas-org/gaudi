@@ -10,13 +10,12 @@
 class IIncidentListener;
 class Incident;
 
-static const InterfaceID IID_IStagerSvc("StagerSvc", 1 , 0); 
-
-class IStagerSvc : virtual public IInterface {
-  public:
+class GAUDI_API IStagerSvc: virtual public IInterface {
+public:
+  /// InterfaceID
+  DeclareInterfaceID(IStagerSvc,2,0);
 
   /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IStagerSvc; }
   virtual StatusCode getStreams()=0;
   virtual StatusCode readAhead()=0;
   virtual StatusCode initStage()=0;

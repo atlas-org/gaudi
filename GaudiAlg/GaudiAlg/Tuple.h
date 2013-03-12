@@ -1,4 +1,3 @@
-// $Id: Tuple.h,v 1.9 2008/10/27 19:22:20 marcocle Exp $
 #ifndef GAUDIALG_TUPLE_H
 #define GAUDIALG_TUPLE_H 1
 // ============================================================================
@@ -51,17 +50,17 @@ namespace Tuples
    * <li> Add all defined columns/items to the booked ntuple </li>
    * <li> Fill ntuple records
    * </ol>
-   *  Usially the first step is done in the header file (separate file!)
+   *  Usually the first step is done in the header file (separate file!)
    *  of the algorithm, the second and the third steps are done in
    *  <tt>initialize()</tt> method of the algorithm and
    *  the fourth step is done somewhere in <tt>execute()</tt> method of
    *  the same algorithm. Such approach requires to keep track of the
-   *  tuple structure through different method and event throught different
-   *  files. And even minor modification of the structure of teh ntuple
-   *  will reqire the modification of at least 2 methods and 2 files.
+   *  tuple structure through different method and event through different
+   *  files. And even minor modification of the structure of the ntuple
+   *  will require the modification of at least 2 methods and 2 files.
    *
    *  The <tt>Tuples::Tuple</tt> wrapper over standard Gaudi
-   *  <tt>NTuple::Tuple</tt> class solves all abouve listed problems with
+   *  <tt>NTuple::Tuple</tt> class solves all above listed problems with
    *  "non-local" nature of Gaudi <tt>NTuple::Tuple</tt> objects.
    *
    *  <tt>Tuples::Tuple</tt> object is booked and used 'locally'.
@@ -72,7 +71,7 @@ namespace Tuples
    *  The simplest example of usage Tuple object:
    *
    *  @code
-   *  Tuple tuple = nTuple( "some more or less uniqe tuple title ");
+   *  Tuple tuple = nTuple( "some more or less unique tuple title ");
    *  for( Loop D0 = loop( "K- pi+", "D0" ) , D0 , ++D0 )
    *  {
    *     tuple -> column ( "mass" , M  ( D0 ) / GeV ) ;
@@ -85,7 +84,7 @@ namespace Tuples
    *  One could fill some Tuple variables in one go
    *
    *  @code
-   *  Tuple tuple = nTuple( "some more or less uniqe tuple title ");
+   *  Tuple tuple = nTuple( "some more or less unique tuple title ");
    *  for( Loop D0 = loop( "K- pi+", "D0" ) , D0 , ++D0 )
    *  {
    *     tuple -> column ( "mass"      , M  ( D0 ) / GeV ) ;
@@ -97,7 +96,7 @@ namespace Tuples
    *  Even ALL variables could be filled in one go:
    *
    *  @code
-   *  Tuple tuple = nTuple( "some more or less uniqe tuple title ");
+   *  Tuple tuple = nTuple( "some more or less unique tuple title ");
    *  for( Loop D0 = loop( "K- pi+", "D0" ) , D0 , ++D0 )
    *  {
    *     tuple -> fill   ( "mass pt , p ", M(D0)/GeV,PT(D0)/GeV,P(D0)/GeV ) ;
@@ -113,7 +112,7 @@ namespace Tuples
    *  @author Vanya BELYAEV Ivan.Belyaev@itep.ru
    *  @date   2003-02-24
    */
-  class Tuple
+  class GAUDI_API Tuple
   {
   public:
 
@@ -268,9 +267,7 @@ namespace Tuples
    *    const MCParticle* mcp = ... ;
    *    tuple << Tuples::Column( "MCP" , mcp ) ;
    *
-   *
    *  @endcode
-   *
    *
    *  @author Vanya BELYAEV Ivan.Belyaev@itep.ru
    */
@@ -280,7 +277,7 @@ namespace Tuples
   public:
     TupleColumn ( const std::string&  name   ,
                   const ITEM&         value  )
-      : m_name ( name ) , m_value  (  value  ) {};
+      : m_name ( name ) , m_value  (  value  ) {}
   public:
     /// Return the column name
     const std::string& name  () const { return m_name  ; }
@@ -293,8 +290,7 @@ namespace Tuples
     ITEM       m_value  ; ///< The column value
   };
 
-  /** @fn make_column
-   *  helper function to create 'on-the-fly' the
+  /** helper function to create 'on-the-fly' the
    *  helper object Tuples::TupleColumn
    */
   template<class ITEM>
@@ -302,8 +298,7 @@ namespace Tuples
   make_column ( const std::string& name , const ITEM& item )
   { return TupleColumn<ITEM> ( name , item ) ; }
 
-  /** @fn make_column
-   *  helper function to create 'on-the-fly' the
+  /** helper function to create 'on-the-fly' the
    *  helper object Tuples::TupleColumn
    */
   template<class ITEM>
@@ -311,8 +306,7 @@ namespace Tuples
   make_column ( const std::string& name , const ITEM* item )
   { return TupleColumn<const ITEM*>( name , item ) ; }
 
-  /** @fn make_column
-   *  helper function to create 'on-the-fly' the
+  /** helper function to create 'on-the-fly' the
    *  helper object Tuples::TupleColumn
    */
   template<class ITEM>

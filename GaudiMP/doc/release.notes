@@ -1,0 +1,127 @@
+Package: GaudiMP
+Package manager : Sebastien Binet
+
+================================ GaudiMP v1r7 ================================
+! 2013-01-15 - Nathalie Rauschmayr
+ - Patch #5593: Implemented late forking for GaudiMP
+   Implemented late forking on the level of the worker processes. After
+   Application Manager has been initialized and before the first event has been
+   processed, subworkers are forked by the main worker.
+
+================================ GaudiMP v1r6 ================================
+! 2012-11-14 - Marco Clemencic
+ - Updated CMakeLists.txt.
+
+================================ GaudiMP v1r5 ================================
+! 2012-09-13 - Marco Clemencic
+ - Fixed compilation warnings.
+
+! 2012-07-27 - Marco Clemencic
+ - Rationalized the permissions of files in the repository.
+
+! 2012-07-25 - Nathalie Rauschmayr
+ - Patch #5471: fixes to be able to run LHCb applications via GaudiParallel.
+   - For Gauss:
+     - GMPBase.py:
+       - DoFirstEvent(): Call GetHistoNames instead of GetList (nearly the same
+         except of the line "rootFID = node.address().par()")
+       - GMPComponent.__init__(): Distinguish the applications
+       - GetEventNumber(): In Gauss, EventNumber must be given by the Reader due
+         to correctly set the random seeds
+       - Initialize() of worker: Interface to EventCounter in order to modify
+         the counters from outside
+       - Engine() of worker: Set EventCounter which is given by the reader
+   - General:
+     - GMPBase.py:
+       - Go(): SUCCESS/FAILURE is not a bool --> if-statement did not work
+       - Terminate(): Termination won't work when one of the processes already
+         died. Check existing processes
+       - Engine() of writer: runTime of writer was not correct as it was
+         overwritten every time
+       - DoFirstEvent(): Register links in TransientEventStore (DAQ/RawEvent)
+       - WAIT_SINGLE_EVENT = 60*6: In certain situations it happened that the
+         waiting time for the finalization was too short
+       - Engine() of worker: ItemList and optItemList have been modified. Double
+         entries caused a memory leak
+     - TESSerializer.cpp:
+       - loadBuffer(): Find objects, which are not equal to /Event in TES, and
+         read out the buffers
+     - pTools.py:
+       - ProcessTimeSpanFSR(): Time Span in FileRecords are not generated
+         correctly (no merging). Instead of writing n times TimeSpanFSR, only
+         the minimum and maximum is written
+       - syncAllRolling(): In Gauss it happened often that the Reader is too
+         fast and could not synchronize with the workers in the end. As the
+         synchronization object is not reset the Reader waits for a long time
+         until it calls processHang() and kills every process. Modifying the
+         if-statement allows to reset the waiting time of the Reader
+     - compareOutputFiles.py:
+       - Sets-module is deprecated
+       - Added functions for the comparison of FileRecords (CompareFSR(),
+         GetFSRdict(), CheckFileRecords())
+
+================================ GaudiMP v1r4 ================================
+! 2012-06-08 - Marco Clemencic
+ - Added CMake configuration files.
+
+================================ GaudiMP v1r3 ================================
+! 2012-01-18 - Wim Lavrijsen
+ - address failures due to missing temp files
+M       python/GaudiMP/FdsRegistry.py
+
+================================ GaudiMP v1r2 ================================
+! 2011-07-18 - Charles Leggett
+ - Patch #4941: bring up to date with GaudiMP-01-01-04
+ - check StatusCode of Service::initialize
+M       src/Lib/IoComponentMgr.cpp
+ - check for python initialization, add IoRegistry.py and FdsRegistry.py
+
+   modules
+A       python/GaudiMP/IoRegistry.py
+A       python/GaudiMP/FdsRegistry.py
+M       cmt/requirements
+M       src/Lib/IoComponentMgr.cpp
+
+ - made GaudiMP a component library too, added some debug output to
+   IoComponentMgr
+M       cmt/requirements
+M       GaudiMP/IoComponentMgr.h
+M       src/Lib/IoComponentMgr.cpp
+
+ - Add IIoComponentMgr
+M       cmt/requirements
+A       GaudiMP/IoComponentMgr.h
+A       src/Lib/IoComponentMgr.cpp
+
+
+! 2011-06-23 - Hubert Degaudenzi
+ - fixed warnings from the eclipse code analysis engine.
+
+================================ GaudiMP v1r1 ================================
+! 2011-04-04 - Pere Mato
+ - Fixes to work with LHCb Brunel
+   1) Namespace changed from GaudiPython to GaudiMP for TESSerializer class
+   2) Firing "EndEvent" incidents in Worker event loop. This was needed to
+      eliminate crashes in Brunel when invalid pointer to collection of
+      cluster was used in fitting algorithms.
+   3) Call update() method after having de-serialize a KeyedContainer<>. This
+      is needed to re-build the internal direct access container.
+
+============================== GaudiMP v1r0 ==================================
+! 2011-01-11 - Marco Clemencic
+ - Fixed some ICC remarks.
+
+! 2010-12-17 - Eoin Smith
+  - Updated TESSerializer.h/cpp, python/GaudiPython for Multicore Execution
+    TESSerializer class can now serialize/reconstruct Opaque Addresses using
+    the GaudiKernel IOpaqueAddress interface.
+    TESSerializer now uses a map as member variable for TClass names, to
+    improve performance (initialize once, refer back on each event iteration)
+    Multicore components collected in GMPBase.py ; the Reader, Worker and
+    Writer.  pTools.py contains extra classes; HistoAgent, FileRecordsAgent
+    for communication and consolidation of Histo and Records stores. pTools
+    also contains some extra methods used by the Reader, Writer, Workers.
+
+! 2010-12-16 - Sebastien Binet
+ - Patch #4074: migrate GaudiPython.Parallel to multiprocessing
+   First import

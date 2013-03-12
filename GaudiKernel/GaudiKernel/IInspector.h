@@ -13,8 +13,11 @@
 
     Inspector base class
 */
-class IInspector : virtual public IInterface     {	
+class GAUDI_API IInspector: virtual public IInterface {
 public:
+  /// InterfaceID
+  DeclareInterfaceID(IInspector,1,0);
+
   enum { MUTABLE = 1<<1, CONST = 1<<2};
 
 protected:
@@ -81,7 +84,7 @@ public:
 		return inspectByRef(pObj, _TT<T>(), (void*)pOwner, _TT<O>(), comment, flag);
 	}
   /// Inspect single item by its value (const)
-	template < class T, class O > 
+	template < class T, class O >
   StatusCode inspectByValue(const T& obj, const O* pOwner, const std::string& comment) {
 		return inspectByValue(new _V<T>(obj), _TT<T>(), (void*)pOwner, _TT<O>(), comment);
 	}

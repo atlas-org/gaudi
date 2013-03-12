@@ -24,7 +24,7 @@ class ISelectStatement;
 
     @author M.Frank
 */
-class INTupleItem    {
+class GAUDI_API INTupleItem {
 protected:
   /// Set the properties of the INTupleItem
   virtual void                setType (long typ)            = 0;
@@ -77,7 +77,7 @@ public:
 
     @author M.Frank
 */
-class INTuple   {
+class GAUDI_API INTuple {
 protected:
   /// Internally used by abstract classes
   virtual INTupleItem*          i_find(const std::string& name)  const = 0;

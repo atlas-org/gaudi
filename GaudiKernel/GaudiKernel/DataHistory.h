@@ -16,13 +16,13 @@
 class AlgorithmHistory;
 
 /** @class DataHistory DataHistory.h
- * 
+ *
  *  DataHistory class definition
  *
  *  @author: Charles Leggett
  *
  */
-class DataHistory: public HistoryObj {
+class GAUDI_API DataHistory: public HistoryObj {
 
 public:
 
@@ -66,16 +66,18 @@ public:
 
   AlgorithmHistory* algorithmHistory() const { return m_algHist; }
 
+  void dump(std::ostream &, const bool isXML=false, int indent=0) const;
 
 private:
 
   CLID m_dataClassID;
   std::string m_dataKey;
   AlgorithmHistory* m_algHist;
+  std::string m_dummy;
 
 
 };
 
-std::ostream& operator<<(std::ostream& lhs, const DataHistory& rhs);
+GAUDI_API std::ostream& operator<<(std::ostream& lhs, const DataHistory& rhs);
 
 #endif

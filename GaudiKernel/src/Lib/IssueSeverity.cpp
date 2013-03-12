@@ -15,7 +15,7 @@ IIssueLogger* IssueSeverity::m_ers(0);
 void IssueSeverity::init() {
   if (!m_init) {
     m_init = true;
-    Gaudi::svcLocator()->service("IssueLogger",m_ers,true).ignore();
+    m_ers = Gaudi::svcLocator()->service<IIssueLogger>("IssueLogger").get();
   }
 }
 

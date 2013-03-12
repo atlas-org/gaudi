@@ -11,7 +11,7 @@ namespace Gaudi { std::string createGuidAsString(); }
 using ROOT::Reflex::PluginService;
 using namespace Gaudi;
 using namespace std;
-DECLARE_NAMESPACE_SERVICE_FACTORY(Gaudi,MultiFileCatalog);
+DECLARE_NAMESPACE_SERVICE_FACTORY(Gaudi,MultiFileCatalog)
 
 namespace {
   template <class V,class F>
@@ -25,7 +25,7 @@ namespace {
 }
 // ----------------------------------------------------------------------------
 MultiFileCatalog::MultiFileCatalog(const std::string& nam, ISvcLocator* svc)
-  : Service(nam, svc), m_started(false), m_oldNames()
+  : base_class(nam, svc), m_started(false), m_oldNames()
 {
   declareProperty("Catalogs", m_catalogNames, "The list of Catalogs")
     -> declareUpdateHandler ( &Gaudi::MultiFileCatalog::propHandler, this ) ;
@@ -64,17 +64,6 @@ StatusCode MultiFileCatalog::finalize()  {
   return Service::finalize();
 }
 // ----------------------------------------------------------------------------
-StatusCode MultiFileCatalog::queryInterface(const InterfaceID& riid, void** ppv)  {
-  if ( riid.versionMatch(IFileCatalog::interfaceID()) )
-    *ppv = (IFileCatalog*)this;
-  else if ( riid.versionMatch(IFileCatalogMgr::interfaceID()) )
-    *ppv = (IFileCatalogMgr*)this;
-  else
-    return Service::queryInterface(riid,ppv);
-  *ppv = (IFileCatalog*)this;
-  addRef();
-  return StatusCode::SUCCESS;
-}
 /// Create file identifier using UUID mechanism
 std::string MultiFileCatalog::createFID()  const {
   return createGuidAsString();
@@ -147,12 +136,12 @@ void MultiFileCatalog::addCatalog(CSTR con)  {
       string url = con.substr(id0+1);
       IInterface* cat = 0;
       if ( strncasecmp("xml",typ.c_str(),3) == 0 )    {
-        cat = PluginService::Create<IInterface*>(xml_typ,url,msgSvc());
+        cat = PluginService::Create<IInterface*>(xml_typ,url,msgSvc().get());
       }
       else    {
-        cat = PluginService::Create<IInterface*>(typ,url,serviceLocator());
+        cat = PluginService::Create<IInterface*>(typ,url,serviceLocator().get());
         if ( !cat )  {
-          cat = PluginService::Create<IInterface*>(typ,url,msgSvc());
+          cat = PluginService::Create<IInterface*>(typ,url,msgSvc().get());
         }
       }
       if ( cat )  {
@@ -271,5 +260,5 @@ void MultiFileCatalog::propHandler(Property& /* p */)
   MsgStream log ( msgSvc() , name() ) ;
   log << MSG::DEBUG
       << "New catalogs to be used: "
-      << Gaudi::Utils::toString ( m_catalogNames ) << endreq ;
+      << Gaudi::Utils::toString ( m_catalogNames ) << endmsg ;
 }

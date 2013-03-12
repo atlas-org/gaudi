@@ -1,16 +1,16 @@
 # File: Gaudi/python/Gaudi/Configuration.py
-# Author: Pere Mato (per.mato@cern.ch)
+# Author: Pere Mato (pere.mato@cern.ch)
 
 from GaudiKernel.Constants import *
 from GaudiKernel.Configurable import *
 from GaudiKernel.ConfigurableDb import loadConfigurableDb, cfgDb
 from GaudiKernel.ConfigurableDb import getConfigurable as confDbGetConfigurable
 from CommonGaudiConfigurables import *
-from GaudiKernel.ProcessJobOptions import importOptions
+from GaudiKernel.ProcessJobOptions import importOptions, importUnits
 from GaudiKernel.ProcessJobOptions import InstallRootLoggingHandler as _InstallRootLoggingHandler
 
 import logging
-log = logging.getLogger("Gaudi.Configuration")
+log = logging.getLogger(__name__)
 # Ensure that a root logging handler is always present.
 _InstallRootLoggingHandler()
 
@@ -18,7 +18,7 @@ allConfigurables = Configurable.allConfigurables
 
 def _fillConfDict():
     nFiles = loadConfigurableDb()
-    log = logging.getLogger( 'PropertyProxy' ) 
+    log = logging.getLogger( 'PropertyProxy' )
     log.debug( "Read module info for %d configurables from %d genConfDb files",
               len(cfgDb), nFiles )
     if len(cfgDb.duplicates()) > 0:
@@ -48,25 +48,18 @@ _fillConfDict()
 
 import os, sys
 
-def importConfiguration(conf, local=locals()) : 
+def importConfiguration(conf, local=locals()) :
     local[conf] = confDbGetConfigurable(conf)
-
-class ConfFacade(object) :
-    def __init__(self) :
-        pass
-    def __getattr__(self, name) :
-        if '_' == name[0] : return None
-        else:               return confDbGetConfigurable(name)
 
 def configurationDict(all=False):
     """Return a dictionary representing the configuration.
     The dictionary contains one entry per configurable which is a dictionary
     with one entry per property.
-    The optional argument "all" is used to decide if to inluce only values
+    The optional argument "all" is used to decide if to include only values
     different from the default or all of them.
     """
     from GaudiKernel.Proxy.Configurable import getNeededConfigurables
-    
+
     catalog = allConfigurables
     keys = getNeededConfigurables() # use only interesting configurables
     conf_dict = {}
@@ -76,7 +69,7 @@ def configurationDict(all=False):
                 conf_dict[n] = {}
             for p, v in  catalog[n].getDefaultProperties().items() :
                 conf_dict[n][p] = v
-    
+
     for n in keys :
         if n not in conf_dict:
             conf_dict[n] = {}
@@ -108,8 +101,46 @@ def getConfigurable(name, defaultType = None):
                 defaultType = globals()[defaultType]
             else:
                 # otherwise we try to get it from the Configurables database
-                exec "from Configurables import %s" % defaultType
-                defaultType = locals()[defaultType]
+                import Configurables
+                defaultType = getattr(Configurables, defaultType)
         return defaultType(name)
 
-sys.modules['Configurables'] = ConfFacade()
+def setCustomMainLoop(runner):
+    '''
+    Replace the default main execution loop with the specified callable object.
+
+    @param runner: a callable that accepts an initialized instance of GaudiPython.AppMgr
+                   and the number of events to process and returns a StatusCode or a boolean
+                   (True means success)
+    '''
+    # change the mainLoop function
+    from Gaudi.Main import gaudimain
+    gaudimain.mainLoop = lambda _self, app, nevt: runner(app, nevt)
+
+
+class GaudiPersistency(ConfigurableUser):
+    """Configurable to enable ROOT-based persistency.
+
+    Note: it requires Gaudi::RootCnvSvc (package RootCnv).
+    """
+    __slots__ = {}
+    def __apply_configuration__(self):
+        """Apply low-level configuration"""
+        from Configurables import (ApplicationMgr,
+                                   PersistencySvc,
+                                   FileRecordDataSvc,
+                                   EventPersistencySvc,
+                                   )
+        # aliased names
+        from Configurables import (RootCnvSvc,
+                                   RootEvtSelector,
+                                   IODataManager,
+                                   FileCatalog,
+                                   )
+        cnvSvcs = [ RootCnvSvc() ]
+        EventPersistencySvc().CnvServices += cnvSvcs
+        PersistencySvc("FileRecordPersistencySvc").CnvServices += cnvSvcs
+        app = ApplicationMgr()
+        app.SvcOptMapping += [ FileCatalog(), IODataManager(),
+                               RootCnvSvc() ]
+        app.ExtSvc += [ FileRecordDataSvc() ]

@@ -16,47 +16,47 @@
 #include "Event.h"
 // ============================================================================
 
-namespace Gaudi 
+namespace Gaudi
 {
-  namespace Examples 
+  namespace Examples
   {
-    
+
     // Forward declarations
     class MyVertex ;
     template <class T> class GaudiObjectHandler;
-    
+
     // CLID definition
     static const CLID& CLID_MyTrack = 355;
-    
+
     /** @class MyTack
-        
+
     Simple class that represents a track for testing purposes
-    
+
     @author Markus Frank
     @author Pere Mato
     */
     //class MyTrack : public ContainedObject {
-    class MyTrack 
+    class GAUDI_API MyTrack
 #ifdef __PLAIN_GAUDI
       : public ContainedObject
 #else
-        : public KeyedObject<int> 
+        : public KeyedObject<int>
 #endif
     {
       friend class GaudiObjectHandler<MyTrack>;
     public:
       // ======================================================================
-      /// the type of plain vector 
+      /// the type of plain vector
       typedef std::vector<MyTrack*>                           Vector ;
-      /// the type of vector of const-pointers 
+      /// the type of vector of const-pointers
       typedef std::vector<const MyTrack*>                ConstVector ;
-      /// the type of selection 
+      /// the type of selection
       typedef SharedObjectsContainer<MyTrack>              Selection ;
 #ifdef __PLAIN_GAUDI
-      /// the actual type of container in TES 
+      /// the actual type of container in TES
       typedef ObjectVector<MyTrack>                        Container ;
-#else 
-      /// the actual type of container in TES 
+#else
+      /// the actual type of container in TES
       typedef KeyedContainer<MyTrack, Containers::HashMap> Container ;
 #endif
       // ======================================================================
@@ -69,7 +69,7 @@ namespace Gaudi
       SmartRef<MyVertex>       m_originVertex;
       /// Links to all decay vertices
       SmartRefVector<MyVertex> m_decayVertices;
-      
+
     public:
       /// Standard constructor
       MyTrack();
@@ -78,7 +78,7 @@ namespace Gaudi
       /// Standard Destructor
       virtual ~MyTrack();
       /// Retrieve pointer to class definition structure
-      virtual const CLID& clID() const    { return MyTrack::classID(); }
+      virtual const CLID& clID() const    { return classID(); }
       static const CLID& classID()        { return CLID_MyTrack; }
       /// Accessors: Retrieve x-component of the track momentum
       float px()  const         { return m_px;  }

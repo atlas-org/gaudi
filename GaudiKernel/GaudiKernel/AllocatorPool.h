@@ -1,10 +1,10 @@
-// $Id: AllocatorPool.h,v 1.3 2007/05/24 14:39:11 hmd Exp $ 
+// $Id: AllocatorPool.h,v 1.3 2007/05/24 14:39:11 hmd Exp $
 // ============================================================================
 // CVS tag $Name:  $, version $Revision: 1.3 $
 // ============================================================================
 /** @file
- *  Allocator pool. 
- *  Class is imported from Geant4 project 
+ *  Allocator pool.
+ *  Class is imported from Geant4 project
  *  @date 2006-02-14
  */
 // ============================================================================
@@ -32,7 +32,7 @@
 // ********************************************************************
 //
 // -------------------------------------------------------------------
-//      GEANT 4 class header file 
+//      GEANT 4 class header file
 //
 // Class description:
 //
@@ -51,19 +51,21 @@
 #ifndef GAUDIKERNEL_AllocatorPool_h
 #define GAUDIKERNEL_AllocatorPool_h 1
 
-namespace GaudiUtils 
+#include "GaudiKernel/Kernel.h"
+
+namespace GaudiUtils
 {
   /** @class AllocatorPool AllocatorPool.h GaudiKernel/AllocatorPool.h
-   * 
-   *  Allocator pool. 
-   *  Class is imported from Geant4 project 
+   *
+   *  Allocator pool.
+   *  Class is imported from Geant4 project
    *
    *  @date 2006-02-14
    */
-  class AllocatorPool
+  class GAUDI_API AllocatorPool
   {
   public:
-    
+
     /// Create a pool of elements of size n
     explicit AllocatorPool( unsigned int n=0 );
     /// Destructor. Return storage to the free store
@@ -78,14 +80,14 @@ namespace GaudiUtils
     inline unsigned int  Size() const;
     /// Return storage to the free store
     void  Reset();
-    
+
   private:
-    
+
     /// Private equality operator
     AllocatorPool& operator= (const AllocatorPool& right);
-    
+
   private:
-    
+
     struct PoolLink
     {
       PoolLink* next;
@@ -100,20 +102,20 @@ namespace GaudiUtils
       char* mem;
       PoolChunk* next;
     };
-    
+
     /// Make pool larger
     void Grow();
 
   private:
-    
+
     const unsigned int esize;
     const unsigned int csize;
     PoolChunk* chunks;
     PoolLink* head;
     int nchunks;
   };
-  
-} // end of namespace GaudiUtils 
+
+} // end of namespace GaudiUtils
 
 
 
@@ -154,7 +156,7 @@ GaudiUtils::AllocatorPool::Size() const
 
 
 // ============================================================================
-// The END 
+// The END
 // ============================================================================
 #endif
 // ============================================================================

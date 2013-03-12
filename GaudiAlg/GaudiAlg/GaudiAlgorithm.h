@@ -20,7 +20,6 @@
 // forward declarations:
 // ============================================================================
 class                   INTupleSvc     ; // GaudiKernel
-class                   IAlgContextSvc ; // GaudiKernel
 template<class T> class  AlgFactory    ; // GaudiKernel
 // ============================================================================
 /* @file GaudiAlgorithm.h
@@ -38,7 +37,7 @@ template<class T> class  AlgFactory    ; // GaudiKernel
  *  The base class allows "easy" (=="1 line") access to data in
  *  Gaudi Transient Stores. The functionality includes the checking
  *  of the presence of the data at the given location, checking the
- *  validity of the data, retrieval of valid data and "forced" retrive
+ *  validity of the data, retrieval of valid data and "forced" retrieve
  *  of valid data (create if there is no data).
  *
  *  The base class allows to perform an easy error, warning and exception
@@ -72,7 +71,7 @@ template<class T> class  AlgFactory    ; // GaudiKernel
  *  The base class allows "easy" (=="1 line") access to data in
  *  Gaudi Transient Stores. The functionality includes the checking
  *  of the presence of the data at the given location, checking the
- *  validity of the data, retrieval of valid data and "forced" retrive
+ *  validity of the data, retrieval of valid data and "forced" retrieve
  *  of valid data (create if there is no data).
  *
  *  The base class allows to perform an easy error, warning and exception
@@ -93,7 +92,7 @@ template<class T> class  AlgFactory    ; // GaudiKernel
  *  @date   30/06/2001
  */
 // ============================================================================
-class GaudiAlgorithm : public GaudiCommon<Algorithm>
+class GAUDI_API GaudiAlgorithm: public GaudiCommon<Algorithm>
 {
   // friend factory for instantiation
   friend class AlgFactory<GaudiAlgorithm>;
@@ -124,10 +123,10 @@ public:
    *  @see  Algorithm
    *  @see IAlgorithm
    *  @see Algorithm::sysExecute
-   *  @return status code 
+   *  @return status code
    */
   virtual StatusCode sysExecute () ;
-  // ==========================================================================  
+  // ==========================================================================
 public:
 
   // following methods cannot go in GaudiCommon since they use methods ( evtSvc()
@@ -148,7 +147,7 @@ public:
    *             RootInTES by prepending the value of this to the
    *             data location that is passed.
    *             The default setting for RootInTES is "" so has no effect.
-   *             This behaviour can be suppressed by passing the arguement
+   *             This behavior can be suppressed by passing the argument
    *             useRootInTES = false
    *
    *  @see IDataProviderSvc
@@ -190,7 +189,7 @@ public:
    *             RootInTES by prepending the value of this to the
    *             data location that is passed.
    *             The default setting for RootInTES is "" so has no effect.
-   *             This behaviour can be suppressed by passing the arguement
+   *             This behavior can be suppressed by passing the argument
    *             useRootInTES = false
    *
    *  @param object     Data object or container to be registered
@@ -227,9 +226,9 @@ public:
    *
    *  @attention The method respects the setting of the job option
    *             RootInTES by prepending the value of this to the
-   *             data location that is passed. 
+   *             data location that is passed.
    *             The default setting for RootInTES is "" so has no effect.
-   *             This behaviour can be suppressed by passing the arguement 
+   *             This behavior can be suppressed by passing the argument
    *             useRootInTES = false
    *
    *  @see IDataProviderSvc
@@ -246,12 +245,54 @@ public:
    *  @return pointer to the data object
    */
   template < class TYPE  >
-  inline typename Gaudi::Utils::GetData<TYPE>::return_type  
+  inline typename Gaudi::Utils::GetData<TYPE>::return_type
   get  ( IDataProviderSvc*  svc       ,
          const std::string& location  ,
          const bool useRootInTES = true ) const
   {
     return GaudiCommon<Algorithm>::get<TYPE> ( svc , location , useRootInTES ) ;
+  }
+
+  /** @brief Templated access to the data in Gaudi Transient Store
+   *
+   *  Quick and safe access to the data in Gaudi transient store.
+   *  The method located the data at given address and perform the
+   *  debug printout about located data.
+   * 
+   *  Skips the check on the data as performed by 'get'. No exception
+   *  is thrown if the data is missing.
+   *
+   *  @code
+   *
+   *  MCHits* hits = getIfExists<MCHits>( evtSvc() , "/Event/MC/Hits" );
+   *
+   *  @endcode
+   *
+   *  @attention The method respects the setting of the job option
+   *             RootInTES by prepending the value of this to the
+   *             data location that is passed.
+   *             The default setting for RootInTES is "" so has no effect.
+   *             This behavior can be suppressed by passing the argument
+   *             useRootInTES = false
+   *
+   *  @see IDataProviderSvc
+   *  @see SmartDataPtr
+   *
+   *  @param svc      Pointer to data service (data provider)
+   *  @param location data location/address in Gaudi Transient Store
+   *  @param useRootInTES Flag to turn on(TRUE) off(FALSE) the use of
+   *                      the RootInTES location property
+   *
+   *  @return pointer to the data object. 
+   *  @retval NULL If data does not exist.
+   */
+  template < class TYPE  >
+  inline typename Gaudi::Utils::GetData<TYPE>::return_type
+  getIfExists ( IDataProviderSvc*  svc       ,
+                const std::string& location  ,
+                const bool useRootInTES = true ) const
+  {
+    return GaudiCommon<Algorithm>::getIfExists<TYPE> ( svc , location , useRootInTES ) ;
   }
 
   /** @brief Templated access to the data from Gaudi Event Transient Store
@@ -269,9 +310,9 @@ public:
    *
    *  @attention The method respects the setting of the job option
    *             RootInTES by prepending the value of this to the
-   *             data location that is passed. 
+   *             data location that is passed.
    *             The default setting for RootInTES is "" so has no effect.
-   *             This behaviour can be suppressed by passing the arguement 
+   *             This behavior can be suppressed by passing the argument
    *             useRootInTES = false
    *
    *  @param location Data location/address in Gaudi Transient Store
@@ -281,11 +322,51 @@ public:
    *  @return         Pointer to the data object
    */
   template < class TYPE  >
-  inline typename Gaudi::Utils::GetData<TYPE>::return_type  
+  inline typename Gaudi::Utils::GetData<TYPE>::return_type
   get  ( const std::string& location,
          const bool useRootInTES = true ) const
   {
     return GaudiCommon<Algorithm>::get<TYPE> ( evtSvc() , location , useRootInTES ) ;
+  }
+
+  /** @brief Templated access to the data in Gaudi Transient Store
+   *
+   *  Quick and safe access to the data in Gaudi transient store.
+   *  The method located the data at given address and perform the
+   *  debug printout about located data. 
+   *
+   *  Skips the check on the data as performed by 'get'. No exception
+   *  is thrown if the data is missing.
+   *
+   *  @code
+   *
+   *  MCHits* hits = getIfExists<MCHits>( "/Event/MC/Hits" );
+   *
+   *  @endcode
+   *
+   *  @attention The method respects the setting of the job option
+   *             RootInTES by prepending the value of this to the
+   *             data location that is passed.
+   *             The default setting for RootInTES is "" so has no effect.
+   *             This behavior can be suppressed by passing the argument
+   *             useRootInTES = false
+   *
+   *  @see IDataProviderSvc
+   *  @see SmartDataPtr
+   *
+   *  @param location data location/address in Gaudi Transient Store
+   *  @param useRootInTES Flag to turn on(TRUE) off(FALSE) the use of
+   *                      the RootInTES location property
+   *
+   *  @return pointer to the data object. 
+   *  @retval NULL If data does not exist.
+   */
+  template < class TYPE  >
+  inline typename Gaudi::Utils::GetData<TYPE>::return_type
+  getIfExists ( const std::string& location  ,
+                const bool useRootInTES = true ) const
+  {
+    return GaudiCommon<Algorithm>::getIfExists<TYPE> ( evtSvc() , location , useRootInTES ) ;
   }
 
   /** @brief Templated access to the detector data from the
@@ -320,6 +401,36 @@ public:
    *
    *  The method located the detector at the given address and perform the
    *  debug printout about located detector.
+   * 
+   *  Skips the check on the data as performed by 'get'. No exception
+   *  is thrown if the data is missing.
+   *
+   *  @code
+   *
+   *  MyDet* mdet = getDetIfExists<MyDet>( detSvc() , "/dd/Structure/LHCb/MyDet" );
+   *
+   *  @endcode
+   *
+   *  @param svc       Pointer to data service (data provider)
+   *  @param location  Detector location/address in Gaudi Transient Store
+   *  @return          Pointer to the detector object
+   *  @retval NULL If the detector object does not exist.
+   */
+  template < class TYPE  >
+  inline typename Gaudi::Utils::GetData<TYPE>::return_type
+  getDetIfExists ( IDataProviderSvc*  svc       ,
+                   const std::string& location  ) const
+  {
+    return GaudiCommon<Algorithm>::getIfExists<TYPE> ( svc , location , false ) ;
+  }
+
+  /** @brief Templated access to the detector data from the
+   *         Gaudi Detector Transient Store
+   *
+   *  Quick and safe access to the detector data in Gaudi transient store.
+   *
+   *  The method located the detector at the given address and perform the
+   *  debug printout about located detector.
    *
    *  @code
    *
@@ -331,9 +442,37 @@ public:
    *  @return          Pointer to the detector object
    */
   template < class TYPE  >
-  inline TYPE* getDet ( const std::string& location   ) const
+  inline TYPE* getDet ( const std::string& location ) const
   {
     return GaudiCommon<Algorithm>::get<TYPE> ( detSvc() , location , false ) ;
+  }
+
+  /** @brief Templated access to the detector data from the
+   *         Gaudi Detector Transient Store
+   *
+   *  Quick and safe access to the detector data in Gaudi transient store.
+   *
+   *  The method located the detector at the given address and perform the
+   *  debug printout about located detector.
+   * 
+   *  Skips the check on the data as performed by 'get'. No exception
+   *  is thrown if the data is missing.
+   *
+   *  @code
+   *
+   *  MyDet* mdet = getDetIfExists<MyDet>( "/dd/Structure/LHCb/MyDet" );
+   *
+   *  @endcode
+   *
+   *  @param location  Detector location/address in Gaudi Transient Store
+   *  @return          Pointer to the detector object
+   *  @retval NULL If the detector object does not exist.
+   */
+  template < class TYPE  >
+  inline typename Gaudi::Utils::GetData<TYPE>::return_type
+  getDetIfExists ( const std::string& location ) const
+  {
+    return GaudiCommon<Algorithm>::getIfExists<TYPE> ( detSvc() , location , false ) ;
   }
 
   /** @brief Check the existence of a data object or container
@@ -348,9 +487,9 @@ public:
    *
    *  @attention The method respects the setting of the job option
    *             RootInTES by prepending the value of this to the
-   *             data location that is passed. 
+   *             data location that is passed.
    *             The default setting for RootInTES is "" so has no effect.
-   *             This behaviour can be suppressed by passing the arguement 
+   *             This behavior can be suppressed by passing the argument
    *             useRootInTES = false
    *
    *  @param svc       Pointer to data service (data provider)
@@ -382,9 +521,9 @@ public:
    *
    *  @attention The method respects the setting of the job option
    *             RootInTES by prepending the value of this to the
-   *             data location that is passed. 
+   *             data location that is passed.
    *             The default setting for RootInTES is "" so has no effect.
-   *             This behaviour can be suppressed by passing the arguement 
+   *             This behavior can be suppressed by passing the argument
    *             useRootInTES = false
    *
    *  @param  location Address in Gaudi Transient Event Store
@@ -458,9 +597,9 @@ public:
    *
    *  @attention The method respects the setting of the job option
    *             RootInTES by prepending the value of this to the
-   *             data location that is passed. 
+   *             data location that is passed.
    *             The default setting for RootInTES is "" so has no effect.
-   *             This behaviour can be suppressed by passing the arguement 
+   *             This behavior can be suppressed by passing the argument
    *             useRootInTES = false
    *
    *  @exception GaudiException for Invalid Data Provider Service
@@ -474,9 +613,10 @@ public:
    *  @return A valid pointer to the object
    */
   template < class TYPE , class TYPE2 >
-  inline TYPE* getOrCreate ( IDataProviderSvc*  svc      ,
-                             const std::string& location ,
-                             const bool useRootInTES = true ) const
+  inline typename Gaudi::Utils::GetData<TYPE>::return_type
+  getOrCreate ( IDataProviderSvc*  svc      ,
+                const std::string& location ,
+                const bool useRootInTES = true ) const
   {
     return GaudiCommon<Algorithm>::getOrCreate<TYPE,TYPE2> ( svc , location , useRootInTES ) ;
   }
@@ -490,12 +630,12 @@ public:
    *  MyHits* hits = getOrCreate<MyHits,MyHits>( "/Event/MyHits" ) ;
    *
    *  @endcode
-   * 
+   *
    *  @attention The method respects the setting of the job option
    *             RootInTES by prepending the value of this to the
-   *             data location that is passed. 
+   *             data location that is passed.
    *             The default setting for RootInTES is "" so has no effect.
-   *             This behaviour can be suppressed by passing the arguement 
+   *             This behavior can be suppressed by passing the argument
    *             useRootInTES = false
    *
    *  @exception GaudiException for Invalid Data Provider Service
@@ -508,8 +648,9 @@ public:
    *  @return A valid pointer to the object
    */
   template < class TYPE , class TYPE2 >
-  inline TYPE* getOrCreate ( const std::string& location ,
-                             const bool useRootInTES = true ) const
+  inline typename Gaudi::Utils::GetData<TYPE>::return_type
+  getOrCreate ( const std::string& location            ,
+                const bool         useRootInTES = true ) const
   {
     return GaudiCommon<Algorithm>::getOrCreate<TYPE,TYPE2> ( evtSvc() , location , useRootInTES ) ;
   }
@@ -518,7 +659,7 @@ public:
   /** Standard constructor (protected)
    *  @see  Algorithm
    *  @param name           name of the algorithm
-   *  @param pSvcLocator    poinetr to Service Locator
+   *  @param pSvcLocator    pointer to Service Locator
    */
   GaudiAlgorithm ( const std::string& name        ,
                    ISvcLocator*       pSvcLocator );
@@ -528,20 +669,10 @@ public:
   // ==========================================================================
 public:
   // ==========================================================================
-  /// register for Algorithm Context Service ?
-  inline bool registerContext() const { return m_registerContext ; }
-  // ==========================================================================  
-public:
-  // ==========================================================================
   /** Access the standard event collection service
    *  @return pointer to the event collection service
    */
-  INTupleSvc*     evtColSvc  () const;
-  // ==========================================================================
-  /** Access the standard Algorithm Context Service 
-   *  @return pointer to the Algorithm Context Service 
-   */
-  IAlgContextSvc* contextSvc () const;
+  SmartIF<INTupleSvc>&     evtColSvc  () const;
   // ==========================================================================
 private:
   // ==========================================================================
@@ -557,18 +688,11 @@ private:
 private:
   // ==========================================================================
   // Pointer to the Event Tag Collection Service
-  mutable INTupleSvc*     m_evtColSvc      ; ///< Event Tag Collection Service
-  // Pointer to the Algorithm Context Service 
-  mutable IAlgContextSvc* m_contextSvc     ; ///< Algorithm Context Service 
-  // The name of the Algorithm Context Service 
-  std::string             m_contextSvcName ; ///< Algorithm Context Service 
-  // enforce the algorithm registration for Algorithm Context Service
-  bool    m_registerContext ; ///< register in Algorithm Context Service
+  mutable SmartIF<INTupleSvc> m_evtColSvc ; ///< Event Tag Collection Service
   /// skip the event if any of these objects are present in TES
   std::vector<std::string> m_vetoObjs;
   /// process the event only if one or more of these objects are present in TES
   std::vector<std::string> m_requireObjs;
-  
   // ==========================================================================
 };
 // ============================================================================

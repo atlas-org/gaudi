@@ -19,7 +19,7 @@
 /** @class TupleDef TupleDef.h TupleEx/TupleDef.h
  *
  *  Simple example of partical specialization of 
- *  N-Tuple for different types, in partcular for 
+ *  N-Tuple for different types, in particular for 
  *
  *  std::pair<double,double> and 
  *  std::pair<std::pair<double,double>,double> and 
@@ -29,7 +29,7 @@
  */
 
 /** @namespace TupleExample 
- *  helper namespace for TupleEx exmaple
+ *  helper namespace for TupleEx example
  *
  *  @author Vanya BELYAEV Ivan.Belyaev@itep.ru
  *  @date   2005-11-29
@@ -39,8 +39,7 @@ namespace TupleExample
   typedef std::pair<double,double> Dublet  ;
   typedef std::pair<Dublet,double> Triplet ;
   
-  /** @fn fillNTuple 
-   *  helper function useful for the partial 
+  /** helper function useful for the partial 
    *  specialization of N-Tuple fills
    *  @param t tuple 
    *  @param n base column name 
@@ -53,8 +52,7 @@ namespace TupleExample
     const std::string& n ,
     const Dublet&      p ) ;  
   
-  /** @fn fillNTuple 
-   *  helper function useful for the partial 
+  /** helper function useful for the partial 
    *  specialization of N-Tuple fills
    *  @param t tuple 
    *  @param n base column name 
@@ -66,7 +64,7 @@ namespace TupleExample
   ( Tuples::Tuple&     t , 
     const std::string& n ,
     const Triplet&     p ) ;  
-}; // end of namespace TupleExample 
+} // end of namespace TupleExample 
 
 
 // ============================================================================
@@ -80,7 +78,7 @@ inline Tuples::Tuple& operator<<
   return TupleExample::fillNTuple ( tuple         , 
                                     item.name  () , 
                                     item.value () ) ;
-};
+}
 // ============================================================================
 template <> 
 inline Tuples::Tuple& operator<< 
@@ -90,7 +88,7 @@ inline Tuples::Tuple& operator<<
   return TupleExample::fillNTuple ( tuple         , 
                                     item.name  () , 
                                     item.value () ) ;
-};
+}
 // ============================================================================
 
 

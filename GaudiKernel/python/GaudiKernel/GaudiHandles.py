@@ -25,7 +25,7 @@ class GaudiHandle(object):
             raise TypeError("Argument to %s must be a string. Got a %s instead" % \
                             ( self.__class__.__name__, type(typeAndName).__name__) )
         self.typeAndName = typeAndName
-    
+
     def __repr__(self):
         return "%s(%r)" % (self.__class__.__name__,self.toStringProperty())
 
@@ -72,7 +72,7 @@ class PublicToolHandle(GaudiHandle):
     __slots__ = ()
     componentType = "AlgTool"
     isPublic = True
-    
+
     def __init__(self, toolTypeAndName=''):
         GaudiHandle.__init__( self, toolTypeAndName )
 
@@ -81,7 +81,7 @@ class PrivateToolHandle(GaudiHandle):
     __slots__ = ()
     componentType = "AlgTool"
     isPublic = False
-    
+
     def __init__(self, toolTypeAndName=''):
         GaudiHandle.__init__( self, toolTypeAndName )
 
@@ -171,7 +171,7 @@ class GaudiHandleArray(list):
             if value.isPublic() != self.__class__.handleType.isPublic:
                 raise TypeError( "Can not append %s (%s %s) to a %s" % \
                                  (value.__class__.__name__, pop, value.getGaudiType(), self.__class__.__name__) )
-                
+
         # check that an instance name appears only once in the list
         try:
             oldValue = self.__getitem__( value.getName() )
@@ -181,7 +181,7 @@ class GaudiHandleArray(list):
         else:
             print "%s    WARNING %r with instance name %r already in list. Not adding %r" % \
                   (self.__class__.__name__, oldValue, oldValue.getName(), value)
-            
+
 
     def isPublic(self):
         return self.__class__.handleType.isPublic
@@ -209,14 +209,14 @@ class GaudiHandleArray(list):
 class ServiceHandleArray(GaudiHandleArray):
     __slots__ = ()
     handleType = ServiceHandle
-    
+
     def __init__(self, serviceTypesAndNames=None):
         GaudiHandleArray.__init__( self, serviceTypesAndNames )
 
 class PublicToolHandleArray(GaudiHandleArray):
     __slots__ = ()
     handleType = PublicToolHandle
-    
+
     def __init__(self, toolTypesAndNames=None):
         GaudiHandleArray.__init__( self, toolTypesAndNames )
 
@@ -224,7 +224,6 @@ class PublicToolHandleArray(GaudiHandleArray):
 class PrivateToolHandleArray(GaudiHandleArray):
     __slots__ = ()
     handleType = PrivateToolHandle
-        
+
     def __init__(self, toolTypesAndNames=None):
         GaudiHandleArray.__init__( self, toolTypesAndNames )
-

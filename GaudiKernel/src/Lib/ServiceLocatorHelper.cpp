@@ -6,7 +6,7 @@
 
 std::string
 ServiceLocatorHelper::threadName() const {
-  return getGaudiThreadIDfromName(requestorName());
+  return getGaudiThreadIDfromName(requesterName());
 }
 
 std::string
@@ -16,135 +16,76 @@ ServiceLocatorHelper::threadedName(const std::string& name) const {
 
 bool
 ServiceLocatorHelper::isInThread() const {
-  return isGaudiThreaded(requestorName());
+  return isGaudiThreaded(requesterName());
 }
 
-StatusCode 
-ServiceLocatorHelper::locateService(const std::string& name, 
-				    const InterfaceID& iid, 
+StatusCode
+ServiceLocatorHelper::locateService(const std::string& name,
+				    const InterfaceID& iid,
 				    void** ppSvc,
 				    bool quiet) const {
-  IService* theSvc(0);
-  StatusCode sc(StatusCode::FAILURE);
+  SmartIF<IService> theSvc = service(name, quiet, false);
+  if (!theSvc.isValid()) return StatusCode::FAILURE;
+  StatusCode sc = theSvc->queryInterface(iid, ppSvc);
+  if (!sc.isSuccess()) {
+    *ppSvc = 0;
+    if (!quiet) log() << MSG::ERROR
+      << "ServiceLocatorHelper::locateService: wrong interface id "
+      << iid << " for service " << name << endmsg;
+  }
+  return sc;
+}
+
+StatusCode
+ServiceLocatorHelper::createService(const std::string& name,
+				    const InterfaceID& iid,
+				    void** ppSvc) const {
+  SmartIF<IService> theSvc = service(name, false, true);
+  if (!theSvc.isValid()) return StatusCode::FAILURE;
+  StatusCode sc = theSvc->queryInterface(iid, ppSvc);
+  if (!sc.isSuccess()) {
+    *ppSvc = 0;
+    log() << MSG::ERROR
+      << "ServiceLocatorHelper::createService: wrong interface id "
+      << iid << " for service " << name << endmsg;
+  }
+  return sc;
+}
+
+StatusCode
+ServiceLocatorHelper::createService(const std::string& type,
+				    const std::string& name,
+				    const InterfaceID& iid,
+				    void** ppSvc) const {
+  return createService(type + "/" + name, iid, ppSvc);
+}
+
+SmartIF<IService> ServiceLocatorHelper::service(const std::string &name, const bool quiet, const bool createIf) const {
+  SmartIF<IService> theSvc;
   if (isInThread()) {
     //first we look for  a thread-specific version of the service
-    sc=serviceLocator()->getService(name + threadName(), theSvc, false);
-  };
+    theSvc = serviceLocator()->service(name + threadName(), createIf);
+  }
   // if not, try to find the common, single-threaded version of the service
-  if (!sc.isSuccess()) sc=serviceLocator()->getService(name, theSvc,false);
-  
-  if ( sc.isSuccess() ) {
-    if (!quiet) log() << MSG::VERBOSE 
-	  << "ServiceLocatorHelper::locateService: found service " 
-	  << name <<endreq;
-    sc = theSvc->queryInterface(iid, ppSvc);
-    if (!sc.isSuccess()) {
-      *ppSvc=0;
-      if (!quiet) log() << MSG::ERROR 
-	    << "ServiceLocatorHelper::locateService: wrong interface id " 
-	    << iid << " for service " << name << endreq;
+  if (!theSvc.isValid()){
+    theSvc = serviceLocator()->service(name, createIf);
+  }
+
+  if (theSvc.isValid()) {
+    if (!quiet) {
+      if (UNLIKELY(log().level() <= MSG::VERBOSE))
+        log() << MSG::VERBOSE
+              << "ServiceLocatorHelper::service: found service " << name <<endmsg;
     }
   } else {
     // if not return an error
     if (!quiet) {
-      log() << MSG::ERROR 
-	    << "ServiceLocatorHelper::locateService: can not locate service " 
-	    << name;
+      log() << MSG::ERROR
+            << "ServiceLocatorHelper::service: can not locate service "
+            << name;
       if (isInThread()) log() << MSG::ERROR << " or " << name + threadName();
-      log() << MSG::ERROR << endreq;
+      log() << MSG::ERROR << endmsg;
     }
-    *ppSvc = 0;
   }
-  return sc;
+  return theSvc;
 }
-
-StatusCode 
-ServiceLocatorHelper::createService(const std::string& name,
-				   const InterfaceID& iid, 
-				   void** ppSvc) const {
-
-  IService* theSvc(0);
-  StatusCode sc(StatusCode::FAILURE);
-  if (isInThread()) {
-    //first we look for  a thread-specific version of the service
-    sc=serviceLocator()->getService(threadedName(name), theSvc, true);
-  };
-  // if not, try to find the common, single-threaded version of the service
-  if (!sc.isSuccess()) sc=serviceLocator()->getService(name, theSvc, true);
-  
-  if ( sc.isSuccess() ) {
-    sc = theSvc->queryInterface(iid, ppSvc);
-    if (!sc.isSuccess()) {
-      *ppSvc=0;
-    }
-  } else {
-    *ppSvc = 0;
-  }
-
-  if (sc.isSuccess()) { 
-#ifndef NDEBUG
-    log() << MSG::VERBOSE 
-	  << "ServiceLocatorHelper::createService: found service " 
-	  << threadedName(name) <<endreq;
-#endif
-  } else {
-    log() << MSG::ERROR 
- 	  << "ServiceLocatorHelper::createService: can not create service " 
- 	  << threadedName(name) << endreq;
-  }
-  return sc;
-}
-
-StatusCode 
-ServiceLocatorHelper::createService(const std::string& type,
-				    const std::string& name,
-				    const InterfaceID& iid, 
-				    void** ppSvc) const {
-
-
-  IService* theSvc(0);
-  StatusCode sc(StatusCode::FAILURE);
-
-  //first we need to declare it
-  try { 
-    dynamic_cast<ISvcManager&>(*serviceLocator()).declareSvcType(threadedName(name),type).ignore(); 
-  } 
-  catch(...) {
-    log() << MSG::ERROR  
-          << "ServiceLocatorHelper::createService: can not declare service " 
-          << threadedName(name) << " of type " << type << endreq;
-    return StatusCode::FAILURE;
-  }
-
-  if (isInThread()) {
-    //first we look for  a thread-specific version of the service
-    sc=serviceLocator()->getService(threadedName(name), theSvc, true);
-  };
-  // if not, try to find the common, single-threaded version of the service
-  if (!sc.isSuccess()) sc=serviceLocator()->getService(name, theSvc, true);
-
-
-  if ( sc.isSuccess() ) {
-    sc = theSvc->queryInterface(iid, ppSvc);
-    if (!sc.isSuccess()) {
-      *ppSvc=0;
-    }
-  } else {
-    *ppSvc = 0;
-  }
-
-  if (sc.isSuccess()) { 
-#ifndef NDEBUG
-    log() << MSG::VERBOSE 
-	  << "ServiceLocatorHelper::createService: found service " 
-	  << threadedName(name) <<endreq;
-#endif
-  } else {
-    log() << MSG::ERROR 
- 	  << "ServiceLocatorHelper::createService: can not create service " 
- 	  << threadedName(name) << " of type " << type << endreq;
-  }
-  return sc;
-
-}
-

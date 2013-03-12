@@ -1,18 +1,18 @@
 #ifndef GAUDIPYTHON_CALLBACKSTREAMBUF_H
 #define GAUDIPYTHON_CALLBACKSTREAMBUF_H
 // ============================================================================
-#include <sstream>    //included for stringbuf
-// ============================================================================
 #include "Python.h"   //included for the python API
+// ============================================================================
+#include <sstream>    //included for stringbuf
 // ============================================================================
 #include "GaudiPython/GaudiPython.h"
 // ============================================================================
 
 namespace GaudiPython
 {
-  int call_python_method(PyObject* self, const char* method, char* buf);
+  int GAUDI_API call_python_method(PyObject* self, const char* method, char* buf);
 
-  class CallbackStreamBuf : public  std::stringbuf
+  class GAUDI_API CallbackStreamBuf: public std::stringbuf
   {
     private:
       PyObject* m_self;
@@ -24,6 +24,6 @@ namespace GaudiPython
       virtual int sync() ;
   }; //CallbackStreamBuf
 
-}; //namespace GaudiPython
+} //namespace GaudiPython
 
 #endif

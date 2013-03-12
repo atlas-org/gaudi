@@ -1,8 +1,7 @@
-// $Id: ExtendedProperties.cpp,v 1.7 2008/01/14 19:45:34 marcocle Exp $
 // ============================================================================
-// Include files 
+// Include files
 // ============================================================================
-// STD & STL 
+// STD & STL
 // ============================================================================
 #include <vector>
 #include <map>
@@ -18,18 +17,13 @@
 #include "GaudiAlg/GaudiAlgorithm.h"
 // ============================================================================
 
-// needed to compile on gcc4.x
-namespace 
-{
-  inline std::ostream &operator << 
-    (std::ostream &s,const std::pair<double,double> &p)
-  {
-    return s << '(' << p.first << ',' << p.second << ')';
-  }
-}
+#ifdef __ICC
+// disable icc remark #177: declared but never referenced
+#pragma warning(disable:177)
+#endif
 
-/** @file 
- *  simple DEMO-file for "extended properties", 
+/** @file
+ *  simple DEMO-file for "extended properties",
  *  implementation file for class ExtendedProperties
  *  @author Alexander MAZUROV alexander.mazurov@gmail.com
  *  @author Vanya BELYAEV ibelyaev@physics.syr.edu
@@ -37,8 +31,8 @@ namespace
  */
 
 
-/** @class ExtendedProperties 
- *  simple DEMO-file for "extended properties", 
+/** @class ExtendedProperties
+ *  simple DEMO-file for "extended properties",
  *  implementation file for class ExtendedProperties
  *  @author Alexander MAZUROV alexander.mazurov@gmail.com
  *  @author Vanya BELYAEV ibelyaev@physics.syr.edu
@@ -51,10 +45,10 @@ class ExtendedProperties
 public:
   StatusCode execute() ;
 
-  ExtendedProperties 
-  ( const std::string& name , 
-    ISvcLocator*       pSvc ) 
-    : GaudiAlgorithm ( name , pSvc ) 
+  ExtendedProperties
+  ( const std::string& name ,
+    ISvcLocator*       pSvc )
+    : GaudiAlgorithm ( name , pSvc )
     , m_1()
     , m_2()
     , m_3()
@@ -81,19 +75,25 @@ public:
     declareProperty ( "MapStringInt"             , m_7 ) ;
     declareProperty ( "MapStringDouble"          , m_8 ) ;
     declareProperty ( "MapStringVectorOfStrings" , m_9 ) ;
-    
+
     declareProperty ( "PairII"                   , m_10) ;
     declareProperty ( "MapStringVectorOfDoubles" , m_11) ;
     declareProperty ( "MapStringVectorOfInts"    , m_12) ;
-    
+
     declareProperty ( "MapIntInt"                , m_13) ;
     declareProperty ( "VectorOfPairsII"          , m_14) ;
 
     declareProperty ( "MapIntString"             , m_15) ;
     declareProperty ( "MapUIntString"            , m_16) ;
-    
+
+    declareProperty ( "EmptyMap"                 , m_20) ;
+    declareProperty ( "EmptyVector"              , m_21) ;
+
     setProperty ("PropertiesPrint", "true").ignore() ;
-    
+
+    m_20["key"] = "value";
+    m_21.push_back(123);
+
   }
   /// destruictor: virtual and protected
   virtual ~ExtendedProperties(){}
@@ -110,7 +110,7 @@ private:
   std::vector<std::pair<double,double> > m_2 ;
   std::vector<std::vector<std::string> > m_3 ;
   std::vector<std::vector<double> >      m_4 ;
-  
+
   std::map<int,double>                   m_5 ;
   std::map<std::string,std::string>      m_6 ;
   std::map<std::string,int>              m_7 ;
@@ -120,47 +120,49 @@ private:
   std::pair<int,int>  m_10 ;
   std::map<std::string,std::vector<double> > m_11 ;
   std::map<std::string,std::vector<int> >    m_12 ;
-  
+
   std::map<int,int>    m_13 ;
   std::vector<std::pair<int,int> >  m_14 ;
 
 
   std::map<int,std::string>            m_15 ;
   std::map<unsigned int,std::string>   m_16 ;
-  
+
+  std::map<std::string, std::string>   m_20;
+  std::vector<int> m_21;
 };
 // ============================================================================
 /// factory
 // ============================================================================
-DECLARE_ALGORITHM_FACTORY(ExtendedProperties);
+DECLARE_ALGORITHM_FACTORY(ExtendedProperties)
 // ============================================================================
-namespace 
+namespace
 {
   template <class TYPE>
-  inline SimplePropertyRef<TYPE> _prop ( TYPE& value ) 
+  inline SimplePropertyRef<TYPE> _prop ( TYPE& value )
   {
-    // construct a readable name 
+    // construct a readable name
     std::string name = System::typeinfoName ( typeid( value ) ) ;
     std::string::size_type ipos = name.find("std::") ;
-    while ( std::string::npos != ipos ) 
-    { 
-      name.erase( ipos , 5 ) ; 
-      ipos = name.find("std::") ; 
+    while ( std::string::npos != ipos )
+    {
+      name.erase( ipos , 5 ) ;
+      ipos = name.find("std::") ;
     }
     ipos = name.find(" ") ;
-    while ( std::string::npos != ipos ) 
-    { 
-      name.erase( ipos , 1 ) ; 
-      ipos = name.find(" ") ; 
+    while ( std::string::npos != ipos )
+    {
+      name.erase( ipos , 1 ) ;
+      ipos = name.find(" ") ;
     }
     ipos = name.find("const") ;
-    while ( std::string::npos != ipos ) 
-    { 
-      name.erase( ipos , 5 ) ; 
-      ipos = name.find("const") ; 
+    while ( std::string::npos != ipos )
+    {
+      name.erase( ipos , 5 ) ;
+      ipos = name.find("const") ;
     }
     ipos = name.find(",allocator<") ;
-    while( std::string::npos != ipos ) 
+    while( std::string::npos != ipos )
     {
       std::string::size_type ip2 = ipos + 11;
       int ip3 = 1 ;
@@ -173,10 +175,10 @@ namespace
       name.erase( ipos , ip2 + 1 - ipos ) ;
       ipos = name.find(",allocator<") ;
     }
-    if ( std::string::npos != name.find("map<") ) 
+    if ( std::string::npos != name.find("map<") )
     {
       ipos = name.find(",less<") ;
-      while( std::string::npos != ipos ) 
+      while( std::string::npos != ipos )
       {
         std::string::size_type ip2 = ipos + 6;
         int ip3 = 1 ;
@@ -188,57 +190,59 @@ namespace
         }
         name.erase( ipos , ip2 + 1 - ipos ) ;
         ipos = name.find(",less<") ;
-      }      
-    } 
-    ipos = name.find(">>") ;
-    while ( std::string::npos != ipos ) 
-    { 
-      name.replace( ipos , 2 , "> >" ) ; 
-      ipos = name.find(">>") ; 
+      }
     }
-    return SimplePropertyRef<TYPE> ( name , value ) ;  
-  }  
+    ipos = name.find(">>") ;
+    while ( std::string::npos != ipos )
+    {
+      name.replace( ipos , 2 , "> >" ) ;
+      ipos = name.find(">>") ;
+    }
+    return SimplePropertyRef<TYPE> ( name , value ) ;
+  }
 }
 // ============================================================================
-StatusCode ExtendedProperties::execute() 
+StatusCode ExtendedProperties::execute()
 {
-  always() << " My Properties : " << endreq ;
-  
-  always () << " \t" << _prop ( m_1  ) << endreq ;
-  always () << " \t" << _prop ( m_2  ) << endreq ;
-  always () << " \t" << _prop ( m_3  ) << endreq ;
-  always () << " \t" << _prop ( m_4  ) << endreq ;
-  always () << " \t" << _prop ( m_5  ) << endreq ;
-  always () << " \t" << _prop ( m_6  ) << endreq ;
-  always () << " \t" << _prop ( m_7  ) << endreq ;
-  always () << " \t" << _prop ( m_8  ) << endreq ;
-  always () << " \t" << _prop ( m_9  ) << endreq ;
-  always () << " \t" << _prop ( m_10 ) << endreq ;
-  always () << " \t" << _prop ( m_11 ) << endreq ;
-  always () << " \t" << _prop ( m_12 ) << endreq ;
-  always () << " \t" << _prop ( m_13 ) << endreq ;
-  always () << " \t" << _prop ( m_14 ) << endreq ;
-  always () << " \t" << _prop ( m_14 ) << endreq ;
-  always () << " \t" << _prop ( m_15 ) << endreq ;
-  always () << " \t" << _prop ( m_16 ) << endreq ;
+  always() << " My Properties : " << endmsg ;
 
-  
+  always () << " \t" << _prop ( m_1  ) << endmsg ;
+  always () << " \t" << _prop ( m_2  ) << endmsg ;
+  always () << " \t" << _prop ( m_3  ) << endmsg ;
+  always () << " \t" << _prop ( m_4  ) << endmsg ;
+  always () << " \t" << _prop ( m_5  ) << endmsg ;
+  always () << " \t" << _prop ( m_6  ) << endmsg ;
+  always () << " \t" << _prop ( m_7  ) << endmsg ;
+  always () << " \t" << _prop ( m_8  ) << endmsg ;
+  always () << " \t" << _prop ( m_9  ) << endmsg ;
+  always () << " \t" << _prop ( m_10 ) << endmsg ;
+  always () << " \t" << _prop ( m_11 ) << endmsg ;
+  always () << " \t" << _prop ( m_12 ) << endmsg ;
+  always () << " \t" << _prop ( m_13 ) << endmsg ;
+  always () << " \t" << _prop ( m_14 ) << endmsg ;
+  always () << " \t" << _prop ( m_14 ) << endmsg ;
+  always () << " \t" << _prop ( m_15 ) << endmsg ;
+  always () << " \t" << _prop ( m_16 ) << endmsg ;
+
+  always () << " \t" << SimplePropertyRef<std::map<std::string, std::string> >( "EmptyMap", m_20 ) << endmsg ;
+  always () << " \t" << SimplePropertyRef<std::vector<int> >( "EmptyVector", m_21 ) << endmsg ;
+
   // some properties could be created from other (convertible) types:
   SimpleProperty<short>     m1 ( "a" , 0  ) ;
   SimpleProperty<double>    m2 ( "b" , m1 ) ;
-  
-  // some properties could be assigned from other (convertible) types 
+
+  // some properties could be assigned from other (convertible) types
   SimpleProperty<int>       m3 ( "c" , 0  ) ;
   m3 = m1 ;
-  
+
   float i = 10 ;
   SimplePropertyRef<float> m4 ( "d" , i )  ;
-  
-  m4 = 12 ;
-  
 
-  return StatusCode::SUCCESS ; 
+  m4 = 12 ;
+
+
+  return StatusCode::SUCCESS ;
 }
 // ============================================================================
-// The END 
+// The END
 // ============================================================================

@@ -5,29 +5,24 @@
 #include "GaudiKernel/IInterface.h"
 #include <string>
 
-// Interface ID
-static const InterfaceID IID_INamedInterface("INamedInterface",0,0);
-
 /**
  * @class INamedInterface INamedInterface.h GaudiKernel/INamedInterface.h
  *
  * IInterface compliant class extending IInterface with the name() method.
  *
- * @author Charles Leggett 
- * @author Marco Clemencic
+ * @author Charles Leggett
  */
-class INamedInterface : virtual public IInterface {
+class GAUDI_API INamedInterface: virtual public IInterface {
 public:
-
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_INamedInterface; }
+  /// InterfaceID
+  DeclareInterfaceID(INamedInterface,1,0);
 
   /// Retrieve the name of the instance.
   virtual const std::string& name() const = 0;
 
   /// Virtual destructor (always needed for abstract classes).
   virtual ~INamedInterface() {}
-  
+
 };
 
 #endif

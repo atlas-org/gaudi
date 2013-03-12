@@ -36,12 +36,17 @@
 //=============================================================================
 template <class PBASE>
 GaudiTuples<PBASE>::~GaudiTuples() {}
-
 //=============================================================================
 // Initialize ntupling
 //=============================================================================
 template <class PBASE>
-StatusCode GaudiTuples<PBASE>::initialize()
+StatusCode GaudiTuples<PBASE>::
+#ifdef __ICC
+  i_gtInitialize
+#else
+  initialize
+#endif
+  ()
 {
   // initialize base class
   const StatusCode sc = PBASE::initialize();
@@ -50,14 +55,14 @@ StatusCode GaudiTuples<PBASE>::initialize()
   if ( produceNTuples() )
   {
     // check the existance of service
-    if ( 0 == this->ntupleSvc() )
+    if ( this->ntupleSvc() == 0 )
     { return  this->Error( "INTupleSvc* points to NULL!" ); }
     // Print ntuple path
-    Print( "The N-Tuple   path is set to be '" + nTuplePath() + "'", 
-           StatusCode(StatusCode::SUCCESS, true) , MSG::DEBUG);
+    this->Print( "The N-Tuple   path is set to be '" + nTuplePath() + "'",
+                 StatusCode(StatusCode::SUCCESS, true) , MSG::DEBUG);
   }
   else
-  { this->debug() << "Production of N-Tuples is switched OFF" << endreq; }
+  { this->debug() << "Production of N-Tuples is switched OFF" << endmsg; }
 
   if ( produceEvtCols() )
   {
@@ -65,11 +70,11 @@ StatusCode GaudiTuples<PBASE>::initialize()
     if ( 0 == this->evtColSvc() )
     { return  this->Error( "INTupleSvc* points to NULL!" ); }
     // Print EvtCol path
-    Print( "The EventCol  path is set to be '" + evtColPath() + "'", 
-           StatusCode(StatusCode::SUCCESS, true) , MSG::DEBUG );
+    this->Print( "The EventCol  path is set to be '" + evtColPath() + "'",
+                 StatusCode(StatusCode::SUCCESS, true) , MSG::DEBUG );
   }
   else
-  { this->debug() << "Production of Event Collections is switched OFF" << endreq; }
+  { this->debug() << "Production of Event Collections is switched OFF" << endmsg; }
 
   return sc;
 }
@@ -78,21 +83,25 @@ StatusCode GaudiTuples<PBASE>::initialize()
 // finalize ntupling
 //=============================================================================
 template <class PBASE>
-StatusCode GaudiTuples<PBASE>::finalize()
+StatusCode GaudiTuples<PBASE>::
+#ifdef __ICC
+  i_gtFinalize
+#else
+  finalize
+#endif
+  ()
 {
-  if ( !( nTupleMapTitle() .empty() &&
-          nTupleMapNumID() .empty() &&
-          nTupleMapLitID() .empty() &&
-          evtColMapTitle() .empty() &&
-          evtColMapNumID() .empty() &&
-          evtColMapLitID() .empty()
+  if ( !( nTupleMapTitle () . empty () &&
+          nTupleMapID    () . empty () &&
+          evtColMapTitle () . empty () &&
+          evtColMapID    () . empty ()
           ) )
   {
-    const int nNtuples = nTupleMapNumID().size() + nTupleMapLitID().size();
-    const int nEvtCols = evtColMapNumID().size() + evtColMapLitID().size();
+    const int nNtuples = nTupleMapID () . size () ;
+    const int nEvtCols = evtColMapID () . size ();
     this->always()
       << "Booked " << nNtuples << " N-Tuples and " << nEvtCols
-      << " Event Tag Collections" << endreq ;
+      << " Event Tag Collections" << endmsg ;
   }
 
   if ( produceNTuples () && tuplesPrint  () ) { printTuples  () ; }
@@ -105,16 +114,10 @@ StatusCode GaudiTuples<PBASE>::finalize()
     m_nTupleMapTitle.clear() ;
   }
   { // release ntuples and clear the container
-    for( TupleMapNumID::iterator itup = m_nTupleMapNumID.begin() ;
-         m_nTupleMapNumID.end() != itup ; ++itup )
+    for( TupleMapID::iterator itup = m_nTupleMapID.begin() ;
+         m_nTupleMapID.end() != itup ; ++itup )
     { if( 0 != itup->second ) { itup->second->release() ; } }
-    m_nTupleMapNumID.clear();
-  }
-  { // release ntuples and clear the container
-    for( TupleMapLitID::iterator itup = m_nTupleMapLitID.begin() ;
-         m_nTupleMapLitID.end() != itup ; ++itup )
-    { if( 0 != itup->second ) { itup->second->release() ; } }
-    m_nTupleMapLitID.clear();
+    m_nTupleMapID.clear();
   }
   { // release ntuples and clear the container
     for( TupleMapTitle::iterator itup = m_evtColMapTitle.begin() ;
@@ -123,18 +126,11 @@ StatusCode GaudiTuples<PBASE>::finalize()
     m_evtColMapTitle.clear();
   }
   { // release ntuples and clear the container
-    for( TupleMapNumID::iterator itup = m_evtColMapNumID.begin() ;
-         m_evtColMapNumID.end() != itup ; ++itup )
+    for( TupleMapID::iterator itup = m_evtColMapID.begin() ;
+         m_evtColMapID.end() != itup ; ++itup )
     { if( 0 != itup->second ) { itup->second->release() ; } }
-    m_evtColMapNumID.clear() ;
+    m_evtColMapID.clear() ;
   }
-  { // release ntuples and clear the container
-    for( TupleMapLitID::iterator itup = m_evtColMapLitID.begin() ;
-         m_evtColMapLitID.end() != itup ; ++itup )
-    { if( 0 != itup->second ) { itup->second->release() ; } }
-    m_evtColMapLitID.clear() ;
-  }
-
   // finalize base class
   return PBASE::finalize();
 }
@@ -160,16 +156,18 @@ Tuples::Tuple GaudiTuples<PBASE>::nTuple
                        StatusCode::SUCCESS );
     }
     // propose the tuple ID
-    ID = TupleID ( m_nTupleMapNumID.size() + 1 + nTupleOffSet() );
+    ID = TupleID ( m_nTupleMapID.size() + 1 + nTupleOffSet() );
     // adjust the proposed ID
-    while ( nTupleExists(ID) || evtColExists(ID) ) { ++ID ; }
+    while ( nTupleExists(ID) || evtColExists(ID) )
+    { ID = TupleID ( ID.numeric() + 1 ) ; }
   }
   else
   {
     // use the title to create a unique literal ID
     ID = TupleID( this->convertTitleToID(title) );
     // Just in case ...
-    while ( nTupleExists(ID) || evtColExists(ID) ) { ID = TupleID(ID.idAsString()+"_"); }
+    while ( nTupleExists(ID) || evtColExists(ID) )
+    { ID = TupleID(ID.idAsString()+"_"); }
   }
   // return
   return nTuple( ID , title , clid ) ;
@@ -197,16 +195,18 @@ Tuples::Tuple GaudiTuples<PBASE>::evtCol
                        StatusCode::SUCCESS );
     }
     // proposed the tuple ID
-    ID = m_evtColMapNumID.size() + 1 + evtColOffSet() ;
+    ID = TupleID ( m_evtColMapID.size() + 1 + evtColOffSet() ) ;
     // adjust the proposed ID
-    while ( nTupleExists(ID) || evtColExists(ID) ) { ++ID ; }
+    while ( nTupleExists(ID) || evtColExists(ID) )
+    { ID = TupleID ( ID.numeric() + 1 ) ; }
   }
   else
   {
     // use the title to create a unique literal ID
     ID = TupleID( this->convertTitleToID(title) );
     // Just in case ...
-    while ( nTupleExists(ID) || evtColExists(ID) ) { ID = TupleID(ID.idAsString()+"_"); }
+    while ( nTupleExists(ID) || evtColExists(ID) )
+    { ID = TupleID ( ID.idAsString()+"_" ) ; }
   }
   // return
   return evtCol( ID , title , clid ) ;
@@ -225,12 +225,11 @@ Tuples::Tuple GaudiTuples<PBASE>::nTuple
   // Check ID
   if ( ID.undefined() )
   { this->Error("Undefined NTuple ID : Title='"+title1+"'"); return Tuple(0); }
-
+  
   // look up in the table
-  Tuples::TupleObj * tuple =
-    ( ID.numeric() ? m_nTupleMapNumID[ID.numericID()] : m_nTupleMapLitID[ID.literalID()] ) ;
+  Tuples::TupleObj * tuple = m_nTupleMapID[ ID ] ;
   if( 0 != tuple ) { return Tuple( tuple ) ; }                   // RETURN
-
+  
   // convert ID to the string
   const std::string tID = ID.idAsString() ;
 
@@ -258,7 +257,7 @@ Tuples::Tuple GaudiTuples<PBASE>::nTuple
     if( 0 != tup -> registry() && this->msgLevel(MSG::DEBUG) )
     { this->debug() << "Booked NTuple '" << title << "' ID=" << tID
                     << "' Path='"  << nTuplePath() << "' TS='"
-                    << tup -> registry() -> identifier() << "'" << endreq; }
+                    << tup -> registry() -> identifier() << "'" << endmsg; }
 
     tuple = createNTuple ( title , tup                , clid ) ;
   }
@@ -268,14 +267,14 @@ Tuples::Tuple GaudiTuples<PBASE>::nTuple
   }
   // increment the reference
   tuple -> addRef();
-  if   ( ID.numeric() ) { m_nTupleMapNumID [ ID.numericID() ] = tuple ; }
-  else                  { m_nTupleMapLitID [ ID.literalID() ] = tuple ; }
+  //
+  m_nTupleMapID [ ID ] = tuple ;
+  //
   tuple -> addRef();
   m_nTupleMapTitle[ title ] = tuple ;
   // return
   return Tuple( tuple ) ;
-};
-
+}
 // ============================================================================
 template <class PBASE>
 Tuples::Tuple GaudiTuples<PBASE>::evtCol
@@ -288,10 +287,9 @@ Tuples::Tuple GaudiTuples<PBASE>::evtCol
   { this->Error("Undefined NTuple ID : Title='"+title1+"'"); return Tuple(0); }
 
   // look up in the table
-  Tuples::TupleObj* tuple =
-    ( ID.numeric() ? m_evtColMapNumID[ID.numericID()] : m_evtColMapLitID[ID.literalID()] ) ;
+  Tuples::TupleObj* tuple = m_evtColMapID[ID] ;
   if ( 0 != tuple ) { return Tuple( tuple ) ; }                   // RETURN
-
+  
   // convert ID to the string
   const std::string tID = ID.idAsString() ;
 
@@ -319,7 +317,7 @@ Tuples::Tuple GaudiTuples<PBASE>::evtCol
     if( 0 != tup -> registry() && this->msgLevel(MSG::DEBUG) )
     { this->debug() << "Booked EvtCol '" << title << "' ID=" << tID
                     << "' Path='" << evtColPath() << "' TS='"
-                    << tup -> registry() -> identifier() << "'" << endreq ; }
+                    << tup -> registry() -> identifier() << "'" << endmsg ; }
 
     tuple = createEvtCol ( title , tup                , clid ) ;
   }
@@ -329,15 +327,14 @@ Tuples::Tuple GaudiTuples<PBASE>::evtCol
   }
   // increment the reference
   tuple -> addRef();
-  if   ( ID.numeric() ) { m_evtColMapNumID [ ID.numericID() ] = tuple ; }
-  else                  { m_evtColMapLitID [ ID.literalID() ] = tuple ; }
+  //
+  m_evtColMapID [ ID ] = tuple ;
+  //
   tuple -> addRef();
   m_evtColMapTitle[ title ] = tuple ;
   // return
   return Tuple( tuple ) ;
 }
-// ============================================================================
-
 // ============================================================================
 // create TupleObj
 // ============================================================================
@@ -365,178 +362,96 @@ Tuples::TupleObj* GaudiTuples<PBASE>::createEvtCol
     ( this , "EvtCol '" + name  + "'" , tuple , clid , Tuples::EVTCOL ) ;
 }
 // ============================================================================
-
-
-// ============================================================================
 // perform the actual printout of N-tuples
 // ============================================================================
 template <class PBASE>
 long GaudiTuples<PBASE>::printTuples  () const
 {
 
-  typedef std::set<const NTuple::Tuple*> _Tuples ;
-
-  if ( nTupleMapTitle().empty() &&
-       nTupleMapNumID().empty() &&
-       nTupleMapLitID().empty() )
-  { if (this->msgLevel(MSG::DEBUG)) this->debug() << "No N-Tuples   are booked" << endreq ; }
+  if ( nTupleMapTitle().empty() && nTupleMapID().empty() )
+  { if (this->msgLevel(MSG::DEBUG)) this->debug() << "No N-Tuples   are booked" << endmsg ; }
   else
   { this->always() << "List of booked N-Tuples in directory "
-                   << "\"" << nTuplePath() << "\"" << endreq ; }
-
-  _Tuples tuples ;
-  { // N-Tuple by Numeric ID
-    for ( TupleMapNumID::const_iterator entry = nTupleMapNumID().begin() ;
-          nTupleMapNumID().end() != entry ; ++entry )
-    {
-      if ( 0 == entry->second ) { continue ; }
-      const NTuple::Tuple* tuple = entry->second->tuple() ;
-      if ( 0 == tuple )
-      { this->error() << " NTuple::Tuple* points to NULL" << endreq ; continue ; }
-      if ( tuples.end() != tuples.find( tuple ) ) { continue ; }
-      tuples.insert ( tuple ) ;
-      this->always() << GaudiAlg::PrintTuple::print ( tuple , entry->first ) << endreq ;
-    }
+                   << "\"" << nTuplePath() << "\"" << endmsg ; }
+  
+  // helper container to sort it:
+  typedef std::map<TupleID,const Tuples::TupleObj*> OrderedMapType;
+  OrderedMapType OrderedMap ( nTupleMapID().begin() , nTupleMapID().end() ) ;
+  //
+  for ( OrderedMapType::const_iterator entry = OrderedMap.begin() ;
+        OrderedMap.end() != entry ; ++entry )
+  {
+    if ( 0 == entry->second ) { continue ; }
+    const NTuple::Tuple* tuple = entry->second->tuple() ;
+    if ( 0 == tuple )
+    { this->error() << " NTuple::Tuple* points to NULL" << endmsg ; continue ; }
+    this->always() << GaudiAlg::PrintTuple::print ( tuple , entry->first ) << endmsg ;
   }
-  { // N-Tuple by Literal ID
-    for ( TupleMapLitID::const_iterator entry = nTupleMapLitID().begin() ;
-          nTupleMapLitID().end() != entry ; ++entry )
-    {
-      if ( 0 == entry->second ) { continue ; }
-      const NTuple::Tuple* tuple = entry->second->tuple() ;
-      if ( 0 == tuple )
-      { this->error() << " NTuple::Tuple* points to NULL" << endreq ; continue ; }
-      if ( tuples.end() != tuples.find( tuple ) ) { continue ; }
-      tuples.insert ( tuple ) ;
-      this->always() << GaudiAlg::PrintTuple::print ( tuple , entry->first ) << endreq ;
-    }
-  }
-  { // N-Tuples by Title
-    for ( TupleMapTitle::const_iterator entry = nTupleMapTitle().begin() ;
-          nTupleMapTitle().end() != entry ; ++entry )
-    {
-      if ( 0 == entry->second ) { continue ; }
-      const NTuple::Tuple* tuple = entry->second->tuple() ;
-      if ( 0 == tuple )
-      { this->error() << " NTuple::Tuple* points to NULL" << endreq ; continue ; }
-      if ( tuples.end() != tuples.find( tuple ) ) { continue ; }
-      tuples.insert ( tuple ) ;
-      this->always() << GaudiAlg::PrintTuple::print ( tuple )             << endreq ;
-    }
-  }
-
-  return tuples.size() ;
-};
-// ============================================================================
-
+  //
+  return this->nTupleMapID().size() ;
+}
 // ============================================================================
 // perform the actual printout of Evt Tag Collections
 // ============================================================================
 template <class PBASE>
 long GaudiTuples<PBASE>::printEvtCols () const
 {
-  typedef std::set<const NTuple::Tuple*> _Tuples ;
-
-  if ( evtColMapTitle().empty() &&
-       evtColMapNumID().empty() &&
-       evtColMapLitID().empty() )
-  { this->always() << "No Event Tag Collections are booked" << endreq ; }
+  if ( evtColMapTitle().empty() && evtColMapID().empty() )
+  { this->always() << "No Event Tag Collections are booked" << endmsg ; }
   else
   { this->always() << "List of booked Event Tag Collections in directory "
-                   << "\"" << evtColPath() << "\"" << endreq ; }
-
-  _Tuples tuples ;
-  { // EvtCols by Numeric ID
-    for ( TupleMapNumID::const_iterator entry = evtColMapNumID().begin() ;
-          evtColMapNumID().end() != entry ; ++entry )
-    {
-      if ( 0 == entry->second ) { continue ; }
-      const NTuple::Tuple* tuple = entry->second->tuple() ;
-      if ( 0 == tuple )
-      { this->error() << "NTuple::Tuple* points to NULL" << endreq ; continue ; }
-      if ( tuples.end() != tuples.find( tuple ) ) { continue ; }
-      tuples.insert ( tuple ) ;
-      this->always() << GaudiAlg::PrintTuple::print ( tuple , entry->first )
-                     << " Items:"
-                     << Gaudi::Utils::toString ( entry->second->items() )    << endreq ;
-    }
+                   << "\"" << evtColPath() << "\"" << endmsg ; }
+  
+  // helper container to sort it:
+  typedef std::map<TupleID,const Tuples::TupleObj*> OrderedMapType;
+  OrderedMapType OrderedMap ( evtColMapID().begin() , evtColMapID().end() ) ;
+  //
+  for ( OrderedMapType::const_iterator entry = OrderedMap.begin() ;
+        OrderedMap.end() != entry ; ++entry )
+  {
+    if ( 0 == entry->second ) { continue ; }
+    const NTuple::Tuple* tuple = entry->second->tuple() ;
+    if ( 0 == tuple )
+    { this->error() << " NTuple::Tuple* points to NULL" << endmsg ; continue ; }
+    this->always() << GaudiAlg::PrintTuple::print ( tuple , entry->first )
+                   << " Items:"
+                   << Gaudi::Utils::toString ( entry->second->items() ) << endmsg ;
   }
-  { // EvtCols by literal ID
-    for ( TupleMapLitID::const_iterator entry = evtColMapLitID().begin() ;
-          evtColMapLitID().end() != entry ; ++entry )
-    {
-      if ( 0 == entry->second ) { continue ; }
-      const NTuple::Tuple* tuple = entry->second->tuple() ;
-      if ( 0 == tuple )
-      { this->error() << "NTuple::Tuple* points to NULL" << endreq ; continue ; }
-      if ( tuples.end() != tuples.find( tuple ) ) { continue ; }
-      tuples.insert ( tuple ) ;
-      this->always() << GaudiAlg::PrintTuple::print ( tuple , entry->first )
-                     << " Items:"
-                     << Gaudi::Utils::toString ( entry->second->items() )    << endreq ;
-    }
-  }
-  { // EvtCols by Title
-    for ( TupleMapTitle::const_iterator entry = evtColMapTitle().begin() ;
-          evtColMapTitle().end() != entry ; ++entry )
-    {
-      if ( 0 == entry->second ) { continue ; }
-      const NTuple::Tuple* tuple = entry->second->tuple() ;
-      if ( 0 == tuple )
-      { this->error() << "NTuple::Tuple* points to NULL" << endreq ; continue ; }
-      if ( tuples.end() != tuples.find( tuple ) ) { continue ; }
-      tuples.insert ( tuple ) ;
-      this->always() << GaudiAlg::PrintTuple::print ( tuple )
-                     << " Items:"
-                     << Gaudi::Utils::toString ( entry->second->items() ) << endreq ;
-    }
-  }
-
-  return tuples.size() ;
+  //
+  return this->evtColMapID().size() ;
 }
-
 // ============================================================================
 // check the existence AND validity of the N-Tuple with the given ID
 // ============================================================================
 template <class PBASE>
 bool GaudiTuples<PBASE>::nTupleExists ( const TupleID& ID ) const
-{
-  bool OK(false);
-  if ( ID.numeric() )
-  {
-    TupleMapNumID::iterator found = m_nTupleMapNumID.find( ID.numericID() ) ;
-    OK = ( m_nTupleMapNumID.end() != found );
-  }
-  else
-  {
-    TupleMapLitID::iterator found = m_nTupleMapLitID.find( ID.literalID() ) ;
-    OK = ( m_nTupleMapLitID.end() != found );
-  }
-  return OK;
-}
-
+{ return m_nTupleMapID.end() != m_nTupleMapID.find ( ID ) ; }
 // ============================================================================
 // check the existence AND validity of the Event Tag Collection with the given ID
 // ============================================================================
 template <class PBASE>
 bool GaudiTuples<PBASE>::evtColExists ( const TupleID& ID ) const
+{ return m_evtColMapID.end() != m_evtColMapID.find ( ID ) ; }
+// ============================================================================
+// Handle method for changes in the 'NTuplePrint'      property
+// ============================================================================
+template <class PBASE>
+void GaudiTuples<PBASE>::printNTupleHandler  ( Property& )
 {
-  bool OK(false);
-  if ( ID.numeric() )
-  {
-    TupleMapNumID::iterator found = m_evtColMapNumID.find( ID.numericID() ) ;
-    OK = ( m_evtColMapNumID.end() != found );
-  }
-  else
-  {
-    TupleMapLitID::iterator found = m_evtColMapLitID.find( ID.literalID() ) ;
-    OK = ( m_evtColMapLitID.end() != found );
-  }
-  return OK;
+  // no action if not yet initialized
+  if ( this -> FSMState() < Gaudi::StateMachine::INITIALIZED ) { return ; }
+  if ( this -> tuplesPrint() ) { this -> printTuples () ; }
 }
-
+// ============================================================================
+// Handle method for changes in the 'EvtColsPrint'      property
+// ============================================================================
+template <class PBASE>
+void GaudiTuples<PBASE>::printEvtColHandler  ( Property& )
+{
+  // no action if not yet initialized
+  if ( this -> FSMState() < Gaudi::StateMachine::INITIALIZED ) { return ; }
+  if ( this -> evtColsPrint() ) { this -> printEvtCols () ; }
+}
 // ============================================================================
 // The END
 // ============================================================================
-
-

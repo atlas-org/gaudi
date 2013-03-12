@@ -8,9 +8,6 @@
 // Forward declarations
 class StreamBuffer;
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_ISerialize(180, 1 , 0); 
-
 /** @class ISerialize ISerialize.h GaudiKernel/ISerialize.h
 
     Object serialization interface definition.
@@ -18,16 +15,17 @@ static const InterfaceID IID_ISerialize(180, 1 , 0);
 
     @author M.Frank
 */
-class ISerialize  : virtual public IInterface    {
+class GAUDI_API ISerialize: virtual public IInterface {
 public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_ISerialize; }
-  /** Input serialisation from stream buffer. Restores the status of the object.
+  /// InterfaceID
+  DeclareInterfaceID(ISerialize,2,0);
+
+  /** Input serialization from stream buffer. Restores the status of the object.
       @param   str    Reference to Streambuffer to be filled
       @return  Reference to filled stream buffer
   */
   virtual StreamBuffer& serialize(StreamBuffer& str) = 0;
-  /** Output serialisation to stream buffer. Saves the status of the object.
+  /** Output serialization to stream buffer. Saves the status of the object.
       @param   str    Reference to Streambuffer to be read
       @return  Reference to read stream buffer
   */

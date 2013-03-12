@@ -20,11 +20,6 @@ class IOpaqueAddress;
 // Registry entry definition
 class IRegistry;
 
-
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IDataManagerSvc("IDataManagerSvc", 1 , 0); 
-
-
 /** @class IDataManagerSvc IDataManagerSvc.h GaudiKernel/IDataManagerSvc.h
 
     <P>The data manager interface of the service allows to:
@@ -37,7 +32,7 @@ static const InterfaceID IID_IDataManagerSvc("IDataManagerSvc", 1 , 0);
          to retrieve the parent object and to access iterators over the
          leaf entries.
     <LI> Register addresses to the data store.
-         Registered addresses contain the retrieve information for the 
+         Registered addresses contain the retrieve information for the
          underlying object.
     <LI> Unregister addresses from the data store. The object will no longer be
          accessible and loadable.
@@ -46,10 +41,10 @@ static const InterfaceID IID_IDataManagerSvc("IDataManagerSvc", 1 , 0);
    @author Markus Frank
    @version 1.0
 */
-class IDataManagerSvc : virtual public IInterface {
- public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IDataManagerSvc; }
+class GAUDI_API IDataManagerSvc: virtual public IInterface {
+public:
+  /// InterfaceID
+  DeclareInterfaceID(IDataManagerSvc,2,0);
 
   /// Get class ID of root Event
   virtual CLID rootCLID() const = 0;
@@ -70,7 +65,7 @@ class IDataManagerSvc : virtual public IInterface {
       @param      refpParent [OUT] Reference to store the parent's registry entry.
       @return                      Status code indicating success or failure.
   */
-  virtual StatusCode objectParent( const DataObject* pObject, 
+  virtual StatusCode objectParent( const DataObject* pObject,
                                    IRegistry*& refpParent) = 0;
 
   /** IDataManagerSvc: Explore the object store: retrieve the object's parent.
@@ -79,7 +74,7 @@ class IDataManagerSvc : virtual public IInterface {
       @param      refpParent [OUT] Reference to store the parent's registry entry.
       @return                      Status code indicating success or failure.
   */
-  virtual StatusCode objectParent( const IRegistry* pRegistry, 
+  virtual StatusCode objectParent( const IRegistry* pRegistry,
                                    IRegistry*& refpParent) = 0;
 
   /** Explore the object store: retrieve all leaves attached to the object
@@ -90,7 +85,7 @@ class IDataManagerSvc : virtual public IInterface {
                                   the objects leaves should be stored.
       @return                     Status code indicating success or failure.
   */
-  virtual StatusCode objectLeaves( const DataObject*  pObject, 
+  virtual StatusCode objectLeaves( const DataObject*  pObject,
                                   std::vector<IRegistry*>& refLeaves) = 0;
 
   /** Explore the object store: retrieve all leaves attached to the object
@@ -101,7 +96,7 @@ class IDataManagerSvc : virtual public IInterface {
                                   the objects leaves should be stored.
       @return                     Status code indicating success or failure.
   */
-  virtual StatusCode objectLeaves( const IRegistry*   pRegistry, 
+  virtual StatusCode objectLeaves( const IRegistry*   pRegistry,
                                   std::vector<IRegistry*>& refLeaves) = 0;
 
   /** Remove all data objects below the sub tree identified by its full path name.
@@ -110,13 +105,13 @@ class IDataManagerSvc : virtual public IInterface {
   */
   virtual StatusCode clearSubTree ( const std::string& sub_path ) = 0;
 
-  /** Remove all data objects below the sub tree 
+  /** Remove all data objects below the sub tree
       identified by the object. The object itself is removed as well.
       @param      pObject    [IN] Pointer to object
       @return                     Status code indicating success or failure
   */
   virtual StatusCode clearSubTree( DataObject* pObject ) = 0;
- 
+
   /** Remove all data objects in the data store.
       @return                     Status code indicating success or failure
   */
@@ -128,37 +123,37 @@ class IDataManagerSvc : virtual public IInterface {
   */
   virtual StatusCode traverseSubTree( const std::string& sub_path,
                                       IDataStoreAgent* pAgent ) = 0;
-  
-  /** Analyse by traversing all data objects below the sub tree 
+
+  /** Analyse by traversing all data objects below the sub tree
       identified by the object. The object itself is removed as well.
       @param      pObject    [IN] Pointer to object
       @param      pAgent     [IN] Pointer to the datastore agent traversing the store
       @return                     Status code indicating success or failure
   */
-  virtual StatusCode traverseSubTree( DataObject* pObject, 
+  virtual StatusCode traverseSubTree( DataObject* pObject,
                                       IDataStoreAgent* pAgent ) = 0;
-  
+
   /** Analyse by traversing all data objects in the data store.
       @return     Status code indicating success or failure
   */
   virtual StatusCode traverseTree( IDataStoreAgent* pAgent) = 0;
-  
+
   /** Initialize data store for new event by giving new event path.
       Implicitly this clears the entire data store.
       @param      root_name  [IN] String containing root path name
       @param      pObject    [IN] Pointer to root node object
       @return                     Status code indicating success or failure
   */
-  virtual StatusCode setRoot( const std::string& root_name, 
+  virtual StatusCode setRoot( const std::string& root_name,
                               DataObject* pObject ) = 0;
-  
+
   /** Initialize data store for new event by giving new event path.
       Implicitly this clears the entire data store.
       @param      root_name  [IN] String containing root path name
       @param      pRootAddr  [IN] Pointer to opaque root node address
       @return                     Status code indicating success or failure
   */
-  virtual StatusCode setRoot( const std::string& root_path, 
+  virtual StatusCode setRoot( const std::string& root_path,
                               IOpaqueAddress* pRootAddr) = 0;
 
   /** Register object address with the data store.
@@ -168,7 +163,7 @@ class IDataManagerSvc : virtual public IInterface {
      @param      pAddress    [IN] Pointer to the object to be registered.
       @return                     Status code indicating success or failure.
   */
-  virtual StatusCode registerAddress( const std::string& fullPath, 
+  virtual StatusCode registerAddress( const std::string& fullPath,
                                       IOpaqueAddress* pAddress) = 0;
 
   /** Register object address with the data store.
@@ -179,8 +174,8 @@ class IDataManagerSvc : virtual public IInterface {
       @param      pAddress   [IN] Pointer to the object to be connected.
       @return                     Status code indicating success or failure.
   */
-  virtual StatusCode registerAddress( DataObject* parentObj, 
-                                      const std::string& objectPath, 
+  virtual StatusCode registerAddress( DataObject* parentObj,
+                                      const std::string& objectPath,
                                       IOpaqueAddress* pAddress) = 0;
 
   /** Register object address with the data store.
@@ -191,8 +186,8 @@ class IDataManagerSvc : virtual public IInterface {
       @param      pAddress   [IN] Pointer to the object to be connected.
       @return                     Status code indicating success or failure.
   */
-  virtual StatusCode registerAddress( IRegistry* parentObj, 
-                                      const std::string& objectPath, 
+  virtual StatusCode registerAddress( IRegistry* parentObj,
+                                      const std::string& objectPath,
                                       IOpaqueAddress* pAddress) = 0;
 
   /** Unregister object address from the data store.
@@ -209,7 +204,7 @@ class IDataManagerSvc : virtual public IInterface {
       @param      objPath  [IN] Path name of the object relative to the parent.
       @return                   Status code indicating success or failure.
   */
-  virtual StatusCode unregisterAddress(DataObject* pParent, 
+  virtual StatusCode unregisterAddress(DataObject* pParent,
                                        const std::string& objPath) = 0;
 
   /** Unregister object address from the data store.

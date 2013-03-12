@@ -12,6 +12,8 @@
 #ifndef INCLUDED_PROPERTYCALLBACKFUNCTOR_H
 #define INCLUDED_PROPERTYCALLBACKFUNCTOR_H
 
+#include "GaudiKernel/Kernel.h"
+
 /****************************
  * C++ DECLARATION SECTION
  *   Base Classes Sub-section
@@ -36,8 +38,8 @@ class Property;
  * CLASS DECLARATION SECTION
  *   Class Interface Sub-section
  *******************************/
- 
-class PropertyCallbackFunctor {
+
+class GAUDI_API PropertyCallbackFunctor {
 
 ////////////////////
 /* Static Members */
@@ -54,16 +56,16 @@ public:
 public:
 
   // Data and Function Members for Collaborators.
-  
+
   // Constructors - None, abstract base class
   // Destructor
   virtual ~PropertyCallbackFunctor() {}
-  
+
   // Operators
   virtual void operator() ( Property& ) const = 0;
-  
+
   virtual PropertyCallbackFunctor* clone() const = 0 ;
-  
+
 };
 
 class PropertyCallbackPointerFunctor : public PropertyCallbackFunctor {
@@ -84,19 +86,19 @@ public:
 
 public:
   // Data and Function Members for Collaborators.
-  
+
   // Constructors
   explicit PropertyCallbackPointerFunctor( PtrToCallbackFunction pCF )
     : m_pCF( pCF ) { }
   // Destructor - Compiler generated version will be Ok
-  
+
   // Operators
   virtual void operator() ( Property& prop ) const
   { m_pCF( prop ); }
-  
-  virtual PropertyCallbackPointerFunctor* clone() const 
-  { return new PropertyCallbackPointerFunctor(*this); } ;
-  
+
+  virtual PropertyCallbackPointerFunctor* clone() const
+  { return new PropertyCallbackPointerFunctor(*this); }
+
 private:
 // Data and Function Members for This Class Implementation.
 
@@ -125,19 +127,19 @@ public:
 
 public:
   // Data and Function Members for Collaborators.
-  
+
   // Constructors
   explicit PropertyCallbackMemberFunctor( PtrToCallbackMember pCM, T* instance )
     : m_pCM( pCM ), m_instance( instance ) { }
   // Destructor - Compiler generated version will be Ok
-  
+
   // Operators
   virtual void operator() ( Property& prop ) const
   { ( m_instance->*m_pCM )( prop ); }
-  
-  virtual  PropertyCallbackMemberFunctor* clone() const 
+
+  virtual  PropertyCallbackMemberFunctor* clone() const
   { return new PropertyCallbackMemberFunctor(*this); }
-  
+
 private:
 // Data and Function Members for This Class Implementation.
 

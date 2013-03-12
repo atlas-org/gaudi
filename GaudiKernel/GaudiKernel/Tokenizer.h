@@ -21,7 +21,7 @@
 
 /** definition of class Tokenizer
 */
-class Tokenizer   {
+class GAUDI_API Tokenizer   {
 public:
   /** Definition of the sub-class Token.
   */
@@ -48,7 +48,7 @@ public:
     Token& operator=(const Token& copy);
     // Equality operator
     bool operator==(const Token& copy)    const   {
-      return m_tag == copy.m_tag, m_value == copy.m_value && m_length == copy.m_length;
+      return m_tag == copy.m_tag && m_value == copy.m_value && m_length == copy.m_length;
     }
     /// Total token length
     long length()   const   {
@@ -62,7 +62,7 @@ public:
     const std::string& value()  const   {
       return m_value;
     }
-    /// Resolve value from environment 
+    /// Resolve value from environment
     void resolveValue();
   };
   typedef Token Item;

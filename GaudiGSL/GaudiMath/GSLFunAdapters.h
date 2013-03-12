@@ -1,6 +1,6 @@
 // $Id: GSLFunAdapters.h,v 1.2 2005/11/25 10:27:03 mato Exp $
 // ============================================================================
-#ifndef GAUDIMATH_GSLFUNADAPTERS_H 
+#ifndef GAUDIMATH_GSLFUNADAPTERS_H
 #define GAUDIMATH_GSLFUNADAPTERS_H 1
 // ============================================================================
 // Include files
@@ -15,49 +15,50 @@
 // ============================================================================
 #include "GaudiMath/FunAdapters.h"
 // ============================================================================
-// GSL 
+// GSL
 // ============================================================================
 #include "gsl/gsl_mode.h"
 #include "gsl/gsl_sf_result.h"
 // ============================================================================
+#include "GaudiKernel/Kernel.h"
 
-namespace Genfun 
+namespace Genfun
 {
   namespace GaudiMathImplementation
   {
-    /// the actual type for primitive adaptor 
+    /// the actual type for primitive adaptor
     typedef Genfun::GaudiMathImplementation::SimpleFunction GSLFunction ;
-    
-    class GSLFunctionWithError : public AbsFunction 
+
+    class GAUDI_API GSLFunctionWithError : public AbsFunction
     {
     public:
-      /// the actual type of the function 
+      /// the actual type of the function
       typedef int (*Function)( double , gsl_sf_result* ) ;
     public:
       /// mandatory macro from CLHEP/GenericFunctions
-      FUNCTION_OBJECT_DEF( GSLFunctionWithError ) ;
+      FUNCTION_OBJECT_DEF( GSLFunctionWithError )
     public:
-      /// constructor with pointer to function 
+      /// constructor with pointer to function
       GSLFunctionWithError ( Function function ) ;
-      /// copy constructor 
+      /// copy constructor
       GSLFunctionWithError ( const GSLFunctionWithError& ) ;
-      /// destructor 
+      /// destructor
       virtual ~GSLFunctionWithError () ;
-      /// the main method 
+      /// the main method
       virtual double operator() (       double    x ) const ;
       virtual double operator() ( const Argument& x ) const ;
       virtual bool         hasAnalyticDerivative () const { return true ; }
       virtual unsigned int dimensionality        () const { return    1 ; }
       Genfun::Derivative partial ( unsigned int i ) const ;
 
-      /// get the function itself 
+      /// get the function itself
       Function             function () const ;
-      /// get the last evaluated result 
+      /// get the last evaluated result
       const gsl_sf_result& result   () const ;
-      /// get the error in the last estimate of the result 
+      /// get the error in the last estimate of the result
       double               error    () const ;
     private:
-      // default constructor is disabled 
+      // default constructor is disabled
       GSLFunctionWithError () ;
       // assignement operator is disabled
       GSLFunctionWithError& operator=( const GSLFunctionWithError & ) ;
@@ -65,35 +66,35 @@ namespace Genfun
       Function        m_function ;
       gsl_sf_result*  m_result   ;
     };
-    
-    class GSLFunctionWithMode : public AbsFunction 
+
+    class GAUDI_API GSLFunctionWithMode : public AbsFunction
     {
     public:
-      /// the actual type of the function 
+      /// the actual type of the function
       typedef double (*Function)( double , gsl_mode_t ) ;
     public:
       /// mandatory macro from CLHEP/GenericFunctions
-      FUNCTION_OBJECT_DEF( GSLFunctionWithMode ) ;
+      FUNCTION_OBJECT_DEF( GSLFunctionWithMode )
     public:
-      /// constructor with pointer to function 
-      GSLFunctionWithMode ( Function          fun  , 
+      /// constructor with pointer to function
+      GSLFunctionWithMode ( Function          fun  ,
                             const gsl_mode_t& mode ) ;
-      /// copy constructor 
+      /// copy constructor
       GSLFunctionWithMode ( const GSLFunctionWithMode& ) ;
-      /// destructor 
+      /// destructor
       virtual ~GSLFunctionWithMode () ;
-      /// the main method 
+      /// the main method
       virtual double operator() (       double    x ) const ;
       virtual double operator() ( const Argument& x ) const ;
       virtual bool         hasAnalyticDerivative () const { return true ; }
       virtual unsigned int dimensionality        () const { return    1 ; }
       Genfun::Derivative partial ( unsigned int i ) const ;
-      /// get the function itself 
+      /// get the function itself
       Function             function () const ;
-      /// get the current mode  
+      /// get the current mode
       const gsl_mode_t&    mode     () const ;
     private:
-      // default constructor is disabled 
+      // default constructor is disabled
       GSLFunctionWithMode () ;
       // assignement operator is disabled
       GSLFunctionWithMode& operator=( const GSLFunctionWithError & ) ;
@@ -101,41 +102,41 @@ namespace Genfun
       Function        m_function ;
       gsl_mode_t*     m_mode     ;
     };
-    
-    class GSLFunctionWithModeAndError : public AbsFunction 
+
+    class GAUDI_API GSLFunctionWithModeAndError : public AbsFunction
     {
     public:
-      /// the actual type of the function 
-      typedef int (*Function)( double          , 
-                               gsl_mode_t      , 
+      /// the actual type of the function
+      typedef int (*Function)( double          ,
+                               gsl_mode_t      ,
                                gsl_sf_result*  ) ;
     public:
       /// mandatory macro from CLHEP/GenericFunctions
-      FUNCTION_OBJECT_DEF( GSLFunctionWithModeAndError ) ;
+      FUNCTION_OBJECT_DEF( GSLFunctionWithModeAndError )
     public:
-      /// constructor with pointer to function 
-      GSLFunctionWithModeAndError ( Function          fun  , 
+      /// constructor with pointer to function
+      GSLFunctionWithModeAndError ( Function          fun  ,
                                     const gsl_mode_t& mode ) ;
-      /// copy constructor 
+      /// copy constructor
       GSLFunctionWithModeAndError ( const GSLFunctionWithModeAndError& ) ;
-      /// destructor 
+      /// destructor
       virtual ~GSLFunctionWithModeAndError () ;
-      /// the main method 
+      /// the main method
       virtual double operator() (       double    x ) const ;
       virtual double operator() ( const Argument& x ) const ;
       virtual bool         hasAnalyticDerivative () const { return true ; }
       virtual unsigned int dimensionality        () const { return    1 ; }
       Genfun::Derivative partial ( unsigned int i ) const ;
-      /// get the function itself 
+      /// get the function itself
       Function             function () const ;
-      /// get the current mode  
+      /// get the current mode
       const gsl_mode_t&    mode     () const ;
-      /// get the last evaluated result 
+      /// get the last evaluated result
       const gsl_sf_result& result   () const ;
-      /// get the error in the last estimate of the result 
+      /// get the error in the last estimate of the result
       double               error    () const ;
     private:
-      // default constructor is disabled 
+      // default constructor is disabled
       GSLFunctionWithModeAndError () ;
       // assignement operator is disabled
       GSLFunctionWithModeAndError& operator=
@@ -146,8 +147,8 @@ namespace Genfun
       gsl_sf_result*  m_result   ;
     };
 
-  } ; // end of namespace GaudiMath Implemnentation
-}; // end of namespace Genfun
+  } // end of namespace GaudiMath Implemnentation
+} // end of namespace Genfun
 
 #endif // GAUDIMATH_GSLFUNADAPTERS_H
 // ============================================================================

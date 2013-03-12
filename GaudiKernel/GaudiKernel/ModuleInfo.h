@@ -31,22 +31,22 @@ namespace System  {
   /// Definition of the process handle
   typedef void* ProcessHandle;
   /// Get the name of the (executable/DLL) file without file-type
-  const std::string& moduleName();
+  GAUDI_API const std::string& moduleName();
   /// Get the full name of the (executable/DLL) file
-  const std::string& moduleNameFull();
+  GAUDI_API const std::string& moduleNameFull();
   /// Get type of the module
-  ModuleType moduleType();
+  GAUDI_API ModuleType moduleType();
   /// Handle to running process
-  ProcessHandle processHandle();
+  GAUDI_API ProcessHandle processHandle();
   /// Handle to currently executed module
-  ImageHandle moduleHandle();
+  GAUDI_API ImageHandle moduleHandle();
   /// Handle to the executable file running
-  ImageHandle exeHandle();
+  GAUDI_API ImageHandle exeHandle();
   /// Name of the executable file running
-  const std::string&  exeName();
+  GAUDI_API const std::string&  exeName();
   /// Vector of names of linked modules
-  const std::vector<std::string> linkedModules();
+  GAUDI_API const std::vector<std::string> linkedModules();
   /// Attach module handle
-  void  setModuleHandle(ImageHandle handle);
+  GAUDI_API void  setModuleHandle(ImageHandle handle);
 }
 #endif // GAUDIKERNEL_MODULEINFO_H

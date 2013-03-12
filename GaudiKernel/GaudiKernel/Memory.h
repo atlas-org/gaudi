@@ -9,7 +9,7 @@
 //
 //	Author     : M.Frank
 //  Created    : 13/11/00
-//	Changes    : 
+//	Changes    :
 //
 //====================================================================
 #ifndef GAUDIKERNEL_MEMORY_H
@@ -35,7 +35,7 @@
     - nonPagedMemory          Current usage of non paged memory
     - nonPagedMemoryPeak      Peak usage of non paged memory
     - nonPagedMemoryLimit     Maximum amount of non-paged memory this process is allowed to use
-    - pagedMemory             Amount of paged memory currently occupied 
+    - pagedMemory             Amount of paged memory currently occupied
     - pagedMemoryPeak         Maximum of paged memory occupied by the process
     - pagedMemoryLimit        paged memory that can be occupied by the process
     - memorySize              Size of currently occupied memory
@@ -56,56 +56,56 @@ namespace System    {
   /// Unit of memory
   enum MemoryUnit { Byte, kByte, MByte, GByte, TByte, PByte, EByte };
   /// Convert time from kByte to requested representation (Experts only)
-  long adjustMemory(MemoryUnit typ, long value);
+  GAUDI_API long adjustMemory(MemoryUnit typ, long value);
   /// Basic Process Information: Process ID
-  long procID();
+  GAUDI_API long procID();
   /// Basic Process Information: Parent's process ID
-  long parentID(InfoType fetch = ProcessBasics, long pid = -1);
+  GAUDI_API long parentID(InfoType fetch = ProcessBasics, long pid = -1);
   /// Basic Process Information: Affinity mask
-  long affinityMask(InfoType fetch = ProcessBasics, long pid = -1);
+  GAUDI_API long affinityMask(InfoType fetch = ProcessBasics, long pid = -1);
   /// Basic Process Information: Exit status (does not really make sense for the running process, but for others!)
-  long exitStatus(InfoType fetch = ProcessBasics, long pid = -1);
+  GAUDI_API long exitStatus(InfoType fetch = ProcessBasics, long pid = -1);
   /// Basic Process Information: Base priority
-  long basePriority(InfoType fetch = ProcessBasics, long pid = -1);
+  GAUDI_API long basePriority(InfoType fetch = ProcessBasics, long pid = -1);
   /// Basic Process Information: priority boost
-  long priorityBoost(InfoType fetch = PriorityBoost, long pid = -1);
+  GAUDI_API long priorityBoost(InfoType fetch = PriorityBoost, long pid = -1);
 
   /// Basic Process Information: Number of page faults
-  long numPageFault(InfoType fetch = Memory, long pid = -1);
+  GAUDI_API long numPageFault(InfoType fetch = Memory, long pid = -1);
   /// Basic Process Information: Current page file usage
-  long pagefileUsage(MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1);
+  GAUDI_API long pagefileUsage(MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1);
   /// Basic Process Information: Peak usage of page file
-  long pagefileUsagePeak(MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1);
+  GAUDI_API long pagefileUsagePeak(MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1);
   /// Basic Process Information: Peak usage of page file
-  long pagefileUsageLimit(MemoryUnit unit = kByte, InfoType fetch = Quota, long pid = -1);
+  GAUDI_API long pagefileUsageLimit(MemoryUnit unit = kByte, InfoType fetch = Quota, long pid = -1);
 
   /// Basic Process Information: Current usage of non paged memory
-  long nonPagedMemory( MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1 );
+  GAUDI_API long nonPagedMemory( MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1 );
   /// Basic Process Information: Peak usage of non paged memory
-  long nonPagedMemoryPeak( MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1 );
+  GAUDI_API long nonPagedMemoryPeak( MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1 );
   /// System Process Limits: Maximum amount of non-paged memory this process is allowed to use
-  long nonPagedMemoryLimit( MemoryUnit unit = kByte, InfoType fetch = Quota, long pid = -1 );
+  GAUDI_API long nonPagedMemoryLimit( MemoryUnit unit = kByte, InfoType fetch = Quota, long pid = -1 );
 
   /// Basic Process Information: Amount of paged memory currently occupied by the process 'pid'
-  long pagedMemory( MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1 );
+  GAUDI_API long pagedMemory( MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1 );
   /// Basic Process Information: Maximum of paged memory occupied by the process 'pid'
-  long pagedMemoryPeak( MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1 );
+  GAUDI_API long pagedMemoryPeak( MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1 );
   /// Basic Process Information: Amount of paged memory that can be occupied by the process 'pid'
-  long pagedMemoryLimit( MemoryUnit unit = kByte, InfoType fetch = Quota, long pid = -1 );
+  GAUDI_API long pagedMemoryLimit( MemoryUnit unit = kByte, InfoType fetch = Quota, long pid = -1 );
 
   /// System Process Limits: Minimum amount of virtual memory this process may use
-  long minMemoryLimit( MemoryUnit unit = kByte, InfoType fetch = Quota, long pid = -1 );
+  GAUDI_API long minMemoryLimit( MemoryUnit unit = kByte, InfoType fetch = Quota, long pid = -1 );
   /// System Process Limits: Maximum amount of virtual memory this process is allowed to use
-  long maxMemoryLimit( MemoryUnit unit = kByte, InfoType fetch = Quota, long pid = -1 );
+  GAUDI_API long maxMemoryLimit( MemoryUnit unit = kByte, InfoType fetch = Quota, long pid = -1 );
   /// Basic Process Information: priority boost
-  long mappedMemory( MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1 );
+  GAUDI_API long mappedMemory( MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1 );
   /// Basic Process Information: priority boost
-  long mappedMemoryPeak( MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1 );
+  GAUDI_API long mappedMemoryPeak( MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1 );
   /// Basic Process Information: priority boost
-  long virtualMemory( MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1 );
+  GAUDI_API long virtualMemory( MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1 );
   /// Basic Process Information: priority boost
-  long virtualMemoryPeak( MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1 );
+  GAUDI_API long virtualMemoryPeak( MemoryUnit unit = kByte, InfoType fetch = Memory, long pid = -1 );
   /// System Process Limits: Maximum amount of the page file this process is allowed to use
-  long virtualMemoryLimit( MemoryUnit unit = kByte, InfoType fetch = Quota, long pid = -1 );
+  GAUDI_API long virtualMemoryLimit( MemoryUnit unit = kByte, InfoType fetch = Quota, long pid = -1 );
 }
 #endif //GAUDIKERNEL_MEMORY_H

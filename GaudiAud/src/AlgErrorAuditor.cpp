@@ -1,22 +1,17 @@
-// AlgErrorAuditor:
-//  An auditor that monitors memory usage
-
 #include "AlgErrorAuditor.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/IMessageSvc.h"
-#include "GaudiKernel/INamedInterface.h"
 #include "GaudiKernel/AudFactory.h"
 #include "GaudiKernel/GaudiException.h"
 
-
-DECLARE_AUDITOR_FACTORY(AlgErrorAuditor);
+DECLARE_AUDITOR_FACTORY(AlgErrorAuditor)
 
 AlgErrorAuditor::AlgErrorAuditor(const std::string& name, ISvcLocator* pSvcLocator)
   : Auditor(name, pSvcLocator), m_error(0), m_fatal(0) {
 
-  declareProperty( "Abort", m_abort = false, 
+  declareProperty( "Abort", m_abort = false,
 		   "Abort job upon illegal Algorithm return code");
-  declareProperty( "Throw", m_throw = false, 
+  declareProperty( "Throw", m_throw = false,
 		   "Throw GaudiException upon illegal Algorithm return code");
 }
 
@@ -24,7 +19,7 @@ AlgErrorAuditor::~AlgErrorAuditor(){
 }
 
 
-void 
+void
 AlgErrorAuditor:: beforeExecute(INamedInterface* ){
   m_error = msgSvc()->messageCount(MSG::ERROR);
   m_fatal = msgSvc()->messageCount(MSG::FATAL);
@@ -36,14 +31,14 @@ AlgErrorAuditor:: initialize() {
   if (m_abort && m_throw) {
     MsgStream log(msgSvc(), name());
     log << MSG::INFO << "Both \"Throw\" and \"Abort\" options have been set."
-	<< " Abort takes precedence." << endreq;
+	<< " Abort takes precedence." << endmsg;
   }
 
   return StatusCode::SUCCESS;
 }
 
 
-void 
+void
 AlgErrorAuditor:: afterExecute(INamedInterface* alg, const StatusCode& sc) {
 
   bool fail(false);
@@ -54,8 +49,8 @@ AlgErrorAuditor:: afterExecute(INamedInterface* alg, const StatusCode& sc) {
     os << std::endl << "Error policy described in "
 	 << "https://twiki.cern.ch/twiki/bin/view/Atlas/ReportingErrors";
 
-    MsgStream log(msgSvc(), name()); 
-    log << MSG::ERROR << os.str() << endreq;
+    MsgStream log(msgSvc(), name());
+    log << MSG::ERROR << os.str() << endmsg;
     incrMap(alg->name(), 0);
     fail = true;
 
@@ -64,7 +59,7 @@ AlgErrorAuditor:: afterExecute(INamedInterface* alg, const StatusCode& sc) {
     }
   }
 
-  if (msgSvc()->messageCount(MSG::FATAL) != m_fatal && 
+  if (msgSvc()->messageCount(MSG::FATAL) != m_fatal &&
       sc != StatusCode::FAILURE ) {
     std::ostringstream os;
     os << "Illegal Return Code: Algorithm " << alg->name()
@@ -72,8 +67,8 @@ AlgErrorAuditor:: afterExecute(INamedInterface* alg, const StatusCode& sc) {
     os << std::endl << "Error policy described in "
 	 << "https://twiki.cern.ch/twiki/bin/view/Atlas/ReportingErrors";
 
-    MsgStream log(msgSvc(), name()); 
-    log << MSG::ERROR << os.str() << endreq;
+    MsgStream log(msgSvc(), name());
+    log << MSG::ERROR << os.str() << endmsg;
     incrMap(alg->name(), 1);
     fail = true;
 
@@ -89,13 +84,13 @@ AlgErrorAuditor:: afterExecute(INamedInterface* alg, const StatusCode& sc) {
 
 }
 
-StatusCode 
+StatusCode
 AlgErrorAuditor::finalize() {
 
 
   std::map<std::string,int>::const_iterator itr;
   if (m_algMap[0].size() != 0) {
-    MsgStream log(msgSvc(), name()); 
+    MsgStream log(msgSvc(), name());
     log << MSG::INFO << "Found " << m_algMap[0].size()
 	<< " instances where an Algorithm::execute() produced an ERROR "
 	<< "but returned a SUCCESS:" << std::endl;
@@ -103,12 +98,12 @@ AlgErrorAuditor::finalize() {
     for (itr = m_algMap[0].begin(); itr != m_algMap[0].end(); ++itr) {
       log << itr->first << ": " << itr->second << std::endl;
     }
-    
-    log << endreq;
+
+    log << endmsg;
   }
 
   if (m_algMap[1].size() != 0) {
-    MsgStream log(msgSvc(), name()); 
+    MsgStream log(msgSvc(), name());
     log << MSG::INFO << "Found " << m_algMap[1].size()
 	<< " instances where an Algorithm::execute() produced a FATAL "
 	<< "but returned a SUCCESS:" << std::endl;
@@ -116,8 +111,8 @@ AlgErrorAuditor::finalize() {
     for (itr = m_algMap[1].begin(); itr != m_algMap[1].end(); ++itr) {
       log << itr->first << ": " << itr->second << std::endl;
     }
-    
-    log << endreq;
+
+    log << endmsg;
   }
 
 
@@ -134,4 +129,4 @@ AlgErrorAuditor::incrMap(const std::string& alg, int level) {
     m_algMap[level].insert( std::pair<std::string,int>(alg,1) );
   }
 }
-    
+

@@ -10,22 +10,18 @@
 // Forward declarations
 class ICnvFactory;
 
-// Declaration of the interface ID ( interface id, major version, minor version)
-static const InterfaceID IID_IConversionSvc("IConversionSvc", 3 , 0); 
-
-
 /** @class IConversionSvc IConversionSvc.h GaudiKernel/IConversionSvc.h
 
     <P> The conversion service interface allows to:
     <UL>
     <LI> Add, get and remove data converters from the sercvice.
-    <LI> Create objects using converters: e.g. create the transient 
+    <LI> Create objects using converters: e.g. create the transient
          representation of a persistent object.
-    <LI> convert objects - the opposite of create: e.g. convert transient 
+    <LI> convert objects - the opposite of create: e.g. convert transient
          objects into the persistent representation of these objects.
          The objects to be converted are defined by a data selector object.
-    <LI> update objects which already exist: e.g. update the existing 
-         persistent representation of objects which were read from the 
+    <LI> update objects which already exist: e.g. update the existing
+         persistent representation of objects which were read from the
 	       persistent store and should be modified.
 	       The objects to be converted are defined by a data selector object.
     <LI> Class specific aspects of the creation/update/conversion mechanism
@@ -39,10 +35,10 @@ static const InterfaceID IID_IConversionSvc("IConversionSvc", 3 , 0);
   - Version 1.2 Remove createReps, updateReps - replaced by interface IConverter
 
 */
-class IConversionSvc  : virtual public IConverter 	{
+class GAUDI_API IConversionSvc: virtual public IConverter {
 public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IConversionSvc; }
+  /// InterfaceID
+  DeclareInterfaceID(IConversionSvc,4,0);
 
   /** Add converter object to conversion service.
    *  @param      pConverter Pointer to converter object

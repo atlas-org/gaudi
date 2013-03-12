@@ -1,7 +1,7 @@
 #include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/Property.h"
 
-class EventCounter : public Algorithm {
+class GAUDI_API EventCounter: public Algorithm {
 public:
 
     /**
@@ -12,7 +12,7 @@ public:
     /**
      ** Destructor
      **/
-    ~EventCounter( );
+    virtual ~EventCounter( );
 
     /*****************************
      ** Public Function Members **

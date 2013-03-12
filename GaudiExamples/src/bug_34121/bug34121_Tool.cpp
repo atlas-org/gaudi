@@ -16,9 +16,9 @@ namespace bug_34121 {
 class Tool : public AlgTool,
                       virtual public IMyTool {
 public:
-  
+
   /// Standard Constructor
-  Tool(const std::string& type, 
+  Tool(const std::string& type,
                 const std::string& name,
                 const IInterface* parent);
 
@@ -40,7 +40,7 @@ private:
 
 //------------------------------------------------------------------------------
 Tool::Tool( const std::string& type,
-                              const std::string& name, 
+                              const std::string& name,
                               const IInterface* parent )
 //------------------------------------------------------------------------------
 : AlgTool( type, name, parent ) {
@@ -53,7 +53,7 @@ Tool::Tool( const std::string& type,
 }
 
 //------------------------------------------------------------------------------
-const std::string&  Tool::message() const 
+const std::string&  Tool::message() const
 //------------------------------------------------------------------------------
 {
   static std::string msg("It works!!!");
@@ -65,7 +65,7 @@ void  Tool::doIt()
 //------------------------------------------------------------------------------
 {
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "Double = " << m_double << endreq;
+  log << MSG::INFO << "Double = " << m_double << endmsg;
 }
 
 //------------------------------------------------------------------------------
@@ -73,8 +73,8 @@ StatusCode  Tool::initialize()
 //------------------------------------------------------------------------------
 {
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "Initialize" << endreq;
-  log << MSG::INFO << "Double = " << m_double << endreq;
+  log << MSG::INFO << "Initialize" << endmsg;
+  log << MSG::INFO << "Double = " << m_double << endmsg;
   return StatusCode::SUCCESS;
 }
 //------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ StatusCode  Tool::finalize()
 //------------------------------------------------------------------------------
 {
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "Finalize" << endreq;
+  log << MSG::INFO << "Finalize" << endmsg;
   return StatusCode::SUCCESS;
 }
 

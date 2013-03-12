@@ -39,9 +39,7 @@ namespace DataSvcHelpers    {
  * @author Sebastien Ponce
  * @version 1.0
 */
-class DataSvc  : public Service,
-		             virtual public IDataProviderSvc, 
-                 virtual public IDataManagerSvc
+class GAUDI_API DataSvc: public extends2<Service, IDataProviderSvc, IDataManagerSvc>
 {
   /// The class creator is of course a friend!
   friend class SvcFactory<DataSvc>;
@@ -59,7 +57,7 @@ protected:
   IConversionSvc*                 m_dataLoader;
   /// Pointer to incident service
   IIncidentSvc*                   m_incidentSvc;
-  /// Items to be pre - loaded
+  /// Items to be pre-loaded
   LoadItems                       m_preLoads;
   /// Allow forced creation of default leaves on registerObject
   bool                            m_forceLeaves;
@@ -69,7 +67,7 @@ protected:
   bool                            m_enableFaultHdlr;
   /// Pointer to root entry
   DataSvcHelpers::RegistryEntry*  m_root;
-  /// Map with object pathes to be inhibited from loading
+  /// Map with object paths to be inhibited from loading
   DataSvcHelpers::InhibitMap*     m_inhibitMap;
   /// Property for the inhibited leaves
   std::vector<std::string>        m_inhibitPathes;
@@ -78,7 +76,7 @@ protected:
   /// Name of the data fault incident
   std::string                     m_faultName;
 public:
-  
+
   /// IDataManagerSvc: Accessor for root event CLID
   virtual CLID rootCLID() const;
 
@@ -86,46 +84,46 @@ public:
   virtual std::string rootName() const;
 
   /// IDataManagerSvc: Register object address with the data store.
-  virtual StatusCode registerAddress( const std::string& fullPath, 
+  virtual StatusCode registerAddress( const std::string& fullPath,
                                       IOpaqueAddress* pAddress);
 
   /// IDataManagerSvc: Register object address with the data store.
-  virtual StatusCode registerAddress( DataObject* parentObj, 
-                                      const std::string& objectPath, 
+  virtual StatusCode registerAddress( DataObject* parentObj,
+                                      const std::string& objectPath,
                                       IOpaqueAddress* pAddress);
 
   /// IDataManagerSvc: Register object address with the data store.
-  virtual StatusCode registerAddress( IRegistry* parentObj, 
-                                      const std::string& objectPath, 
+  virtual StatusCode registerAddress( IRegistry* parentObj,
+                                      const std::string& objectPath,
                                       IOpaqueAddress* pAddress);
 
   /// IDataManagerSvc: Unregister object address from the data store.
   virtual StatusCode unregisterAddress(const std::string& fullPath);
 
   /// IDataManagerSvc: Unregister object address from the data store.
-  virtual StatusCode unregisterAddress( DataObject* pParent, 
+  virtual StatusCode unregisterAddress( DataObject* pParent,
                                         const std::string& objPath);
 
   /// IDataManagerSvc: Unregister object address from the data store.
-  virtual StatusCode unregisterAddress( IRegistry* pParent, 
+  virtual StatusCode unregisterAddress( IRegistry* pParent,
                                         const std::string& objPath);
 
   /** IDataManagerSvc: Explore the object store: retrieve all leaves attached
    *  to the object
    */
-  virtual StatusCode objectLeaves( const DataObject*  pObject, 
+  virtual StatusCode objectLeaves( const DataObject*  pObject,
                                   std::vector<IRegistry*>& refLeaves);
   /** IDataManagerSvc: Explore the object store: retrieve all leaves attached
    *  to the object
    */
-  virtual StatusCode objectLeaves( const IRegistry*   pRegistry, 
+  virtual StatusCode objectLeaves( const IRegistry*   pRegistry,
                                   std::vector<IRegistry*>& refLeaves);
 
   /// IDataManagerSvc: Explore the object store: retrieve the object's parent
-  virtual StatusCode objectParent( const DataObject*  pObject, 
+  virtual StatusCode objectParent( const DataObject*  pObject,
                                    IRegistry*& refpParent);
   /// IDataManagerSvc: Explore the object store: retrieve the object's parent
-  virtual StatusCode objectParent( const IRegistry*   pRegistry, 
+  virtual StatusCode objectParent( const IRegistry*   pRegistry,
                                    IRegistry*& refpParent);
 
   /** IDataManagerSvc: Remove all data objects below the sub tree identified
@@ -134,24 +132,24 @@ public:
   virtual StatusCode clearSubTree( const std::string& sub_tree_path );
 
   /** IDataManagerSvc: Remove all data objects below the sub tree identified
-   *  by the object. 
+   *  by the object.
    */
   virtual StatusCode clearSubTree( DataObject* pObject );
 
   /// IDataManagerSvc: Remove all data objects in the data store.
   virtual StatusCode clearStore();
 
-  /** IDataManagerSvc: Analyse by traversing all data objects below the sub
+  /** IDataManagerSvc: Analyze by traversing all data objects below the sub
    *  tree identified by its full path name.
    */
-  virtual StatusCode traverseSubTree( const std::string& sub_tree_path, 
+  virtual StatusCode traverseSubTree( const std::string& sub_tree_path,
                                       IDataStoreAgent* pAgent );
 
-  /// IDataManagerSvc: Analyse by traversing all data objects below the sub tree
-  virtual StatusCode traverseSubTree( DataObject* pObject, 
+  /// IDataManagerSvc: Analyze by traversing all data objects below the sub tree
+  virtual StatusCode traverseSubTree( DataObject* pObject,
                                       IDataStoreAgent* pAgent );
 
-  /// IDataManagerSvc: Analyse by traversing all data objects in the data store.
+  /// IDataManagerSvc: Analyze by traversing all data objects in the data store.
   virtual StatusCode traverseTree( IDataStoreAgent* pAgent );
 
   /** Initialize data store for new event by giving new event path and root
@@ -197,41 +195,41 @@ public:
   /// Clear the preload list
   virtual StatusCode resetPreLoad();
 
-  /** Execute one level of preloading and recursively load until the 
+  /** Execute one level of preloading and recursively load until the
       final level is reached.
       @param   depth        current level of loading from requested parent
       @param   load_depth   maximum level of object loading
       @param   pObject      pointer to next level root object
       @return  Status code indicating success or failure.
   */
-  virtual StatusCode preLoad( int depth, 
-                              int load_depth, 
+  virtual StatusCode preLoad( int depth,
+                              int load_depth,
                               DataObject* pObject );
 
   /// load all preload items of the list
   virtual StatusCode preLoad();
 
   /// Register object with the data store.
-  virtual StatusCode registerObject(  const std::string& fullPath, 
+  virtual StatusCode registerObject(  const std::string& fullPath,
                                       DataObject* pObject );
 
   /// Register object with the data store.
-  virtual StatusCode registerObject(  const std::string& parentPath,   
-                                      const std::string& objPath, 
+  virtual StatusCode registerObject(  const std::string& parentPath,
+                                      const std::string& objPath,
                                       DataObject* pObject );
 
   /// Register object with the data store.
-  virtual StatusCode registerObject(  const std::string& parentPath, 
-                                      int item, 
+  virtual StatusCode registerObject(  const std::string& parentPath,
+                                      int item,
                                       DataObject* pObject );
 
   /// Register object with the data store.
-  virtual StatusCode registerObject(  DataObject* parentObj, 
-                                      const std::string& objPath, 
+  virtual StatusCode registerObject(  DataObject* parentObj,
+                                      const std::string& objPath,
                                       DataObject* pObject );
 
   /// Register object with the data store.
-  virtual StatusCode registerObject(  DataObject* parentObj, 
+  virtual StatusCode registerObject(  DataObject* parentObj,
                                       int item,
                                       DataObject* pObject );
 
@@ -239,7 +237,7 @@ public:
   virtual StatusCode unregisterObject(const std::string& fullPath );
 
   /// Unregister object from the data store.
-  virtual StatusCode unregisterObject(const std::string& parentPath, 
+  virtual StatusCode unregisterObject(const std::string& parentPath,
                                       const std::string& objectPath );
 
   /// Unregister object from the data store.
@@ -250,100 +248,100 @@ public:
   virtual StatusCode unregisterObject(DataObject* pObject );
 
   /// Unregister object from the data store.
-  virtual StatusCode unregisterObject(DataObject* pObject, 
+  virtual StatusCode unregisterObject(DataObject* pObject,
                                       const std::string& objectPath );
 
   /// Unregister object from the data store.
-  virtual StatusCode unregisterObject(DataObject* pObject, 
+  virtual StatusCode unregisterObject(DataObject* pObject,
                                       int item );
 
   /// Retrieve object from data store.
-  virtual StatusCode retrieveObject(  IRegistry* pDirectory, 
-                                      const std::string& path, 
+  virtual StatusCode retrieveObject(  IRegistry* pDirectory,
+                                      const std::string& path,
                                       DataObject*& pObject );
 
   /// Retrieve object identified by its full path from the data store.
-  virtual StatusCode retrieveObject(  const std::string& fullPath, 
+  virtual StatusCode retrieveObject(  const std::string& fullPath,
                                       DataObject*& pObject );
 
   /// Retrieve object from data store.
-  virtual StatusCode retrieveObject(  const std::string& parentPath, 
-                                      const std::string& objPath, 
+  virtual StatusCode retrieveObject(  const std::string& parentPath,
+                                      const std::string& objPath,
                                       DataObject*& pObject );
 
   /// Retrieve object from data store.
-  virtual StatusCode retrieveObject(  const std::string& parentPath, 
-                                      int item, 
+  virtual StatusCode retrieveObject(  const std::string& parentPath,
+                                      int item,
                                       DataObject*& pObject );
 
   /// Retrieve object from data store.
-  virtual StatusCode retrieveObject(  DataObject* parentObj, 
-                                      const std::string& objPath, 
+  virtual StatusCode retrieveObject(  DataObject* parentObj,
+                                      const std::string& objPath,
                                       DataObject*& pObject );
 
   /// Retrieve object from data store.
-  virtual StatusCode retrieveObject(  DataObject* parentObj, 
-                                      int item, 
+  virtual StatusCode retrieveObject(  DataObject* parentObj,
+                                      int item,
                                       DataObject*& pObject );
 
   /// Find object identified by its full path in the data store.
-  virtual StatusCode findObject(  const std::string& fullPath, 
+  virtual StatusCode findObject(  const std::string& fullPath,
                                   DataObject*& pObject );
 
   /// Find object identified by its full path in the data store.
-  virtual StatusCode findObject(  IRegistry* pDirectory, 
-                                  const std::string& path, 
+  virtual StatusCode findObject(  IRegistry* pDirectory,
+                                  const std::string& path,
                                   DataObject*& pObject );
 
   /// Find object in the data store.
-  virtual StatusCode findObject(  const std::string& parentPath, 
-                                  const std::string& objPath, 
+  virtual StatusCode findObject(  const std::string& parentPath,
+                                  const std::string& objPath,
                                   DataObject*& pObject );
 
   /// Find object in the data store.
-  virtual StatusCode findObject(  const std::string& parentPath, 
-                                  int item, 
+  virtual StatusCode findObject(  const std::string& parentPath,
+                                  int item,
                                   DataObject*& pObject );
 
   /// Find object in the data store.
-  virtual StatusCode findObject(  DataObject* parentObj, 
-                                  const std::string& objPath, 
+  virtual StatusCode findObject(  DataObject* parentObj,
+                                  const std::string& objPath,
                                   DataObject*& pObject );
 
   /// Find object in the data store.
-  virtual StatusCode findObject(  DataObject* parentObj, 
-                                  int item, 
+  virtual StatusCode findObject(  DataObject* parentObj,
+                                  int item,
                                   DataObject*& pObject );
 
   /// Add a link to another object.
-  virtual StatusCode linkObject(  IRegistry* from, 
-                                  const std::string& objPath, 
+  virtual StatusCode linkObject(  IRegistry* from,
+                                  const std::string& objPath,
                                   DataObject* to );
 
   /// Add a link to another object.
-  virtual StatusCode linkObject(  const std::string& fromPath, 
-                                  const std::string& objPath, 
+  virtual StatusCode linkObject(  const std::string& fromPath,
+                                  const std::string& objPath,
                                   DataObject* to );
 
   /// Add a link to another object.
-  virtual StatusCode linkObject(  DataObject* from, 
-                                  const std::string& objPath, 
+  virtual StatusCode linkObject(  DataObject* from,
+                                  const std::string& objPath,
                                   DataObject* to );
 
   /// Add a link to another object.
-  virtual StatusCode linkObject(  const std::string& fullPath, 
+  virtual StatusCode linkObject(  const std::string& fullPath,
                                   DataObject* to );
 
   /// Remove a link to another object.
-  virtual StatusCode unlinkObject(IRegistry* from, 
+  virtual StatusCode unlinkObject(IRegistry* from,
                                   const std::string& objPath );
 
   /// Remove a link to another object.
-  virtual StatusCode unlinkObject(const std::string& fromPath, 
+  virtual StatusCode unlinkObject(const std::string& fromPath,
                                   const std::string& objPath );
 
   /// Remove a link to another object.
-  virtual StatusCode unlinkObject(DataObject* fromObj, 
+  virtual StatusCode unlinkObject(DataObject* fromObj,
                                   const std::string& objPath );
 
   /// Remove a link to another object.
@@ -359,23 +357,20 @@ public:
   virtual StatusCode updateObject(DataObject* toUpdate );
 
   /// Update object.
-  virtual StatusCode updateObject(const std::string& parentPath, 
+  virtual StatusCode updateObject(const std::string& parentPath,
                                   const std::string& updatePath );
 
   /// Update object.
-  virtual StatusCode updateObject(DataObject* pParent, 
+  virtual StatusCode updateObject(DataObject* pParent,
                                   const std::string& updatePath );
 
-  /// Query interface
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvUnknown );
-
-  /// Service initialisation
+  /// Service initialization
   virtual StatusCode initialize();
 
-  /// Service initialisation
+  /// Service initialization
   virtual StatusCode reinitialize();
 
-  /// Service initialisation
+  /// Service initialization
   virtual StatusCode finalize();
 
   /// Standard Constructor
@@ -383,6 +378,12 @@ public:
 
   /// Standard Destructor
   virtual ~DataSvc();
+
+private:
+  /// Fake copy constructor (never implemented).
+  DataSvc(const DataSvc&);
+  /// Fake assignment operator (never implemented).
+  DataSvc& operator= (const DataSvc&);
 
 protected:
   /// Check if root path is valid
@@ -406,12 +407,12 @@ protected:
   /** Invoke Persistency service to create transient object from its
    *  persistent representation
    */
-  virtual StatusCode loadObject( IConversionSvc* pLoader, 
+  virtual StatusCode loadObject( IConversionSvc* pLoader,
                                  IRegistry* pNode );
 
   /// Retrieve registry entry from store
   StatusCode retrieveEntry( DataSvcHelpers::RegistryEntry* pNode,
-                            const std::string& path, 
+                            const std::string& path,
                             DataSvcHelpers::RegistryEntry*& pEntry );
   /** Invoke data fault handling if enabled
     * @param pReg  [IN]   Pointer to missing registry entry

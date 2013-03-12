@@ -8,13 +8,13 @@
 #include <vector>
 
 /** @class PropertyList PropertyList.h GaudiKernel/PropertyList.h
-    
+
     List of properties.
 
     @author David Quarrie
     @author Pere Mato
 */
-class PropertyList : public Property {
+class GAUDI_API PropertyList : public Property {
 public:
   /// Constructor
 	PropertyList();
@@ -28,11 +28,11 @@ public:
 
   /// Add a property to the list
   void addProperty( const std::string& name, Property& p );
-  /// Add a property to the list 
+  /// Add a property to the list
 	void addProperty( Property& p );
-  /// Remove a property from the list 
+  /// Remove a property from the list
 	void removeProperty( const std::string& name );
-  /// Remove a property from the list 
+  /// Remove a property from the list
 	void removeProperty( Property& p );
 
 	/// Property implementation: set property

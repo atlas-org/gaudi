@@ -1,8 +1,8 @@
 // $Id: ReadTES.cpp,v 1.1 2008/11/04 22:49:24 marcocle Exp $
-// Include files 
+// Include files
 
 // from Gaudi
-#include "GaudiKernel/AlgFactory.h" 
+#include "GaudiKernel/AlgFactory.h"
 
 // local
 #include "ReadTES.h"
@@ -14,7 +14,7 @@
 //-----------------------------------------------------------------------------
 
 // Declaration of the Algorithm Factory
-DECLARE_ALGORITHM_FACTORY( ReadTES );
+DECLARE_ALGORITHM_FACTORY( ReadTES )
 
 
 //=============================================================================
@@ -30,7 +30,7 @@ ReadTES::ReadTES( const std::string& name,
 //=============================================================================
 // Destructor
 //=============================================================================
-ReadTES::~ReadTES() {} 
+ReadTES::~ReadTES() {}
 
 //=============================================================================
 // Initialization
@@ -58,7 +58,7 @@ StatusCode ReadTES::execute() {
     DataObject* pTES = get<DataObject>( *it );
     info() << "Found object " << *it << " at " << pTES << endmsg;
   }
-  
+
   return StatusCode::SUCCESS;
 }
 

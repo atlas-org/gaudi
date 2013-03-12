@@ -8,12 +8,10 @@
 // C++ include files
 #include <string>
 
-static const InterfaceID IID_IPartitionControl("IPartitionControl", 0 , 0); 
-
 /**@class IPartitionControl IPartitionControl.h GaudiKernel/IPartitionControl.h
   *
   * Create / access partitions.
-  * Partitioning is used to switch between different instances of 
+  * Partitioning is used to switch between different instances of
   * multi-services like it is used e.g. in the event buffer tampering.
   *
   *
@@ -49,7 +47,7 @@ static const InterfaceID IID_IPartitionControl("IPartitionControl", 0 , 0);
   * with "data on demand" this can easily have unexpected results.
   *
   * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  * 
+  *
   * SmartIF<IPartitionControl> partCtrl(eventSvc());
   * if ( partCtrl )  {
   *   IInterface* ptr = 0;
@@ -66,11 +64,10 @@ static const InterfaceID IID_IPartitionControl("IPartitionControl", 0 , 0);
   *  @author  Markus Frank
   *  @version 1.0
   */
-class IPartitionControl : virtual public IInterface {
+class GAUDI_API IPartitionControl: virtual public IInterface {
 public:
-
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IPartitionControl; }
+  /// InterfaceID
+  DeclareInterfaceID(IPartitionControl,1,0);
 
   /// Create a partition object. The name identifies the partition uniquely
   /** Create a new partition. If the partition exists already
@@ -101,7 +98,7 @@ public:
     * @return Status code indicating failure or success.
     */
   virtual StatusCode create(const std::string& name,
-                            const std::string& type, 
+                            const std::string& type,
                             IInterface*& pPartition) = 0;
 
   /// Drop a partition object. The name identifies the partition uniquely
@@ -119,7 +116,7 @@ public:
   /** Remove a partition object. If the partition object does not exists,
     * the return code is PARTITION_NOT_PRESENT. The partition may not
     * be used anymore after this call.
-    * If the interface pointer is invalid, IInterface::NO_INTERFACE 
+    * If the interface pointer is invalid, IInterface::NO_INTERFACE
     * is returned.
     *
     * @param  pPartition    [IN]     Reference to existing partition
@@ -142,13 +139,13 @@ public:
   virtual StatusCode activate(const std::string& name) = 0;
 
   /// Activate a partition object.
-  /** Access an existing partition object. 
+  /** Access an existing partition object.
     * The activation of a partition does not change the state of the
     * partition. It only means that any call issued to the corresponding
     * multi-service will be redirected to the this partition - typically
     * a service implementing the same interfaces as the multi-service.
     *
-    * If the interface pointer is invalid, IInterface::NO_INTERFACE 
+    * If the interface pointer is invalid, IInterface::NO_INTERFACE
     * is returned.
     *
     * @param  pPartition    [IN]     Pointer to the partition.
@@ -158,7 +155,7 @@ public:
   virtual StatusCode activate(IInterface* pPartition) = 0;
 
   /// Access a partition object. The name identifies the partition uniquely.
-  /** Access an existing partition object. 
+  /** Access an existing partition object.
     *
     * @param  name          [IN]     Partition name
     * @param  pPartition    [IN]     Location to store the pointer to the partition.
@@ -168,7 +165,7 @@ public:
   virtual StatusCode get(const std::string& name, IInterface*& pPartition) const = 0;
 
   /// Access the active partition object.
-  /** Access the active partition object. 
+  /** Access the active partition object.
     *
     * @param  name          [OUT]    Partition name
     * @param  pPartition    [OUT]    Location to store the pointer to the partition.

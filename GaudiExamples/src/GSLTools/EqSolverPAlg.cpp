@@ -1,10 +1,10 @@
 // $Id: EqSolverPAlg.cpp,v 1.4 2006/01/10 19:58:26 hmd Exp $
 
-// Include files 
+// Include files
 
 // from Gaudi
 #include "GaudiKernel/AlgFactory.h"
-#include "GaudiKernel/MsgStream.h" 
+#include "GaudiKernel/MsgStream.h"
 #include "GaudiGSL/IEqSolver.h"
 #include "GaudiMath/GaudiMath.h"
 #include "GaudiMath/Adapters.h"
@@ -30,13 +30,13 @@ DECLARE_ALGORITHM_FACTORY(EqSolverPAlg)
 EqSolverPAlg::EqSolverPAlg( const std::string& name,
 			ISvcLocator* pSvcLocator)
   : Algorithm ( name , pSvcLocator ) {
-  
+
 }
 
 //=============================================================================
 // Destructor
 //=============================================================================
-EqSolverPAlg::~EqSolverPAlg() {}; 
+EqSolverPAlg::~EqSolverPAlg() {}
 
 //=============================================================================
 typedef Genfun::AbsFunction GenFunc;
@@ -45,17 +45,17 @@ typedef Genfun::AbsFunction GenFunc;
 double function1 ( const std::vector<double>& x  )
 {
   return x[0] * x[0] + x[1] * x[1]- 1;
-};
+}
 
 double function2 ( const std::vector<double>& x  )
 {
   return x[0] + x[1] ;
-};
+}
 
 double function3 ( const std::vector<double>& x  )
 {
   return x[2] * x[2] * x[2] * x[1] - 120 ;
-};
+}
 
 //=============================================================================
 // Initialisation. Check parameters
@@ -63,23 +63,23 @@ double function3 ( const std::vector<double>& x  )
 StatusCode EqSolverPAlg::initialize() {
 
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "==> Initialise" << endreq;
+  log << MSG::INFO << "==> Initialise" << endmsg;
 
   StatusCode sc;
   sc = toolSvc()->retrieveTool("EqSolver", m_publicTool );
-  if( sc.isFailure() ) 
+  if( sc.isFailure() )
     {
-      log << MSG::ERROR<< "Error retrieving the public tool" << endreq;  
+      log << MSG::ERROR<< "Error retrieving the public tool" << endmsg;
     }
   sc = toolSvc()->retrieveTool("EqSolver", m_privateTool, this );
-  if( sc.isFailure() ) 
+  if( sc.isFailure() )
     {
-      log << MSG::ERROR<< "Error retrieving the private tool" << endreq;  
+      log << MSG::ERROR<< "Error retrieving the private tool" << endmsg;
     }
-  log << MSG::INFO << "....initialization done" << endreq;
-  
+  log << MSG::INFO << "....initialization done" << endmsg;
+
   return StatusCode::SUCCESS;
-};
+}
 
 //=============================================================================
 // Main execution
@@ -87,25 +87,25 @@ StatusCode EqSolverPAlg::initialize() {
 StatusCode EqSolverPAlg::execute() {
 
   MsgStream  log( msgSvc(), name() );
-  log << MSG::INFO << "==> Execute" << endreq;
-     
+  log << MSG::INFO << "==> Execute" << endmsg;
+
   // the objects of the class AdapterPFunction
   // @see Adapters.h
   const GaudiMath::Function& adap1 = GaudiMath::adapter( 3 , &function1 ) ;
   const GaudiMath::Function& adap2 = GaudiMath::adapter( 3 , &function2 ) ;
   const GaudiMath::Function& adap3 = GaudiMath::adapter( 3 , &function3 ) ;
-   
+
   std::vector<const GenFunc*> function;
-  
+
   function.push_back(&adap1);
   function.push_back(&adap2);
   function.push_back(&adap3);
- 
+
 //=============================================================================
 
   // Input number and value of the arguments of the function "GenFunc"
   IEqSolver::Arg arg (function.size ());
-  
+
   arg[0] = 2;
   arg[1] = 3;
   arg[2] = 5;
@@ -113,18 +113,18 @@ StatusCode EqSolverPAlg::execute() {
   // Call of the method
   m_publicTool->solver( function ,
                         arg      );
-  log << endreq;
-  log << "START OF THE METHOD" << endreq;
-  log << "SOLUTION FOUND AT: " << endreq;
-  
+  log << endmsg;
+  log << "START OF THE METHOD" << endmsg;
+  log << "SOLUTION FOUND AT: " << endmsg;
+
   for (unsigned int i = 0; i < arg.dimension(); i++)
     {
-      log << "Value of argument " << i <<" is " << arg[i] << endreq;
+      log << "Value of argument " << i <<" is " << arg[i] << endmsg;
     }
-  log << endreq;
+  log << endmsg;
 
   return StatusCode::SUCCESS;
-};
+}
 
 //=============================================================================
 //  Finalize
@@ -132,7 +132,7 @@ StatusCode EqSolverPAlg::execute() {
 StatusCode EqSolverPAlg::finalize() {
 
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "==> Finalize" << endreq;
+  log << MSG::INFO << "==> Finalize" << endmsg;
 
   toolSvc()->releaseTool( m_publicTool  );
   toolSvc()->releaseTool( m_privateTool );

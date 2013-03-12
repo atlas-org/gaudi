@@ -4,21 +4,22 @@
 //
 //	Package    : Gaudi/System
 //
-//  Description: The DLL initialisation must be done seperately for 
-//               each DLL. 
+//  Description: The DLL initialisation must be done seperately for
+//               each DLL.
 //
 //	Author     : M.Frank
 //  Created    : 13/1/99
-//	Changes    : 
+//	Changes    :
 //
 //====================================================================
 #ifndef SYSTEM_DLLMAIN_ICPP
 #define SYSTEM_DLLMAIN_ICPP 1
 
+#include "GaudiKernel/Kernel.h"
 #include "GaudiKernel/System.h"
 
 #if !defined(__APPLE__)
-class GaudiDll   {
+class GaudiDll {
   GaudiDll()  {}
 public:
   static void initialize(void* hinstDLL);
@@ -26,34 +27,23 @@ public:
 };
 #endif
 
-#if defined _WIN32
-#  define FACTORYTABLE_API __declspec(dllexport)
-#else
-#  define FACTORYTABLE_API
-#endif
-
 #if defined(_WIN32) && defined(_DLL)
 namespace win {
+// Avoid conflicts between Windows' headers and MSG.
 #ifndef NOMSG
-# define NOMSG
-# ifndef NOGDI
-#  define NOGDI
-#  include <windows.h>
-#  undef NOGDI
-# else
-#  include <windows.h>
-# endif
-# undef NOMSG
-#else
-# include <windows.h>
+#  define NOMSG
+#  ifndef NOGDI
+#    define NOGDI
+#  endif
 #endif
+#include <windows.h>
 }
 
 win::BOOL APIENTRY DllMain(
         win::HINSTANCE hinstDLL,  // handle to DLL module
         win::DWORD fdwReason,     // reason for calling function
         win::LPVOID lpvReserved   // reserved
-)   
+)
 {
     System::setModuleHandle(hinstDLL);
     switch( fdwReason ) {

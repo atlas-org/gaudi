@@ -10,22 +10,17 @@
 // Generic interface to data object class
 class IConversionSvc;
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_IPersistencySvc(7, 1 , 0); 
-
-
 /** @class IPersistencySvc IPersistencySvc.h GaudiKernel/IPersistencySvc.h
 
     Data persistency service interface.
- 
+
     @author Markus Frank
     @version 1.0
 */
-class IPersistencySvc  : virtual public IInterface 	{
-  public:
-
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IPersistencySvc; }
+class GAUDI_API IPersistencySvc: virtual public IInterface {
+public:
+  /// InterfaceID
+  DeclareInterfaceID(IPersistencySvc,2,0);
 
   /** Set default service type.
       @return     Status code indicating success or failure.

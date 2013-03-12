@@ -1,5 +1,5 @@
 // $Id: DataStreamTool.cpp,v 1.5 2008/04/04 15:12:19 marcocle Exp $
-// Include files 
+// Include files
 
 // from Gaudi
 #include "GaudiKernel/MsgStream.h"
@@ -16,7 +16,9 @@
 #include "GaudiKernel/EventSelectorDataStream.h"
 #include "GaudiKernel/DataStreamTool.h"
 #include "GaudiKernel/ToolFactory.h"
-#include "GaudiKernel/SvcFactory.h" 
+#include "GaudiKernel/SvcFactory.h"
+
+#include <sstream>
 
 //-----------------------------------------------------------------------------
 // Implementation file for class : DataStreamTool
@@ -34,10 +36,10 @@
 DataStreamTool::DataStreamTool( const std::string& type,
                                 const std::string& name,
                                 const IInterface* parent )
-  : AlgTool ( type, name , parent )
+  : base_class ( type, name , parent )
 {
-  declareInterface<IDataStreamTool>(this);
-  
+  //declareInterface<IDataStreamTool>(this);
+
   m_incidentSvc       = 0;
   m_streamCount       = 0;
   m_streamID          = 0;
@@ -47,28 +49,28 @@ DataStreamTool::DataStreamTool( const std::string& type,
 // Destructor
 //=============================================================================
 DataStreamTool::~DataStreamTool() {
-} 
+}
 
 //=============================================================================
 StatusCode DataStreamTool::initialize() {
-  
+
   MsgStream logger(msgSvc(), name());
-  
+
   StatusCode status = AlgTool::initialize();
   if( !status.isSuccess() )  {
-    logger << MSG::FATAL << "Error. Cannot initialize base class." << endreq;
+    logger << MSG::FATAL << "Error. Cannot initialize base class." << endmsg;
     return status;
   }
-  
+
   // Get the references to the services that are needed by the ApplicationMgr itself
-  status = serviceLocator()->service("IncidentSvc", m_incidentSvc, true);
-  if( !status.isSuccess() )  {
-    logger << MSG::FATAL << "Error retrieving IncidentSvc." << endreq;
-    return status;
+  m_incidentSvc = serviceLocator()->service("IncidentSvc");
+  if( !m_incidentSvc.isValid() )  {
+    logger << MSG::FATAL << "Error retrieving IncidentSvc." << endmsg;
+    return StatusCode::FAILURE;
   }
-  
+
   return StatusCode::SUCCESS;
-  
+
 }
 
 StatusCode DataStreamTool::addStream(const std::string & input) {
@@ -80,14 +82,13 @@ StatusCode DataStreamTool::addStream(const std::string & input) {
 
   m_streamSpecs.push_back(input);
 
-  char txt[32];
-  
-  std::string strname = name() + "_" + ::_itoa(++m_streamCount, txt, 10);
-    
+  std::ostringstream strname;
+  strname << name() << '_' << ++m_streamCount;
+
   EventSelectorDataStream* s = 0;
-  
-  StatusCode status = createStream(strname, input , s );
-  
+
+  StatusCode status = createStream(strname.str(), input , s );
+
   if( status.isSuccess() && 0 != s ) {
     s->addRef();
     m_streams.push_back(s);
@@ -97,45 +98,35 @@ StatusCode DataStreamTool::addStream(const std::string & input) {
     MsgStream log(msgSvc(), name());
     if (s) {
       s->release();
-      log << MSG::ERROR << "Error connecting/creating Stream: " << s << endreq;
+      log << MSG::ERROR << "Error connecting/creating Stream: " << s << endmsg;
     }
-    log << MSG::ERROR << "Error connecting/creating Stream: " << input << endreq;
+    log << MSG::ERROR << "Error connecting/creating Stream: " << input << endmsg;
     status = StatusCode::FAILURE;
   }
 
   return status;
-  
+
 }
 
 StatusCode DataStreamTool::addStreams(const StreamSpecs & inputs) {
-  
+
   StatusCode status = StatusCode::SUCCESS;
 
   for ( StreamSpecs::const_iterator itr = inputs.begin(); itr != inputs.end() && status.isSuccess(); ++itr )    {
-    
+
     status = addStream(*itr);
 
   }
-  
+
   return status;
-  
+
 }
 
 StatusCode DataStreamTool::finalize() {
-  
-  StatusCode status = StatusCode::SUCCESS;
-  
   clear().ignore();
-  
-  if( m_incidentSvc ) {
-    m_incidentSvc->release();
-    m_incidentSvc = 0 ;
-  }
-  
-  status = AlgTool::finalize();
-  
-  return status;
-  
+  m_incidentSvc = 0; // release
+
+  return AlgTool::finalize();
 }
 
 StatusCode DataStreamTool::initializeStream(EventSelectorDataStream* s)   {
@@ -144,8 +135,8 @@ StatusCode DataStreamTool::initializeStream(EventSelectorDataStream* s)   {
   if ( status.isSuccess() )   {
     status = createSelector(s->name(), s->selectorType(), sel);
     if ( status.isSuccess() )   {
-      SmartIF<IProperty> prop(IID_IProperty, sel); //Att:IID_IProperty, IID_IService used to point to EventSelector
-      SmartIF<IService>  isvc(IID_IService, sel);
+      SmartIF<IProperty> prop(sel); //Att: IProperty, IService used to point to EventSelector
+      SmartIF<IService>  isvc(sel);
       s->setSelector(sel);
       sel->release();  // No need of this interface anymore, it is passed to the stream
       if ( prop.isValid( ) && isvc.isValid( ) )   {
@@ -165,16 +156,17 @@ StatusCode DataStreamTool::initializeStream(EventSelectorDataStream* s)   {
 
 // Create (sub-) Event selector service
 StatusCode DataStreamTool::createSelector(const std::string& nam, const std::string& typ, IEvtSelector*& sel) {
-  MsgStream log(msgSvc(), name());
   IService* isvc = ROOT::Reflex::PluginService::Create<IService*>(typ, nam, serviceLocator());
   if ( isvc ) {
-    StatusCode status = isvc->queryInterface(IID_IEvtSelector, (void**)&sel);
+    StatusCode status = isvc->queryInterface(IEvtSelector::interfaceID(), (void**)&sel);
     if ( status.isSuccess() ) {
       return status;
     }
     sel = 0;
     isvc->release();
   }
+  MsgStream log(msgSvc(), name());
+  log << MSG::ERROR << "Failed to create IEvtSelector " << typ << "/" << nam << endmsg;
   return StatusCode::FAILURE;
 }
 
@@ -183,7 +175,7 @@ StatusCode DataStreamTool::finalizeStream(EventSelectorDataStream* s)   {
   if ( s )    {
     IEvtSelector* sel = const_cast<IEvtSelector*>(s->selector());
     if ( sel )    {
-      SmartIF<IService>  isvc(IID_IService, sel);
+      SmartIF<IService> isvc(sel);
       if ( isvc.isValid() )   {
         isvc->finalize().ignore();
         s->finalize().ignore();
@@ -202,9 +194,9 @@ StatusCode DataStreamTool::finalizeStream(EventSelectorDataStream* s)   {
 
 
 StatusCode DataStreamTool::eraseStream ( const std::string& info )   {
-  
+
   Streams::iterator i = getStreamIterator(info);
-  
+
   if ( m_streams.end() != i )   {
     (*i)->release();
     m_streams.erase(i);
@@ -214,7 +206,7 @@ StatusCode DataStreamTool::eraseStream ( const std::string& info )   {
   return StatusCode::FAILURE;
 }
 
-StatusCode DataStreamTool::createStream(const std::string& nam, const std::string& info, 
+StatusCode DataStreamTool::createStream(const std::string& nam, const std::string& info,
                                         EventSelectorDataStream*& stream)  {
   stream = new EventSelectorDataStream(nam, info, serviceLocator());
 
@@ -244,22 +236,22 @@ EventSelectorDataStream * DataStreamTool::getStream( size_type pos ) {
     return 0;
 }
 
-EventSelectorDataStream * DataStreamTool::lastStream() 
+EventSelectorDataStream * DataStreamTool::lastStream()
 {
-  if (m_streams.size() > 1 ) 
+  if (m_streams.size() > 1 )
     return *(--m_streams.end());
   else return *m_streams.begin();
-  
+
 }
 
 
 
 StatusCode DataStreamTool::clear()
 {
-  
+
   StatusCode iret, status = StatusCode::SUCCESS;
   iret.ignore();
-  
+
   MsgStream log(msgSvc(), name());
 
   // disconnect the streams
@@ -269,55 +261,55 @@ StatusCode DataStreamTool::clear()
       if ( s->isInitialized() )    {
         iret = finalizeStream(s);
         if ( !iret.isSuccess() )  {
-          log << MSG::ERROR << "Error finalizing Stream" << *il << endreq;
+          log << MSG::ERROR << "Error finalizing Stream" << *il << endmsg;
           status = iret;
         }
       }
       iret = eraseStream( *il );
       if ( !iret.isSuccess() )    {
-        log << MSG::ERROR << "Error diconnecting Stream" << *il << endreq;
+        log << MSG::ERROR << "Error diconnecting Stream" << *il << endmsg;
         status = iret;
       }
     }
   }
-  
+
   m_streamSpecs.clear();
-  
+
   return status;
 }
 
 
-StatusCode DataStreamTool::connectStream( EventSelectorDataStream *s) 
+StatusCode DataStreamTool::connectStream( EventSelectorDataStream *s)
 {
-  
+
   if ( 0 != s )   {
     s->addRef();
     m_streams.push_back(s);
     return StatusCode::SUCCESS;
   }
-  
+
   return StatusCode::FAILURE;
-  
+
 }
 
-StatusCode DataStreamTool::connectStream( const std::string & info ) 
+StatusCode DataStreamTool::connectStream( const std::string & info )
 {
 
   if ( NULL != getStream(info) )   {
     MsgStream log(msgSvc(), name());
     log << MSG::WARNING << "Input stream " << info << "already in use" << endmsg;
   }
-  char txt[32];
-  std::string nam = name() + "_" + ::_itoa(++m_streamCount, txt, 10);
+  std::ostringstream nam;
+  nam << name() << '_' << ++m_streamCount;
   EventSelectorDataStream* s = 0;
-  StatusCode status = createStream(nam, info, s);
+  StatusCode status = createStream(nam.str(), info, s);
   if ( status.isSuccess() )   {
     return connectStream(s);
   }
   s->release();
   return status;
-  
-  
+
+
 }
 
 /*
@@ -335,9 +327,9 @@ StatusCode DataStreamTool::getNextStream( const EventSelectorDataStream * & esds
 
   esds = nextStream;
   ++m_streamID;
-  
+
   return StatusCode::SUCCESS;
-  
+
 }
 
 StatusCode DataStreamTool::getPreviousStream( const EventSelectorDataStream * & esds, size_type & dsid )
@@ -348,9 +340,9 @@ StatusCode DataStreamTool::getPreviousStream( const EventSelectorDataStream * & 
 
   esds = previousStream;
   --m_streamID;
-  
+
   return StatusCode::SUCCESS;
-  
+
 }
 
 

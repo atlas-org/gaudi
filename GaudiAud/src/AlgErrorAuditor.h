@@ -5,7 +5,6 @@
 #include <map>
 #include <string>
 
-class INamedInterface;
 class IMessageSvc;
 
 /** @class AlgErrorAuditor

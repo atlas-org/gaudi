@@ -6,15 +6,13 @@
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/IAppMgrUI.h"
 #include "GaudiKernel/IEventProcessor.h"
+#include "GaudiKernel/IAlgorithm.h"
+#include "GaudiKernel/IIncidentSvc.h"
+#include "GaudiKernel/IIncidentListener.h"
 
 // STL include files
 #include <list>
 #include <vector>
-
-// Forward declarations
-class IAlgorithm;
-class IIncidentSvc;
-class IIncidentListener;
 
 /** @class MinimalEventLoopMgr
  *  This is the default processing manager of the application manager.
@@ -25,12 +23,12 @@ class IIncidentListener;
  *  @author Markus Frank
  *  @version 1.0
  */
-class MinimalEventLoopMgr : public Service, 
-                            virtual public IEventProcessor
+class GAUDI_API MinimalEventLoopMgr: public extends1<Service, IEventProcessor>
 {
 public:
   /// Creator friend class
-  typedef std::list<IAlgorithm*>   ListAlg;
+  typedef std::list<SmartIF<IAlgorithm> >  ListAlg;
+  typedef std::list<IAlgorithm*>  ListAlgPtrs;
   typedef std::list<std::string>   ListName;
   typedef std::vector<std::string> VectorName;
 
@@ -38,9 +36,9 @@ protected:
   // enums
   enum State { OFFLINE, CONFIGURED, FINALIZED, INITIALIZED };
   /// Reference to the IAppMgrUI interface of the application manager
-  IAppMgrUI*          m_appMgrUI;
-  /// Reference to the indicent service
-  IIncidentSvc*       m_incidentSvc;
+  SmartIF<IAppMgrUI> m_appMgrUI;
+  /// Reference to the incident service
+  SmartIF<IIncidentSvc> m_incidentSvc;
   /// List of top level algorithms
   ListAlg             m_topAlgList;
   /// List of output streams
@@ -55,12 +53,12 @@ protected:
   State               m_state;
   /// Scheduled stop of event processing
   bool                m_scheduledStop;
-  /// Instance of the incident listener waiting for AbortEvent. 
-  IIncidentListener*  m_abortEventListener;
+  /// Instance of the incident listener waiting for AbortEvent.
+  SmartIF<IIncidentListener>  m_abortEventListener;
   /// Flag signalling that the event being processedhas to be aborted
-  /// (skip all following top algs). 
+  /// (skip all following top algs).
   bool                m_abortEvent;
-  /// Source of the AbortEvent incident. 
+  /// Source of the AbortEvent incident.
   std::string         m_abortEventSource;
 
 public:
@@ -69,18 +67,17 @@ public:
   /// Standard Destructor
   virtual ~MinimalEventLoopMgr();
 
+#if defined(GAUDI_V20_COMPAT) && !defined(G21_NO_DEPRECATED)
 protected:
-
   /// Helper to release interface pointer
   template<class T> T* releaseInterface(T* iface)   {
     if ( 0 != iface ) iface->release();
     return 0;
   }
-
 public:
-  /// implementation of IInterface: queryInterface
-  virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
-  /// implementation of IService::initalize
+#endif
+
+  /// implementation of IService::initialize
   virtual StatusCode initialize();
   /// implementation of IService::start
   virtual StatusCode start();
@@ -111,5 +108,11 @@ public:
   /// decodeOutStreamNameList & outStreamNameListHandler
   StatusCode decodeOutStreams();
 
+private:
+  /// Fake copy constructor (never implemented).
+  MinimalEventLoopMgr(const MinimalEventLoopMgr&);
+  /// Fake assignment operator (never implemented).
+  MinimalEventLoopMgr& operator= (const MinimalEventLoopMgr&);
+  
 };
 #endif // GAUDIKERNEL_MINIMALEVENTLOOPMGR_H

@@ -5,9 +5,6 @@
 // Include files
 #include "GaudiKernel/IAlgTool.h"
 
-// Declaration of the interface ID ( interface id, major version, minor version)
-static const InterfaceID IID_IMyTool("IMyTool", 1 , 0);
-
 /** @class IMyTool IMyTool.h
  *  Example of an Interface of a Algorithm Tool
  *
@@ -15,17 +12,14 @@ static const InterfaceID IID_IMyTool("IMyTool", 1 , 0);
  */
 class IMyTool : virtual public IAlgTool {
 public:
+  /// InterfaceID
+  DeclareInterfaceID(IMyTool,2,0);
 
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IMyTool; }
   /// Get a message
   virtual const std::string&  message() const = 0;
   /// Do something
   virtual void  doIt() = 0;
 };
-
-// Declaration of the interface ID ( interface id, major version, minor version)
-static const InterfaceID IID_IMyOtherTool("IMyOtherTool", 1 , 0);
 
 /** @class IMyOtherTool IMyTool.h
  *
@@ -35,8 +29,9 @@ static const InterfaceID IID_IMyOtherTool("IMyOtherTool", 1 , 0);
  */
 class IMyOtherTool : virtual public IAlgTool {
 public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IMyOtherTool; }
+  /// InterfaceID
+  DeclareInterfaceID(IMyOtherTool,2,0);
+
   /// Do something else
   virtual void doItAgain() = 0;
 };

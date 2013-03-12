@@ -13,8 +13,8 @@ int main ( int argc, char** argv ) {
   StatusCode status = StatusCode::SUCCESS;
   // Create an instance of an application manager
   IInterface* iface = Gaudi::createApplicationMgr();
-  SmartIF<IProperty>     propMgr ( IID_IProperty, iface );
-  SmartIF<IAppMgrUI>     appMgr  ( IID_IAppMgrUI, iface );
+  SmartIF<IProperty>     propMgr ( iface );
+  SmartIF<IAppMgrUI>     appMgr  ( iface );
 
   if( !appMgr.isValid() || !propMgr.isValid() ) {
     std::cout << "Fatal error while creating the ApplicationMgr " << std::endl;

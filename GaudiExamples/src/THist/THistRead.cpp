@@ -1,7 +1,6 @@
 // $Id: THistRead.cpp,v 1.2 2006/11/27 09:53:07 hmd Exp $
 
-
-// Include files 
+// Include files
 #include "THistRead.h"
 
 #include "GaudiKernel/MsgStream.h"
@@ -38,62 +37,49 @@ StatusCode THistRead::initialize()
   MsgStream log( msgSvc(), name() );
 
   if (service("THistSvc",m_ths).isFailure()) {
-    log << MSG::ERROR << "Couldn't get THistSvc" << endreq;
+    log << MSG::ERROR << "Couldn't get THistSvc" << endmsg;
     return StatusCode::FAILURE;
   }
 
   // stream read1, 1D in "/xxx"
-
-  if (! m_ths->exists("/read1/xxx/1Dgauss")) {
-    log << MSG::INFO << "1Dgauss doesn't exist yet, which is OK" << endreq;
-  } else {
-    log << MSG::ERROR << "1Dgauss shouldn't exist yet!!" << endreq;
-  }
-
   TH1 *h1(0);
-  if (m_ths->regHist("/read1/xxx/1Dgauss").isFailure() || 
+  if (m_ths->regHist("/read1/xxx/1Dgauss").isFailure() ||
       m_ths->getHist("/read1/xxx/1Dgauss",h1).isFailure()) {
-    log << MSG::ERROR << "Couldn't read gauss1d" << endreq;
+    log << MSG::ERROR << "Couldn't read gauss1d" << endmsg;
   } else {
     log << MSG::INFO << h1->GetName() << ": " << h1->GetEntries()
-	<< endreq;
+	<< endmsg;
   }
 
-  if (m_ths->exists("/read1/xxx/1Dgauss")) {
-    log << MSG::INFO << "1Dgauss now exists." << endreq;
-  } else {
-    log << MSG::ERROR << "1Dgauss should exist but doesn't!!" << endreq;
-  }
 
-  
   // stream read2, 2D tree in "/"
   TH2* h2(0);
   if (m_ths->regHist("/read2/2Dgauss").isFailure() ||
       m_ths->getHist("/read2/2Dgauss",h2).isFailure()) {
-    log << MSG::ERROR << "Couldn't read 2Dgauss" << endreq;
+    log << MSG::ERROR << "Couldn't read 2Dgauss" << endmsg;
   } else {
     log << MSG::INFO << h2->GetName() << ": " << h2->GetEntries()
-	<< endreq;
+	<< endmsg;
   }
 
   // 3D tree in "/"
   TH3* h3(0);
   if (m_ths->regHist("/read2/3Dgauss").isFailure() ||
       m_ths->getHist("/read2/3Dgauss",h3).isFailure()) {
-    log << MSG::ERROR << "Couldn't read 3Dgauss" << endreq;
+    log << MSG::ERROR << "Couldn't read 3Dgauss" << endmsg;
   } else {
     log << MSG::INFO << h3->GetName() << ": " << h3->GetEntries()
-	<< endreq;
+	<< endmsg;
   }
 
   // Profile in "/"
   TH1* tp(0);
   if (m_ths->regHist("/read2/profile").isFailure() ||
       m_ths->getHist("/read2/profile",tp).isFailure()) {
-    log << MSG::ERROR << "Couldn't read profile" << endreq;
+    log << MSG::ERROR << "Couldn't read profile" << endmsg;
   } else {
     log << MSG::INFO << tp->GetName() << ": " << tp->GetEntries()
-	<< endreq;
+	<< endmsg;
   }
 
 
@@ -101,13 +87,13 @@ StatusCode THistRead::initialize()
   TTree *tr(0);
   if (m_ths->regTree("/read2/trees/stuff/treename").isFailure() ||
       m_ths->getTree("/read2/trees/stuff/treename",tr).isFailure()) {
-    log << MSG::ERROR << "Couldn't read tree" << endreq;
+    log << MSG::ERROR << "Couldn't read tree" << endmsg;
   } else {
     log << MSG::INFO << tr->GetName() << ": " << tr->GetEntries()
-	<< endreq;
+	<< endmsg;
   }
 
-     
+
   return StatusCode::SUCCESS;
 }
 
@@ -128,7 +114,7 @@ StatusCode THistRead::finalize()
 //------------------------------------------------------------------------------
 {
   MsgStream log(msgSvc(), name());
-  log << MSG::DEBUG << "Finalizing..." << endreq;
+  log << MSG::DEBUG << "Finalizing..." << endmsg;
 
   return StatusCode::SUCCESS;
 }

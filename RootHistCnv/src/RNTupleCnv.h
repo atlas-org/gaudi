@@ -16,10 +16,10 @@ namespace RootHistCnv {
 
   /** @class RootHistCnv::RNTupleCnv RNTupleCnv.h
       NTuple converter class definition
-  
-      Package    : RootHistCnv 
+
+      Package    : RootHistCnv
       Author     : Charles Leggett
-    
+
   */
   class RNTupleCnv : public RConverter   {
   public:
@@ -55,7 +55,7 @@ namespace RootHistCnv {
 
   protected:
     /// Reference to N tuple service
-    INTupleSvc*  m_ntupleSvc;
+    SmartIF<INTupleSvc>  m_ntupleSvc;
 
     virtual std::string rootVarType(int);
   };
@@ -67,8 +67,8 @@ namespace RootHistCnv {
   template<class TYP>
   INTupleItem* createNTupleItem(std::string itemName, std::string blockName,
 				std::string indexName,
-				int indexRange, int arraySize, 
-				TYP minimum, TYP maximum, 
+				int indexRange, int arraySize,
+				TYP minimum, TYP maximum,
 				INTuple* tuple);
 
   bool parseName(std::string full, std::string &blk, std::string &var);

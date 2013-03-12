@@ -42,7 +42,7 @@ StatusCode RootHistCnv::RConverter::createDirectory(const std::string& loc)
   if ( findTFile(loc,tf).isSuccess() ) {
     tf->cd();
   }
-    
+
   std::list<std::string> lpath;
   i = 1;
 
@@ -67,8 +67,8 @@ StatusCode RootHistCnv::RConverter::createDirectory(const std::string& loc)
   std::list<std::string>::const_iterator litr;
   for(litr=lpath.begin(); litr!=lpath.end(); ++litr) {
     cur = *litr;
-    if (! gDirectory->GetKey(litr->c_str()) ) { 
-      gDirectory->mkdir(litr->c_str()); 
+    if (! gDirectory->GetKey(litr->c_str()) ) {
+      gDirectory->mkdir(litr->c_str());
     }
     gDirectory->cd(litr->c_str());
   }
@@ -94,8 +94,8 @@ std::string RootHistCnv::RConverter::diskDirectory(const std::string& loc)
 
   } else {
     MsgStream log(msgSvc(), "RConverter");
-    log << MSG::ERROR << "diskDirectory(" << loc << ")" 
-	<< " --> no leading /NTUPLES/ or /stat/" << endreq;
+    log << MSG::ERROR << "diskDirectory(" << loc << ")"
+	<< " --> no leading /NTUPLES/ or /stat/" << endmsg;
     return loc;
   }
   //  dir = loc.substr(ll+8,loc.length()-ll-8);
@@ -123,14 +123,14 @@ void RootHistCnv::RConverter::setDirectory(const std::string& loc)
   MsgStream log(msgSvc(), "RConverter");
   std::string full, id;
   TFile *tf;
-  
+
   full = diskDirectory( loc );
 
   // get associated TFile
   if ( findTFile(loc,tf).isSuccess() ) {
     tf->cd();
   } else {
-    log << MSG::ERROR << "error getting TFile name " << loc << endreq;
+    log << MSG::ERROR << "error getting TFile name " << loc << endmsg;
   }
 
   int p,i=1;
@@ -139,9 +139,9 @@ void RootHistCnv::RConverter::setDirectory(const std::string& loc)
   gDirectory->cd("/");
   while ( (p = full.find("/",i)) != -1) {
     sdir = full.substr(i,p-i);
-    if (! gDirectory->GetKey(sdir.c_str()) ) { 
-      log << MSG::ERROR << "cannot cd to " << full << " from " 
-	  << gDirectory->GetPath() << endreq;
+    if (! gDirectory->GetKey(sdir.c_str()) ) {
+      log << MSG::ERROR << "cannot cd to " << full << " from "
+	  << gDirectory->GetPath() << endmsg;
       return;
     }
     gDirectory->cd(sdir.c_str());
@@ -165,10 +165,10 @@ std::string RootHistCnv::RConverter::getDirectory()
   std::string dir = gDirectory->GetPath();
   return (dir);
 }
-  
+
 
 //-----------------------------------------------------------------------------
-StatusCode RootHistCnv::RConverter::createAddress(DataObject* pObj, 
+StatusCode RootHistCnv::RConverter::createAddress(DataObject* pObj,
                                                   TDirectory* pDir,
                                                   TObject* pTObj,
                                                   IOpaqueAddress*& refpAddr)
@@ -179,9 +179,9 @@ StatusCode RootHistCnv::RConverter::createAddress(DataObject* pObj,
   if ( 0 != pReg )    {
     refpAddr = pReg->address();
     if ( 0 == refpAddr )    {
-      refpAddr = new RootObjAddress(repSvcType(), 
+      refpAddr = new RootObjAddress(repSvcType(),
 				    objType(),
-				    pReg->name(), 
+				    pReg->name(),
 				    "",
 				    (unsigned long)(pDir),
  				    (unsigned long)(pTObj),
@@ -222,9 +222,8 @@ StatusCode RootHistCnv::RConverter::createAddress(const std::string& rzdir,
 						  IOpaqueAddress*& refpAddress)
 //--------------------------------------------------------------------------
 {
-  char obj[32];
-  StatusCode status = createAddress(rzdir, clid, 
-				    ::_itoa(id, obj, 10), pTobj, refpAddress);
+  std::ostringstream obj; obj << id;
+  StatusCode status = createAddress(rzdir, clid, obj.str(), pTobj, refpAddress);
   if ( status.isSuccess() )   {
     unsigned long* ipar = (unsigned long*)refpAddress->ipar();
     ipar[0] = id;
@@ -262,8 +261,8 @@ TDirectory* RootHistCnv::RConverter::changeDirectory(DataObject* pObject)
 
 //-----------------------------------------------------------------------------
 /// Convert the transient object to the requested representation.
-StatusCode RootHistCnv::RConverter::createRep(DataObject* pObject, 
-                                              IOpaqueAddress*& pAddr)  
+StatusCode RootHistCnv::RConverter::createRep(DataObject* pObject,
+                                              IOpaqueAddress*& pAddr)
 //-----------------------------------------------------------------------------
 {
   GlobalDirectoryRestore restore;
@@ -282,19 +281,19 @@ StatusCode RootHistCnv::RConverter::createRep(DataObject* pObject,
   catch (...)   {
   }
   MsgStream log (msgSvc(), "RConverter");
-  log << MSG::ERROR << "Failed to create persistent Object!" << endreq;
+  log << MSG::ERROR << "Failed to create persistent Object!" << endmsg;
   return StatusCode::FAILURE;
 }
 
 //-----------------------------------------------------------------------------
-StatusCode RootHistCnv::RConverter::readObject(IOpaqueAddress* /* pAddr */ , 
+StatusCode RootHistCnv::RConverter::readObject(IOpaqueAddress* /* pAddr */ ,
                                                DataObject*&   /* refpObj */ )
 {
 //    MsgStream log(msgSvc(), "RConverter::readObject");
-//    log << MSG::WARNING << pAddr->par()[0] << " <> " << pAddr->par()[1] 
+//    log << MSG::WARNING << pAddr->par()[0] << " <> " << pAddr->par()[1]
 //        << " <> "
 //        << pAddr->ipar()[0] << " <> " << pAddr->ipar()[1] << " <> "
-//        << pAddr->registry()->identifier() << endreq;
+//        << pAddr->registry()->identifier() << endmsg;
 
   return StatusCode::SUCCESS;
 }
@@ -307,7 +306,7 @@ TObject* RootHistCnv::RConverter::createPersistent(DataObject*   /* pObj */)
 
 
 //-----------------------------------------------------------------------------
-StatusCode RootHistCnv::RConverter::regTFile(const std::string id, 
+StatusCode RootHistCnv::RConverter::regTFile(const std::string id,
 					     const TFile* tfile)
 //-----------------------------------------------------------------------------
 {
@@ -318,8 +317,8 @@ StatusCode RootHistCnv::RConverter::regTFile(const std::string id,
   imap = s_fileMap.find(id);
 
   if ( imap != s_fileMap.end() ) {
-    log << MSG::ERROR << "cannot register TTree " << id 
-        << ": already exists" << endreq;
+    log << MSG::ERROR << "cannot register TTree " << id
+        << ": already exists" << endmsg;
     return StatusCode::FAILURE;
   }
 
@@ -329,7 +328,7 @@ StatusCode RootHistCnv::RConverter::regTFile(const std::string id,
 }
 
 //-----------------------------------------------------------------------------
-StatusCode RootHistCnv::RConverter::findTFile(const std::string id, 
+StatusCode RootHistCnv::RConverter::findTFile(const std::string id,
 					      TFile*& tfile)
 //-----------------------------------------------------------------------------
 {
@@ -342,13 +341,13 @@ StatusCode RootHistCnv::RConverter::findTFile(const std::string id,
   int i1,i2,i3;
   i1 = id.find("/",0);
   if (i1 != 0) {
-    log << MSG::ERROR << "Directory name does not start with \"/\": " 
-	<< id << endreq;
+    log << MSG::ERROR << "Directory name does not start with \"/\": "
+	<< id << endmsg;
     return StatusCode::FAILURE;
   }
   i2 = id.find("/",i1+1);
   if (i2 == -1) {
-    log << MSG::ERROR << "Directory name has only one part: " << id << endreq;
+    log << MSG::ERROR << "Directory name has only one part: " << id << endmsg;
     return StatusCode::FAILURE;
   }
   i3 = id.find("/",i2+1);
@@ -357,7 +356,7 @@ StatusCode RootHistCnv::RConverter::findTFile(const std::string id,
   } else {
     idm = id.substr(0,i3);
   }
-  
+
   std::map<std::string,TFile*>::const_iterator imap;
   imap = s_fileMap.find(idm);
 

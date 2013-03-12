@@ -7,7 +7,7 @@
 // ============================================================================
 // Include files
 // ============================================================================
-// STD & STL 
+// STD & STL
 // ============================================================================
 #include <iostream>
 #include <string>
@@ -21,8 +21,8 @@
 /** @class IChronoStatSvc IChronoStatSvc.h GaudiKernel/IChronoStatSvc.h
  *
  *  The IChronoStatSvc is the interface implemented by the ChronoStatService.
- *  This interface is used by any algorithm or services wanting to study 
- *  its own performance and CPU consumption and some statistical computation 
+ *  This interface is used by any algorithm or services wanting to study
+ *  its own performance and CPU consumption and some statistical computation
  *
  *  @see IChronoSvc
  *  @see IStatSvc
@@ -30,20 +30,19 @@
  *  @author Vanya BELYAEV ibelyaev@physics.syr.edu
  *         (inspired by Mauro VILLA's codes used within ARTE framework )
  *
- *  @date December 1, 1999 
+ *  @date December 1, 1999
  *  @date 2007-07-08
  */
-class IChronoStatSvc 
-  : virtual public IService
-  , virtual public IChronoSvc
-  , virtual public IStatSvc
-{  
+class GAUDI_API IChronoStatSvc: virtual public extend_interfaces3<IService,
+                                                                  IChronoSvc,
+                                                                  IStatSvc>
+{
 public:
-  /// unique interface identifier
-  static const InterfaceID& interfaceID() ;
+  /// InterfaceID
+  DeclareInterfaceIDMultiBase(IChronoStatSvc,6,0);
 protected:
-  // virtual and destructor
-  virtual ~IChronoStatSvc(); ///< virtual and desctructor
+  // protected and virtual destructor
+  virtual ~IChronoStatSvc(); ///< virtual desctructor
 };
 // ============================================================================
 // The END

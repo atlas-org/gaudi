@@ -43,46 +43,41 @@ class IIncidentSvc;
     Author:  M.Frank
     Version: 1.0
 */
-class RndmEngine: public Service, 
-                  virtual public IRndmEngine, 
-                  virtual public ISerialize,
-                  virtual public IIncidentListener
+class RndmEngine: public extends3<Service, IRndmEngine, ISerialize, IIncidentListener>
 {
 protected:
   /// Reference to the incident service
-  IIncidentSvc*        m_pIncidentSvc;
+  SmartIF<IIncidentSvc>        m_pIncidentSvc;
 
   /// Standard Constructor
   RndmEngine(const std::string& name, ISvcLocator* loc);
   /// Standard Destructor
   virtual ~RndmEngine();
 public:
-  /// Query interface
-  StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
-  /// Service override: initialisation
+  /// Service override: initialization
   virtual StatusCode initialize();
-  /// Service override: finalisation
+  /// Service override: finalization
   virtual StatusCode finalize();
   /// Single shot returning single random number
   virtual double rndm() const;
   /** Multiple shots returning vector with flat random numbers.
-      @param  array    Array containing random numbers 
+      @param  array    Array containing random numbers
       @param  howmany  fill 'howmany' random numbers into array
       @param  start    ... starting at position start
       @return StatusCode indicating failure or success.
   */
   virtual StatusCode rndmArray( std::vector<double>& array, long howmany, long start = 0) const;
-  /** Input serialisation from stream buffer. Restores the status of the object.
+  /** Input serialization from stream buffer. Restores the status of the object.
       @param   str    Reference to Streambuffer to be filled
       @return  Reference to filled stream buffer
   */
   virtual StreamBuffer& serialize(StreamBuffer& str);
-  /** Output serialisation to stream buffer. Saves the status of the object.
+  /** Output serialization to stream buffer. Saves the status of the object.
       @param   str    Reference to Streambuffer to be read
       @return  Reference to read stream buffer
   */
   virtual StreamBuffer& serialize(StreamBuffer& str) const;
-  /// Inform that a new incident has occured
+  /// Inform that a new incident has occurred
   virtual void handle(const Incident& inc);
 };
 

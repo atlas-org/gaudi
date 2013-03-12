@@ -25,11 +25,11 @@ namespace Gaudi {
     Essential information of the event used in examples
     It can be identified by "/Event"
 
-  
+
     @author Pavel Binko
     */
 
-    class Event : public DataObject {
+    class GAUDI_API Event : public DataObject {
 
     public:
       /// Constructors
@@ -38,19 +38,19 @@ namespace Gaudi {
       virtual ~Event() { }
 
       /// Retrieve reference to class definition structure
-      virtual const CLID& clID() const  { return Event::classID(); }
+      virtual const CLID& clID() const  { return classID(); }
       static const CLID& classID() { return CLID_Event; }
 
       /// Retrieve event number
       int event () const { return m_event; }
       /// Update event number
       void setEvent (int value) { m_event = value; }
-  
+
       /// Retrieve run number
       int run () const { return m_run; }
       /// Update run number
       void setRun (int value) { m_run = value; }
-   
+
       /// Retrieve reference to event time stamp
       const Gaudi::Time& time () const { return m_time; }
       /// Update reference to event time stamp
@@ -101,14 +101,12 @@ namespace Gaudi {
 
     /// Serialize the object for writing
     inline StreamBuffer& Event::serialize( StreamBuffer& s ) const {
-      DataObject::serialize(s);
       return s << m_event << m_run << m_time << m_collisions(this);
     }
 
 
     /// Serialize the object for reading
     inline StreamBuffer& Event::serialize( StreamBuffer& s ) {
-      DataObject::serialize(s);
       return s >> m_event >> m_run >> m_time >> m_collisions(this);
     }
 

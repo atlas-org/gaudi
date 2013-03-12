@@ -25,8 +25,9 @@
 #include "GaudiKernel/GaudiException.h"
 #include "GaudiKernel/IChronoStatSvc.h"
 #include "GaudiKernel/StatEntity.h"
+#include "GaudiKernel/ICounterSummarySvc.h"
 #include "GaudiKernel/IUpdateManagerSvc.h"
-#include "GaudiKernel/TransientFastContainer.h"
+#include "GaudiKernel/HashMap.h"
 // ============================================================================
 // forward declarations
 // ============================================================================
@@ -40,7 +41,8 @@ namespace Gaudi { namespace Utils { template <class TYPE> struct GetData ; } }
  *
  *  @author Chris Jones   Christopher.Rob.Jones@cern.ch
  *  @author Vanya BELYAEV Ivan.Belyaev@itep.ru
- *  @date   2005-08-08
+ *  @author Rob Lambert Rob.Lambert@cern.ch
+ *  @date   2009-08-04
  */
 // ============================================================================
 /** @class GaudiCommon GaudiCommon.h GaudiAlg/GaudiCommon.h
@@ -49,17 +51,18 @@ namespace Gaudi { namespace Utils { template <class TYPE> struct GetData ; } }
  *
  *  @author Chris Jones   Christopher.Rob.Jones@cern.ch
  *  @author Vanya BELYAEV Ivan.Belyaev@itep.ru
- *  @date   2005-08-10
+ *  @author Rob Lambert Rob.Lambert@cern.ch
+ *  @date   2009-08-04
  */
 // ============================================================================
 template < class PBASE >
-class GaudiCommon : public PBASE
+class GAUDI_API GaudiCommon: public PBASE
 {
 protected: // definitions
   /** Simple definition to be used with the new useRootInTES argument get<TYPE>
    *  and put methods. If used with cause the RootInTES option to be IGNORED.
    *
-   *  Useful to aid with code readablity. e.g.
+   *  Useful to aid with code readability. e.g.
    *  @code
    *  // Get data, ignoring the setting of rootInTES()
    *  MyData * data = get<MyData>( "/Event/MyData", IgnoreRootInTES );
@@ -69,7 +72,7 @@ protected: // definitions
   /** Simple definition to be used with the new useRootInTES argument get<TYPE>
    *  and put methods. If used with cause the RootInTES option to be USED
    *
-   *  Useful to aid with code readablity. e.g.
+   *  Useful to aid with code readability. e.g.
    *  @code
    *  // Get data, using the setting of rootInTES()
    *  MyData * data = get<MyData>( "/Event/MyData", UseRootInTES );
@@ -78,18 +81,27 @@ protected: // definitions
    *  @endcode
    */
   static const bool UseRootInTES = true;
+  // ==========================================================================
 protected: // few actual data types
+  // ==========================================================================
   /// the actual type of general counters
   typedef std::map<std::string,StatEntity>   Statistics ;
   /// the actual type error/warning counter
   typedef std::map<std::string,unsigned int> Counter      ;
   /// storage for active tools
   typedef std::vector<IAlgTool*>             AlgTools     ;
-  /// Service pointer and name
-  typedef std::pair<IInterface*,std::string> ServiceEntry ;
   /// storage for active services
-  typedef std::vector<ServiceEntry>          Services     ;
+  typedef GaudiUtils::HashMap<std::string, SmartIF<IService> > Services;
+  // ==========================================================================
+  //protected members such that they can be used in the derived classes
+  /// a pointer to the CounterSummarySvc
+  ICounterSummarySvc* m_counterSummarySvc;
+  ///list of counters to declare. Set by property CounterList. This can be a regular expression.
+  std::vector<std::string> m_counterList;
+  //list of stat entities to write. Set by property StatEntityList. This can be a regular expression.
+  std::vector<std::string> m_statEntityList;
 public:
+  // ==========================================================================
   /** @brief Templated access to the data in Gaudi Transient Store
    *
    *  Quick and safe access to the data in Gaudi transient store.
@@ -107,7 +119,7 @@ public:
    *             RootInTES by prepending the value of this to the
    *             data location that is passed.
    *             The default setting for RootInTES is "" so has no effect.
-   *             This behaviour can be suppressed by passing the arguement
+   *             This behavior can be suppressed by passing the argument
    *             useRootInTES = false
    *
    *  @see IDataProviderSvc
@@ -128,7 +140,15 @@ public:
   get ( IDataProviderSvc*  svc         ,
         const std::string& location    ,
         const bool useRootInTES = true ) const ;
-  /** @brief Check the existence of a data object or container
+  /** Quicker version of the get function which bypasses the check on the
+   *  retrieved data.
+   */
+  template < class TYPE >
+  typename Gaudi::Utils::GetData<TYPE>::return_type
+  getIfExists ( IDataProviderSvc*  svc         ,
+                const std::string& location    ,
+                const bool useRootInTES = true ) const ;
+    /** @brief Check the existence of a data object or container
    *         in the Gaudi Transient Event Store
    *
    *  @code
@@ -142,7 +162,7 @@ public:
    *             RootInTES by prepending the value of this to the
    *             data location that is passed.
    *             The default setting for RootInTES is "" so has no effect.
-   *             This behaviour can be suppressed by passing the arguement
+   *             This behavior can be suppressed by passing the argument
    *             useRootInTES = false
    *
    *  @param  svc      Pointer to data provider service
@@ -172,7 +192,7 @@ public:
    *             RootInTES by prepending the value of this to the
    *             data location that is passed.
    *             The default setting for RootInTES is "" so has no effect.
-   *             This behaviour can be suppressed by passing the arguement
+   *             This behavior can be suppressed by passing the argument
    *             useRootInTES = false
    *
    *  @exception GaudiException for Invalid Data Provider Service
@@ -186,9 +206,10 @@ public:
    *  @return A valid pointer to the data object
    */
   template < class TYPE , class TYPE2 >
-  TYPE* getOrCreate ( IDataProviderSvc* svc ,
-                      const std::string& location ,
-                      const bool useRootInTES = true ) const  ;
+  typename Gaudi::Utils::GetData<TYPE>::return_type
+  getOrCreate ( IDataProviderSvc*  svc                 ,
+                const std::string& location            ,
+                const bool         useRootInTES = true ) const  ;
   /** @brief Register a data object or container into Gaudi Event Transient Store
    *
    *  @see IDataProviderSvc
@@ -197,7 +218,7 @@ public:
    *             RootInTES by prepending the value of this to the
    *             data location that is passed.
    *             The default setting for RootInTES is "" so has no effect.
-   *             This behaviour can be suppressed by passing the arguement
+   *             This behavior can be suppressed by passing the argument
    *             useRootInTES = false
    *
    *  @param svc        Pointer to data provider service
@@ -267,7 +288,7 @@ public:
    *  @exception    GaudiException for invalid tool
    *  @param type   Tool type, could be of "Type/Name" format
    *  @param parent Tool parent
-   *  @param create Flag for creation of nonexisting tools
+   *  @param create Flag for creation of non-existing tools
    *  @return       A pointer to the tool
    */
   template < class TOOL >
@@ -297,12 +318,10 @@ public:
    *  @return       A pointer to the service
    */
   template < class SERVICE >
-  SERVICE* svc ( const std::string& name           ,
-                 const bool         create = true ) const ;
+  SmartIF<SERVICE> svc ( const std::string& name           ,
+                         const bool         create = true ) const ;
   /// Short-cut to locate the Update Manager Service.
   inline IUpdateManagerSvc * updMgrSvc() const;
-  /// Short-cut to locate the Fast Containers Service.
-  inline IDataProviderSvc * fastContainersSvc() const;
 public:
   /** Print the error message and return with the given StatusCode.
    *
@@ -358,6 +377,25 @@ public:
   ( const std::string& msg ,
     const StatusCode   st  = StatusCode::FAILURE ,
     const size_t       mx  = 10                  ) const ;
+  /** Print the info message and return with the given StatusCode.
+   *
+   *  Also performs statistical analysis of the error messages and
+   *  suppression after the defined number of instances.
+   *
+   *  @see MsgStream
+   *  @see IMessageSvc
+   *  @see StatusCode
+   *  @see GaudiCommon::Warning
+   *
+   *  @param msg    Info message
+   *  @param st     StatusCode to return
+   *  @param mx     Maximum number of printouts for this message
+   *  @return       The given StatusCode
+   */
+  StatusCode Info
+  ( const std::string& msg ,
+    const StatusCode   st  = StatusCode::SUCCESS ,
+    const size_t       mx  = 10                  ) const ;
   /** Print the message and return with the given StatusCode.
    *
    *  @see MsgStream
@@ -380,10 +418,8 @@ public:
    *  @exception          Exception for invalid condition
    *  @param ok           Condition which should be "true"
    *  @param message      Message to be associated with the exception
-   *  @param sc           StatusCode to be returned (artificial)
-   *  @return             StatusCode
    */
-  inline StatusCode Assert
+  inline void Assert
   ( const bool         ok                            ,
     const std::string& message = ""                  ,
     const StatusCode   sc      = StatusCode(StatusCode::FAILURE, true) ) const;
@@ -394,10 +430,8 @@ public:
    *  @exception          Exception for invalid condition
    *  @param ok           Condition which should be "true"
    *  @param message      Message to be associated with the exception
-   *  @param sc           StatusCode to be returned (artificial)
-   *  @return             StatusCode
    */
-  inline StatusCode Assert
+  inline void Assert
   ( const bool         ok                            ,
     const char*        message                       ,
     const StatusCode   sc      = StatusCode(StatusCode::FAILURE, true) ) const;
@@ -405,13 +439,11 @@ public:
    *
    *  @see GaudiException
    *
-   *  @exception    CaudiException always thrown!
+   *  @exception    GaudiException always thrown!
    *  @param msg    Exception message
    *  @param exc    (previous) exception of type GaudiException
-   *  @param sc     StatusCode
-   *  @return       StatusCode (fictive)
    */
-  StatusCode Exception
+  void Exception
   ( const std::string    & msg                        ,
     const GaudiException & exc                        ,
     const StatusCode       sc  = StatusCode(StatusCode::FAILURE, true) ) const ;
@@ -423,9 +455,8 @@ public:
    *  @param msg    Exception message
    *  @param exc    (previous) exception of type std::exception
    *  @param sc     StatusCode
-   *  @return       StatusCode (fictive)
    */
-  StatusCode Exception
+  void Exception
   ( const std::string    & msg                        ,
     const std::exception & exc                        ,
     const StatusCode       sc  = StatusCode(StatusCode::FAILURE, true) ) const ;
@@ -436,9 +467,8 @@ public:
    *  @exception    GaudiException always thrown!
    *  @param msg    Exception message
    *  @param sc     StatusCode
-   *  @return       StatusCode (fictive)
    */
-  StatusCode Exception
+  void Exception
   ( const std::string& msg = "no message"        ,
     const StatusCode   sc  = StatusCode(StatusCode::FAILURE, true) ) const ;
 public: // predefined streams
@@ -446,7 +476,7 @@ public: // predefined streams
    *
    *  @code
    *
-   *  if ( a < 0 ) { msgStream( MSG::ERROR ) << "a = " << endreq ; }
+   *  if ( a < 0 ) { msgStream( MSG::ERROR ) << "a = " << endmsg ; }
    *
    *  @endcode
    *
@@ -454,24 +484,25 @@ public: // predefined streams
    */
   inline MsgStream& msgStream ( const MSG::Level level ) const ;
   /// shortcut for the method msgStream ( MSG::ALWAYS )
-  inline MsgStream&  always () const { return msgStream ( MSG::  ALWAYS ) ; }
+  inline MsgStream&  always () const { return msgStream ( MSG::ALWAYS ) ; }
   /// shortcut for the method msgStream ( MSG::FATAL   )
-  inline MsgStream&   fatal () const { return msgStream ( MSG::   FATAL ) ; }
+  inline MsgStream&   fatal () const { return msgStream ( MSG::FATAL ) ; }
   /// shortcut for the method msgStream ( MSG::ERROR   )
-  inline MsgStream&     err () const { return msgStream ( MSG::   ERROR ) ; }
+  inline MsgStream&     err () const { return msgStream ( MSG::ERROR ) ; }
   /// shortcut for the method msgStream ( MSG::ERROR   )
-  inline MsgStream&   error () const { return msgStream ( MSG::   ERROR ) ; }
+  inline MsgStream&   error () const { return msgStream ( MSG::ERROR ) ; }
   /// shortcut for the method msgStream ( MSG::WARNING )
-  inline MsgStream& warning () const { return msgStream ( MSG:: WARNING ) ; }
+  inline MsgStream& warning () const { return msgStream ( MSG::WARNING ) ; }
   /// shortcut for the method msgStream ( MSG::INFO    )
-  inline MsgStream&    info () const { return msgStream ( MSG::    INFO ) ; }
+  inline MsgStream&    info () const { return msgStream ( MSG::INFO ) ; }
   /// shortcut for the method msgStream ( MSG::DEBUG   )
-  inline MsgStream&   debug () const { return msgStream ( MSG::   DEBUG ) ; }
+  inline MsgStream&   debug () const { return msgStream ( MSG::DEBUG ) ; }
   /// shortcut for the method msgStream ( MSG::VERBOSE )
-  inline MsgStream& verbose () const { return msgStream ( MSG:: VERBOSE ) ; }
+  inline MsgStream& verbose () const { return msgStream ( MSG::VERBOSE ) ; }
   /// shortcut for the method msgStream ( MSG::INFO    )
-  inline MsgStream&     msg () const { return msgStream ( MSG::    INFO ) ; }
+  inline MsgStream&     msg () const { return msgStream ( MSG::INFO ) ; }
 public:
+  // ==========================================================================
   /// accessor to all counters
   inline const Statistics& counters() const { return m_counters ; }
   /** accessor to certain counter by name
@@ -493,6 +524,7 @@ public:
    *  @return the counter itself
    */
   inline StatEntity& counter( const std::string& tag ) const { return m_counters[tag] ; }
+  // ==========================================================================
 public:
   /** @brief The current message service output level
    *  @return The current message level
@@ -500,7 +532,7 @@ public:
   inline MSG::Level msgLevel() const { return m_msgLevel ; }
   /** @brief Test the output level
    *  @param level The message level to test against
-   *  @return boolean Indicting if messages at given level will be printed
+   *  @return boolean Indicating if messages at given level will be printed
    *  @retval true Messages at level "level" will be printed
    *  @retval true Messages at level "level" will NOT be printed
    */
@@ -512,19 +544,22 @@ public:
   void resetMsgStream() const;
   /// Insert the actual C++ type of the algorithm/tool in the messages ?
   inline bool typePrint     () const { return m_typePrint    ; }
-  /// Print properties at initalization ?
+  /// Print properties at initialization ?
   inline bool propsPrint    () const { return m_propsPrint   ; }
   /// Print statistical counters at finalization ?
   inline bool statPrint     () const { return m_statPrint    ; }
   /// Print error counters at finalization ?
   inline bool errorsPrint   () const { return m_errorsPrint  ; }
+  // ==========================================================================
 private:
+  // ==========================================================================
   /** @brief Handle method for changes in the Messaging levels.
    *  Called whenever the property "OutputLevel" changes to perform
    *  all necessary actions locally.
    *  @param theProp Reference to the Property that has changed
    */
   void msgLevelHandler ( Property& theProp );
+  // ==========================================================================
 public:
   /** perform the actual printout of statistical counters
    *  @param  level The message level to print at
@@ -544,7 +579,7 @@ public:
   /** register the current instance to the UpdateManagerSvc as a consumer for a condition.
    *  @param condition  the path inside the Transient Detector Store to the condition object.
    *  @param mf         optional pointer to the member function to call when the condition object
-   *                    is updated. If the pointer is omitted the user must explicitely provide
+   *                    is updated. If the pointer is omitted the user must explicitly provide
    *                    the class name to the method.
    *  @code
    *  StatusCode MyAlg::initialize(){
@@ -568,7 +603,7 @@ public:
    *                      Note: the pointer can be safely used only in the execute method or in the
    *                      member function triggered by the update.
    *  @param mf           optional pointer to the member function to call when the condition object
-   *                      is updated. If the pointer is omitted the user must explicitely provide
+   *                      is updated. If the pointer is omitted the user must explicitly provide
    *                      the class name to the method.
    *  @code
    *  class MyAlg: public GaudiAlgorithm {
@@ -603,7 +638,7 @@ public:
   /** register the current instance to the UpdateManagerSvc as a consumer for a condition.
    *  @param condition  the path inside the Transient Detector Store to the condition object.
    *  @param mf         optional pointer to the member function to call when the condition object
-   *                    is updated. If the pointer is omitted the user must explicitely provide
+   *                    is updated. If the pointer is omitted the user must explicitly provide
    *                    the class name to the method.
    *  @code
    *  StatusCode MyAlg::initialize(){
@@ -631,13 +666,6 @@ public:
    *  @endcode
    */
   inline StatusCode runUpdate() { return updMgrSvc()->update(this); }
-  /// Return a new TransientFastContainer for objects of type T.
-  /// The container is created if it is not in the transient store.
-  /// If a container with the same name but a different type
-  template <class T>
-  TransientFastContainer<T> * getFastContainer
-  ( const std::string &location,
-    typename TransientFastContainer<T>::size_type initial=0);
 public:
   /// Algorithm constructor
   GaudiCommon ( const std::string & name,
@@ -650,20 +678,30 @@ public:
   /** standard initialization method
    *  @return status code
    */
-  virtual StatusCode initialize ();
+  virtual StatusCode initialize()
+#ifdef __ICC
+   { return i_gcInitialize(); }
+  StatusCode i_gcInitialize()
+#endif
+  ;
   /** standard finalization method
    *  @return status code
    */
-  virtual StatusCode finalize   ();
+  virtual StatusCode finalize()
+#ifdef __ICC
+   { return i_gcFinalize(); }
+  StatusCode i_gcFinalize()
+#endif
+  ;
 protected:
   /// Destructor
-  virtual ~GaudiCommon( );
+  virtual ~GaudiCommon() {resetMsgStream();}
 private :
   // default constructor is disabled
   GaudiCommon() ;
   // copy    constructor is disabled
   GaudiCommon           ( const GaudiCommon& ) ;
-  // assignement operator is disabled
+  // assignment operator is disabled
   GaudiCommon& operator=( const GaudiCommon& ) ;
 protected:
   /// manual forced (and 'safe') release of the tool
@@ -691,8 +729,28 @@ public:
    *  @retval           StatusCode::FAILURE Error releasing too or service
    */
   StatusCode release ( const IInterface* interface ) const ;
+  /// Un-hide IInterface::release (ICC warning #1125)
+  virtual inline unsigned long release() { return PBASE::release(); }
+  // ==========================================================================
 public:
-  /// Returns the "context" string. Used to indentify different processing states.
+  // ==========================================================================
+  /// get the list of aquired tools
+  const AlgTools& tools    () const { return m_tools    ; }    // get all tools
+  /// get the list of aquired services
+  const Services& services () const { return m_services ; } // get all services
+  // ==========================================================================
+private:
+  // ==========================================================================
+  /// handler for "ErrorPrint" property
+  void printErrorHandler ( Property& /* theProp */ ) ;     //      "ErrorPrint"
+  /// handler for "PropertiesPrint" property
+  void printPropsHandler ( Property& /* theProp */ ) ;     // "PropertiesPrint"
+  /// handler for "StatPrint" property
+  void printStatHandler  ( Property& /* theProp */ ) ;     //       "StatPrint"
+  // ==========================================================================
+public:
+  // ==========================================================================
+  /// Returns the "context" string. Used to identify different processing states.
   inline const std::string & context() const { return m_context; }
   /** @brief Returns the "rootInTES" string.
    *  Used as the directory root in the TES for which all data access refers to (both saving and retrieving).
@@ -700,20 +758,26 @@ public:
   inline const std::string & rootInTES() const { return m_rootInTES; }
   /// Returns the "globalTimeOffset" double.
   inline double globalTimeOffset() const { return m_globalTimeOffset; }
+  // ==========================================================================
+public:
+  // ==========================================================================
+  /// Returns the full correct event location given the rootInTes settings
+  const std::string     fullTESLocation
+  ( const std::string & location     ,
+    const bool          useRootInTES ) const ;
+  // ==========================================================================
 private:
+  // ==========================================================================
   /// Add the given tool to the list of acquired tools
   void addToToolList    ( IAlgTool * tool ) const;
   /// Add the given service to the list of acquired services
-  void addToServiceList ( IInterface * svc,
-                          const std::string & name ) const;
+  void addToServiceList ( const SmartIF<IService>& svc ) const;
   /// Constructor initializations
   void initGaudiCommonConstructor( const IInterface * parent = 0 );
-  /// Returns the full correct event location given the rootInTes settings
-  const std::string fullTESLocation( const std::string & location,
-                                     const bool useRootInTES ) const;
+  // ==========================================================================
 private:
   /// The message level
-  MSG::Level         m_msgLevel    ;
+  MSG::Level  m_msgLevel    ;
 private:
   /// The predefined message stream
   mutable MsgStream* m_msgStream   ;
@@ -726,6 +790,8 @@ private:
   mutable Counter    m_errors      ;
   /// counter of warnings
   mutable Counter    m_warnings    ;
+  /// counter of infos
+  mutable Counter    m_infos       ;
   /// Counter of exceptions
   mutable Counter    m_exceptions  ;
   /// General counters
@@ -733,12 +799,10 @@ private:
   // ==========================================================================
   /// Pointer to the Update Manager Service instance
   mutable IUpdateManagerSvc* m_updMgrSvc;
-  /// Pointer to the service providing transient fast containers
-  mutable IDataProviderSvc* m_fastContainersSvc;
   // ==========================================================================
-  /// insert  the actual C++ type of the algoritm in the messages?
+  /// insert  the actual C++ type of the algorithm in the messages?
   bool        m_typePrint     ;
-  /// print properties at initalization?
+  /// print properties at initialization?
   bool        m_propsPrint    ;
   /// print counters at finalization ?
   bool        m_statPrint     ;

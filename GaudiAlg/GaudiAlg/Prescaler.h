@@ -2,7 +2,7 @@
 #include "GaudiAlg/GaudiAlgorithm.h"
 #include "GaudiKernel/Property.h"
 
-class Prescaler:public GaudiAlgorithm 
+class GAUDI_API Prescaler: public GaudiAlgorithm
 {
 
 public:
@@ -15,7 +15,7 @@ public:
     /**
      ** Destructor
      **/
-    ~Prescaler( );
+    virtual ~Prescaler( );
 
     /*****************************
      ** Public Function Members **

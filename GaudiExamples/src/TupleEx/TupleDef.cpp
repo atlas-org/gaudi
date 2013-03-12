@@ -18,8 +18,7 @@
 namespace TupleExample 
 {
   
-  /** @fn fillNTuple 
-   *  helper function useful for the partial 
+  /** helper function useful for the partial 
    *  specialization of N-Tuple fills
    *  @param t tuple 
    *  @param n base column name 
@@ -36,10 +35,9 @@ namespace TupleExample
     t -> column ( n + "F" , p.first  ) ;
     t -> column ( n + "S" , p.second ) ;    
     return t ;
-  } ;
+  }
   
-  /** @fn fillNTuple 
-   *  helper function useful for the partial 
+  /** helper function useful for the partial 
    *  specialization of N-Tuple fills
    *  @param t tuple 
    *  @param n base column name 
@@ -57,10 +55,9 @@ namespace TupleExample
     t -> column ( n + "S" , p.first.second ) ;    
     t -> column ( n + "T" , p.second       ) ;    
     return t ;
-  } ;
+  }
   
-};
-
+}
 
 // ============================================================================
 // The END 

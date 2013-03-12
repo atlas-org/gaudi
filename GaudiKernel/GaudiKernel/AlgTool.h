@@ -1,5 +1,3 @@
-// $Id: AlgTool.h,v 1.23 2008/06/02 14:20:38 marcocle Exp $
-// ============================================================================
 #ifndef GAUDIKERNEL_ALGTOOL_H
 #define GAUDIKERNEL_ALGTOOL_H
 // ============================================================================
@@ -24,28 +22,20 @@
  *
  *  Base class from which all the concrete tool classes
  *  should be derived. Specific methods for doing something
- *  usefull should be implemented in the concrete tools.
+ *  useful should be implemented in the concrete tools.
  *  Sub-types of this class could implement an additional
- *  interface for behaviour common to sets of concrete tools
- *   (for example vertexers).
+ *  interface for behavior common to sets of concrete tools
+ *  (for example vertexers).
  *
  *  @author Gloria Corti
  *  @author Pere Mato
  */
-class AlgTool : public virtual IAlgTool,
-                public virtual IProperty,
-                public virtual IStateful {
+class GAUDI_API AlgTool: public implements3<IAlgTool, IProperty, IStateful> {
   friend class ToolSvc;
 public:
 
   /// Query for a given interface
   virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvUnknown);
-
-  /// Reference Interface instance.
-  virtual unsigned long addRef();
-
-  /// Release Interface instance.
-  virtual unsigned long release();
 
   /// Retrieve full identifying name of the concrete tool object.
   virtual const std::string& name() const;
@@ -57,7 +47,7 @@ public:
   virtual const IInterface*  parent() const;
 
   // State machine implementation
-  //OBSOLETE CLASH virtual StatusCode configure() { return StatusCode::SUCCESS; }
+  virtual StatusCode configure() { return StatusCode::SUCCESS; }
   virtual StatusCode initialize();
   virtual StatusCode start();
   virtual StatusCode stop();
@@ -67,25 +57,25 @@ public:
   virtual StatusCode restart();
   virtual Gaudi::StateMachine::State FSMState() const { return m_state; }
   virtual Gaudi::StateMachine::State targetFSMState() const { return m_targetState; }
-  
+
   /// Initialize AlgTool
   virtual StatusCode sysInitialize();
-  
+
   /// Start AlgTool
   virtual StatusCode sysStart();
-  
+
   /// Stop AlgTool
   virtual StatusCode sysStop();
 
   /// Finalize AlgTool
   virtual StatusCode sysFinalize();
-  
+
   /// Initialize AlgTool
   virtual StatusCode sysReinitialize();
-  
+
   /// Start AlgTool
   virtual StatusCode sysRestart();
-  
+
   /// Default implementations for IProperty interface.
   virtual StatusCode setProperty( const Property&    p );
   virtual StatusCode setProperty( const std::string& s );
@@ -94,57 +84,57 @@ public:
   virtual const Property& getProperty( const std::string& name) const;
   virtual StatusCode getProperty( const std::string& n, std::string& v ) const;
   virtual const std::vector<Property*>& getProperties( ) const;
-  
+
   inline PropertyMgr * getPropertyMgr() { return m_propertyMgr; }
-  
+
 public:
-  
-  /** set the property form the value 
-   *  
-   *  @code 
+
+  /** set the property form the value
+   *
+   *  @code
    *
    *  std::vector<double> data = ... ;
    *  setProperty( "Data" , data ) ;
-   *  
+   *
    *  std::map<std::string,double> cuts = ... ;
    *  setProperty( "Cuts" , cuts ) ;
    *
    *  std::map<std::string,std::string> dict = ... ;
    *  setProperty( "Dictionary" , dict ) ;
-   * 
-   *  @endcode 
    *
-   *  Note: the interface IProperty allows setting of the properties either 
+   *  @endcode
+   *
+   *  Note: the interface IProperty allows setting of the properties either
    *        directly from other properties or from strings only
    *
-   *  This is very convinient in resetting of the default 
+   *  This is very convenient in resetting of the default
    *  properties in the derived classes.
-   *  E.g. without this method one needs to convert 
+   *  E.g. without this method one needs to convert
    *  everything into strings to use IProperty::setProperty
    *
-   *  @code 
-   *  
+   *  @code
+   *
    *    setProperty ( "OutputLevel" , "1"    ) ;
    *    setProperty ( "Enable"      , "True" ) ;
    *    setProperty ( "ErrorMax"    , "10"   ) ;
    *
-   *  @endcode 
+   *  @endcode
    *
-   *  For simple cases it is more or less ok, but for complicated properties 
+   *  For simple cases it is more or less ok, but for complicated properties
    *  it is just ugly..
    *
-   *  @param name      name of the property 
+   *  @param name      name of the property
    *  @param value     value of the property
    *  @see Gaudi::Utils::setProperty
    *  @author Vanya BELYAEV ibelyaev@physics.syr.edu
-   *  @date 2007-05-13 
-   */ 
+   *  @date 2007-05-13
+   */
   template <class TYPE>
-  StatusCode setProperty 
-  ( const std::string& name  , 
-    const TYPE&        value ) 
+  StatusCode setProperty
+  ( const std::string& name  ,
+    const TYPE&        value )
   { return Gaudi::Utils::setProperty ( m_propertyMgr , name , value ) ; }
-  
+
 
   /** Standard Constructor.
    *  @param type the concrete class of the sub-algtool
@@ -158,7 +148,7 @@ public:
   /// Retrieve pointer to service locator.
   ISvcLocator* serviceLocator()  const;
 
-  /// shortcut for the methos service locator
+  /// shortcut for the method service locator
   ISvcLocator* svcLoc()  const { return serviceLocator() ; }
 
   /// Retrieve pointer to message service.
@@ -190,6 +180,9 @@ public:
     return service_i(type, name, T::interfaceID(), (void**)&svc);
   }
 
+  /// Return a pointer to the service identified by name (or "type/name")
+  SmartIF<IService> service(const std::string& name, const bool createIf = true, const bool quiet = false) const;
+
   /// declare interface
   void declInterface( const InterfaceID&, void*);
 
@@ -204,44 +197,44 @@ public:
    *
    *  @code
    *
-   *  MyTool ( const std::string& type   , 
-   *           const std::string& name   , 
-   *           const IInterface*  parent ) 
-   *     : AlgTool  ( type , name , pSvc ) 
+   *  MyTool ( const std::string& type   ,
+   *           const std::string& name   ,
+   *           const IInterface*  parent )
+   *     : AlgTool  ( type , name , pSvc )
    *     , m_property1   ( ... )
    *     , m_property2   ( ... )
    *   {
-   *     // declare the property 
-   *     declareProperty( "Property1" , m_property1 , "Doc fro property #1" ) ;
+   *     // declare the property
+   *     declareProperty( "Property1" , m_property1 , "Doc for property #1" ) ;
    *
-   *     // declare the property and attach the handler  to it
-   *     declareProperty( "Property2" , m_property2 , "Doc for property #2" ) 
-   *        -> declareUpdateHandler( &MyAlg::handler_2 ) ;
-   *  
+   *     // declare the property and attach the handler to it
+   *     declareProperty( "Property2" , m_property2 , "Doc for property #2" )
+   *        -> declareUpdateHandler( &MyTool::handler_2 ) ;
+   *
    *   }
    *  @endcode
-   *  
-   *  @see PropertyMgr 
-   *  @see PropertyMgr::declareProperty 
-   *  
-   *  @param name the property name 
-   *  @param property the property itself, 
+   *
+   *  @see PropertyMgr
+   *  @see PropertyMgr::declareProperty
+   *
+   *  @param name the property name
+   *  @param property the property itself,
    *  @param doc      the documentation string
-   *  @return the actual property objects 
+   *  @return the actual property objects
    */
   template <class T>
   Property* declareProperty
-  ( const std::string& name         , 
+  ( const std::string& name         ,
     T&                 property     ,
-    const std::string& doc = "none" ) const 
+    const std::string& doc = "none" ) const
   {
     return m_propertyMgr -> declareProperty ( name , property , doc ) ;
   }
   /// Declare remote named properties
   Property* declareRemoteProperty
-  ( const std::string& name       , 
+  ( const std::string& name       ,
     IProperty*         rsvc       ,
-    const std::string& rname = "" ) const 
+    const std::string& rname = "" ) const
   {
     return m_propertyMgr-> declareRemoteProperty ( name , rsvc , rname ) ;
   }
@@ -263,7 +256,7 @@ public:
     // If not already located try to locate it without forcing a creation
     if ( !m_pMonitorSvc ){
       service_i( m_monitorSvcName, false,
-                 IMonitorSvc::interfaceID(), pp_cast<void>(&m_pMonitorSvc) );
+                 IMonitorSvc::interfaceID(), pp_cast<void>(&m_pMonitorSvc) ).ignore();
     }
     return m_pMonitorSvc;
   }
@@ -304,18 +297,12 @@ protected:
   /// get tool's output level
   int           outputLevel () const { return (int)m_outputLevel ; }
 
-  /** Current number of refCounts.
-      Avoids having to call addRef() + release() to get current refCount.
-      Used in ToolSvc.
-  */
-  virtual unsigned long refCount() const { return m_refCount; }
-
   /// Accessor for the Message level property
   IntegerProperty & outputLevelProperty() { return m_outputLevel; }
 
   /** callback for output level property */
   void initOutputLevel(Property& prop);
- 
+
 
 
 protected:
@@ -329,7 +316,6 @@ private:
   std::string          m_type;             ///< AlgTool type (concrete class name)
   const std::string    m_name;             ///< AlgTool full name
   const IInterface*    m_parent;           ///< AlgTool parent
-  unsigned long        m_refCount;         ///< Reference counter
   mutable ISvcLocator* m_svcLocator;       ///< Pointer to Service Locator service
   mutable IMessageSvc* m_messageSvc;       ///< Message service
   mutable IToolSvc*    m_ptoolSvc;         ///< Tool service
@@ -358,7 +344,7 @@ private:
   bool         m_auditorFinalize;  ///< flag for auditors in "finalize()"
   bool         m_auditorReinitialize;///< flag for auditors in "reinitialize()"
   bool         m_auditorRestart;     ///< flag for auditors in "restart()"
-  
+
   Gaudi::StateMachine::State m_state;            ///< state of the Tool
   Gaudi::StateMachine::State m_targetState;      ///< state of the Tool
 };

@@ -7,9 +7,6 @@
 #include "GaudiKernel/StateMachine.h"
 #include <string>
 
-// Declaration of the interface ID. 
-static const InterfaceID IID_IService(2, 2, 1); 
-
 /** @class IService IService.h GaudiKernel/IService.h
 
     General service interface definition
@@ -19,70 +16,68 @@ static const InterfaceID IID_IService(2, 2, 1);
 class ISvcManager;
 class ServiceManager;
 
-class IService : virtual public INamedInterface {
+class GAUDI_API IService: virtual public INamedInterface {
   friend class ServiceManager;
 public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IService; }
+  /// InterfaceID
+  DeclareInterfaceID(IService,3,0);
 
-  /// Retrieve ID of the Service. Not really used.
-  virtual const InterfaceID&  type() const = 0;
-  /// Initilize Service 
+  /// Initialize Service
   virtual StatusCode sysInitialize() = 0;
-  /// Start Service 
+  /// Start Service
   virtual StatusCode sysStart() = 0;
-  /// Stop Service 
+  /// Stop Service
   virtual StatusCode sysStop() = 0;
   /// Finalize Service
   virtual StatusCode sysFinalize() = 0;
-  /// Re-initialize the Service 
+  /// Re-initialize the Service
   virtual StatusCode sysReinitialize() = 0;
-  /// Re-start the Service 
+  /// Re-start the Service
   virtual StatusCode sysRestart() = 0;
-  
+
   // --- Methods from IStateful ---
   /** Configuration (from OFFLINE to CONFIGURED).
   */
   virtual StatusCode configure() = 0;
 
-  /** Initialization (from CONFIGURED to INITIALIZED). 
+  /** Initialization (from CONFIGURED to INITIALIZED).
    */
   virtual StatusCode initialize() = 0;
 
-  /** Start (from INITIALIZED to RUNNING). 
+  /** Start (from INITIALIZED to RUNNING).
   */
   virtual StatusCode start() = 0;
 
-  /** Stop (from RUNNING to INITIALIZED). 
+  /** Stop (from RUNNING to INITIALIZED).
   */
   virtual StatusCode stop() = 0;
 
-  /** Finalize (from INITIALIZED to CONFIGURED). 
+  /** Finalize (from INITIALIZED to CONFIGURED).
   */
   virtual StatusCode finalize() = 0;
-  
-  /** Initialization (from CONFIGURED to OFFLINE). 
+
+  /** Initialization (from CONFIGURED to OFFLINE).
   */
   virtual StatusCode terminate() = 0;
 
 
-  /** Initialization (from INITIALIZED or RUNNING to INITIALIZED, via CONFIGURED). 
+  /** Initialization (from INITIALIZED or RUNNING to INITIALIZED, via CONFIGURED).
   */
   virtual StatusCode reinitialize() = 0;
 
-  /** Initialization (from RUNNING to RUNNING, via INITIALIZED). 
+  /** Initialization (from RUNNING to RUNNING, via INITIALIZED).
   */
   virtual StatusCode restart() = 0;
-  
+
   /** Get the current state.
    */
   virtual Gaudi::StateMachine::State FSMState() const = 0;
-  
+
   /** When we are in the middle of a transition, get the state where the
-   *  transition is leading us. Otherwise it returns the same state as state(). 
+   *  transition is leading us. Otherwise it returns the same state as state().
    */
   virtual Gaudi::StateMachine::State targetFSMState() const = 0;
-  
+
 protected:
   virtual void setServiceManager(ISvcManager*) = 0;
 };

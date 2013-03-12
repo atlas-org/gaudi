@@ -19,7 +19,7 @@ DataCreator::DataCreator(const std::string& name, ISvcLocator* ploc)
 StatusCode DataCreator::initialize() {
 //------------------------------------------------------------------------------
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "initializing...." << endreq;
+  log << MSG::INFO << "initializing...." << endmsg;
   return StatusCode::SUCCESS;
 }
 
@@ -28,7 +28,7 @@ StatusCode DataCreator::initialize() {
 StatusCode DataCreator::execute() {
 //------------------------------------------------------------------------------
   MsgStream log( msgSvc(), name() );
-  log << MSG::INFO << "executing...." << endreq;
+  log << MSG::INFO << "executing...." << endmsg;
   put(new DataObject(), m_data);
   return StatusCode::SUCCESS;
 }
@@ -38,7 +38,7 @@ StatusCode DataCreator::execute() {
 StatusCode DataCreator::finalize() {
 //------------------------------------------------------------------------------
   MsgStream log(msgSvc(), name());
-  log << MSG::INFO << "finalizing...." << endreq;
+  log << MSG::INFO << "finalizing...." << endmsg;
   return StatusCode::SUCCESS;
 }
 

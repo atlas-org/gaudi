@@ -9,12 +9,12 @@
 
     Data base class allowing to store persistent type information
 */
-class IClassInfo 	{
+class GAUDI_API IClassInfo {
 public:
   /// Standard Destructor
   virtual ~IClassInfo() { }
-	/// Retrieve Pointer to class defininition structure
-	virtual const CLID& clID() const = 0;
+  /// Retrieve Pointer to class definition structure
+  virtual const CLID& clID() const = 0;
 };
 
 #endif // GAUDIKERNEL_ICLASSINFO_H

@@ -1,7 +1,7 @@
 // $Id: QotdAlg.cpp,v 1.1 2007/05/08 09:16:25 hmd Exp $
 
 
-// Include files 
+// Include files
 #include "QotdAlg.h"
 
 #include "GaudiKernel/MsgStream.h"
@@ -28,9 +28,9 @@ StatusCode QotdAlg::initialize()
   // configure our MsgStream
   m_msg.setLevel( outputLevel() );
 
-  m_msg << MSG::INFO 
-	<< "Initializing " << name() << "..." 
-	<< endreq;
+  m_msg << MSG::INFO
+	<< "Initializing " << name() << "..."
+	<< endmsg;
 
   return StatusCode::SUCCESS;
 }
@@ -48,7 +48,7 @@ StatusCode QotdAlg::execute()
 	<< " - In a few minutes a computer can make a mistake so great that it would have taken many men many months to equal it.\n"
 	<< " - GIGO is not a design pattern.\n"
 	<< " --- famous quotes --- [DONE]"
-	<< endreq;
+	<< endmsg;
 
   return StatusCode::SUCCESS;
 }
@@ -57,7 +57,7 @@ StatusCode QotdAlg::execute()
 StatusCode QotdAlg::finalize()
 //------------------------------------------------------------------------------
 {
-  m_msg << MSG::INFO << "Finalizing..." << endreq;
+  m_msg << MSG::INFO << "Finalizing..." << endmsg;
   return StatusCode::SUCCESS;
 }
 

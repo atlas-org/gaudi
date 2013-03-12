@@ -10,19 +10,18 @@
 #include "TemplatedAlg.h"
 #include <vector>
 
-
 // Static Factory declaration
 typedef TemplatedAlg<int,std::vector<std::string> > t1;
 typedef TemplatedAlg<double, bool > t2;
 
-DECLARE_ALGORITHM_FACTORY(t1);
-DECLARE_NAMED_ALGORITHM_FACTORY(t1,TAlgIS);
-DECLARE_ALGORITHM_FACTORY(t2);
-DECLARE_NAMED_ALGORITHM_FACTORY(t2,TAlgDB);
+DECLARE_ALGORITHM_FACTORY(t1)
+DECLARE_NAMED_ALGORITHM_FACTORY(t1,TAlgIS)
+DECLARE_ALGORITHM_FACTORY(t2)
+DECLARE_NAMED_ALGORITHM_FACTORY(t2,TAlgDB)
 
 
-template <typename T, typename R> 
-TemplatedAlg<T,R>::TemplatedAlg(const std::string& name, ISvcLocator* ploc) 
+template <typename T, typename R>
+TemplatedAlg<T,R>::TemplatedAlg(const std::string& name, ISvcLocator* ploc)
           : GaudiAlgorithm(name, ploc), m_t(), m_r() {
 //------------------------------------------------------------------------------
   declareProperty("TProperty", m_t);
@@ -30,7 +29,7 @@ TemplatedAlg<T,R>::TemplatedAlg(const std::string& name, ISvcLocator* ploc)
 }
 
 //------------------------------------------------------------------------------
-template <typename T, typename R> 
+template <typename T, typename R>
 StatusCode TemplatedAlg<T,R>::initialize() {
 //------------------------------------------------------------------------------
   MsgStream log( msgSvc(), name() );
@@ -39,7 +38,7 @@ StatusCode TemplatedAlg<T,R>::initialize() {
 }
 
 //------------------------------------------------------------------------------
-template <typename T, typename R> 
+template <typename T, typename R>
 StatusCode TemplatedAlg<T,R>::execute() {
 //------------------------------------------------------------------------------
   return StatusCode::SUCCESS;
@@ -47,7 +46,7 @@ StatusCode TemplatedAlg<T,R>::execute() {
 
 
 //------------------------------------------------------------------------------
-template <typename T, typename R> 
+template <typename T, typename R>
 StatusCode TemplatedAlg<T,R>::finalize() {
 //------------------------------------------------------------------------------
   return StatusCode::SUCCESS;
