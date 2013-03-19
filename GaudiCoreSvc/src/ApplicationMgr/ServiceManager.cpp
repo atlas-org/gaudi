@@ -402,7 +402,7 @@ StatusCode ServiceManager::finalize()
 //------------------------------------------------------------------------------
 {
   // make sure that HistogramDataSvc and THistSvc get finalized after the
-  // ToolSvc, and StatusCodeSvc after that
+  // ToolSvc, and the FileMgr and StatusCodeSvc after that
   int pri_tool = getPriority("ToolSvc");
   if (pri_tool != 0) {
     setPriority("THistSvc",pri_tool-1).ignore();
@@ -412,6 +412,9 @@ StatusCode ServiceManager::finalize()
     setPriority("HistogramDataSvc",pri_tool-1).ignore();
     // Preserve the relative ordering between HistogramDataSvc and HistogramPersistencySvc
     setPriority("HistogramPersistencySvc",pri_tool-2).ignore();
+    setPriority("HistorySvc",pri_tool-3).ignore();
+    setPriority("FileMgr",pri_tool-4).ignore();
+
   }
 
   // make sure the StatusCodeSvc gets finalized really late:
@@ -454,10 +457,33 @@ StatusCode ServiceManager::finalize()
 
   // loop over all Active Services, removing them one by one.
   // They should be deleted because the reference counting goes to 0.
+  DEBMSG << "looping over all active services..." << endmsg;
   it = m_listsvc.begin();
   while (it != m_listsvc.end()) {
+     DEBMSG << " - [" << it->service->name()
+            << "] ref-count [" << it->service->refCount() << "]" 
+            << endmsg;
     if (it->active) {
+      IService* service = it->service.get();
+      // add a ref-count to prevent m_listsvc.erase(it) to
+      // invalidate it->service if 'it->service->refCount() == 1'
+      // {
+      it->service->addRef();
+      // }
       it = m_listsvc.erase(it);
+      const std::string& svc_name = service->name();
+      if (svc_name != "AuditorSvc" &&
+          svc_name != "StatusCodeSvc" &&
+          svc_name != "MessageSvc" &&
+          svc_name != "JobOptionsSvc" )
+      {
+        // this will eventually destroy the service
+        while (service) {
+          if (!service->release()) {
+            break;
+          }
+        }
+      }
     } else {
       ++it;
     }

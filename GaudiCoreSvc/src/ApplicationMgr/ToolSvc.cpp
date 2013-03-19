@@ -644,8 +644,7 @@ std::string ToolSvc::nameTool( const std::string& toolname,
     return fullname ;                                          // RETURN
   }
 
-  MsgStream log ( msgSvc(), name() );
-  log << MSG::ERROR
+  error()
       << "Private Tools only allowed for components implementing INamedInterface"
       << endmsg;
   //

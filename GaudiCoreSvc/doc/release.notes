@@ -4,6 +4,18 @@
 # Description: basic and mandatory components for a Gaudi application
 ################################################################################
 
+============================= GaudiCoreSvc-01-03-01 ==========================
+! 2013-03-19 - Charles Leggett
+ - merge with GaudiSvc-18-13-39
+
+ - use error() in ToolSvc
+M       src/ApplicationMgr/ToolSvc.cpp
+ - try ATLAS way of finalizing services
+M       src/ApplicationMgr/ServiceManager.cpp
+
+ - check for null ptr before deref
+M       src/EventSelector/EventSelector.cpp
+
 ============================= GaudiCoreSvc v1r3 ==============================
 ! 2012-11-12 - Marco Clemencic
  - Set the application return code to CorruptedInput in case of incident
