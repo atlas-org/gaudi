@@ -1,11 +1,43 @@
 Package : GaudiKernel
 Package manager : Marco Clemencic
 
-! 2013-02-21 - Marco Clemencic
- - Fixed compilation with CMT on Ubuntu 12.10 (gcc 4.7.2).
+============================= GaudiKernel-28-05-03 ===========================
+! 2013-03-19 - Charles Leggett
 
-! 2013-01-30 - Marco Clemencic
- - Fixed a problem in the detection of Boost 1.50 (Sleep.cpp).
+several fixes to bring trunk in line with GaudiKernel-27-13-25
+
+ - fix inheritance structure of History objects
+M       GaudiKernel/AlgToolHistory.h
+M       GaudiKernel/JobHistory.h
+M       GaudiKernel/AlgorithmHistory.h
+M       GaudiKernel/ServiceHistory.h
+
+ - Service.cpp: don't preset outputLevel
+M       src/Lib/Service.cpp
+
+ - FileIncident.h: remove payload, move vdtor 
+M       GaudiKernel/FileIncident.h
+
+ - TypeNameString.h: include <ostream>
+M       GaudiKernel/TypeNameString.h
+
+============================= GaudiKernel-28-05-02 ===========================
+! 2013-03-06 - Charles Leggett
+ - move virtual dtor of IFileMgr and IoComponentMgr to VirtualDestructors.cpp
+D       src/Lib/IIoComponentMgr.cpp
+D       src/Lib/IIoComponent.cpp
+M       src/Lib/VirtualDestructors.cpp
+D       src/Lib/IFileMgr.cpp
+
+============================= GaudiKernel-28-05-01 ===========================
+! 2013-03-06 - Charles Leggett
+ - add/update IFileMgr and IoComponentMgr
+
+A       src/Lib/IIoComponentMgr.cpp
+A       src/Lib/IIoComponent.cpp
+A       src/Lib/IFileMgr.cpp
+A       GaudiKernel/IFileMgr.h
+M       GaudiKernel/IIoComponentMgr.h
 
 ============================= GaudiKernel v28r5 ==============================
 ! 2013-01-15 - Marco Clemencic
