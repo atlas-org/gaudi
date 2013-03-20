@@ -1,6 +1,11 @@
 Package : GaudiKernel
 Package manager : Marco Clemencic
 
+============================= GaudiKernel-28-05-04 ===========================
+! 2013-03-20 - Charles Leggett
+- fix FileIncident dtor
+M       GaudiKernel/FileIncident.h
+
 ============================= GaudiKernel-28-05-03 ===========================
 ! 2013-03-19 - Charles Leggett
 
