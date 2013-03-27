@@ -1,6 +1,11 @@
 Package: GaudiMonitor
 Package manager : Marco Clemencic
 
+============================= GaudiMonitor-03-02-01 ==========================
+! 2012-03-27 - Charles Leggett
+ - merge with GaudiSvc-18-13-39
+M       src/HistorySvc.cpp
+
 ============================= GaudiMonitor v3r2 ==============================
 ! 2012-11-14 - Marco Clemencic
  - Updated CMakeLists.txt.
