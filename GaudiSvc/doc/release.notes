@@ -3,7 +3,7 @@ Package manager : Marco Clemencic
 
 =============================== GaudiSvc-19-03-01 ============================
 ! 2013-03-06 - Charles Leggett
- - merge with GaudiSvc-18-13-27-13
+ - merge with GaudiSvc-18-13-39
  - add FileMgr
  - update THistSvc
 
