@@ -4,6 +4,13 @@
 # Description: standard and commonly used components
 ################################################################################
 
+============================ GaudiCommonSvc-01-04-01 =========================
+! 2013-03-27 - Charles Leggett
+ From GaudiSvc-18-12-01
+ - hack to allow some service destructors to run: bug#75834
+
+M       src/PersistencySvc/PersistencySvc.cpp
+
 ============================ GaudiCommonSvc v1r4 =============================
 ! 2012-11-14 - Marco Clemencic
  - Updated CMakeLists.txt.

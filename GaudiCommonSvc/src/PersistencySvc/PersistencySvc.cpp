@@ -606,7 +606,16 @@ StatusCode PersistencySvc::finalize()      {
   // Release all workers
   m_cnvServices.clear();
   // Release references to this to avoid loops
+  //  m_addrCreator = 0;
+
+  if (m_addrCreator) m_addrCreator->addRef();
+  if (m_dataSvc) m_dataSvc->addRef();
+  if (m_cnvDefault) m_cnvDefault->addRef();
+
   m_addrCreator = 0;
+  m_dataSvc = 0;
+  m_cnvDefault = 0;
+
   return StatusCode::SUCCESS;
 }
 
@@ -634,4 +643,24 @@ PersistencySvc::PersistencySvc(const std::string& name, ISvcLocator* svc)
 
 /// Standard Destructor
 PersistencySvc::~PersistencySvc()   {
+
+  // the following is hopefully (!) temporary hack to prevent deleting
+  // services we hold a reference count to.
+  // the problem is that these references might point back to us (so we
+  // end up recursively calling the d-tor) or be double-deleted later on
+  // by the ServiceManager.
+  // the correct fix is to have everybody use SmartIF<T> all over the code...
+  if (m_cnvDefault) {
+    m_cnvDefault->addRef();
+    m_cnvDefault = 0;
+  }
+  if (m_addrCreator) {
+    m_addrCreator->addRef();
+    m_addrCreator = 0;
+  }
+  if (m_dataSvc) {
+    m_dataSvc->addRef();
+    m_dataSvc = 0;
+  }
+
 }
