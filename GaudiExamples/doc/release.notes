@@ -1,6 +1,20 @@
 Package GaudiExamples
 Package manager : Marco Clemencic
 
+============================ GaudiExamples-23-06-02 ==========================
+! 2013-03-26 - Charles Leggett
+ - added example for FileMgr
+M       cmt/requirements
+A       src/FileMgr
+A       src/FileMgr/FileMgrTest.cpp
+A       src/FileMgr/FileMgrTest.h
+A       options/FileMgrTest.opts
+
+============================ GaudiExamples-23-06-01 ==========================
+! 2013-03-05 - Charles Leggett
+ - conditional usage for GaudiPartProp and RootCnv
+M       cmt/requirements
+
 ============================ GaudiExamples v23r6 =============================
 ============================ GaudiExamples v23r5 =============================
 ! 2012-11-15 - Marco Clemencic
