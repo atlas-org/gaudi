@@ -13,6 +13,15 @@
 
 using ROOT::Reflex::PluginService;
 
+namespace {
+  template<class T>
+  std::string name_of_iface(const T& t)
+  {
+    SmartIF<INamedInterface> si(t);
+    return si->name();
+  }
+}
+
 enum CnvSvcAction   {
   CREATE_OBJ,
   FILL_OBJ_REFS,
@@ -296,6 +305,17 @@ StatusCode ConversionSvc::finalize()      {
   }
   m_workers->erase(m_workers->begin(), m_workers->end() );
   // release interfaces
+#ifdef ATLAS_GAUDI_V21
+  if (m_addressCreator) {
+    m_addressCreator->addRef();
+  }
+  if (m_dataSvc) {
+    m_dataSvc->addRef();
+  }
+  if (m_cnvSvc) {
+    m_cnvSvc->addRef();
+  }
+#endif
   m_addressCreator = 0;
   m_dataSvc = 0;
   m_cnvSvc = 0;
@@ -416,10 +436,43 @@ ConversionSvc::ConversionSvc(const std::string& name, ISvcLocator* svc, long typ
 
 /// Standard Destructor
 ConversionSvc::~ConversionSvc()   {
+
+#ifdef ATLAS_GAUDI_V21
+  if (this->refCount()==0) {
+    this->addRef();
+  }
+  if (m_cnvSvc) {
+    SmartIF<INamedInterface> incnv(m_cnvSvc);
+    if (incnv->name() == this->name()) {
+      m_cnvSvc->addRef();
+    }
+    m_cnvSvc->addRef();
+    m_cnvSvc = 0;
+  }
+  if (m_addressCreator) {
+    SmartIF<INamedInterface> inadd(m_addressCreator);
+    if (inadd->name() == this->name()) {
+      m_addressCreator->addRef();
+    }
+    m_addressCreator->addRef();
+    m_addressCreator = 0;
+  }
+  if (m_dataSvc) {
+    SmartIF<INamedInterface> inda(m_dataSvc);
+    if (inda->name() == this->name()) {
+      m_dataSvc->addRef();
+    }
+
+    m_dataSvc->addRef();
+    m_dataSvc = 0;
+  }
+#endif
+
   // Release all workers.
   for ( Workers::iterator i = m_workers->begin(); i != m_workers->end(); i++ )    {
     (*i).converter()->release();
   }
   m_workers->erase(m_workers->begin(), m_workers->end() );
-  delete m_workers;
+  delete m_workers; m_workers = 0;
+
 }

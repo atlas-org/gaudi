@@ -1,6 +1,12 @@
 Package : GaudiKernel
 Package manager : Marco Clemencic
 
+============================= GaudiKernel-28-05-05 ===========================
+! 2013-03-27 - Charles Leggett
+ From GaudiKernel-27-11-01
+ - fix/hack destructors not run bug# 75834
+M       src/Lib/ConversionSvc.cpp
+
 ============================= GaudiKernel-28-05-04 ===========================
 ! 2013-03-20 - Charles Leggett
 - fix FileIncident dtor
