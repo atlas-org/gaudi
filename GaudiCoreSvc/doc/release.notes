@@ -4,6 +4,14 @@
 # Description: basic and mandatory components for a Gaudi application
 ################################################################################
 
+============================= GaudiCoreSvc-01-03-03 ==========================
+! 2013-04-02 - Charles Leggett
+ - ServiceManager:
+   - use default service priority from ISvcManager
+   - incorporate def priority in AppMgr
+M       src/ApplicationMgr/ServiceManager.h
+M       src/ApplicationMgr/ApplicationMgr.cpp
+
 ============================= GaudiCoreSvc-01-03-02 ==========================
 ! 2013-04-02 - Charles Leggett
  - ServiceManager:
