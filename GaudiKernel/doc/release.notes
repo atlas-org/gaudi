@@ -1,6 +1,11 @@
 Package : GaudiKernel
 Package manager : Marco Clemencic
 
+============================= GaudiKernel-28-05-06 ===========================
+! 2013-04-02 - Charles Leggett
+ - change default piority of services to 100 from 10
+M       GaudiKernel/ISvcManager.h
+
 ============================= GaudiKernel-28-05-05 ===========================
 ! 2013-03-27 - Charles Leggett
  From GaudiKernel-27-11-01
