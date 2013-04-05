@@ -1,6 +1,12 @@
 package GaudiPolicy
 package manager: Marco Clemencic
 
+============================= GaudiPolicy-12-04-04 ===========================
+! 2013-04-05 - Charles Leggett
+ - merge macro and pattern for genconf extra modules, make it tag dependent
+
+M       cmt/requirements
+
 ============================= GaudiPolicy-12-04-03 ===========================
 ! 2013-04-05 - Charles Leggett
  - add macro and pattern for loading of optional modules into <pkg>Conf.py 
