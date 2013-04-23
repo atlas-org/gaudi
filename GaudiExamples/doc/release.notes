@@ -1,6 +1,11 @@
 Package GaudiExamples
 Package manager : Marco Clemencic
 
+============================ GaudiExamples-23-06-03 ==========================
+! 2013-04-23 - Charles Leggett
+ - unchecked StatusCode
+M       src/AlgSequencer/StopperAlg.cpp
+
 ============================ GaudiExamples-23-06-02 ==========================
 ! 2013-03-26 - Charles Leggett
  - added example for FileMgr
