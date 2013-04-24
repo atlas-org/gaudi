@@ -4,6 +4,12 @@
 # Description: basic and mandatory components for a Gaudi application
 ################################################################################
 
+============================= GaudiCoreSvc-01-03-04 ==========================
+! 2013-04-24 - Charles Leggett
+ - ApplicationMgr:
+   - a "ScheduledStop" should not result in a termination error message
+M       src/ApplicationMgr/ApplicationMgr.cpp
+
 ============================= GaudiCoreSvc-01-03-03 ==========================
 ! 2013-04-02 - Charles Leggett
  - ServiceManager:
