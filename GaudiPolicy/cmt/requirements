@@ -147,6 +147,13 @@ pattern component_library \
     apply_pattern generate_rootmap library=<library> group=<group> ; \
     apply_pattern generate_configurables library=<library> group=<group>
 
+pattern gaudi_component_library \
+    apply_pattern libraryShr library="<library>" ; \
+    apply_pattern library_Cshlibflags library="<library>" ;\
+    macro <library>_dependencies "$(<package>_linker_library) " ;\
+    apply_pattern generate_rootmap library=<library> group=<group> ; \
+    apply_pattern generate_configurables library=<library> group=<group>
+
 pattern linker_library \
     apply_pattern library_path        library="<library>" ; \
     apply_pattern library_Llinkopts   library="<library>" ; \
