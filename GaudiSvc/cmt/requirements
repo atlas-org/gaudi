@@ -20,8 +20,8 @@ library GaudiSvc -import=Boost -import=CLHEP -import=ROOT -no_static \
 library GaudiSvcTest -group=tests ../tests/src/component/*.cpp -no_static
 
 # define component library link options
-apply_pattern component_library library=GaudiSvc
-apply_pattern component_library library=GaudiSvcTest
+apply_pattern gaudi_component_library library=GaudiSvc
+apply_pattern gaudi_component_library library=GaudiSvcTest
 
 macro_append Boost_linkopts " $(Boost_linkopts_system) $(Boost_linkopts_filesystem) $(Boost_linkopts_thread) "
 
