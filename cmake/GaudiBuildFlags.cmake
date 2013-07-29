@@ -1,3 +1,11 @@
+# Special defaults
+if (LCG_COMPVERS VERSION_LESS "47")
+  set(GAUDI_CPP11_DEFAULT OFF)
+else()
+  # C++11 is enable by default on gcc >= 4.7
+  set(GAUDI_CPP11_DEFAULT ON)
+endif()
+
 #--- Gaudi Build Options -------------------------------------------------------
 # Build options that map to compile time features
 #
@@ -29,7 +37,8 @@ option(GAUDI_CMT_RELEASE
 
 option(GAUDI_CPP11
        "enable C++11 compilation"
-       OFF)
+       ${GAUDI_CPP11_DEFAULT})
+
 
 #--- Compilation Flags ---------------------------------------------------------
 if(NOT GAUDI_FLAGS_SET)
@@ -72,6 +81,16 @@ if(NOT GAUDI_FLAGS_SET)
           FORCE)
       set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG"
           CACHE STRING "Flags used by the compiler during release builds."
+          FORCE)
+    endif()
+
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND LCG_COMPVERS VERSION_GREATER "47")
+      # Use -Og with Debug builds in gcc >= 4.8
+      set(CMAKE_CXX_FLAGS_DEBUG "-Og -g"
+          CACHE STRING "Flags used by the compiler during Debug builds."
+          FORCE)
+      set(CMAKE_C_FLAGS_DEBUG "-Og -g"
+          CACHE STRING "Flags used by the compiler during Debug builds."
           FORCE)
     endif()
 
@@ -153,8 +172,14 @@ if ((GAUDI_V21 OR G21_HIDE_SYMBOLS) AND (LCG_COMP STREQUAL gcc AND LCG_COMPVERS 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
 endif()
 
-if ( GAUDI_CPP11 )
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+if (GAUDI_CPP11)
+  if (LCG_COMPVERS VERSION_LESS "47")
+    # gcc 4.6 only understands c++0x
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11")
+  endif()
 endif()
 
 if(NOT GAUDI_V21)

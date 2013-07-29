@@ -18,11 +18,10 @@
 #include "GaudiKernel/IProperty.h"
 #include "GaudiKernel/Property.h"
 
-#include "GaudiKernel/SvcFactory.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/System.h"
 // ============================================================================
-DECLARE_SERVICE_FACTORY(JobOptionsSvc)
+DECLARE_COMPONENT(JobOptionsSvc)
 // ============================================================================
 // Namespace aliases:
 // ============================================================================
@@ -35,7 +34,6 @@ m_pmgr()
 , m_source_type()
 , m_dir_search_path()
 , m_dump()
-, m_dumped( false )
 {
   std::string tmp ;
   tmp = System::getEnv ( "JOBOPTSEARCHPATH" ) ;

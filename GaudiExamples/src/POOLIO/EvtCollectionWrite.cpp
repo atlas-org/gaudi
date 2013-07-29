@@ -12,7 +12,6 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/IRegistry.h"
 #include "GaudiKernel/INTupleSvc.h"
-#include "GaudiKernel/AlgFactory.h"
 #include "GaudiKernel/SmartDataPtr.h"
 
 // Example related include files
@@ -24,7 +23,7 @@
 
 using namespace Gaudi::Examples;
 
-DECLARE_ALGORITHM_FACTORY(EvtCollectionWrite)
+DECLARE_COMPONENT(EvtCollectionWrite)
 
 /**  Algorithm parameters which can be set at run time must be declared.
      This should be done in the constructor.

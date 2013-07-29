@@ -1,8 +1,7 @@
 package GaudiExamples
-version v23r6
+version v23r9
 
 use ROOT         * LCG_Interfaces
-use Reflex       * LCG_Interfaces -no_auto_imports
 use RELAX        * LCG_Interfaces -no_auto_imports
 use AIDA         * LCG_Interfaces
 
@@ -24,7 +23,7 @@ include_dirs $(GAUDIEXAMPLESROOT)/src/Lib
 
 library GaudiExamplesLib -no_static Lib/*.cpp
 
-library GaudiExamples    -import=Reflex -no_static \
+library GaudiExamples    -no_static \
                           AbortEvent/*.cpp \
                           AlgSequencer/*.cpp \
                           AlgTools/*.cpp \

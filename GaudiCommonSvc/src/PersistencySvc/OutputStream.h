@@ -1,7 +1,5 @@
-// $Id: OutputStream.h,v 1.4 2010/05/20 17:07:50 marcocle Exp $
 #ifndef GAUDISVC_PERSISTENCYSVC_OUTPUTSTREAM_H
 #define GAUDISVC_PERSISTENCYSVC_OUTPUTSTREAM_H
-
 
 // Required for inheritance
 #include "GaudiKernel/IDataSelector.h"
@@ -14,9 +12,6 @@
 #include <string>
 
 // forward declarations
-template <class ConcreteAlgorithm> class AlgFactory;
-namespace { template <class P, class S> class Factory; }
-
 class IIncidentSvc;
 class IRegistry;
 class IConversionSvc;
@@ -30,16 +25,13 @@ class DataStoreItem;
     Version: 1.0
 */
 class OutputStream : public Algorithm     {
-  friend class AlgFactory<OutputStream>;
-  friend class Factory<OutputStream,IAlgorithm* (std::string,ISvcLocator *)>;
-
 public:
   typedef std::vector<DataStoreItem*> Items;
   typedef std::vector<std::string>    ItemNames;
 protected:
-  /// Reference to the indicent service
+  /// Reference to the incident service
   SmartIF<IIncidentSvc> m_incidentSvc;
-  /// Flag indicating wether data pre-loading should be performed
+  /// Flag indicating whether data pre-loading should be performed
   bool                     m_doPreLoad;
   /// Flag indicating whether optional items should be preloaded
   bool                     m_doPreLoadOpt;
@@ -91,28 +83,28 @@ protected:
   std::vector<Algorithm*>* m_vetoAlgs;
 
 public:
-	/// Standard algorithm Constructor
-	OutputStream(const std::string& name, ISvcLocator* pSvcLocator);
+  /// Standard algorithm Constructor
+  OutputStream(const std::string& name, ISvcLocator* pSvcLocator);
   /// Standard Destructor
   virtual ~OutputStream();
 protected:
   /// Decode list of Algorithms that this stream accepts
-  StatusCode decodeAcceptAlgs( );
+  StatusCode decodeAcceptAlgs();
   /// Handler for AcceptAlgs Property
   void acceptAlgsHandler( Property& theProp );
   /// Decode list of Algorithms that this stream requires
-  StatusCode decodeRequireAlgs( );
+  StatusCode decodeRequireAlgs();
   /// Handler for RequireAlgs Property
   void requireAlgsHandler( Property& theProp );
   /// Decode list of Algorithms that this stream is vetoed by
-  StatusCode decodeVetoAlgs( );
+  StatusCode decodeVetoAlgs();
   /// Handler for VetoAlgs Property
   void vetoAlgsHandler( Property& theProp );
   /// Decode specified list of Algorithms
   StatusCode decodeAlgorithms( StringArrayProperty& theNames,
                                std::vector<Algorithm*>* theAlgs );
   /// Test whether this event should be output
-  bool isEventAccepted( ) const;
+  bool isEventAccepted() const;
   /// Find single item identified by its path (exact match)
   DataStoreItem* findItem(const std::string& path);
   /// Select the different objects and write them to file
@@ -126,11 +118,11 @@ protected:
 
 public:
   /// Initialize OutputStream
-	virtual StatusCode initialize();
+  virtual StatusCode initialize();
   /// Terminate OutputStream
-	virtual StatusCode finalize();
+  virtual StatusCode finalize();
   /// Working entry point
-	virtual StatusCode execute();
+  virtual StatusCode execute();
   // Connect to proper conversion service
   virtual StatusCode connectConversionSvc();
   /// Store agent's classback
@@ -144,9 +136,7 @@ public:
   /// Clear list of selected objects
   void clearSelection();
   /// Return the list of selected objects
-  IDataSelector* selectedObjects()    {
-    return &m_objects;
-  }
+  IDataSelector* selectedObjects() { return &m_objects; }
 };
 
 #endif // GAUDISVC_PERSISTENCYSVC_OUTPUTSTREAM_H

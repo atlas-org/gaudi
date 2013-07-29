@@ -1,9 +1,97 @@
 Package : GaudiKernel
 Package manager : Marco Clemencic
 
+! 2013-07-26 - Marco Clemencic
+ - Ported new GaudiPluginService to CMT.
+
+! 2013-07-26 - Marco Clemencic
+ - Fixed a warning.
+
+! 2013-07-25 - Marco Clemencic
+ - Fixed mistake in the name of a macro.
+
+! 2013-07-25 - Marco Clemencic
+ - Fixed a "misbalance warning" in genconf.
+
+! 2013-07-25 - Marco Clemencic
+ - Minor updates to a couple of macros.
+
+! 2013-07-25 - Marco Clemencic
+ - Modified factory declarations to allow private/protected constructors.
+
+! 2013-07-19 - Marco Clemencic
+ - Improved the printout of genconf.
+
+! 2013-07-19 - Marco Clemencic
+ - Clean up in the use of the new PluginService.
+
+! 2013-07-18 - Marco Clemencic
+ - Removed the need of AlgFactory.h, SvcFactory.h, ToolFactory.h, AudFactory.h
+   and CnvFactory.h.
+ - Moved the factories typedefs from the global namespace to the class scope.
+ - Introduced backward compatibility hacks to handle non-public constructors
+   (the hack can be disabled defining the macro GAUDI_NEW_PLUGIN_SERVICE).
+
+! 2013-07-18 - Marco Clemencic
+ - Fixed compilation problem on slc6-gcc46.
+
+! 2013-07-17 - Marco Clemencic
+ - Use the new ROOT-free Plugin Service.
+
+! 2013-07-17 - Marco Clemencic
+ - Removed factories forward declarations.
+
+! 2013-07-03 - Marco Clemencic
+ - genconf.cpp: replaces Reflex::SharedLibrary::Load with the equivalent Gaudi
+   function.
+ - Added test for System::currentTime.
+ - Added a GaudiKernel/PluginService.h to hide the technical implementation of
+   the plugin service for the migration to ROOT 6.
+ - Replaced references to ROOT::Reflex::PluginService with Gaudi::PluginService.
+
+! 2013-07-19 - Marco Clemencic
+ - Replaced "#ifdef linux" with "#ifdef __linux" (more reliable: Rolf Seuster
+   reported that "linux" is not defined when using C++11).
+
+! 2013-07-04 - Marco Clemencic
+ - Updated the exclusion list in make_patch.py.
+
+! 2013-07-03 - Marco Clemencic
+ - Added test for System::currentTime.
+
+! 2013-06-27 - Marco Clemencic
+ - Fixed CFHEP-78: configurables created after applyConfigurableUser()
+   Force the instantiation of all Handles properties during the call to
+   applyConfigurableUser.
+   https://sft.its.cern.ch/jira/browse/CFHEP-78
+
+! 2013-04-09 - Hubert Degaudenzi
+ - src/Lib/System.cpp: fixed cppcheck warning.
+ - GaudiKernel/KeyedObject.h: idem
+ - GaudiKernel/ServiceHandle.h: idem
+
+! 2013-04-25 - Marco Clemencic
+ - Added virtual destructors for IConverter and IConversionSvc to fix issue
+   CFHEP-87 <https://sft.its.cern.ch/jira/browse/CFHEP-87>.
+
+! 2013-04-23 - Marco Clemencic
+ - Fixed Eclipse static analyzer warning.
+
+! 2013-04-22 - Marco Clemencic
+ - Fixed more Clang warnings.
+
+! 2013-04-16 - Marco Clemencic
+ - Fixed Clang warnings.
+
+! 2013-02-21 - Marco Clemencic
+ - Fixed compilation with CMT on Ubuntu 12.10 (gcc 4.7.2).
+
+! 2013-01-30 - Marco Clemencic
+ - Fixed a problem in the detection of Boost 1.50 (Sleep.cpp).
+
 ============================= GaudiKernel-28-05-08 ===========================
 ! 2013-04-05 - Charles Leggett
- - add new optional parameter to genconf to allow import/declaration of 
+ - add new optional parameter to genconf to allow import/declaration of
    user specified module
 M       src/Util/genconf.cpp
 
@@ -42,7 +130,7 @@ M       GaudiKernel/ServiceHistory.h
  - Service.cpp: don't preset outputLevel
 M       src/Lib/Service.cpp
 
- - FileIncident.h: remove payload, move vdtor 
+ - FileIncident.h: remove payload, move vdtor
 M       GaudiKernel/FileIncident.h
 
  - TypeNameString.h: include <ostream>
@@ -4046,4 +4134,3 @@ Improvements
   Changed to support two or more conversion services. This was needed to
   support the Root conversion service.
   Added classes OutputStream, OutputStreamAgent
-

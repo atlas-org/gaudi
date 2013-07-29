@@ -1,6 +1,45 @@
 package GaudiPolicy
 package manager: Marco Clemencic
 
+! 2013-07-27 - Marco Clemencic
+ - Restored merge_rootmap macros and fragments, used by the Reflex dictionary
+   pattern.
+
+! 2013-07-26 - Marco Clemencic
+ - Ported new GaudiPluginService to CMT.
+
+! 2013-06-13 - Marco Clemencic
+ - Added a special exclusion pattern for reference file comparison to ignore a
+   message from ROOT after the removal of PyCintex.
+
+! 2013-03-27 - Hubert Degaudenzi
+ - Modified createProjVersHeader.py to understand only the LHCb version
+   style(vXrY[pZ]) , the ATLAS version style (bla-X-Y[-Z]) and the plain
+   version style (X.Y[.Z])
+
+! 2013-06-20 - Marco Clemencic
+ - Use the special name lcg-<compiler>-<version> for Clang too (already done
+   when building with CMake).
+ - Use -Og when compiling in debug mode with gcc 4.8.
+
+! 2013-06-10 - Marco Clemencic
+ - Added -Wno-deprecated for gcc 4.8 (as it was done already for 4.6 and 4.7).
+ - GaudiTest.py: Removed a stale debug printout statement.
+
+! 2013-04-28 - Marco Clemencic
+ - Extended the GaudiExeTest class to allow expected termination by signal.
+   To accept termination by signal of a test, set the test field 'signal',
+   e.g. (for SIGABRT):
+
+     <argument name="signal"><integer>6</integer></argument>
+
+! 2013-04-23 - Marco Clemencic
+ - Exclude some (make) variables in the Eclipse launcher configuration generated
+   with QMTest, because they can cause problems in some builds.
+
+! 2013-03-22 - Marco Clemencic
+ - Enable C++11 by default when using gcc 4.7
+
 ============================= GaudiPolicy-12-04-06 ===========================
 ! 2013-05-07 - Charles Leggett
  - fix circular dependencies with GaudiSvc
@@ -21,9 +60,9 @@ M       cmt/requirements
 
 ============================= GaudiPolicy-12-04-03 ===========================
 ! 2013-04-05 - Charles Leggett
- - add macro and pattern for loading of optional modules into <pkg>Conf.py 
-   files via genconf. This eases the transition of ATLAS packages that 
-   imported modules that used to be in GaudiSvc but are now in GaudiCoreSvc or 
+ - add macro and pattern for loading of optional modules into <pkg>Conf.py
+   files via genconf. This eases the transition of ATLAS packages that
+   imported modules that used to be in GaudiSvc but are now in GaudiCoreSvc or
    GaudiCommonSvc
 
 M       cmt/requirements
@@ -39,7 +78,6 @@ M       cmt/fragments/genconfig_header
 
 M       cmt/requirements
 M       scripts/install.py
-
 
 ! 2013-02-08 - Marco Clemencic
  - Improvements to the checker for Python files encoding.

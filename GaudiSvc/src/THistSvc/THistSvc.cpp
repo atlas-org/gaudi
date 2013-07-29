@@ -6,7 +6,6 @@
 
 #include "THistSvc.h"
 
-#include "GaudiKernel/SvcFactory.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Tokenizer.h"
 #include "GaudiKernel/GaudiException.h"
@@ -35,7 +34,7 @@
 using namespace std;
 
 
-DECLARE_SERVICE_FACTORY(THistSvc)
+DECLARE_COMPONENT(THistSvc)
 
 inline void toupper(std::string &s)
 {
@@ -1844,6 +1843,7 @@ void THistSvc::MergeRootFile(TDirectory *target, TDirectory *source) {
     //TObject *obj=key->ReadObj();
     TObject *obj=source->Get(pathnameinsource.c_str());
 
+    if (obj) {
     if (obj->IsA()->InheritsFrom("TDirectory") ) {
       // it's a subdirectory
 
@@ -1881,9 +1881,10 @@ void THistSvc::MergeRootFile(TDirectory *target, TDirectory *source) {
       //<< mycopiedtree->Write(key->GetName()) <<" ) bytes written"
       //<< endmsg;
 
-    } else if (obj) {
+    } else {
       target->cd();
       obj->Write(key->GetName() );
+    }
     }
 
   } // while ( ( TKey *key = (TKey*)nextkey() ) )

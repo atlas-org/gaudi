@@ -348,6 +348,7 @@ namespace Gaudi {
         m_usedSignals.reserve(2);
         m_usedSignals.push_back("SIGINT");
         m_usedSignals.push_back("SIGXCPU");
+        m_stopRequested = false;
         declareProperty("Signals", m_usedSignals,
             "List of signal names or numbers to use to schedule a stop. "
             "If the signal is followed by a '+' the signal is propagated the previously "
@@ -509,12 +510,10 @@ namespace Gaudi {
 Gaudi::Utils::SignalMonitorSvc* Gaudi::Utils::SignalMonitorSvc::s_instance = 0;
 
 // ========================================================================
-#include "GaudiKernel/SvcFactory.h"
-
 // Instantiation of a static factory class used by clients to create instances of this service
 typedef Gaudi::Utils::SignalMonitorSvc g_u_sms;
-DECLARE_SERVICE_FACTORY(g_u_sms)
+DECLARE_COMPONENT(g_u_sms)
 
 // Instantiation of a static factory class used by clients to create instances of this service
 typedef Gaudi::Utils::StopSignalHandler g_u_ssh;
-DECLARE_SERVICE_FACTORY(g_u_ssh)
+DECLARE_COMPONENT(g_u_ssh)

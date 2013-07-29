@@ -9,7 +9,6 @@
 //      ====================================================================
 
 // Framework include files
-#include "GaudiKernel/AlgFactory.h"
 #include "GaudiKernel/DataStoreItem.h"
 #include "GaudiKernel/SmartDataPtr.h"
 #include "GaudiKernel/MsgStream.h"
@@ -31,7 +30,7 @@
 
 using namespace Gaudi::Examples;
 
-DECLARE_ALGORITHM_FACTORY(ReadAlg)
+DECLARE_COMPONENT(ReadAlg)
 
 //--------------------------------------------------------------------
 // Initialize

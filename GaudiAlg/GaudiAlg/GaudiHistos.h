@@ -26,7 +26,6 @@
 // GaudiAlg
 // ============================================================================
 #include "GaudiAlg/Maps.h"
-#include "GaudiAlg/HbookName.h"
 // ============================================================================
 // Forward declarations
 namespace AIDA
@@ -2705,13 +2704,11 @@ public: // trivial & non-trivial accessors
   /// get histogram directory           (property "HistoDir")
   inline const std::string& histoDir      () const { return m_histoDir      ; }
   /// get the constructed histogram path
-  inline std::string histoPath () const
-  {
-    const std::string path = histoTopDir() + histoDir();
-    return ( splitHistoDir() ? dirHbookName(path) : path );
-  }
+  std::string histoPath () const;
   /// print histograms at finalization ?
   inline bool histosPrint () const  { return m_histosPrint ; }
+  /// print histogram counters at finalization ?
+  inline bool histoCountersPrint () const  { return m_histoCountersPrint ; }
   /// Use old style sequencial numerical automatically assigned IDs ?
   inline bool useNumericAutoIDs() const { return m_useNumericAutoIDs; }
   // ==========================================================================
@@ -3108,6 +3105,8 @@ private:
   std::string m_histoDir      ;
   /// print histograms at finalization
   bool        m_histosPrint   ;
+  /// print histogram counters at finalization
+  bool        m_histoCountersPrint   ;
   /// Flag to turn on/off the registration of histograms to the Monitoring Service
   bool        m_declareMoniHists;
   // ==========================================================================

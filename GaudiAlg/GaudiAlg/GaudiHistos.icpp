@@ -34,6 +34,7 @@
 #include "GaudiAlg/CheckForNaN.h"
 #include "GaudiAlg/Print.h"
 #include "GaudiAlg/Fill.h"
+#include "GaudiAlg/HbookName.h"
 // ============================================================================
 // forward declarations from AIDA
 // ============================================================================
@@ -65,6 +66,10 @@ void GaudiHistos<PBASE>::initGaudiHistosConstructor()
       m_histosPrint   = false ,
       "Switch on/off the printout of histograms at finalization" )
     -> declareUpdateHandler ( &GaudiHistos<PBASE>::printHistoHandler, this ) ;
+  this->declareProperty
+    ( "HistoCountersPrint"         ,
+      m_histoCountersPrint = true ,
+      "Switch on/off the printout of histogram counters at finalization" ) ;  
   // check for NaN/Finite
   this->declareProperty
     ( "HistoCheckForNaN"      ,
@@ -124,11 +129,11 @@ void GaudiHistos<PBASE>::initGaudiHistosConstructor()
 template <class PBASE>
 StatusCode GaudiHistos<PBASE>::
 #ifdef __ICC
-  i_ghInitialize
+i_ghInitialize
 #else
-  initialize
+initialize
 #endif
-  ()
+()
 {
   // initialize base class
   const StatusCode sc = PBASE::initialize();
@@ -150,13 +155,13 @@ StatusCode GaudiHistos<PBASE>::
   {
     this ->
       Warning( "Using numerical automatic IDs. These are not guaranteed to be totally deterministic. Use with care...",
-               StatusCode::SUCCESS );
+               StatusCode::SUCCESS ).ignore();
   }
 
   // Finally, print the location histogram will be written to
   this->Print
     ( "The histogram path is set to be '" + histoPath() + "'",
-      StatusCode( StatusCode::SUCCESS, true )  , MSG::DEBUG );
+      StatusCode( StatusCode::SUCCESS, true )  , MSG::DEBUG ).ignore();
 
   return sc;
 }
@@ -166,18 +171,18 @@ StatusCode GaudiHistos<PBASE>::
 template <class PBASE>
 StatusCode GaudiHistos<PBASE>::
 #ifdef __ICC
-  i_ghFinalize
+i_ghFinalize
 #else
-  finalize
+finalize
 #endif
-  ()
+()
 {
 
   if ( produceHistos() )
   {
 
     // Count how many histos of each type
-    if ( !noHistos() )
+    if ( (!noHistos()) && histoCountersPrint() )
     {
       const unsigned int n1D  = histo1DMapID   () . size () ;
       const unsigned int n2D  = histo2DMapID   () . size () ;
@@ -537,6 +542,15 @@ void GaudiHistos<PBASE>::printHistoHandler( Property& )
   // no action if not yet initialized
   if ( this -> FSMState() < Gaudi::StateMachine::INITIALIZED ) { return ; }
   if ( this -> histosPrint() ) { this -> printHistos ( MSG::ALWAYS ) ; }
+}
+// ============================================================================
+// get the constructed histogram path
+// ============================================================================
+template < class PBASE >
+std::string GaudiHistos<PBASE>::histoPath () const
+{
+  const std::string path = histoTopDir() + histoDir();
+  return ( splitHistoDir() ? dirHbookName(path) : path );
 }
 // ============================================================================
 // 1D

@@ -1,4 +1,4 @@
-gaudi_subdir(GaudiExamples v23r6)
+gaudi_subdir(GaudiExamples v23r9)
 
 gaudi_depends_on_subdirs(GaudiKernel GaudiUtils GaudiGSL GaudiAlg)
 
@@ -44,7 +44,8 @@ set(GaudiExamples_srcs
     src/StringKeys/*.cpp
     src/StatusCodeSvc/*.cpp
     src/testing/*.cpp
-    src/IntelProfiler/*.cpp)
+    src/IntelProfiler/*.cpp
+    src/PluginService/*.cpp)
 
 gaudi_add_library(GaudiExamplesLib src/Lib/*.cpp
                   LINK_LIBRARIES GaudiGSLLib GaudiUtilsLib HepPDT ROOT

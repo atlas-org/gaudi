@@ -1,11 +1,8 @@
-// $Id: PythonScriptingSvc.cpp,v 1.18 2008/10/27 21:12:08 marcocle Exp $
-
 #include "Python.h"
 
 // Include Files
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/SvcFactory.h"
 #include "GaudiKernel/SmartIF.h"
 
 #include "PythonScriptingSvc.h"
@@ -14,13 +11,13 @@
 #include <sstream>
 
 // Special for Unixes
-#if defined(linux)
+#if defined(__linux)
   #include "dlfcn.h"
 #endif
 
 // Instantiation of a static factory class used by clients to create
 //  instances of this service
-DECLARE_SERVICE_FACTORY(PythonScriptingSvc)
+DECLARE_COMPONENT(PythonScriptingSvc)
 
 //----------------------------------------------------------------------------------
 PythonScriptingSvc::PythonScriptingSvc( const std::string& name, ISvcLocator* svc )
@@ -71,7 +68,7 @@ StatusCode PythonScriptingSvc::initialize()
   std::string vers(version, 0, version.find_first_of('.',version.find_first_of('.')+1));
   log << MSG::INFO << "Python version: [" << vers << "]" << endmsg;
 
-#if defined(linux)
+#if defined(__linux)
   // This is hack to make global the python symbols
   // which are needed by the other python modules
   // (eg. readline, math, etc,) libraries.
