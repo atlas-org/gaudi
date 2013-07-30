@@ -4,7 +4,7 @@
   <argument name="options"><text>
 from Gaudi.Configuration import *
 
-from Configurables import HelloWorld, AbortEventAlg
+from Configurables import HelloWorld, AbortEventAlg, EventLoopMgr
 
 importOptions("Common.opts")
 
@@ -15,8 +15,8 @@ alg = AbortEventAlg(AbortedEventNumber = 3)
 
 app = ApplicationMgr(TopAlg = [h1,alg,h2],
                      EvtSel = "NONE", EvtMax = 5)
-                     
-MessageSvc().setDebug.append("EventLoopMgr") 
+
+EventLoopMgr(OutputLevel=DEBUG)
 
 </text></argument>
 <argument name="validator"><text>

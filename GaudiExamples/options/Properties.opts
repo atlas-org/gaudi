@@ -80,3 +80,5 @@ MessageSvc.setWarning  += {"MsgTest"};
 //MessageSvc.setFatal  += {"MsgTest"};
 //MessageSvc.setAlways  += {"MsgTest"};
 
+// MessageSvc.set* properties do not work in the ATLAS branch
+EventLoopMgr.OutputLevel = 2;

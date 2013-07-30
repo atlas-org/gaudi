@@ -87,3 +87,5 @@ msgSvc.setWarning  += ["MsgTest"]
 #msgSvc.setFatal  += ["MsgTest"]
 #msgSvc.setAlways  += ["MsgTest"]
 
+# MessageSvc.set* properties do not work in the ATLAS branch
+EventLoopMgr(OutputLevel = DEBUG)

@@ -1,6 +1,10 @@
 Package GaudiExamples
 Package manager : Marco Clemencic
 
+! 2013-07-30 - Marco Clemencic
+ - Modified reference files and changed options (because the "set*" properties
+   of MessageSvc do not work in the ATLAS branch).
+
 ! 2013-07-26 - Marco Clemencic
  - Fixed a warning.
 
