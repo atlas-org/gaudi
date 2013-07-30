@@ -1,6 +1,10 @@
 Package: GaudiUtils
 Package manager : Marco Clemencic
 
+! 2013-07-30 - Marco Clemencic
+ - Minor fix to IODataManager to prevent a segfault during finalization in ATLAS
+   branch.
+
 ! 2013-07-19 - Marco Clemencic
  - Clean up in the use of the new PluginService.
 

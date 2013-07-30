@@ -59,6 +59,7 @@ StatusCode IODataManager::initialize()  {
 /// IService implementation: finalize the service
 StatusCode IODataManager::finalize()  {
   m_catalog = 0; // release
+  m_incSvc  = 0;
   return Service::finalize();
 }
 
