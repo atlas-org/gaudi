@@ -487,6 +487,20 @@ pattern generate_componentslist \
     macro_append <library>MergeComponentsList_dependencies " <library>ComponentsList " ; \
   end_private
 
+pattern generate_rootmap \
+  document genmap <library>RootMap -group=<group> LIBNAME=<library> ; \
+  macro_append <library>RootMap_dependencies " <library> " ; \
+  private ; \
+    apply_pattern application_path ; \
+    macro merge_rootmap_tag "--do-merge"   \
+	  do_merge_rootmap  "--do-merge"   \
+	  no_merge_rootmap  "--un-merge" ; \
+    document merge_rootmap <library>MergeMap -group=<group> \
+             library=<library> \
+             merge_rootmap_switch=$(merge_rootmap_tag) \
+             $(bin)$(library_prefix)<library>.$(shlibsuffix) ; \
+    macro_append <library>MergeMap_dependencies " <library>RootMap " ; \
+  end_private
 
 # Tags and Global macros=====================================================
 

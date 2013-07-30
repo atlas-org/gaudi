@@ -2,6 +2,10 @@ package GaudiPolicy
 package manager: Marco Clemencic
 
 ! 2013-07-30 - Marco Clemencic
+ - Restored the pattern "generate_rootmap" for custom Reflex::PluginService
+   uses.
+
+! 2013-07-30 - Marco Clemencic
  - Updated the pattern "gaudi_component_library".
 
 ! 2013-07-27 - Marco Clemencic
