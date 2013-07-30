@@ -151,7 +151,7 @@ pattern gaudi_component_library \
     apply_pattern libraryShr library="<library>" ; \
     apply_pattern library_Cshlibflags library="<library>" ;\
     macro <library>_dependencies "$(<package>_linker_library) " ;\
-    apply_pattern generate_rootmap library=<library> group=<group> ; \
+    apply_pattern generate_componentslist library=<library> group=<group> ; \
     apply_pattern generate_configurables library=<library> group=<group>
 
 pattern linker_library \
@@ -1453,12 +1453,12 @@ set GAUDI_DOXY_HOME $(GAUDI_home)/GaudiRelease/doc
 # Conditional use of packages
 #-------------------------------------------------------------------
 #
-# Pattern to "use" a package only if a certain tag <tag> is present. If tag is 
+# Pattern to "use" a package only if a certain tag <tag> is present. If tag is
 #    NOT active, package will be not be used.
 #
 #   pkg:  package name
 #   tag:  tag name to switch on usage of package
-#   ver:  version of package 
+#   ver:  version of package
 #   root: root path of package
 #   opt:  extra options to pass
 #
@@ -1479,7 +1479,7 @@ pattern use_if \
 #
 #   pkg:  package name
 #   tag:  tag name to switch OFF usage of package
-#   ver:  version of package 
+#   ver:  version of package
 #   root: root path of package
 #   opt:  extra options to pass
 #
