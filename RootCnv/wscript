@@ -1,0 +1,93 @@
+## -*- python -*-
+## automatically generated from a hscript
+## do NOT edit.
+
+## waf imports
+import waflib.Logs as msg
+
+PACKAGE = {
+    "name":    "RootCnv",
+    "authors": ["Markus", "Frank"],
+
+    "version":  "v1r20p1",
+}
+
+### ---------------------------------------------------------------------------
+def pkg_deps(ctx):
+    
+    ## public dependencies
+    ctx.use_pkg("GaudiKernel", version="*", public=True)
+    ctx.use_pkg("GaudiUtils", version="*", public=True)
+    ctx.use_pkg("LCG_Interfaces/ROOT", version="*", public=True)
+    
+    ## no private dependencies
+    ## no runtime dependencies
+    return # pkg_deps
+
+
+### ---------------------------------------------------------------------------
+def options(ctx):
+    
+    return # options
+
+
+### ---------------------------------------------------------------------------
+def configure(ctx):
+    
+    
+    
+    #### macro_append &{{ROOT_linkopts [{default [-lCintex -lTreePlayer -lMathCore]} {target-winxp [libCintex.lib libTreePlayer.lib libMathCore.lib]}]}}
+    ctx.hwaf_macro_append("ROOT_linkopts", (
+      {"default": ["-lCintex", "-lTreePlayer", "-lMathCore"]},
+      {"target-winxp": ["libCintex.lib", "libTreePlayer.lib", "libMathCore.lib"]},
+    ))
+    #### macro_append &{{ROOT_cppflags [{default []} {target-winxp [-FI"${ROOTSYS}/include/w32pragma.h]}]}}
+    ctx.hwaf_macro_append("ROOT_cppflags", (
+      {"default": ""},
+      {"target-winxp": "-FI\"${ROOTSYS}/include/w32pragma.h"},
+    ))
+    
+    return # configure
+
+
+### ---------------------------------------------------------------------------
+def build(ctx):
+    
+    
+    ##### **** statement *hlib.ApplyPatternStmt (&{install_more_includes [more=RootCnv]})
+    ##### **** statement *hlib.ApplyPatternStmt (&{reflex_dictionary [dictionary=RootCnv headerfiles=$(ROOTCNVROOT)/dict/RootCnv_dict.h selectionfile=$(ROOTCNVROOT)/dict/RootCnv_dict.xml]})
+    ##### **** statement *hlib.ApplyPatternStmt (&{linker_library [library=RootCnvLib]})
+    ##### **** statement *hlib.ApplyPatternStmt (&{component_library [library=RootCnv]})
+    
+    ctx(
+        features = "tdaq_library",
+        name     = "RootCnv",
+        target   = "RootCnv",
+        source   = ["components/*.cpp"],
+        cxxflags = ["-D__POOL_COMPATIBILITY"],
+    )
+    
+    ctx(
+        features = "tdaq_library",
+        name     = "RootCnvLib",
+        target   = "RootCnvLib",
+        source   = ["src/*.cpp"],
+        cxxflags = ["-D__POOL_COMPATIBILITY"],
+    )
+    
+    ctx(
+        features = "tdaq_application",
+        name     = "extract_event",
+        target   = "extract_event",
+        source   = ["merge/extractEvt.cpp"],
+    )
+    
+    ctx(
+        features = "tdaq_application",
+        name     = "gaudi_merge",
+        target   = "gaudi_merge",
+        source   = ["merge/merge.cpp"],
+    )
+    return # build
+
+## EOF ##

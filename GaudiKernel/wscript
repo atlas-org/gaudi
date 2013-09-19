@@ -1,0 +1,154 @@
+## -*- python -*-
+## automatically generated from a hscript
+## do NOT edit.
+
+## waf imports
+import waflib.Logs as msg
+
+PACKAGE = {
+    "name":    "GaudiKernel",
+    "authors": ["LHCb Gaudi Team"],
+
+    "version":  "v28r8",
+}
+
+### ---------------------------------------------------------------------------
+def pkg_deps(ctx):
+    
+    ## public dependencies
+    ctx.use_pkg("GaudiPolicy", version="*", public=True)
+    ctx.use_pkg("LCG_Interfaces/Reflex", version="*", public=True)
+    ctx.use_pkg("LCG_Interfaces/Boost", version="*", public=True)
+    
+    ## private dependencies
+    ctx.use_pkg("LCG_Interfaces/CppUnit", version="*", private=True)
+    
+    ## runtime dependencies
+    ctx.use_pkg("LCG_Interfaces/CppUnit", version="*", runtime=True)
+    return # pkg_deps
+
+
+### ---------------------------------------------------------------------------
+def options(ctx):
+    
+    return # options
+
+
+### ---------------------------------------------------------------------------
+def configure(ctx):
+    
+    
+    
+    #### apply_tag &{{skip_genconfuser []}}
+    ctx.hwaf_declare_tag("skip_genconfuser", content=[])
+    ctx.hwaf_apply_tag("skip_genconfuser")
+    #### macro_append &{{cppflags [{default []} {target-linux [-pedantic -Wwrite-strings -Wpointer-arith -Woverloaded-virtual -Wno-long-long]} {target-darwin []} {target-winxp []}]}}
+    ctx.hwaf_macro_append("cppflags", (
+      {"default": ""},
+      {"target-linux": ["-pedantic", "-Wwrite-strings", "-Wpointer-arith", "-Woverloaded-virtual", "-Wno-long-long"]},
+      {"target-darwin": ""},
+      {"target-winxp": ""},
+    ))
+    #### macro_append &{{Boost_linkopts [{default [${Boost_linkopts_thread} ${Boost_linkopts_date_time}]}]}}
+    ctx.hwaf_macro_append("Boost_linkopts", (
+      {"default": ["${Boost_linkopts_thread}", "${Boost_linkopts_date_time}"]},
+    ))
+    #### macro_append &{{Boost_linkopts [{default [${Boost_linkopts_system} ${Boost_linkopts_filesystem}]}]}}
+    ctx.hwaf_macro_append("Boost_linkopts", (
+      {"default": ["${Boost_linkopts_system}", "${Boost_linkopts_filesystem}"]},
+    ))
+    #### macro_append &{{dictionary_dict_cpp_cppflags [{default [-Wno-overloaded-virtual]} {no-hide-warnings []} {target-winxp [-D_SCL_SECURE_NO_WARNINGS]}]}}
+    ctx.hwaf_macro_append("dictionary_dict_cpp_cppflags", (
+      {"default": "-Wno-overloaded-virtual"},
+      {"no-hide-warnings": ""},
+      {"target-winxp": "-D_SCL_SECURE_NO_WARNINGS"},
+    ))
+    
+    return # configure
+
+
+### ---------------------------------------------------------------------------
+def build(ctx):
+    
+    
+    ##### **** statement *hlib.ApplyPatternStmt (&{install_more_includes [more=GaudiKernel]})
+    ##### **** statement *hlib.ApplyPatternStmt (&{linker_library [library=GaudiKernel]})
+    ##### **** statement *hlib.ApplyPatternStmt (&{ld_library_path []})
+    ##### **** statement *hlib.ApplyPatternStmt (&{install_scripts []})
+    ##### **** statement *hlib.ApplyPatternStmt (&{install_python_modules []})
+    ##### **** statement *hlib.ApplyPatternStmt (&{reflex_dictionary [dictionary=GaudiKernel headerfiles=$(GAUDIKERNELROOT)/dict/dictionary.h selectionfile=$(GAUDIKERNELROOT)/dict/dictionary.xml]})
+    ##### **** statement *hlib.ApplyPatternStmt (&{QMTest []})
+    
+    ctx(
+        features = "tdaq_application",
+        name     = "DirSearchPath_test",
+        target   = "DirSearchPath_test",
+        source   = ["tests/src/DirSearchPath_test.cpp"],
+    )
+    
+    ctx(
+        features = "tdaq_library",
+        name     = "GaudiKernel",
+        target   = "GaudiKernel",
+        source   = ["Lib/*.cpp"],
+    )
+    
+    ctx(
+        features = "tdaq_application",
+        name     = "Memory_test",
+        target   = "Memory_test",
+        source   = ["tests/src/Memory_test.cpp"],
+    )
+    
+    ctx(
+        features = "tdaq_application",
+        name     = "Parsers_test",
+        target   = "Parsers_test",
+        source   = ["tests/src/parsers.cpp"],
+    )
+    
+    ctx(
+        features = "tdaq_application",
+        name     = "PathResolver_test",
+        target   = "PathResolver_test",
+        source   = ["tests/src/PathResolver_test.cpp"],
+    )
+    
+    ctx(
+        features = "tdaq_application",
+        name     = "genconf",
+        target   = "genconf",
+        source   = ["Util/genconf.cpp"],
+        use = ["dl", "${GaudiKernel_linkopts}", "${Boost_linkopts}", "${Boost_linkopts_filesystem}", "${Boost_linkopts_regex}", "${Boost_linkopts_program_options}", "${CppUnit_linkopts}"],
+    )
+    
+    ctx(
+        features = "tdaq_application",
+        name     = "test_GaudiTime",
+        target   = "test_GaudiTime",
+        source   = ["tests/src/test_GaudiTime.cpp"],
+    )
+    
+    ctx(
+        features = "tdaq_application",
+        name     = "test_GaudiTiming",
+        target   = "test_GaudiTiming",
+        source   = ["tests/src/test_GaudiTiming.cpp"],
+    )
+    
+    ctx(
+        features = "tdaq_application",
+        name     = "test_SerializeSTL",
+        target   = "test_SerializeSTL",
+        source   = ["tests/src/test_SerializeSTL.cpp"],
+    )
+    
+    ctx(
+        features = "tdaq_application",
+        name     = "test_headers_build",
+        target   = "test_headers_build",
+        source   = ["tests/src/test_headers_build.cpp"],
+    )
+    return # build
+
+## EOF ##

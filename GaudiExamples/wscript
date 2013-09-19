@@ -1,0 +1,122 @@
+## -*- python -*-
+## automatically generated from a hscript
+## do NOT edit.
+
+## waf imports
+import waflib.Logs as msg
+
+PACKAGE = {
+    "name":    "GaudiExamples",
+    "authors": [],
+
+    "version":  "v23r9",
+}
+
+### ---------------------------------------------------------------------------
+def pkg_deps(ctx):
+    
+    ## public dependencies
+    ctx.use_pkg("LCG_Interfaces/ROOT", version="*", public=True)
+    ctx.use_pkg("LCG_Interfaces/Reflex", version="*", public=True)
+    ctx.use_pkg("LCG_Interfaces/RELAX", version="*", public=True)
+    ctx.use_pkg("LCG_Interfaces/AIDA", version="*", public=True)
+    ctx.use_pkg("Gaudi", version="*", public=True)
+    ctx.use_pkg("GaudiPartProp", version="*", public=True)
+    ctx.use_pkg("PartPropSvc", version="*", public=True)
+    ctx.use_pkg("GaudiPython", version="*", public=True)
+    ctx.use_pkg("GaudiGSL", version="*", public=True)
+    ctx.use_pkg("RootHistCnv", version="*", public=True)
+    ctx.use_pkg("RootCnv", version="*", public=True)
+
+    ctx.use_pkg("LCG_Interfaces/Boost", version="*", public=True)
+    ctx.use_pkg("LCG_Interfaces/HepPDT", version="*", public=True)
+    
+    ## private dependencies
+    ctx.use_pkg("LCG_Interfaces/Python", version="*", private=True)
+    
+    ## runtime dependencies
+    ctx.use_pkg("LCG_Interfaces/Reflex", version="*", runtime=True)
+    ctx.use_pkg("LCG_Interfaces/RELAX", version="*", runtime=True)
+    ctx.use_pkg("LCG_Interfaces/Python", version="*", runtime=True)
+    return # pkg_deps
+
+
+### ---------------------------------------------------------------------------
+def options(ctx):
+    
+    return # options
+
+
+### ---------------------------------------------------------------------------
+def configure(ctx):
+    
+    
+    
+    ##### **** statement *hlib.SetStmt (&{{STDOPTS [{default [${GAUDIEXAMPLESROOT}/options]}]}})
+    #### path_append &{{JOBOPTSEARCHPATH [{default [/NONEXISTINGDIR]}]}}
+    ctx.hwaf_path_append("JOBOPTSEARCHPATH", (
+      {"default": "/NONEXISTINGDIR"},
+    ))
+    #### path_append &{{JOBOPTSEARCHPATH [{default [${GAUDIEXAMPLESROOT}/options]}]}}
+    ctx.hwaf_path_append("JOBOPTSEARCHPATH", (
+      {"default": "${GAUDIEXAMPLESROOT}/options"},
+    ))
+    #### macro_append &{{ROOT_linkopts [{default [-lHist]} {target-winxp [libHist.lib]} {target-mac104 [-lHist -lMatrix]}]}}
+    ctx.hwaf_macro_append("ROOT_linkopts", (
+      {"default": "-lHist"},
+      {"target-winxp": "libHist.lib"},
+      {"target-mac104": ["-lHist", "-lMatrix"]},
+    ))
+    #### macro_append &{{ROOT_linkopts [{default []} {ROOT_GE_5_15&target-mac104 [-lNet]}]}}
+    ctx.hwaf_macro_append("ROOT_linkopts", (
+      {"default": ""},
+      {("ROOT_GE_5_15", "target-mac104"): "-lNet"},
+    ))
+    #### macro_remove &{{PyExample_use_linkopts [{default [${GaudiExamples_linkopts}]}]}}
+    ctx.hwaf_macro_remove("PyExample_use_linkopts", (
+      {"default": "${GaudiExamples_linkopts}"},
+    ))
+    #### path_prepend &{{PYTHONPATH [{default []} {QMTest [${GAUDIEXAMPLESROOT}/tests/qmtest]}]}}
+    ctx.hwaf_path_prepend("PYTHONPATH", (
+      {"default": ""},
+      {"QMTest": "${GAUDIEXAMPLESROOT}/tests/qmtest"},
+    ))
+    
+    return # configure
+
+
+### ---------------------------------------------------------------------------
+def build(ctx):
+    
+    
+    ##### **** statement *hlib.ApplyPatternStmt (&{reflex_dictionary [dictionary=GaudiExamples headerfiles=$(GAUDIEXAMPLESROOT)/src/POOLIO/dict.h selectionfile=$(GAUDIEXAMPLESROOT)/src/POOLIO/dict.xml options= $(includes) ]})
+    ##### **** statement *hlib.ApplyPatternStmt (&{install_python_modules []})
+    ##### **** statement *hlib.ApplyPatternStmt (&{application_path []})
+    ##### **** statement *hlib.ApplyPatternStmt (&{linker_library [library=GaudiExamplesLib]})
+    ##### **** statement *hlib.ApplyPatternStmt (&{component_library [library=GaudiExamples]})
+    ##### **** statement *hlib.ApplyPatternStmt (&{pyd_boost_module [module=PyExample files=PythonModule/*.cpp]})
+    ##### **** statement *hlib.ApplyPatternStmt (&{QMTest []})
+    
+    ctx(
+        features = "tdaq_application",
+        name     = "Allocator",
+        target   = "Allocator",
+        source   = ["Allocator/*.cpp"],
+    )
+    
+    ctx(
+        features = "tdaq_library",
+        name     = "GaudiExamples",
+        target   = "GaudiExamples",
+        source   = ["AbortEvent/*.cpp", "AlgSequencer/*.cpp", "AlgTools/*.cpp", "DataOnDemand/*.cpp", "AlgErrAud/*.cpp", "GSLTools/*.cpp", "RandomNumber/*.cpp", "Histograms/*.cpp", "NTuples/*.cpp", "TupleEx/*.cpp", "CounterEx/*.cpp", "PartProp/*.cpp", "Properties/*.cpp", "ExtendedProperties/*.cpp", "POOLIO/*.cpp", "ColorMsg/ColorMsgAlg.cpp", "History/History.cpp", "THist/*.cpp", "ErrorLog/ErrorLogTest.cpp", "EvtColsEx/EvtColAlg.cpp", "Maps/*.cpp", "MultipleLogStreams/*.cpp", "GaudiCommonTests/*.cpp", "IncidentSvc/*.cpp", "bug_34121/*.cpp", "Auditors/*.cpp", "Timing/*.cpp", "Selections/*.cpp", "SvcInitLoop/*.cpp", "StringKeys/*.cpp", "StatusCodeSvc/*.cpp", "testing/*.cpp", "IntelProfiler/*.cpp", "Dll/GaudiExamples*.cpp"],
+    )
+    
+    ctx(
+        features = "tdaq_library",
+        name     = "GaudiExamplesLib",
+        target   = "GaudiExamplesLib",
+        source   = ["Lib/*.cpp"],
+    )
+    return # build
+
+## EOF ##
