@@ -60,10 +60,7 @@ def configure(ctx):
 def build(ctx):
     
     
-    ctx.gaudi_install_joboptions(
-        source = ["options/*.py", "options/*.opts"],
-        cwd = "options",
-    )
+    ctx.gaudi_install_joboptions()
 
     ctx(
         features = "gaudi_application hwaf_utest",
