@@ -1,13 +1,11 @@
 ## -*- python -*-
-## automatically generated from a hscript
-## do NOT edit.
 
 ## waf imports
 import waflib.Logs as msg
 
 PACKAGE = {
     "name":    "GaudiPython",
-    "authors": [],
+    "authors": ["gaudi collaboration"],
 
     "version":  "v12r6",
 }
@@ -28,10 +26,6 @@ def pkg_deps(ctx):
     ctx.use_pkg("GaudiCoreSvc", version="*", private=True)
     ctx.use_pkg("GaudiCommonSvc", version="*", private=True)
     
-    ## runtime dependencies
-    ctx.use_pkg("LCG_Interfaces/CLHEP", version="*", runtime=True)
-    ctx.use_pkg("LCG_Interfaces/Python", version="*", runtime=True)
-    ctx.use_pkg("LCG_Interfaces/Reflex", version="*", runtime=True)
     return # pkg_deps
 
 
@@ -44,54 +38,57 @@ def options(ctx):
 ### ---------------------------------------------------------------------------
 def configure(ctx):
     
-    
-    
-    #### macro &{{testdict_options [{default [--no_templatetypedefs -I${Python_inc} -I${GAUDIPYTHONROOT}/src/Test]}]}}
-    ctx.hwaf_declare_macro("testdict_options", (
-      {"default": ["--no_templatetypedefs", "-I${Python_inc}", "-I${GAUDIPYTHONROOT}/src/Test"]},
-    ))
-    #### macro &{{rootmap_name [{default [rootmap]} {ROOT_GE_5_15 [reflex.rootmap]}]}}
-    ctx.hwaf_declare_macro("rootmap_name", (
-      {"default": "rootmap"},
-      {"ROOT_GE_5_15": "reflex.rootmap"},
-    ))
-    
     return # configure
 
 
 ### ---------------------------------------------------------------------------
 def build(ctx):
     
-    
-    ##### **** statement *hlib.ApplyPatternStmt (&{install_more_includes [more=GaudiPython]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{install_python_modules []})
-    ##### **** statement *hlib.ApplyPatternStmt (&{install_scripts []})
-    ##### **** statement *hlib.ApplyPatternStmt (&{linker_library [library=GaudiPythonLib]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{reflex_dictionary [dictionary=GaudiPython headerfiles=$(GAUDIPYTHONROOT)/dict/kernel.h selectionfile=../dict/selection_kernel.xml options="--no_templatetypedefs -I$(Python_inc) imports="Python -import=CLHEP]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{component_library [library=GaudiPython]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{library_Cshlibflags [library="GPyTest]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{reflex_test_dictionary [dictionary=GPyTest headerfiles=$(GAUDIPYTHONROOT)/src/Test/test.h selectionfile=../src/Test/test_selection.xml options=$(testdict_options) imports="Python -import=CLHEP]})
+    ctx(
+        features = "gaudi_library",
+        name     = "GaudiPythonLib",
+        source   = ["src/Lib/*.cpp"],
+        use      = ["GaudiAlgLib",
+                    "python",
+                    "CLHEP",
+                    ],
+    )
+
+    ctx(
+        features = "gaudi_module",
+        name     = "GaudiPython",
+        source   = ["src/Services/*.cpp"],
+        use      = ["GaudiPythonLib", "GaudiUtilsLib"],
+    )
     
     ctx(
-        features = "tdaq_library",
+        features = "build_reflex_dict",
+        name     = "GaudiPythonDict",
+        selection_xml = "dict/selection_kernel.xml",
+        source   = "dict/kernel.h",
+        use      = ["GaudiPythonLib", "GaudiUtilsLib"],
+    )
+    
+    ctx.gaudi_install_python_modules()
+
+    ## -- tests --
+    ctx(
+        features = "gaudi_library",
         name     = "GPyTest",
         target   = "GPyTest",
-        source   = ["Test/*.cpp"],
+        source   = ["src/Test/*.cpp"],
+        use      = ["GaudiKernel", "python", "CLHEP"],
+        include  = ["src/Test"],
     )
     
     ctx(
-        features = "tdaq_library",
-        name     = "GaudiPython",
-        target   = "GaudiPython",
-        source   = ["Services/*.cpp"],
+        features = "build_reflex_dict",
+        name     = "GPyTestDict",
+        selection_xml = "src/Test/test_selection.xml",
+        source   = "src/Test/test.h",
+        use      = ["GaudiKernel", "python", "CLHEP"],
     )
-    
-    ctx(
-        features = "tdaq_library",
-        name     = "GaudiPythonLib",
-        target   = "GaudiPythonLib",
-        source   = ["Lib/*.cpp"],
-    )
+
     return # build
 
 ## EOF ##
