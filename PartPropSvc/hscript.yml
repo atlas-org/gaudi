@@ -37,12 +37,14 @@ build: {
     PartPropSvc-jobo: {
         features: "gaudi_install_joboptions",
         source:   ["share/PartPropSvc.py"],
+        cwd:      "share",
     },
 
     PartPropSvc-data: {
         features: "gaudi_install_data",
         source:   ["share/PDGTABLE", "share/PDGTABLE.MeV"],
         install_path: "${INSTALL_AREA}/share",
+        cwd:      "share",
     },
 }
 
