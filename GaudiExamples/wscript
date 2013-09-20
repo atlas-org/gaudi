@@ -1,13 +1,11 @@
 ## -*- python -*-
-## automatically generated from a hscript
-## do NOT edit.
 
 ## waf imports
 import waflib.Logs as msg
 
 PACKAGE = {
     "name":    "GaudiExamples",
-    "authors": [],
+    "authors": ["gaudi collaboration"],
 
     "version":  "v23r9",
 }
@@ -50,33 +48,6 @@ def options(ctx):
 ### ---------------------------------------------------------------------------
 def configure(ctx):
     
-    
-    
-    ##### **** statement *hlib.SetStmt (&{{STDOPTS [{default [${GAUDIEXAMPLESROOT}/options]}]}})
-    #### path_append &{{JOBOPTSEARCHPATH [{default [/NONEXISTINGDIR]}]}}
-    ctx.hwaf_path_append("JOBOPTSEARCHPATH", (
-      {"default": "/NONEXISTINGDIR"},
-    ))
-    #### path_append &{{JOBOPTSEARCHPATH [{default [${GAUDIEXAMPLESROOT}/options]}]}}
-    ctx.hwaf_path_append("JOBOPTSEARCHPATH", (
-      {"default": "${GAUDIEXAMPLESROOT}/options"},
-    ))
-    #### macro_append &{{ROOT_linkopts [{default [-lHist]} {target-winxp [libHist.lib]} {target-mac104 [-lHist -lMatrix]}]}}
-    ctx.hwaf_macro_append("ROOT_linkopts", (
-      {"default": "-lHist"},
-      {"target-winxp": "libHist.lib"},
-      {"target-mac104": ["-lHist", "-lMatrix"]},
-    ))
-    #### macro_append &{{ROOT_linkopts [{default []} {ROOT_GE_5_15&target-mac104 [-lNet]}]}}
-    ctx.hwaf_macro_append("ROOT_linkopts", (
-      {"default": ""},
-      {("ROOT_GE_5_15", "target-mac104"): "-lNet"},
-    ))
-    #### macro_remove &{{PyExample_use_linkopts [{default [${GaudiExamples_linkopts}]}]}}
-    ctx.hwaf_macro_remove("PyExample_use_linkopts", (
-      {"default": "${GaudiExamples_linkopts}"},
-    ))
-    #### path_prepend &{{PYTHONPATH [{default []} {QMTest [${GAUDIEXAMPLESROOT}/tests/qmtest]}]}}
     ctx.hwaf_path_prepend("PYTHONPATH", (
       {"default": ""},
       {"QMTest": "${GAUDIEXAMPLESROOT}/tests/qmtest"},
@@ -89,34 +60,99 @@ def configure(ctx):
 def build(ctx):
     
     
-    ##### **** statement *hlib.ApplyPatternStmt (&{reflex_dictionary [dictionary=GaudiExamples headerfiles=$(GAUDIEXAMPLESROOT)/src/POOLIO/dict.h selectionfile=$(GAUDIEXAMPLESROOT)/src/POOLIO/dict.xml options= $(includes) ]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{install_python_modules []})
-    ##### **** statement *hlib.ApplyPatternStmt (&{application_path []})
-    ##### **** statement *hlib.ApplyPatternStmt (&{linker_library [library=GaudiExamplesLib]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{component_library [library=GaudiExamples]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{pyd_boost_module [module=PyExample files=PythonModule/*.cpp]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{QMTest []})
-    
+    ctx.gaudi_install_joboptions(
+        source = ["options/*.py", "options/*.opts"],
+        cwd = "options",
+    )
+
     ctx(
-        features = "tdaq_application",
+        features = "gaudi_application hwaf_utest",
         name     = "Allocator",
         target   = "Allocator",
-        source   = ["Allocator/*.cpp"],
+        source   = ["src/Allocator/*.cpp"],
     )
     
     ctx(
-        features = "tdaq_library",
+        features = "gaudi_module",
         name     = "GaudiExamples",
         target   = "GaudiExamples",
-        source   = ["AbortEvent/*.cpp", "AlgSequencer/*.cpp", "AlgTools/*.cpp", "DataOnDemand/*.cpp", "AlgErrAud/*.cpp", "GSLTools/*.cpp", "RandomNumber/*.cpp", "Histograms/*.cpp", "NTuples/*.cpp", "TupleEx/*.cpp", "CounterEx/*.cpp", "PartProp/*.cpp", "Properties/*.cpp", "ExtendedProperties/*.cpp", "POOLIO/*.cpp", "ColorMsg/ColorMsgAlg.cpp", "History/History.cpp", "THist/*.cpp", "ErrorLog/ErrorLogTest.cpp", "EvtColsEx/EvtColAlg.cpp", "Maps/*.cpp", "MultipleLogStreams/*.cpp", "GaudiCommonTests/*.cpp", "IncidentSvc/*.cpp", "bug_34121/*.cpp", "Auditors/*.cpp", "Timing/*.cpp", "Selections/*.cpp", "SvcInitLoop/*.cpp", "StringKeys/*.cpp", "StatusCodeSvc/*.cpp", "testing/*.cpp", "IntelProfiler/*.cpp", "Dll/GaudiExamples*.cpp"],
+        source   = ["src/AbortEvent/*.cpp", 
+                    "src/AlgSequencer/*.cpp", 
+                    "src/AlgTools/*.cpp", 
+                    "src/DataOnDemand/*.cpp", 
+                    "src/AlgErrAud/*.cpp", 
+                    "src/GSLTools/*.cpp", 
+                    "src/RandomNumber/*.cpp", 
+                    "src/Histograms/*.cpp", 
+                    "src/NTuples/*.cpp", 
+                    "src/TupleEx/*.cpp", 
+                    "src/CounterEx/*.cpp", 
+                    "src/PartProp/*.cpp", 
+                    "src/Properties/*.cpp", 
+                    "src/ExtendedProperties/*.cpp", 
+                    "src/POOLIO/*.cpp", 
+                    "src/ColorMsg/ColorMsgAlg.cpp", 
+                    "src/History/History.cpp", 
+                    "src/THist/*.cpp", 
+                    "src/ErrorLog/ErrorLogTest.cpp", 
+                    "src/EvtColsEx/EvtColAlg.cpp", 
+                    "src/Maps/*.cpp", 
+                    "src/MultipleLogStreams/*.cpp", 
+                    "src/GaudiCommonTests/*.cpp", 
+                    "src/IncidentSvc/*.cpp", 
+                    "src/bug_34121/*.cpp", 
+                    "src/Auditors/*.cpp", 
+                    "src/Timing/*.cpp", 
+                    "src/Selections/*.cpp", 
+                    "src/SvcInitLoop/*.cpp", 
+                    "src/StringKeys/*.cpp", 
+                    "src/StatusCodeSvc/*.cpp", 
+                    "src/testing/*.cpp", 
+                    "src/IntelProfiler/*.cpp", 
+                    "src/Dll/GaudiExamples*.cpp",
+                ],
+        use = ["GaudiExamplesLib"],
     )
     
     ctx(
-        features = "tdaq_library",
+        features = "gaudi_library",
         name     = "GaudiExamplesLib",
         target   = "GaudiExamplesLib",
-        source   = ["Lib/*.cpp"],
+        source   = ["src/Lib/*.cpp"],
+        use = ["GaudiGSLLib", "GaudiUtilsLib",
+               "HepPDT",
+               "ROOT",
+               ],
+
     )
+
+    ctx(
+        features = "gaudi_pyext",
+        name   = "PyExample",
+        source = "src/PythonModule/*.cpp"
+        use    = ["boost-python"],
+    )
+
+    ctx(
+        features = "build_reflex_dict",
+        name = "GaudiExamplesDict",
+        selection_xml = ["src/POOLIO/dict.xml"],
+        source = "src/POOLIO/dict.h",
+        use = ["GaudiExamplesLib"],
+    )
+
+    ## -- tests --
+    ctx.gaudi_qmtest(
+        name = "Properties",
+        joboptions = "GaudiExamples/Properties.opts",
+        qmtest_dir = "tests/qmtest",
+    )
+    ctx.gaudi_qmtest(
+        name = "AlgTools",
+        joboptions = "GaudiExamples/AlgTools.opts",
+        qmtest_dir = "tests/qmtest",
+    )
+
     return # build
 
 ## EOF ##
