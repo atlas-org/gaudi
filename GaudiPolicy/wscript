@@ -35,6 +35,9 @@ def options(ctx):
 
 ### ---------------------------------------------------------------------------
 def configure(ctx):
+
+    ### export
+    ctx.hwaf_export_module("waftools/gaudi-policy.py")
     
     ## FIXME:
     if 1:

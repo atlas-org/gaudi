@@ -44,7 +44,6 @@ def build(ctx):
     ctx(
         features = "gaudi_library",
         name     = "GaudiKernel",
-        target   = "GaudiKernel",
         source   = ["src/Lib/*.cpp"],
         use      = ["boost", "ROOT"],
     )
@@ -61,10 +60,10 @@ def build(ctx):
     )
 
     ctx(
-        features = "build_reflex_dict",
+        features = "gaudi_dictionary",
         name = "GaudiKernelDict",
         source = "dict/dictionary.h",
-        selection_xml = "dict/dictionary.xml",
+        selection_file = "dict/dictionary.xml",
         use = ["GaudiKernel", "Reflex"],
     )
 
@@ -87,7 +86,7 @@ def build(ctx):
     )
     
     ctx(
-        features = "tdaq_application",
+        features = "gaudi_application hwaf_utest",
         name     = "Parsers_test",
         target   = "Parsers_test",
         source   = ["tests/src/parsers.cpp"],
@@ -95,7 +94,7 @@ def build(ctx):
     )
     
     ctx(
-        features = "tdaq_application",
+        features = "gaudi_application hwaf_utest",
         name     = "PathResolver_test",
         target   = "PathResolver_test",
         source   = ["tests/src/PathResolver_test.cpp"],
@@ -103,28 +102,28 @@ def build(ctx):
     )
     
     ctx(
-        features = "tdaq_application",
+        features = "gaudi_application hwaf_utest",
         name     = "test_GaudiTime",
         source   = ["tests/src/test_GaudiTime.cpp"],
         use      = ["GaudiKernel", "CppUnit"],
     )
     
     ctx(
-        features = "tdaq_application",
+        features = "gaudi_application hwaf_utest",
         name     = "test_GaudiTiming",
         source   = ["tests/src/test_GaudiTiming.cpp"],
         use      = ["GaudiKernel", "CppUnit"],
     )
     
     ctx(
-        features = "tdaq_application",
+        features = "gaudi_application hwaf_utest",
         name     = "test_SerializeSTL",
         source   = ["tests/src/test_SerializeSTL.cpp"],
         use      = ["GaudiKernel", "CppUnit"],
     )
     
     ctx(
-        features = "tdaq_application",
+        features = "gaudi_application hwaf_utest",
         name     = "test_headers_build",
         source   = ["tests/src/test_headers_build.cpp"],
         use      = ["GaudiKernel", "CppUnit"],

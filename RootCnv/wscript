@@ -55,10 +55,10 @@ def build(ctx):
     )
     
     ctx(
-        features = "build_reflex_dict",
+        features = "gaudi_dictionary",
         name     = "RootCnvDict",
         source   = "dict/RootCnv_dict.h",
-        selection_xml = "dict/RootCnv_dict.xml",
+        selection_file = "dict/RootCnv_dict.xml",
         use      = ["RootCnvLib"],
     )
 

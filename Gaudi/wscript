@@ -73,7 +73,7 @@ def build(ctx):
     ##### **** statement *hlib.ApplyPatternStmt (&{QMTest []})
     
     ctx(
-        features = "tdaq_application",
+        features = "gaudi_application",
         name     = "Gaudi",
         target   = "Gaudi",
         source   = ["main.cpp"],

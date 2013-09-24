@@ -60,10 +60,10 @@ def build(ctx):
     )
 
     ctx(
-        features = "build_reflex_dict",
+        features = "gaudi_dictionary",
         name     = "GaudiMPLibDict",
         source   = "dict/gaudimp_dict.h",
-        selection_xml = "dict/selection.xml",
+        selection_file = "dict/selection.xml",
         use      = ["GaudiMPLib",
                     ],
     )

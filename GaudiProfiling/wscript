@@ -141,28 +141,28 @@ def build(ctx):
     ##### **** statement *hlib.ApplyPatternStmt (&{pyd_boost_module [module=PyCPUFamily files=python/CPUFamily.cpp]})
     
     ctx(
-        features = "tdaq_application",
+        features = "gaudi_application hwaf_utest",
         name     = "GaudiGenProfilingHtml",
         target   = "GaudiGenProfilingHtml",
         source   = ["app/pfm_gen_analysis.cpp"],
     )
     
     ctx(
-        features = "tdaq_library",
+        features = "gaudi_library",
         name     = "GaudiGoogleProfiling",
         target   = "GaudiGoogleProfiling",
         source   = ["component/google/*.cpp"],
     )
     
     ctx(
-        features = "tdaq_library",
+        features = "gaudi_module",
         name     = "GaudiProfiling",
         target   = "GaudiProfiling",
         source   = ["component/*.cpp"],
     )
     
     ctx(
-        features = "tdaq_library",
+        features = "gaudi_module",
         name     = "IntelProfiler",
         target   = "IntelProfiler",
         source   = ["component/intel/*.cpp"],

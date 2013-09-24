@@ -62,10 +62,10 @@ def build(ctx):
     )
     
     ctx(
-        features = "build_reflex_dict",
+        features = "gaudi_dictionary",
         name     = "GaudiPythonDict",
-        selection_xml = "dict/selection_kernel.xml",
         source   = "dict/kernel.h",
+        selection_file = "dict/selection_kernel.xml",
         use      = ["GaudiPythonLib", "GaudiUtilsLib"],
     )
     
@@ -82,9 +82,9 @@ def build(ctx):
     )
     
     ctx(
-        features = "build_reflex_dict",
+        features = "gaudi_dictionary",
         name     = "GPyTestDict",
-        selection_xml = "src/Test/test_selection.xml",
+        selection_file = "src/Test/test_selection.xml",
         source   = "src/Test/test.h",
         use      = ["GaudiKernel", "python", "CLHEP"],
     )

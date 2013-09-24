@@ -106,7 +106,6 @@ def build(ctx):
                     "src/StatusCodeSvc/*.cpp", 
                     "src/testing/*.cpp", 
                     "src/IntelProfiler/*.cpp", 
-                    "src/Dll/GaudiExamples*.cpp",
                 ],
         use = ["GaudiExamplesLib"],
     )
@@ -131,9 +130,9 @@ def build(ctx):
     )
 
     ctx(
-        features = "build_reflex_dict",
+        features = "gaudi_dictionary",
         name = "GaudiExamplesDict",
-        selection_xml = ["src/POOLIO/dict.xml"],
+        selection_file = ["src/POOLIO/dict.xml"],
         source = "src/POOLIO/dict.h",
         use = ["GaudiExamplesLib"],
     )
