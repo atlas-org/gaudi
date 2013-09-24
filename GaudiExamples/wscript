@@ -126,7 +126,7 @@ def build(ctx):
     ctx(
         features = "gaudi_pyext",
         name   = "PyExample",
-        source = "src/PythonModule/*.cpp"
+        source = "src/PythonModule/*.cpp",
         use    = ["boost-python"],
     )
 
