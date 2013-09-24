@@ -34,6 +34,7 @@ build: {
         source:   ["src/components/*.cpp"],
         use: ["boost", "AIDA", "ROOT",
               "GaudiAlgLib", "GaudiKernel",
+              "GaudiUtils",
               ],
     },
 }
