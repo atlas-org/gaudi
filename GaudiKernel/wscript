@@ -45,7 +45,12 @@ def build(ctx):
         features = "gaudi_library",
         name     = "GaudiKernel",
         source   = ["src/Lib/*.cpp"],
-        use      = ["boost", "ROOT"],
+        use      = ["ROOT",
+                    "Reflex",
+                    "boost-thread",
+                    "boost-filesystem",
+                    "boost-system",
+                    ],
     )
     
     ctx(
@@ -56,6 +61,7 @@ def build(ctx):
                "boost-filesystem",
                "boost-regex",
                "boost-program_options",
+               "Reflex",
                ],
     )
 
