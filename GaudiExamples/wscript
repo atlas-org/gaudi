@@ -67,6 +67,7 @@ def build(ctx):
         name     = "Allocator",
         target   = "Allocator",
         source   = ["src/Allocator/*.cpp"],
+        use      = ["GaudiKernel"],
     )
     
     ctx(
@@ -107,6 +108,7 @@ def build(ctx):
                     "src/testing/*.cpp", 
                     "src/IntelProfiler/*.cpp", 
                 ],
+        includes = ["src/Lib"],
         use = ["GaudiExamplesLib"],
     )
     
@@ -118,6 +120,7 @@ def build(ctx):
         use = ["GaudiGSLLib", "GaudiUtilsLib",
                "HepPDT",
                "ROOT",
+               "GSL",
                ],
 
     )
@@ -135,6 +138,7 @@ def build(ctx):
         selection_file = ["src/POOLIO/dict.xml"],
         source = "src/POOLIO/dict.h",
         use = ["GaudiExamplesLib"],
+        includes = ["src/Lib"],
     )
 
     ## -- tests --

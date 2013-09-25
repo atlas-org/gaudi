@@ -31,6 +31,7 @@ build: {
         source:   ["src/Lib/*.cpp"],
         use:      [GaudiKernel,
                    ROOT,
+                   ROOT-XMLIO,
                    AIDA,
                ],
     },

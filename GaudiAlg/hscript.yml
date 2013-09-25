@@ -26,15 +26,18 @@ build: {
     GaudiAlgLib: {
         features: "gaudi_library",
         source:   ["src/lib/*.cpp"],
-        use: ["boost", "AIDA"],
+        use: ["GaudiKernel",
+              "GaudiUtilsLib",
+              "boost-regex",
+              "AIDA"],
     },
     
     GaudiAlg: {
         features: "gaudi_module",
         source:   ["src/components/*.cpp"],
-        use: ["boost", "AIDA", "ROOT",
-              "GaudiAlgLib", "GaudiKernel",
-              "GaudiUtils",
+        use: ["GaudiAlgLib", "GaudiKernel",
+              "GaudiUtilsLib",
+              "boost-regex", "AIDA", "ROOT",
               ],
     },
 }

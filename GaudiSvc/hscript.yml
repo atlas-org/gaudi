@@ -31,15 +31,17 @@ build: {
                    "src/THistSvc/*.cpp",
                ],
         use: [GaudiKernel,
-              boost, ROOT, CLHEP, AIDA,
+              boost-regex,
+              ROOT, CLHEP, AIDA,
               ],
     },
     
     GaudiSvcTest: {
-        features: "gaudi_module hwaf_utest",
+        features: "gaudi_module",
         source:   ["tests/src/component/*.cpp"],
         use: [GaudiKernel, boost-regex,
               ],
+        group: "test",
     },
 }
 

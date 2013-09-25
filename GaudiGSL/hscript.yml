@@ -31,7 +31,7 @@ build: {
               "GSL",
               "CLHEP",
               ],
-        export_includes: ["GaudiGSL", "GaudiMath"],
+        #export_includes: ["GaudiGSL", "GaudiMath"],
     },
     
     GaudiGSL: {

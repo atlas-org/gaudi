@@ -64,6 +64,7 @@ def build(ctx):
                "Reflex",
                ],
     )
+    ctx.env['GENCONF'] = 'genconf.exe'
 
     ctx(
         features = "gaudi_dictionary",

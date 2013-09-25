@@ -145,6 +145,7 @@ def build(ctx):
         name     = "GaudiGenProfilingHtml",
         target   = "GaudiGenProfilingHtml",
         source   = ["app/pfm_gen_analysis.cpp"],
+        use      = ["GaudiKernel", "z"],
     )
     
     ctx(
@@ -152,6 +153,7 @@ def build(ctx):
         name     = "GaudiGoogleProfiling",
         target   = "GaudiGoogleProfiling",
         source   = ["component/google/*.cpp"],
+        use      = ["GaudiKernel", "GaudiAlgLib", "z", "tcmalloc"],
     )
     
     ctx(
@@ -159,13 +161,17 @@ def build(ctx):
         name     = "GaudiProfiling",
         target   = "GaudiProfiling",
         source   = ["component/*.cpp"],
+        use      = ["GaudiKernel", "z", "libunwind"],
     )
-    
-    ctx(
+
+    ## FIXME
+    if 0:
+        ctx(
         features = "gaudi_module",
         name     = "IntelProfiler",
         target   = "IntelProfiler",
         source   = ["component/intel/*.cpp"],
+        use      = ["GaudiKernel"],
     )
     return # build
 

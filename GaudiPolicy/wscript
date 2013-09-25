@@ -38,7 +38,10 @@ def configure(ctx):
 
     ### export
     ctx.hwaf_export_module("waftools/gaudi-policy.py")
-    
+
+    ## FIXME
+    ctx.hwaf_macro_append('CXXFLAGS', '-Wno-deprecated')
+    ctx.hwaf_declare_macro('GENCONF_CONFIGURABLE_MODULE', 'GaudiKernel.Proxy')
     ## FIXME:
     if 1:
         return

@@ -56,7 +56,10 @@ def build(ctx):
         name     = "GaudiMPLib",
         target   = "GaudiMPLib",
         source   = ["src/Lib/*.cpp"],
-        use      = ["ROOT", "python"],
+        use      = [
+            "GaudiKernel",
+            "ROOT", "python"
+            ],
     )
 
     ctx(

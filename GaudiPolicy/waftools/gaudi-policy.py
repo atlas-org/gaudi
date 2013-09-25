@@ -3,6 +3,7 @@
 ## stdlib imports
 import os
 import os.path as osp
+import re
 import sys
 
 ## waf imports
@@ -18,13 +19,130 @@ from waflib.TaskGen import feature, before_method, after_method, extension, afte
 
 
 ### ---------------------------------------------------------------------------
+@feature('cxx', 'c')
+@after_method('apply_incpaths')
+def _gaudi_insert_blddir(self):
+    self.env.prepend_value('INCPATHS', self.env.BUILD_INSTALL_AREA_INCDIR)
+    self.env.prepend_value('INCPATHS', self.env.INSTALL_AREA_INCDIR)
+    self.env.prepend_value('INCPATHS', '.')
+
+    self.env.prepend_value('LIBPATH', self.env.BUILD_INSTALL_AREA_LIBDIR)
+    return
+
+### ---------------------------------------------------------------------------
+@feature('hwaf_runtime_tsk', '*')
+@before_method('process_rule')
+def _gaudi_insert_project_level_pythonpath(self):
+    '''
+    insert_project_level_pythonpath adds ${INSTALL_AREA}/python into the
+    ${PYTHONPATH} environment variable.
+    '''
+    _get = getattr(self, 'hwaf_get_install_path', None)
+    if not _get: _get = getattr(self.bld, 'hwaf_get_install_path')
+    pydir = _get('${INSTALL_AREA}/python')
+    self.env.prepend_value('PYTHONPATH', pydir)
+    return
+
+### ---------------------------------------------------------------------------
+@feature('hwaf_runtime_tsk', '*')
+@before_method('process_rule')
+def _gaudi_insert_project_level_joboptpath(self):
+    '''
+    insert_project_level_joboptpath adds ${INSTALL_AREA}/jobOptions into the
+    ${JOBOPTSEARCHPATH} environment variable.
+    '''
+    _get = getattr(self, 'hwaf_get_install_path', None)
+    if not _get: _get = getattr(self.bld, 'hwaf_get_install_path')
+    d = _get('${INSTALL_AREA}/jobOptions')
+    self.env.prepend_value('JOBOPTSEARCHPATH', d)
+    return
+
+### ---------------------------------------------------------------------------
+@feature('hwaf_runtime_tsk', '*')
+@before_method('process_rule')
+def _gaudi_insert_project_level_datapath(self):
+    '''
+    insert_project_level_datapath adds ${INSTALL_AREA}/share into the
+    ${DATAPATH} environment variable.
+    '''
+    _get = getattr(self, 'hwaf_get_install_path', None)
+    if not _get: _get = getattr(self.bld, 'hwaf_get_install_path')
+    d = _get('${INSTALL_AREA}/share')
+    self.env.prepend_value('DATAPATH', d)
+    return
+
+### ---------------------------------------------------------------------------
+@feature('hwaf_runtime_tsk', '*')
+@before_method('process_rule')
+def _gaudi_insert_project_level_xmlpath(self):
+    '''
+    insert_project_level_xmlpath adds ${INSTALL_AREA}/XML into the
+    ${XMLPATH} environment variable.
+    '''
+    _get = getattr(self, 'hwaf_get_install_path', None)
+    if not _get: _get = getattr(self.bld, 'hwaf_get_install_path')
+    d = _get('${INSTALL_AREA}/XML')
+    self.env.prepend_value('XMLPATH', d)
+    return
+
+### ---------------------------------------------------------------------------
 @conf
 def gaudi_install_python_modules(ctx, **kw):
+    # extract package name
+    PACKAGE_NAME = osp.basename(ctx.hwaf_pkg_name())
+
+    # add ${INSTALL_AREA}/python to PYTHONPATH if not there already
+    #pypath = ctx.hwaf_get_install_path('${INSTALL_AREA}/python')
+    pypath = waflib.Utils.subst_vars('${INSTALL_AREA}/python', ctx.env)
+    if not (pypath in ctx.env.get_flat('PYTHONPATH')):
+        ctx.env.prepend_value('PYTHONPATH', pypath)
+        pass
+    
+    #source = waflib.Utils.to_list(source)
+    pydir = ctx.path.find_dir('python')
+    if not pydir:
+        msg.error(
+            '[%s] no such directory: [%s]' % (
+                PACKAGE_NAME,
+                os.path.join(ctx.path.abspath(), 'python'),
+                )
+            )
+        msg.error('cannot execute [gaudi_install_python_modules]')
+        return
+    pyfiles = pydir.ant_glob(
+        '**/*',
+        dir=False,
+        relative_trick=True,
+        )
+    ctx(
+        features     = 'py',
+        name         = 'py-%s' % PACKAGE_NAME,
+        source       = pyfiles,
+        install_path = '${INSTALL_AREA}/python/%s' % PACKAGE_NAME,
+        )
     return
 
 ### ---------------------------------------------------------------------------
 @conf
 def gaudi_install_scripts(ctx, **kw):
+    # extract package name
+    PACKAGE_NAME = osp.basename(ctx.hwaf_pkg_name())
+
+    source = kw.get('source', 'scripts/*')
+    
+    source = waflib.Utils.to_list(source)
+    _srcs = []
+    for f in source:
+        _srcs.extend(ctx.path.ant_glob(f, dir=False))
+    source = _srcs[:]
+    del _srcs
+    
+    ctx.install_files(
+        '${INSTALL_AREA}/bin',
+        source, 
+        #relative_trick=True,
+        chmod=waflib.Utils.O755,
+        )
     return
 
 ### ---------------------------------------------------------------------------
@@ -52,11 +170,47 @@ def gaudi_dictionary(ctx, **kw):
 ### ---------------------------------------------------------------------------
 @conf
 def gaudi_install_joboptions(ctx, **kw):
+    # extract package name
+    PACKAGE_NAME = osp.basename(ctx.hwaf_pkg_name())
+
+    jobo_dir = ctx.path.find_dir('options')
+    jobos = jobo_dir.ant_glob('**/*', dir=False)
+    
+    ctx.install_files(
+        '${INSTALL_AREA}/jobOptions/%s' % PACKAGE_NAME,
+        jobos,
+        cwd=jobo_dir,
+        relative_trick=True
+        )
     return
 
 ### ---------------------------------------------------------------------------
 @conf
 def gaudi_install_data(ctx, **kw):
+    # extract package name
+    PACKAGE_NAME = osp.basename(ctx.hwaf_pkg_name())
+
+    source = kw['source']
+    relative_trick = kw.get('relative_trick', False)
+    cwd = kw.get('cwd', None)
+    if cwd:
+        cwd = waflib.Utils.to_list(cwd)[0]
+        cwd = ctx.path.find_dir(cwd)
+        
+    source = waflib.Utils.to_list(source)
+    _srcs = []
+    for f in source:
+        _srcs.extend(ctx.path.ant_glob(f, dir=False))
+    source = _srcs[:]
+    del _srcs
+
+    ctx.install_files(
+        '${INSTALL_AREA}/share',
+        source, 
+        relative_trick=relative_trick,
+        cwd=cwd,
+        postpone=False,
+        )
     return
 
 ### -----------------------------------------------------------------------------
@@ -82,7 +236,7 @@ def gaudi_install_headers(ctx, incdir=None, relative_trick=True, cwd=None):
         cwd = ctx.path.find_dir(cwd)
         
     if not inc_node:
-        ctx.fatal('no such directory [%s] (pkg=%s)' % (incdir, PACKAGE_NAME))
+        ctx.fatal('no such directory [%s] (pkg=%s)' % (incdir, ctx.hwaf_pkg_name()))
         pass
     
     includes = inc_node.ant_glob('**/*', dir=False)
@@ -94,10 +248,10 @@ def gaudi_install_headers(ctx, incdir=None, relative_trick=True, cwd=None):
         )
 
     incpath = waflib.Utils.subst_vars('${INSTALL_AREA}/include',ctx.env)
-    #msg.info("--> [%s] %s" %(PACKAGE_NAME,incpath))
     ctx.env.append_unique('INCLUDES_%s' % PACKAGE_NAME,
                            [incpath,inc_node.parent.abspath()])
-    #inc_node.parent.abspath())
+    # msg.info("--> [%s] %s: %r" %(PACKAGE_NAME,incpath,
+    #                              ctx.env.get_flat('INCLUDES_%s'%PACKAGE_NAME)))
     return
     
 ### ---------------------------------------------------------------------------
@@ -109,7 +263,7 @@ def gaudi_qmtest(ctx, **kw):
 @conf
 def gaudi_library(ctx, **kw):
     # extract package name
-    PACKAGE_NAME = ctx._get_pkg_name()
+    PACKAGE_NAME = osp.basename(ctx.hwaf_pkg_name())
 
     ctx.gaudi_gen_package_version_header()
 
@@ -355,7 +509,7 @@ def gen_conf_hook(self, node):
     return
 
 class gen_conf(waflib.Task.Task):
-    vars = ['GENCONF', 'DEFINES', 'INCLUDES']
+    vars = ['GENCONF', 'DEFINES', 'INCLUDES', 'GENCONF_CONFIGURABLE_MODULE']
     color= 'BLUE'
     ext_in  = ['.bin', '.so']
     ext_out = ['.py']
@@ -366,7 +520,7 @@ class gen_conf(waflib.Task.Task):
     
     def run(self):
         import os
-        cmd = '${GENCONF} -p ${PACKAGE_NAME} -i %s -o ${GENCONF_OUTPUTDIR}' % (
+        cmd = '${GENCONF} -p ${PACKAGE_NAME} -i %s -o ${GENCONF_OUTPUTDIR} --configurable-module ${GENCONF_CONFIGURABLE_MODULE}' % (
             self.inputs[0].name,
             )
         cmd = waflib.Utils.subst_vars(cmd, self.env)

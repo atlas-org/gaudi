@@ -67,17 +67,17 @@ def configure(ctx):
 def build(ctx):
     
     
-    ##### **** statement *hlib.ApplyPatternStmt (&{ProjectVersionHeader []})
-    ##### **** statement *hlib.ApplyPatternStmt (&{install_scripts []})
-    ##### **** statement *hlib.ApplyPatternStmt (&{install_python_modules []})
-    ##### **** statement *hlib.ApplyPatternStmt (&{QMTest []})
-    
     ctx(
         features = "gaudi_application",
         name     = "Gaudi",
         target   = "Gaudi",
         source   = ["main.cpp"],
+        use      = ["GaudiKernel"],
     )
+
+    ctx.gaudi_install_python_modules()
+    ctx.gaudi_install_scripts()
+    
     return # build
 
 ## EOF ##

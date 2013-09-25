@@ -43,6 +43,7 @@ def build(ctx):
         use      = ["GaudiKernel",
                     "GaudiUtilsLib",
                     "ROOT",
+                    "ROOT-TreePlayer",
                     ],
     )
     
@@ -59,7 +60,8 @@ def build(ctx):
         name     = "RootCnvDict",
         source   = "dict/RootCnv_dict.h",
         selection_file = "dict/RootCnv_dict.xml",
-        use      = ["RootCnvLib"],
+        defines  = ["__POOL_COMPATIBILITY"],
+        use      = ["RootCnvLib", "GaudiKernel", "Reflex"],
     )
 
     ## -- tests --
