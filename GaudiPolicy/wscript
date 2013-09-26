@@ -39,9 +39,15 @@ def configure(ctx):
     ### export
     ctx.hwaf_export_module("waftools/gaudi-policy.py")
 
+    macro = ctx.hwaf_declare_macro
+    
     ## FIXME
     ctx.hwaf_macro_append('CXXFLAGS', '-Wno-deprecated')
-    ctx.hwaf_declare_macro('GENCONF_CONFIGURABLE_MODULE', 'GaudiKernel.Proxy')
+    macro('GENCONF_CONFIGURABLE_MODULE', 'GaudiKernel.Proxy')
+    ##
+    ctx.hwaf_declare_runtime_env('JOBOPTSEARCHPATH')
+    ctx.hwaf_declare_runtime_env('DATAPATH')
+    ctx.hwaf_declare_runtime_env('XMLPATH')
     ## FIXME:
     if 1:
         return
