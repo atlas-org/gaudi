@@ -651,7 +651,7 @@ def gaudi_gen_package_version_header(ctx,**kw):
                 'min': minver,
                 'pat': patver,
                 },
-            before = 'process_source',
+            before = 'cxx',
             )
         ctx.env['GEN_PKG_VERSION_HDR_%s' % pkgname] = '1'
     return
