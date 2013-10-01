@@ -78,7 +78,7 @@ def build(ctx):
         target   = "GPyTest",
         source   = ["src/Test/*.cpp"],
         use      = ["GaudiKernel", "python", "CLHEP"],
-        include  = ["src/Test"],
+        includes = ["src/Test"],
     )
     
     ctx(
