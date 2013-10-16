@@ -67,13 +67,6 @@ def build(ctx):
     ## -- tests --
     ctx(
         features = "gaudi_application hwaf_utest",
-        name     = "extract_event",
-        source   = ["merge/extractEvt.cpp"],
-        use      = ["RootCnvLib"],
-    )
-    
-    ctx(
-        features = "gaudi_application hwaf_utest",
         name     = "gaudi_merge",
         source   = ["merge/merge.cpp"],
         use      = ["RootCnvLib"],
