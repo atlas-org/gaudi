@@ -23,7 +23,6 @@ from waflib.TaskGen import feature, before_method, after_method, extension, afte
 @after_method('apply_incpaths')
 def _gaudi_insert_blddir(self):
     self.env.prepend_value('INCPATHS', self.env.BUILD_INSTALL_AREA_INCDIR)
-    self.env.prepend_value('INCPATHS', self.env.INSTALL_AREA_INCDIR)
     self.env.prepend_value('INCPATHS', '.')
 
     self.env.prepend_value('LIBPATH', self.env.BUILD_INSTALL_AREA_LIBDIR)
