@@ -48,6 +48,13 @@ def configure(ctx):
     ctx.hwaf_declare_runtime_env('JOBOPTSEARCHPATH')
     ctx.hwaf_declare_runtime_env('DATAPATH')
     ctx.hwaf_declare_runtime_env('XMLPATH')
+
+    ## FIXME
+    ctx.hwaf_macro_append("DEFINES", (
+        {"target-linux": ["linux", "f2cFortran", "_GNU_SOURCE", "unix"]},
+        {"target-mac106": ["f2cFortran", "_GNU_SOURCE", "unix"]},
+    ))
+    
     ## FIXME:
     if 1:
         return
