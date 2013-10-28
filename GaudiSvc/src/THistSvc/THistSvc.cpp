@@ -31,9 +31,9 @@
 #include <sstream>
 #include <streambuf>
 #include <cstdio>
+#include <utility>
 
 using namespace std;
-
 
 DECLARE_SERVICE_FACTORY(THistSvc)
 
@@ -1457,7 +1457,7 @@ THistSvc::updateFiles() {
                     << sitr->second << "\"" << endmsg;
 #endif
             m_fileStreams.erase(sitr);
-	    m_fileStreams.insert( make_pair<std::string,std::string>(newFileName,streamName) );
+            m_fileStreams.insert( make_pair(newFileName,streamName) );
           }
 
 
@@ -1620,7 +1620,7 @@ THistSvc::connect(const std::string& ident) {
       return StatusCode::FAILURE;
     } else {
       TFile *f2 = f_info.first;
-      m_files[stream] = make_pair<TFile*,Mode>(f2,newMode);
+      m_files[stream] = make_pair(f2,newMode);
       if (m_log.level() <= MSG::DEBUG)
         m_log << MSG::DEBUG << "Connecting stream: \"" << stream
               << "\" to previously opened TFile: \"" << filename << "\""
@@ -1730,8 +1730,8 @@ THistSvc::connect(const std::string& ident) {
 
   }
 
-  m_files[stream] = make_pair<TFile*,Mode>(f,newMode);
-  m_fileStreams.insert(make_pair<std::string,std::string>(filename,stream));
+  m_files[stream] = make_pair(f,newMode);
+  m_fileStreams.insert(make_pair(filename,stream));
 
   if (m_log.level() <= MSG::DEBUG)
     m_log << MSG::DEBUG << "Opening TFile \"" << filename << "\"  stream: \""
