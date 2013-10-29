@@ -319,9 +319,12 @@ def gaudi_library(ctx, **kw):
         )
     o.reentrant = True
     # for use-exports
-    # FIXME: also propagate uses ?
     ctx.env['LIB_%s' % name] = [name]
     ctx.env.append_unique('LIBPATH_%s'%name, ctx.path.get_bld().abspath())
+
+    uses = waflib.Utils.to_list(kw.get('use', []))
+    ctx.hwaf_propagate_uselib(name, uses)
+
     #msg.info('--> libpath[%s]: %s' % (name, ctx.env['LIBPATH_%s'%name]))
     #msg.info('--> incpath[%s]: %s' % (name, export_incs))
     if export_incs:
