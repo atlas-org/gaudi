@@ -54,6 +54,17 @@ def configure(ctx):
         {"target-linux": ["linux", "f2cFortran", "_GNU_SOURCE", "unix"]},
         {"target-mac106": ["f2cFortran", "_GNU_SOURCE", "unix"]},
     ))
+
+    ## FIXME
+    ctx.hwaf_macro_append("DEFINES", (
+      {"default": "GAUDI_V20_COMPAT"},
+      {"GAUDI_V21": ""},
+      {"GAUDI_V22": "GAUDI_V22_API"},
+    ))
+    ctx.hwaf_macro_append("DEFINES", (
+      {"default": ""},
+      {"ATLAS": "ATLAS_GAUDI_V21"},
+    ))
     
     ## FIXME:
     if 1:
