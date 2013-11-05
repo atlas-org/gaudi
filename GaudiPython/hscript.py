@@ -51,6 +51,7 @@ def build(ctx):
         use      = ["GaudiAlgLib",
                     "python",
                     "CLHEP",
+                    "AIDA",
                     ],
     )
 
@@ -77,7 +78,7 @@ def build(ctx):
         name     = "GPyTest",
         target   = "GPyTest",
         source   = ["src/Test/*.cpp"],
-        use      = ["GaudiKernel", "python", "CLHEP"],
+        use      = ["GaudiKernel", "python", "CLHEP", "AIDA"],
         includes = ["src/Test"],
     )
     
