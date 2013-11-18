@@ -1,0 +1,165 @@
+################################################################################
+# Package: GaudiCoreSvc
+# Maintainer: Marco Clemencic
+# Description: basic and mandatory components for a Gaudi application
+################################################################################
+
+============================= GaudiCoreSvc v2r1 ==============================
+! 2013-11-18 - Marco Clemencic
+ - Removed duplicated print of of service ref count (use old format for
+   backward compatibility with tests).
+
+============================= GaudiCoreSvc-02-00-03 =========================
+! 2013-10-24 - Charles Leggett
+ - implement IncidentSvc::getListeners
+ - ServiceManager will trigger SvcPostFinalize incident
+
+M       src/ApplicationMgr/ServiceManager.cpp
+M       src/IncidentSvc/IncidentSvc.h
+M       src/IncidentSvc/IncidentSvc.cpp
+
+============================= GaudiCoreSvc-02-00-02 =========================
+! 2013-09-10 - Charles Leggett
+ - re-introduce release/deletion of services during ServiceManager::finalize()
+
+M       src/ApplicationMgr/ServiceManager.cpp
+
+============================= GaudiCoreSvc-02-00-01 =========================
+! 2013-09-09 - Charles Leggett
+ - re-introduce ordering rules for HistorySvc and FileMgr in 
+   ServiceManager::finalize()
+
+M       src/ApplicationMgr/ServiceManager.cpp
+
+============================= GaudiCoreSvc-02-00-00 =========================
+! 2013-08-30 - Charles Leggett
+ - retag for Atlas merge
+
+! 2013-04-24 - Charles Leggett
+ - ApplicationMgr:
+   - a "ScheduledStop" should not result in a termination error message
+M       src/ApplicationMgr/ApplicationMgr.cpp
+
+! 2013-04-02 - Charles Leggett
+ - ServiceManager:
+   - use default service priority from ISvcManager
+   - incorporate def priority in AppMgr
+M       src/ApplicationMgr/ServiceManager.h
+M       src/ApplicationMgr/ApplicationMgr.cpp
+
+! 2013-04-02 - Charles Leggett
+ - ServiceManager:
+   - allow setting of priority from a service's initialize method
+   - change default piority of services to 100 from 10
+   - push down priorities of "problematic" services
+   - added dump() method to list services for debugging
+M       src/ApplicationMgr/ServiceManager.h
+M       src/ApplicationMgr/ServiceManager.cpp
+
+============================= GaudiCoreSvc v1r6 ==============================
+! 2013-09-04 - Marco Clemencic
+ - Extended AlgorithmManager and ApplicationMgr to allow aliasing of algorithm
+   types.
+   These options:
+
+       from Configurables import ApplicationMgr
+
+       app = ApplicationMgr()
+       app.AlgTypeAliases['MyAlg'] = 'MyNewAlg'
+
+   instruct the AlgorithmManager to create instances of MyNewAlg whenever it is
+   requested to create a MyAlg.
+   The aliasing can be bypassed by prefixing the string 'unalias:' to the class
+   name.
+
+============================= GaudiCoreSvc v1r5 ==============================
+! 2013-04-09 - Hubert Degaudenzi
+ - src/EventSelector/EventSelector.cpp: fixed cppcheck warning.
+
+! 2013-06-06 - Marco Clemencic
+ - Minor change in the printout of the job option parser.
+
+! 2013-06-03 - Sasha Mazurov
+ - Fixed parsing of '.opts' files with C++11 enabled.
+
+============================= GaudiCoreSvc v1r4 ==============================
+! 2013-04-16 - Marco Clemencic
+ - Fixed Clang warnings.
+
+============================= GaudiCoreSvc v1r3 ==============================
+! 2012-11-12 - Marco Clemencic
+ - Set the application return code to CorruptedInput in case of incident
+   CorruptedInputFile.
+
+! 2012-11-07 - Marco Clemencic
+ - Fixes to use the '-pedantic' option.
+
+! 2012-10-26 - Marco Clemencic
+ - Initialize the application return code to 'Success' in
+   ApplicationMgr::configure() instead of EventLoopMgr::nextEvent(int), to
+   avoid that error conditions (like failure to open a file) happening during
+   initialization are discarded.
+
+============================= GaudiCoreSvc v1r2 ==============================
+! 2012-06-08 - Marco Clemencic
+ - Added CMake configuration files.
+
+! 2012-06-07 - Marco Clemencic
+ - Fixed compilation with Clang (lookup of operator<<).
+
+============================= GaudiCoreSvc v1r1 ==============================
+! 2012-02-06 - Marco Clemencic
+ - minor esthetic fix
+
+! 2012-01-26 - Marco Clemencic
+ - Added protection to debug messages (reported by Marco Cattaneo).
+
+============================= GaudiCoreSvc v1r0 ==============================
+! 2012-01-25 - Marco Clemencic
+ - Set non-zero return code in case of failure during finalization.
+ - Modified the last messages (finalization and termination) of ApplicationMgr
+   in case of failures.
+
+! 2012-01-24 - Illya Shapoval
+ - Modified ServiceManager to avoid race conditions on concurrent requests of
+   services from different threads.
+
+! 2012-01-20 - Marco Clemencic
+ - Moved ToolSvc to GaudiCoreSvc because it's used by some other core services.
+
+! 2012-01-19 - Marco Clemencic
+ - Improved debug (VERBOSE) messages in DataOnDemandSvc.
+
+! 2012-01-17 - Sasha Mazurov
+ - Patch #5183: JobOptionsSvc: warnings and environment variables
+   - Disable the warning "Reassignment of option".
+   - Fix a bug: Environment variables aren't replaced by their values in a
+     property's value.
+
+! 2012-01-17 - Marco Clemencic
+ - Improvements to DataOnDemandSvc:
+   - do not load the ToolSvc if not needed
+   - ensure that the tools are not released if the ToolSvc is already finalized
+
+! 2012-01-16 - Marco Clemencic
+ - Modified DataOnDemandSvc to accept tools to map paths to node types
+   (IDODNodeMapper) and to algorithms (IDODAlgMapper).
+   Note: the mapping is cached in the usual internal structures so the
+         implementation of the tools must always return the same answer for the
+         same path.
+ - Added a basic IDODNodeMapper and IDODAlgMapper (DODBasicMapper) implementing
+   the minimal DataOnDemandSvc static mapping.
+
+! 2011-12-15 - Sasha Mazurov
+ - Patch #5176: fix problem with underscore in property names (Boost 1.48)
+
+! 2011-12-15 - Marco Clemencic
+ - Make ApplicationMgr print the version of the package if no version is
+   specified in the options.
+
+! 2011-12-13 - Sasha Mazurov
+ - Patch #5166: Allow "::" in property and component names.
+
+! 2011-11-01 - Marco Clemencic
+ - Moved core services out of GaudiSvc and into the new packages GaudiCoreSvc
+   and GaudiCommonSvc. (patch #1816)

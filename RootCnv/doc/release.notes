@@ -1,0 +1,89 @@
+!-----------------------------------------------------------------------------
+! Package     : RootCnv
+! Responsible : Markus Frank
+! Purpose     : Root based persistency
+!-----------------------------------------------------------------------------
+
+============================ RootCnv v1r20p1 ================================
+! 2013-07-08 - Marco Clemencic
+ - Fixed dependency problem with event extractor.
+
+! 2013-07-05 - Marco Clemencic
+ - Updated CMake configuration.
+
+!========================= RootCnv v1r20 2013-05-23 =========================
+! 2013-04-25 - Markus Frank
+ - Fix compiler warnings for gcc47
+
+! 2012-11-22 - Markus Frank
+ - Add event extractor
+
+!========================= RootCnv v1r19 2012-11-16 =========================
+! 2012-11-16 - Marco Clemencic
+ - Added CMake configuration file.
+
+! 2012-11-14 - Markus Frank
+ - Add incident "CorruptedInputFile" if the data or reference branch
+   of a given file cannot be read (aka ROOT returns -1 on read).
+
+! 2012-11-07 - Marco Clemencic
+ - Fixed warning: format '%X' expects argument of type 'unsigned int*',
+                  but argument N has type 'int*' [-Wformat]
+
+!========================= RootCnv v1r18 2012-09-28 =========================
+! 2012-09-24 - Markus Frank
+ - Change optimization options to be part of the RootCnvSvc and not part of
+   the RootDataConnection + adapt all called functions to use these.
+
+!========================= RootCnv v1r17 2012-09-16 ========================
+! 2012-09-16 - Markus Frank
+ - Add developments from Ivan Valencik for memory optimization.
+   Options to modify the default behaviour:
+   RootCnvSvc.BasketSize = 2*MBYTE
+   RootCnvSvc.BufferSize = 2*kBYTE
+   RootCnvSvc.SplitLevel = 0
+   Ivan also developed a small component to measure process quantities
+   such as the memory usage and cpu consumption.
+
+!========================= RootCnv v1r13 2012-02-23 ========================
+! 2012-02-23 - Markus Frank
+ - Add option to RootCnvSvc to change compression factor in the following form:
+   "<compression-algorithm>:<compression-level>"
+   Currently supported algorithms are: LZMA and ZLIB with levels 1-9
+   Example:
+   RootCnvSvc.GlobalCompression     = "LZMA:6";  // First algorithm, then level
+   The default is "LZMA:6", to disable any compression set:
+   RootCnvSvc.GlobalCompression     = "0";
+
+   Please note:
+   Since setting individual options for all different conversion services
+   (Event, FSR,...) is a major pain and in general only leads to confusion,
+   this is a GLOBAL option. You set it once and it will be valid for any
+   subsequent call to TFile::Open in ANY RootDataConnection objects.
+
+
+!========================= RootCnv v1r12 2012-01-24 ========================
+! 2012-01-20 - Markus Frank
+ - Fix gcc46 compile warning in merge.C
+
+!========================= RootCnv v1r11 2012-01-11 ========================
+! 2011-11-11 - Markus Frank
+ - Remove RootOutputStream component. It's not used.
+
+!========================= RootCnv v1r10 2011-11-07 ========================
+! 2011-10-31 - Markus Frank
+ - Fix bug #88049: RootCnv has problems reading POOL XDST
+   For unknown reasons some pool files have a funny file version number.
+   Explicitly handle this case.
+
+!========================= RootCnv v1r9 2011-10-11 =========================
+! 2011-10-11 - Markus Frank
+ - Fix bug for programming the branch cache properly
+
+!========================= RootCnv v1r8 2011-09-15 =========================
+! 2011-09-13 - Markus Frank
+ - Fix bug when writing FSRs for files with no events
+
+!========================= RootCnv v1r6 2011-06-14 =========================
+! 2011-06-14 - Marco Cattaneo
+ - Add release notes file......

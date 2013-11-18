@@ -1,0 +1,152 @@
+Package: GaudiRelease
+Maintainer: Marco Clemencic
+
+============================= GaudiRelease v24r1 =============================
+============================ GaudiRelease v23r10 =============================
+! 2013-09-24 - Marco Clemencic
+ - Switched to LCGCMT 66.
+
+! 2013-07-23 - Marco Clemencic
+ - Added dummy CMakeLists.txt to silence a (new) warning.
+
+============================= GaudiRelease v23r9 =============================
+! 2013-04-11 - Hubert Degaudenzi
+ - cmake/toolchain/heptools-common.cmake: fix mac osx arch detection
+
+! 2013-04-10 - Hubert Degaudenzi
+ - added the possibility to use the env variable BINARY_TAG instead of
+   CMAKECONFIG or CMTCONFIG. Files changed:
+	- configure
+	- cmake/toolchain/heptools-common.cmake
+	- Makefile-cmake.mk
+
+! 2013-04-09 - Hubert Degaudenzi
+ - modifications in the gaudi_add_unit_test function:
+   - added the possibility to use Boost unit tests
+   - added the possibility to pass a TIMEOUT parameter (in seconds)
+   - added the possibility to pass some environment variables
+
+! 2013-03-27 - Hubert Degaudenzi
+ - Added protection in heptools-common if Boost_config_verison is not defined.
+   This is the case when using Boost from the system instead of the LCG stack
+ - fixed heptools compatibility check if heptools is not used at all.
+
+============================= GaudiRelease v23r8 =============================
+============================= GaudiRelease v23r7 =============================
+! 2013-02-26 - Marco Clemencic
+ - Updates to doxygen main page.
+
+! 2013-02-15 - Marco Clemencic
+ - Fixed update_versions.py to change the version in the global CMakeLists.txt.
+
+============================= GaudiRelease v23r6 =============================
+! 2013-01-28 - Marco Clemencic
+ - Minor fix to update_versions.py.
+
+============================= GaudiRelease v23r5 =============================
+============================= GaudiRelease v23r4 =============================
+! 2012-09-13 - Marco Clemencic
+ - Removed the special hack used to produce the LHCb deployment kit (obsolete).
+ - Fix to tag_release.py.
+
+! 2012-07-27 - Marco Clemencic
+ - Rationalized the permissions of files in the repository.
+
+! 2012-06-20 - Marco Clemencic
+ - Updated tag_release.py script to also tag the CMake configuration at the top
+   level.
+
+============================= GaudiRelease v23r3 =============================
+! 2012-06-08 - Marco Clemencic
+ - Added CMake configuration files.
+
+! 2012-06-06 - Marco Clemencic
+ - Modified update_versions.py to update CMakeLists.txt too.
+
+============================= GaudiRelease v23r2 =============================
+============================= GaudiRelease v23r1 =============================
+! 2012-02-27 - Marco Clemencic
+ - Minor change in update_versions.py to understand separators in RootCnv.
+
+! 2011-12-25 - Marco Clemencic
+ - Added script to tag packages in GIT.
+
+============================= GaudiRelease v23r0 =============================
+! 2011-12-13 - Marco Clemencic
+ - Removed POOL from the Doxygen configuration
+
+! 2011-11-01 - Marco Clemencic
+ - Moved core services out of GaudiSvc and into the new packages GaudiCoreSvc
+   and GaudiCommonSvc. (patch #1816)
+   Added the two new packages to the project requirements.
+
+============================= GaudiRelease v22r5 =============================
+============================= GaudiRelease v22r4 =============================
+============================= GaudiRelease v22r3 =============================
+! 2011-04-20 - Marco Clemencic
+ - Updated tag_release.py script to allow tagging from a (global) branch.
+
+============================= GaudiRelease v22r2 =============================
+! 2011-04-14 - Marco Clemencic
+ - Switched to LCGCMT 60b and added Frontier_Client to the LHCb externals.
+
+! 2011-02-28 - Marco Clemencic
+ - Disable Doxygen multi-thread feature.
+
+============================= GaudiRelease v22r1 =============================
+============================= GaudiRelease v22r0 =============================
+! 2011-01-17 - Marco Clemencic
+ - Removed a couple of obsolete LHCb-specific packages from the requirements.
+
+! 2011-01-16 - Karol Kruzelecki
+ - Patch #4608: new Package GaudiProfiling
+
+! 2010-12-16 - Sebastien Binet
+ - Patch #4074: migrate GaudiPython.Parallel to multiprocessing
+   Added new package GaudiMP.
+
+============================ GaudiRelease v21r11p2 =============================
+! 2010-12-06 - Charles Leggett
+ - Updated GaudiKernel to v27r11p1
+
+! 2010-11-30 - Marco Clemencic
+ - Added graphviz to the list of external packages needed by LHCb.
+
+============================ GaudiRelease v21r11p1 =============================
+! 2010-12-03 - Charles Leggett
+ - Updated PartPropSvc to v4r1
+
+============================ GaudiRelease v21r11 =============================
+! 2010-09-22 - Marco Clemencic
+ - Added neurobayes to the list of external packages needed by LHCb.
+
+! 2010-08-23 - Marco Clemencic
+ - Added XQilla to the list of external packages needed by LHCb.
+
+! 2010-07-28 - Marco Clemencic
+ - Remove the dependencies on pyqt and pyqt_compat, and adde the dependency on
+   Qt (for the LHCb distribution).
+
+! 2010-07-14 - Marco Clemencic
+ - Small updates for the scripts to prepare the release.
+
+! 2010-04-27 - Marco Clemencic
+ - Added the new python modules packages to the list of LHCb extra packages:
+   - pytools
+   - pyanalysis
+   - pygraphics
+
+============================= GaudiRelease v21r7 =============================
+! 2010-01-20 - Marco Clemencic
+ - Added a small script to finalize the -pre tags into normal tags for all the
+   packages of the project. (cmt/finalize_tags.py)
+
+! 2010-01-11 - Marco Clemencic
+ - Added "fastjet" to the list of LHCb extra packages.
+
+! 2009-11-20 - Marco Clemencic
+ - Minor improvements to the doxygen configuration files (documentation is now
+   built in the InstallArea under the directory doc).
+
+! 2009-11-19 - Marco Clemencic
+ - Removed dependency on rx for Windows (which has been removed from LCGCMT).
