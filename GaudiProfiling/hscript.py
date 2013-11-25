@@ -127,17 +127,6 @@ def configure(ctx):
 def build(ctx):
     
     
-    ##### **** statement *hlib.ApplyPatternStmt (&{component_library [library="GaudiProfiling]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{component_library [library="GaudiGoogleProfiling]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{component_library [library="IntelProfiler]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{install_python_modules []})
-    ##### **** statement *hlib.ApplyPatternStmt (&{install_scripts []})
-    ##### **** statement *hlib.ApplyPatternStmt (&{disable_package_on [platform=target-winxp]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{disable_package_on [platform=target-i386]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{disable_package_on [platform=target-i686]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{disable_package_on [platform=target-slc4]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{disable_package_on [platform=target-mac]})
-    ##### **** statement *hlib.ApplyPatternStmt (&{install_more_includes [more=GaudiProfiling]})
     ##### **** statement *hlib.ApplyPatternStmt (&{pyd_boost_module [module=PyCPUFamily files=python/CPUFamily.cpp]})
     
     ctx(
@@ -163,6 +152,9 @@ def build(ctx):
         source   = ["component/*.cpp"],
         use      = ["GaudiKernel", "z", "libunwind"],
     )
+
+    ctx.gaudi_install_python_modules()
+    ctx.gaudi_install_scripts()
 
     ## FIXME
     if 0:
