@@ -214,10 +214,14 @@ def gaudi_install_data(ctx, **kw):
 
 ### -----------------------------------------------------------------------------
 @conf
-def gaudi_install_headers(ctx, incdir=None, relative_trick=True, cwd=None):
-    
+def gaudi_install_headers(ctx, **kw):
     # extract package name
     PACKAGE_NAME = osp.basename(ctx.hwaf_pkg_name())
+
+    incdir = kw.get('incdir', None)
+    relative_trick = kw.get('relative_trick', True)
+    cwd = kw.get('cwd', None)
+    
     inc_node = None
     if not incdir:
         inc_node = ctx.path.find_dir(PACKAGE_NAME)
@@ -329,9 +333,8 @@ def gaudi_library(ctx, **kw):
     #msg.info('--> incpath[%s]: %s' % (name, export_incs))
     if export_incs:
         export_incs = waflib.Utils.to_list(export_incs)[0]
-        if export_incs == '.':
-            ctx.gaudi_install_headers()
-            pass
+        if export_incs == ".": export_incs=None
+        ctx.gaudi_install_headers(incdir=export_incs)
         pass
     
     return o
