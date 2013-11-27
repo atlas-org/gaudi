@@ -15,6 +15,7 @@ def pkg_deps(ctx):
     
     ## public dependencies
     ctx.use_pkg("GaudiPolicy", version="*", public=True)
+    ctx.use_pkg("GaudiPluginService", version="*", public=True)
     ctx.use_pkg("LCG_Interfaces/Reflex", version="*", public=True)
     ctx.use_pkg("LCG_Interfaces/Boost", version="*", public=True)
     
@@ -45,7 +46,8 @@ def build(ctx):
         features = "gaudi_library",
         name     = "GaudiKernel",
         source   = ["src/Lib/*.cpp"],
-        use      = ["ROOT",
+        use      = ["GaudiPluginService",
+                    "ROOT",
                     "Reflex",
                     "boost-thread",
                     "boost-filesystem",
@@ -71,7 +73,7 @@ def build(ctx):
         name = "GaudiKernelDict",
         source = "dict/dictionary.h",
         selection_file = "dict/dictionary.xml",
-        use = ["GaudiKernel", "Reflex"],
+        use = ["GaudiKernel", "GaudiPluginService", "Reflex"],
     )
 
     ctx.gaudi_install_python_modules()
