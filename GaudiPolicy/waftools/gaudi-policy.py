@@ -365,6 +365,7 @@ def gaudi_module(ctx, **kw):
     linkflags = waflib.Utils.to_list(kw.get('linkflags', []))
     linkflags = ctx.env.SHLINKFLAGS + linkflags
     kw['linkflags'] = linkflags
+    kw['use'] = waflib.Utils.to_list(kw.get('use', [])) + ['dl']
 
     defines = waflib.Utils.to_list(kw.get('defines', []))
     kw['defines'] = defines + ctx._get_pkg_version_defines()
@@ -429,7 +430,7 @@ def gaudi_application(ctx, **kw):
         'cxx', 'cxxprogram', 'symlink_tsk',
         ]
     
-    kw['use'] = waflib.Utils.to_list(kw.get('use', []))
+    kw['use'] = waflib.Utils.to_list(kw.get('use', [])) + ['dl']
 
     pkg_node = ctx.path.get_src()
     src_node = ctx.path.find_dir('src')

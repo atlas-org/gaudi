@@ -65,6 +65,10 @@ def configure(ctx):
       {"default": ""},
       {"ATLAS": "ATLAS_GAUDI_V21"},
     ))
+
+    ## load posixlibs, mainly for dlopen
+    ctx.load("find_posixlibs")
+    ctx.find_posixlibs()
     
     ## FIXME:
     if 1:
