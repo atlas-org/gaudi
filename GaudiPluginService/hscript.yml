@@ -1,0 +1,36 @@
+# -*- yml -*-
+package: {
+    name:    GaudiPluginService,
+    authors: ["gaudi collaboration"],
+
+    version:  "v1r0",
+    deps: {
+        public: [
+            GaudiPolicy,
+        ],
+    }
+}
+
+options: {
+}
+
+configure: {
+}
+
+build: {
+
+    GaudiPluginService: {
+        features: "gaudi_library",
+        source:   "src/PluginService.cpp",
+        export_includes: ["Gaudi", "."],
+    },
+
+    listcomponents: {
+        features: "gaudi_application",
+        source:   ["src/listcomponents.cpp", "src/PluginService.cpp"],
+    },
+    
+    hwaf-call: [],
+}
+
+## EOF ##
